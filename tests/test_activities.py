@@ -112,3 +112,21 @@ def test_formatted_description_with_no_text_is_empty(teacher):
     assert response.status_code == 400
     sections[0]["description_format"] = "fancy"
     assert teacher.put(f"/api/activities/{activity_id}", json={"title": "T", "sections": sections}).status_code == 400
+
+
+def test_duplicate_makes_a_clean_draft(teacher, other_teacher):
+    activity_id, _ = make_activity(teacher)
+    teacher.put(f"/api/activities/{activity_id}/settings", json={"max_attempts": 3})
+    copy = teacher.post(f"/api/activities/{activity_id}/duplicate")
+    assert copy.status_code == 201
+    copy = copy.get_json()["activity"]
+    assert copy["id"] != activity_id and copy["title"] == "Early Eastern Philosophy (copy)"
+    assert copy["max_attempts"] == 3 and copy["assigned"] == 0 and copy["locked"] is False
+    original = teacher.get(f"/api/activities/{activity_id}").get_json()["activity"]["sections"]
+    copied = copy["sections"] if "sections" in copy else \
+        teacher.get(f"/api/activities/{copy['id']}").get_json()["activity"]["sections"]
+    strip = lambda sections: [{**{k: v for k, v in s.items() if k != "id"},
+                               "questions": [{k: v for k, v in q.items() if k != "id"} for q in s["questions"]]}
+                              for s in sections]
+    assert strip(copied) == strip(original)
+    assert other_teacher.post(f"/api/activities/{activity_id}/duplicate").status_code == 404

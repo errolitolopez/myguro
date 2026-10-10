@@ -84,6 +84,12 @@ def api_delete(activity_id):
     return jsonify(ok=True)
 
 
+@bp.post("/api/activities/<int:activity_id>/duplicate")
+@role_required_api("teacher")
+def api_duplicate(activity_id):
+    return jsonify(activity=service().duplicate(activity_id)), 201
+
+
 @bp.put("/api/activities/<int:activity_id>/settings")
 @role_required_api("teacher")
 def api_settings(activity_id):

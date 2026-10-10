@@ -37,6 +37,28 @@ class ActivityRepository(Repository):
         return self.execute("INSERT INTO activities (teacher_id, title, subject) VALUES (?, ?, ?)",
                             (teacher_id, title, subject)).lastrowid
 
+    def copy(self, source_id, title):
+        """A new draft with the same settings, sections and questions as the source sheet
+        (no assignments, no student answers). Returns the new sheet's id."""
+        new_id = self.execute(
+            "INSERT INTO activities (teacher_id, title, subject, max_attempts) "
+            "SELECT teacher_id, ?, subject, max_attempts FROM activities WHERE id = ?",
+            (title, source_id)).lastrowid
+        section_ids = {}
+        for row in self.all("SELECT * FROM activity_sections WHERE activity_id = ? ORDER BY position", (source_id,)):
+            section_ids[row["id"]] = self.execute(
+                "INSERT INTO activity_sections (activity_id, position, kind, title, description, description_format) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                (new_id, row["position"], row["kind"], row["title"], row["description"],
+                 row["description_format"])).lastrowid
+        for row in self.all("SELECT * FROM questions WHERE activity_id = ? ORDER BY position", (source_id,)):
+            self.execute(
+                "INSERT INTO questions (activity_id, section_id, position, type, prompt, choices, answer, points) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                (new_id, section_ids[row["section_id"]], row["position"], row["type"], row["prompt"],
+                 row["choices"], row["answer"], row["points"]))
+        return new_id
+
     def update_title(self, activity_id, title, subject):
         self.execute("UPDATE activities SET title = ?, subject = ?, updated_at = datetime('now') WHERE id = ?",
                      (title, subject, activity_id))

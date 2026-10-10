@@ -1,5 +1,5 @@
 from myguro.domain.sheet_import import sections_from_rows
-from myguro.domain.sheets import clean_max_attempts, clean_sections, clean_title_subject
+from myguro.domain.sheets import MAX_TITLE_LENGTH, clean_max_attempts, clean_sections, clean_title_subject
 from myguro.errors import NotFoundError, ValidationError
 from myguro.services.base import Service
 
@@ -77,6 +77,16 @@ class ActivityService(Service):
         self.activities.save_sections(activity_id, sections)
         self.commit()
         return self.get(activity_id)
+
+    def duplicate(self, activity_id):
+        """Copy a sheet (even a locked one) into a new draft named "<title> (copy)": same
+        sections, questions and submissions allowed, none of the assignments or answers."""
+        source = self.require(activity_id)
+        suffix = " (copy)"
+        title = source["title"][:MAX_TITLE_LENGTH - len(suffix)] + suffix
+        new_id = self.activities.copy(activity_id, title)
+        self.commit()
+        return self.activity_json(self.require(new_id))
 
     def delete(self, activity_id):
         """Delete a sheet that no class has been given yet."""

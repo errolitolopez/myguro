@@ -637,7 +637,7 @@ function lockEditor() {
   const editorArea = document.querySelector("main");
   editorArea.querySelectorAll("input, textarea, select").forEach((field) => (field.disabled = true));
   editorArea.querySelectorAll("button").forEach((button) => {
-    if (button.id !== "assign-button") button.disabled = true;
+    if (button.id !== "assign-button" && button.id !== "copy-button") button.disabled = true;
   });
   maxAttemptsSelect.disabled = false; // more tries can still be given
   editorArea.querySelectorAll("#add-text-button, #add-activity-button, #delete-button")
@@ -772,6 +772,31 @@ document.getElementById("preview-button").addEventListener("click", () => {
     body.append(block);
   }
   bootstrap.Modal.getOrCreateInstance(document.getElementById("preview-modal")).show();
+});
+
+// --- Make a copy ---------------------------------------------------------------------
+
+const copyButton = document.getElementById("copy-button");
+copyButton.addEventListener("click", async () => {
+  if (unsaved) {
+    showEditorError("Save your changes first, then make a copy.");
+    return;
+  }
+  copyButton.disabled = true;
+  try {
+    const response = await apiFetch(`/api/activities/${activityId}/duplicate`, { method: "POST" });
+    if (!response) return;
+    const data = await response.json();
+    if (!response.ok) {
+      showEditorError(data.error || "Could not copy the activity.");
+      return;
+    }
+    window.location.href = `/activities/${data.activity.id}`;
+  } catch {
+    showEditorError("Cannot reach the server. Check your connection.");
+  } finally {
+    copyButton.disabled = false;
+  }
 });
 
 // --- Delete --------------------------------------------------------------------------
