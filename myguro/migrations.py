@@ -142,6 +142,10 @@ def add_missing_columns(db):
     if "max_attempts" not in activity_columns:
         db.execute("ALTER TABLE activities ADD COLUMN max_attempts INTEGER DEFAULT 1")
 
+    assignment_columns = [row["name"] for row in db.execute("PRAGMA table_info(assignments)")]
+    if "scores_released" not in assignment_columns:
+        db.execute("ALTER TABLE assignments ADD COLUMN scores_released INTEGER NOT NULL DEFAULT 0")
+
     submission_columns = [row["name"] for row in db.execute("PRAGMA table_info(submissions)")]
     if "paper" not in submission_columns:
         db.execute("ALTER TABLE submissions ADD COLUMN paper INTEGER NOT NULL DEFAULT 0")

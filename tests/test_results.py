@@ -7,10 +7,12 @@ from openpyxl import load_workbook
 from conftest import assign, error, login, make_activity, make_class
 
 
-def setup(teacher):
+def setup(teacher, release=True):
     class_id, students = make_class(teacher)
     activity_id, questions = make_activity(teacher)
     assignment_id = assign(teacher, activity_id, class_id, due_date="2020-01-01")
+    if release:
+        assert teacher.put(f"/api/assignments/{assignment_id}/release", json={"released": True}).status_code == 200
     return assignment_id, activity_id, questions, students
 
 

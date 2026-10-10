@@ -22,7 +22,7 @@ class DashboardService(Service):
                 "role": "student",
                 "classes": [dict(row) for row in self.classes.classes_of_student(self.user["id"])],
                 "submitted": self.submissions.count_submitted_by_student(self.user["id"]),
-                "to_do": sum(1 for item in StudentWorkService(self.db, self.user).list() if item["score"] is None),
+                "to_do": sum(1 for item in StudentWorkService(self.db, self.user).list() if not item["done"]),
             }
         teacher_id = self.user["id"]
         return {

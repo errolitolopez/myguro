@@ -70,6 +70,12 @@ def api_points(submission_id):
     return jsonify(detail=service().set_points(submission_id, json_body().get("points")))
 
 
+@bp.put("/api/assignments/<int:assignment_id>/release")
+@role_required_api("teacher")
+def api_release(assignment_id):
+    return jsonify(service().set_released(assignment_id, json_body().get("released")))
+
+
 @bp.post("/api/assignments/<int:assignment_id>/students/<int:student_id>/reopen")
 @role_required_api("teacher")
 def api_reopen(assignment_id, student_id):

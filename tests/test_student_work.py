@@ -5,10 +5,12 @@ import json
 from conftest import assign, error, login, make_activity, make_class
 
 
-def setup(teacher, **assign_options):
+def setup(teacher, release=True, **assign_options):
     class_id, students = make_class(teacher)
     activity_id, questions = make_activity(teacher)
     assignment_id = assign(teacher, activity_id, class_id, **assign_options)
+    if release:
+        assert teacher.put(f"/api/assignments/{assignment_id}/release", json={"released": True}).status_code == 200
     return assignment_id, activity_id, questions, students
 
 
@@ -86,3 +88,31 @@ def test_students_outside_the_class_cannot_open(teacher):
     outsider = login("ksantos08")  # Grade 9 - Bonifacio
     assert outsider.get(f"/api/my-activities/{assignment_id}").status_code == 404
     assert teacher.get("/api/my-activities").status_code == 403
+
+
+def test_score_hidden_until_teacher_releases(teacher, other_teacher):
+    assignment_id, _, q, students = setup(teacher, release=False)
+    student = login(students[0]["username"])
+    submitted = student.post(f"/api/my-activities/{assignment_id}/submit",
+                            json={"answers": {str(q[0]): 1, str(q[2]): "Daoism"}}).get_json()["activity"]
+    assert submitted["submitted_at"] and submitted["score"] is None and submitted["scores_released"] is False
+    listed = student.get("/api/my-activities").get_json()["activities"][0]
+    assert listed["done"] is True and listed["score"] is None
+    assert student.get("/api/dashboard").get_json()["to_do"] == 0
+    # The teacher still sees the score
+    results = teacher.get(f"/api/assignments/{assignment_id}/results").get_json()
+    assert results["assignment"]["scores_released"] is False
+    assert results["summary"]["average"] is not None
+
+    # Only the teacher of the activity can release, with a true / false
+    assert other_teacher.put(f"/api/assignments/{assignment_id}/release", json={"released": True}).status_code == 404
+    assert student.put(f"/api/assignments/{assignment_id}/release", json={"released": True}).status_code == 403
+    assert error(teacher.put(f"/api/assignments/{assignment_id}/release", json={"released": "yes"})) == \
+        "Choose whether to release the scores."
+
+    assert teacher.put(f"/api/assignments/{assignment_id}/release", json={"released": True}).get_json() == \
+        {"scores_released": True}
+    shown = student.get(f"/api/my-activities/{assignment_id}").get_json()["activity"]
+    assert shown["score"]["total"]["earned"] == 3 and shown["scores_released"] is True
+    teacher.put(f"/api/assignments/{assignment_id}/release", json={"released": False})
+    assert student.get(f"/api/my-activities/{assignment_id}").get_json()["activity"]["score"] is None

@@ -78,6 +78,7 @@ class ResultsService(Service):
                 "class_id": assignment["class_id"],
                 "class_name": class_title(assignment["class_name"], assignment["class_subject"]),
                 "due_date": assignment["due_date"],
+                "scores_released": bool(assignment["scores_released"]),
                 "everyone": bool(assignment["everyone"]),
                 "max_attempts": assignment["max_attempts"],
                 "total_points": self.activities.total_points(activity_id),
@@ -159,6 +160,15 @@ class ResultsService(Service):
                                                 None if value is None else int(value == question["points"]), value)
         self.commit()
         return self.attempt_detail(self.require_submission(submission_id), submission["activity_id"])
+
+    def set_released(self, assignment_id, released):
+        """Show (or hide again) the students' scores of this assignment to the students."""
+        self.require(assignment_id)
+        if not isinstance(released, bool):
+            raise ValidationError("Choose whether to release the scores.")
+        self.assignments.set_scores_released(assignment_id, released)
+        self.commit()
+        return {"scores_released": released}
 
     def reopen(self, assignment_id, student_id):
         """Give one student another try, even past the activity's limit: a new attempt starting

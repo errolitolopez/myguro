@@ -236,14 +236,18 @@ function showResult() {
     card.classList.add("d-none");
     return;
   }
-  const total = activity.score.total;
   card.classList.remove("d-none");
-  document.getElementById("result-score").textContent = scoreText(total);
-  document.getElementById("result-note").textContent = activity.paper
-    ? "Scored by your teacher from your paper." + (activity.note ? ` ${activity.note}` : "")
-    : total.pending
-      ? `${plural(total.pending, "more point")} from short answers: waiting for your teacher to check.`
-      : "Everything is checked.";
+  const total = activity.score && activity.score.total;
+  // The score stays hidden until the teacher releases the scores.
+  document.getElementById("result-label").textContent = total ? "Your score" : "Submitted";
+  document.getElementById("result-score").textContent = total ? scoreText(total) : "Score not released yet";
+  document.getElementById("result-note").textContent = !total
+    ? "Your teacher will show the scores when everyone is done."
+    : activity.paper
+      ? "Scored by your teacher from your paper." + (activity.note ? ` ${activity.note}` : "")
+      : total.pending
+        ? `${plural(total.pending, "more point")} from short answers: waiting for your teacher to check.`
+        : "Everything is checked.";
   document.getElementById("result-late").classList.toggle("d-none", !activity.late);
 
   const triesLeft = activity.max_attempts === null ? null : activity.max_attempts - activity.attempt;

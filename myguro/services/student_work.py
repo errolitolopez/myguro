@@ -45,8 +45,13 @@ class StudentWorkService(Service):
                 "can_retry": status == "submitted" and can_try_again(row, row["max_attempts"]),
                 "late": bool(row["last_late"]),
                 "paper": bool(row["last_paper"]),
-                # The score that counts: the latest submitted attempt
-                "score": self.score(row["last_id"], row["activity_id"])["total"] if row["last_id"] else None,
+                # Submitted at least once (stays true while trying again)
+                "done": row["last_id"] is not None,
+                "scores_released": bool(row["scores_released"]),
+                # The score that counts: the latest submitted attempt. Hidden until the teacher
+                # releases the scores.
+                "score": self.score(row["last_id"], row["activity_id"])["total"]
+                if row["last_id"] and row["scores_released"] else None,
             })
         return result
 
@@ -74,10 +79,13 @@ class StudentWorkService(Service):
                               and can_try_again(submission, assignment["max_attempts"])),
             # The latest submitted attempt counts. While working on a new attempt, this is the
             # earlier one's score (submitting again replaces it).
-            "score": self.score(last_submitted["id"], assignment["activity_id"]) if last_submitted else None,
+            # Hidden until the teacher releases the scores.
+            "scores_released": bool(assignment["scores_released"]),
+            "score": self.score(last_submitted["id"], assignment["activity_id"])
+            if last_submitted and assignment["scores_released"] else None,
             "late": bool(last_submitted and last_submitted["late"]),
             "paper": bool(last_submitted and last_submitted["paper"]),
-            "note": last_submitted["note"] if last_submitted else "",
+            "note": last_submitted["note"] if last_submitted and assignment["scores_released"] else "",
         }
 
     def current_attempt(self, assignment_id):

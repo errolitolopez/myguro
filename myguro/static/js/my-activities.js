@@ -17,10 +17,15 @@ function statusBadges(activity) {
     badges.append(badge);
   };
 
-  if (activity.score) {
+  if (activity.done) {
     const score = activity.score;
-    add("text-bg-success", `${score.earned} / ${score.possible - score.pending}`);
-    if (score.pending) add("text-bg-light border", `+${score.pending} pts to check`);
+    if (score) {
+      add("text-bg-success", `${score.earned} / ${score.possible - score.pending}`);
+      if (score.pending) add("text-bg-light border", `+${score.pending} pts to check`);
+    } else {
+      add("text-bg-success", "Submitted");
+      add("text-bg-light border", "Score not released yet");
+    }
     if (activity.paper) add("text-bg-secondary", "Paper");
     if (activity.late) add("text-bg-warning", "Late");
     if (activity.status === "in_progress") add("text-bg-info", `Trying again · attempt ${activity.attempt}`);
@@ -55,8 +60,8 @@ function activityItem(activity) {
 function render() {
   const showDone = document.getElementById("show-done").checked;
   // Once submitted it stays under Submitted, even while trying again.
-  const todo = activities.filter((activity) => !activity.score);
-  const done = activities.filter((activity) => activity.score);
+  const todo = activities.filter((activity) => !activity.done);
+  const done = activities.filter((activity) => activity.done);
   document.getElementById("count-todo").textContent = `(${todo.length})`;
   document.getElementById("count-done").textContent = `(${done.length})`;
 

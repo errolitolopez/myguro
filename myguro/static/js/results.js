@@ -55,6 +55,13 @@ function render() {
   back.textContent = `‹ ${assignment.class_name}`;
   document.getElementById("edit-link").href = `/activities/${assignment.activity_id}`;
 
+  const released = assignment.scores_released;
+  document.getElementById("release-button").textContent = released ? "Hide scores" : "Release scores";
+  document.getElementById("release-button").className =
+    `btn btn-sm text-nowrap ${released ? "btn-outline-secondary" : "btn-primary"}`;
+  document.getElementById("release-note").textContent = released
+    ? "Students can see their scores."
+    : "Students can't see their scores yet. Release them when everyone is done.";
   document.getElementById("stat-submitted").textContent = `${summary.submitted} / ${summary.students}`;
   document.getElementById("stat-not-started").textContent = summary.not_started;
   document.getElementById("stat-late").textContent = summary.late;
@@ -129,6 +136,29 @@ async function loadResults() {
     showError("results-error", "Cannot reach the server. Check your connection.");
   }
 }
+
+document.getElementById("release-button").addEventListener("click", async (event) => {
+  event.target.disabled = true;
+  hideError("results-error");
+  try {
+    const response = await apiFetch(`/api/assignments/${assignmentId}/release`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ released: !results.assignment.scores_released }),
+    });
+    if (!response) return;
+    if (!response.ok) {
+      showError("results-error", (await response.json()).error || "Could not save.");
+      return;
+    }
+    results.assignment.scores_released = (await response.json()).scores_released;
+    render();
+  } catch {
+    showError("results-error", "Cannot reach the server. Check your connection.");
+  } finally {
+    event.target.disabled = false;
+  }
+});
 
 document.getElementById("search").addEventListener("input", render);
 document.getElementById("filter").addEventListener("change", render);

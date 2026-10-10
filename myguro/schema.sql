@@ -73,6 +73,8 @@ CREATE TABLE IF NOT EXISTS assignments (
     class_id INTEGER NOT NULL REFERENCES classes (id),
     everyone INTEGER NOT NULL DEFAULT 1,
     due_date TEXT,
+    -- 0 = students don't see their scores yet (so answers can't be passed around); the teacher releases them
+    scores_released INTEGER NOT NULL DEFAULT 0,
     assigned_at TEXT NOT NULL DEFAULT (datetime('now')),
     UNIQUE (activity_id, class_id)
 );

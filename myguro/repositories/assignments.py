@@ -32,6 +32,9 @@ class AssignmentRepository(Repository):
         self.execute("UPDATE assignments SET everyone = ?, due_date = ? WHERE id = ?",
                      (int(everyone), due_date, assignment_id))
 
+    def set_scores_released(self, assignment_id, released):
+        self.execute("UPDATE assignments SET scores_released = ? WHERE id = ?", (int(released), assignment_id))
+
     def set_chosen_students(self, assignment_id, student_ids):
         self.execute("DELETE FROM assignment_students WHERE assignment_id = ?", (assignment_id,))
         self.db.executemany("INSERT INTO assignment_students (assignment_id, student_id) VALUES (?, ?)",
@@ -95,7 +98,7 @@ class AssignmentRepository(Repository):
         latest submitted attempt (last: the one that counts)."""
         return self.all(
             f"""
-            SELECT asg.id, asg.due_date, a.title, a.subject, a.id AS activity_id, a.max_attempts,
+            SELECT asg.id, asg.due_date, asg.scores_released, a.title, a.subject, a.id AS activity_id, a.max_attempts,
                    c.name AS class_name, c.subject AS class_subject, t.name AS teacher,
                    sub.id AS submission_id, sub.submitted_at, sub.attempt, sub.paper,
                    last.id AS last_id, last.late AS last_late, last.paper AS last_paper
