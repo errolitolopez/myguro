@@ -133,7 +133,7 @@ def test_all_or_nothing_with_row_errors(admin):
             (3, "Last name is required."),
             (4, "Choose a grade from the list."),
             (5, 'The username "ecruz" is already taken.'),
-            (6, "Password must be at least 8 characters."),
+            (6, "Password must be at least 6 characters."),
             (7, "Username must be 3 to 30 letters, numbers, dots, dashes or underscores, with no spaces."),
             (9, 'The username "twice" is used twice in the file (rows 8 and 9).'),
             (10, "The middle initial must be a letter."),

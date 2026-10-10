@@ -101,7 +101,7 @@ def template_xlsx_bytes():
         ["Username", "Optional. Leave empty to make one from the name (Altamerano, Rian Joshua -> raltamerano)."],
         ["Grade", "Optional. Kinder or Grade 1 to Grade 12 (you can also type just 9)."],
         ["Section", "Optional. Leave empty for irregular students."],
-        ["Password", "Optional, at least 8 characters. Leave empty to make one."],
+        ["Password", "Optional, at least 6 characters. Leave empty to make one."],
         [],
         ["Students change their password the first time they log in."],
         ["Instead of the three name columns you can use one Name column: Altamerano, Rian Joshua, M"],

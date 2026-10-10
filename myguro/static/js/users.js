@@ -231,8 +231,8 @@ addForm.addEventListener("submit", async (event) => {
     addUsername.focus();
     return;
   }
-  if (password && password.length < 8) {
-    showError("add-user-error", "Password must be at least 8 characters, or leave it empty.");
+  if (password && password.length < 6) {
+    showError("add-user-error", "Password must be at least 6 characters, or leave it empty.");
     addPassword.focus();
     return;
   }

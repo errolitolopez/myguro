@@ -31,8 +31,8 @@ form.addEventListener("submit", async (event) => {
     showError("Enter your current password.");
     return;
   }
-  if (newInput.value.length < 8) {
-    showError("New password must be at least 8 characters.");
+  if (newInput.value.length < 6) {
+    showError("New password must be at least 6 characters.");
     return;
   }
   if (newInput.value !== confirmInput.value) {

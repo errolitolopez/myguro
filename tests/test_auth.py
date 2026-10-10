@@ -34,7 +34,7 @@ def test_default_admin_must_change_password(app):
     assert response.status_code == 403 and response.get_json()["must_change_password"] is True
     assert error(client.post("/api/change-password",
                              json={"current_password": "admin", "new_password": "short"})).startswith(
-        "New password must be at least 8")
+        "New password must be at least 6")
     assert client.post("/api/change-password",
                        json={"current_password": "admin", "new_password": "adminpass1"}).status_code == 200
     assert client.get("/dashboard").status_code == 200

@@ -11,7 +11,7 @@ ROLES = ("admin", "teacher", "student")
 ACCOUNT_ROLES = ("teacher", "student")  # the ones the admin manages
 
 USERNAME_PATTERN = re.compile(r"[a-z0-9._-]{3,30}")
-MIN_PASSWORD_LENGTH = 8
+MIN_PASSWORD_LENGTH = 6
 MAX_NAME_LENGTH = 100
 MAX_SECTION_LENGTH = 50
 # Grade levels a student can have (or none). Shown as a dropdown so the values stay the same.
