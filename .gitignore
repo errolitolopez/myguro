@@ -10,3 +10,6 @@ instance/
 .vscode/
 .idea/
 .DS_Store
+
+# Tests
+.pytest_cache/

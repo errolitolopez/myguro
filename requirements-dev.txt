@@ -1,0 +1,3 @@
+# For development: run the tests with  .venv/bin/pytest
+-r requirements.txt
+pytest==8.4.2
