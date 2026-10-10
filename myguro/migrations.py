@@ -154,6 +154,11 @@ def add_missing_columns(db):
             "ALTER TABLE activity_sections ADD COLUMN kind TEXT NOT NULL DEFAULT 'text' "
             "CHECK (kind IN ('text', 'activity'))"
         )
+    if "description_format" not in section_columns:
+        db.execute(
+            "ALTER TABLE activity_sections ADD COLUMN description_format TEXT NOT NULL DEFAULT 'plain' "
+            "CHECK (description_format IN ('plain', 'rich'))"
+        )
     db.commit()
 
 

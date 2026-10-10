@@ -59,7 +59,9 @@ CREATE TABLE IF NOT EXISTS activity_sections (
     position INTEGER NOT NULL,
     kind TEXT NOT NULL DEFAULT 'text' CHECK (kind IN ('text', 'activity')),
     title TEXT NOT NULL DEFAULT '',
-    description TEXT NOT NULL DEFAULT ''  -- the text, or the directions of an activity
+    description TEXT NOT NULL DEFAULT '',  -- the text, or the directions of an activity
+    -- 'plain' = typed text; 'rich' = HTML (bold, italic, lists) cleaned by domain/richtext.py
+    description_format TEXT NOT NULL DEFAULT 'plain' CHECK (description_format IN ('plain', 'rich'))
 );
 
 -- A sheet given to a class: to everyone in it (also students added later), or only to the

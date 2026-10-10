@@ -12,6 +12,7 @@ import re
 from dataclasses import dataclass, field
 
 from myguro.domain.accounts import MAX_NAME_LENGTH
+from myguro.domain.richtext import clean_rich_text, rich_text_length
 from myguro.domain.text import clean_description, clean_name, whole_number
 from myguro.errors import ValidationError
 
@@ -19,6 +20,7 @@ MAX_TITLE_LENGTH = 150
 MAX_SECTIONS = 50
 MAX_DESCRIPTION_LENGTH = 20000
 SECTION_KINDS = ("text", "activity")
+DESCRIPTION_FORMATS = ("plain", "rich")
 QUESTION_TYPES = ("multiple_choice", "true_false", "identification", "fill_blank", "short_answer")
 MAX_QUESTIONS_PER_SECTION = 100
 MAX_CHOICES = 6
@@ -45,6 +47,7 @@ class Section:
     description: str
     questions: list = field(default_factory=list)
     id: int | None = None
+    description_format: str = "plain"  # "rich" = description is HTML from clean_rich_text()
 
 
 def clean_title_subject(data):
@@ -83,10 +86,18 @@ def clean_section(section, number):
     if kind not in SECTION_KINDS:
         raise ValidationError(f"Section {number}: unknown kind of section.")
     title = clean_name(section.get("title"))
-    description = clean_description(section.get("description"))
+    description_format = section.get("description_format", "plain")
+    if description_format not in DESCRIPTION_FORMATS:
+        raise ValidationError(f"Section {number}: unknown text format.")
+    if description_format == "rich":
+        description = clean_rich_text(section.get("description"))
+        description_length = rich_text_length(description)
+    else:
+        description = clean_description(section.get("description"))
+        description_length = len(description)
     if len(title) > MAX_TITLE_LENGTH:
         raise ValidationError(f"Section {number}: the title can be at most {MAX_TITLE_LENGTH} characters.")
-    if len(description) > MAX_DESCRIPTION_LENGTH:
+    if description_length > MAX_DESCRIPTION_LENGTH:
         raise ValidationError(f"Section {number}: the text can be at most {MAX_DESCRIPTION_LENGTH} characters.")
 
     questions = []
@@ -103,7 +114,8 @@ def clean_section(section, number):
             raise ValidationError(f"Section {number}: at most {MAX_QUESTIONS_PER_SECTION} questions.")
         questions = [clean_question(question, f"Section {number}, question {question_number}")
                      for question_number, question in enumerate(posted, start=1)]
-    return Section(kind=kind, title=title, description=description, questions=questions, id=section.get("id"))
+    return Section(kind=kind, title=title, description=description, questions=questions, id=section.get("id"),
+                   description_format=description_format)
 
 
 def clean_question(question, where):

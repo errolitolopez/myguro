@@ -6,6 +6,8 @@
 <style>
   /* Keep the teacher's line breaks in the preview, like students will see them. */
   .preserve-lines { white-space: pre-wrap; }
+  /* Placeholder of the formatted-text editor */
+  [contenteditable]:empty::before { content: attr(data-placeholder); color: var(--bs-secondary-color); }
   /* A blank in a fill-in-the-blank question, in the preview */
   .blank-line { display: inline-block; min-width: 6em; border-bottom: 1px solid currentColor; }
 </style>

@@ -181,7 +181,11 @@ function sectionBlock(section, locked) {
   if (section.kind === "text") {
     const block = el("section");
     if (section.title) block.append(el("h2", "h5", section.title));
-    if (section.description) block.append(el("p", "preserve-lines mb-0", section.description));
+    if (section.description) {
+      const text = el("div", "preserve-lines");
+      showDescription(text, section);
+      block.append(text);
+    }
     return block;
   }
 
@@ -197,7 +201,11 @@ function sectionBlock(section, locked) {
     header.append(el("span", "badge text-bg-success text-nowrap", text));
   }
   body.append(header);
-  if (section.description) body.append(el("p", "preserve-lines fst-italic", section.description));
+  if (section.description) {
+    const text = el("div", "preserve-lines fst-italic");
+    showDescription(text, section);
+    body.append(text);
+  }
   const list = el("ol", "mb-0 ps-3");
   section.questions.forEach((question) => list.append(questionItem(question, locked)));
   body.append(list);

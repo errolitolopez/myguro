@@ -88,3 +88,27 @@ def test_sections_must_have_content_before_assigning(teacher):
 
 
 SAMPLE = SAMPLE_SECTIONS  # re-exported for other tests
+
+
+def test_formatted_description_is_cleaned_and_kept(teacher):
+    activity_id, _ = make_activity(teacher)
+    sections = teacher.get(f"/api/activities/{activity_id}").get_json()["activity"]["sections"]
+    assert sections[0]["description_format"] == "plain"
+    sections[0]["description_format"] = "rich"
+    sections[0]["description"] = ('<p onclick="x()">Hi <b>there</b></p><script>alert(1)</script>'
+                                  '<ul><li>one</li><li><a href="http://x">two</a></ul>')
+    response = teacher.put(f"/api/activities/{activity_id}", json={"title": "T", "sections": sections})
+    assert response.status_code == 200, response.get_json()
+    saved = teacher.get(f"/api/activities/{activity_id}").get_json()["activity"]["sections"][0]
+    assert saved["description_format"] == "rich"
+    assert saved["description"] == "<p>Hi <b>there</b></p><ul><li>one</li><li>two</li></ul>"
+
+
+def test_formatted_description_with_no_text_is_empty(teacher):
+    activity_id, _ = make_activity(teacher)
+    sections = teacher.get(f"/api/activities/{activity_id}").get_json()["activity"]["sections"]
+    sections[0].update(description_format="rich", description="<div><br></div>", title="")
+    response = teacher.put(f"/api/activities/{activity_id}", json={"title": "T", "sections": sections})
+    assert response.status_code == 400
+    sections[0]["description_format"] = "fancy"
+    assert teacher.put(f"/api/activities/{activity_id}", json={"title": "T", "sections": sections}).status_code == 400

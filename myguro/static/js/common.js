@@ -125,3 +125,33 @@ if (copyDetailsButton) {
     setTimeout(() => (copyDetailsButton.textContent = "Copy"), 1500);
   });
 }
+
+// Formatted text (bold, italic, lists) of a section. The server already cleans it; this keeps
+// only the same few tags again before it goes into the page.
+const RICH_TAGS = new Set(["P", "DIV", "BR", "B", "STRONG", "I", "EM", "U", "UL", "OL", "LI"]);
+
+function richTextNodes(html) {
+  const copy = (node) => {
+    if (node.nodeType === Node.TEXT_NODE) return [document.createTextNode(node.textContent)];
+    if (node.nodeType !== Node.ELEMENT_NODE) return [];
+    const inner = Array.from(node.childNodes).flatMap(copy);
+    if (!RICH_TAGS.has(node.tagName)) {
+      return ["SCRIPT", "STYLE", "TEMPLATE", "IFRAME", "OBJECT", "NOSCRIPT"].includes(node.tagName) ? [] : inner;
+    }
+    const clean = document.createElement(node.tagName.toLowerCase());
+    clean.append(...inner);
+    return [clean];
+  };
+  const parsed = new DOMParser().parseFromString(html, "text/html");
+  return Array.from(parsed.body.childNodes).flatMap(copy);
+}
+
+// Show a section's description in an element: formatted when the section is "rich", else as typed.
+function showDescription(element, section) {
+  if (section.description_format === "rich") {
+    element.classList.remove("preserve-lines");
+    element.replaceChildren(...richTextNodes(section.description));
+  } else {
+    element.textContent = section.description;
+  }
+}

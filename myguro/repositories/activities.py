@@ -55,7 +55,8 @@ class ActivityRepository(Repository):
     def sections(self, activity_id):
         """The sections in order, each with its questions (with the answer key: teacher only)."""
         sections = [dict(row) for row in self.all(
-            "SELECT id, kind, title, description FROM activity_sections WHERE activity_id = ? ORDER BY position",
+            "SELECT id, kind, title, description, description_format FROM activity_sections "
+            "WHERE activity_id = ? ORDER BY position",
             (activity_id,),
         )]
         questions = self.all("SELECT * FROM questions WHERE activity_id = ? ORDER BY position", (activity_id,))
@@ -80,15 +81,16 @@ class ActivityRepository(Repository):
         kept_sections, kept_questions = set(), set()
 
         for position, section in enumerate(sections):
-            values = (section.kind, section.title, section.description, position)
+            values = (section.kind, section.title, section.description, section.description_format, position)
             if section.id in old_sections and section.id not in kept_sections:
                 section_id = section.id
-                self.execute("UPDATE activity_sections SET kind = ?, title = ?, description = ?, position = ? "
+                self.execute("UPDATE activity_sections SET kind = ?, title = ?, description = ?, description_format = ?, "
+                             "position = ? "
                              "WHERE id = ?", (*values, section_id))
             else:
                 section_id = self.execute(
-                    "INSERT INTO activity_sections (kind, title, description, position, activity_id) "
-                    "VALUES (?, ?, ?, ?, ?)", (*values, activity_id)).lastrowid
+                    "INSERT INTO activity_sections (kind, title, description, description_format, position, "
+                    "activity_id) VALUES (?, ?, ?, ?, ?, ?)", (*values, activity_id)).lastrowid
             kept_sections.add(section_id)
 
             for question_position, question in enumerate(section.questions):

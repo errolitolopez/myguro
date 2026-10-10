@@ -94,6 +94,133 @@ function textField(id, label, value, placeholder, onInput, { multiline = false, 
   return wrapper;
 }
 
+// --- Description: plain text or formatted (bold, italic, lists) --------------------------
+
+function escapeHtml(text) {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// Typed text -> HTML: blank lines separate paragraphs, single line breaks stay.
+function plainToRich(text) {
+  return text.trim().split(/\n{2,}/).filter(Boolean)
+    .map((paragraph) => `<p>${escapeHtml(paragraph).replace(/\n/g, "<br>")}</p>`).join("");
+}
+
+// HTML -> typed text: one line per paragraph or list item ("• " or "1. " in front of items).
+function richToPlain(html) {
+  const lines = [];
+  let current = "";
+  const flush = () => {
+    if (current.trim()) lines.push(current.trim());
+    current = "";
+  };
+  const walk = (node, listItem) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      current += node.textContent;
+    } else if (node.tagName === "BR") {
+      flush();
+    } else if (node.tagName === "UL" || node.tagName === "OL") {
+      flush();
+      let number = 0;
+      node.childNodes.forEach((child) => {
+        number += 1;
+        flush();
+        current = node.tagName === "OL" ? `${number}. ` : "• ";
+        walk(child, true);
+        flush();
+      });
+    } else {
+      const block = ["P", "DIV", "LI"].includes(node.tagName);
+      if (block && !listItem) flush();
+      node.childNodes.forEach((child) => walk(child, listItem || node.tagName === "LI"));
+      if (block && !listItem) flush();
+    }
+  };
+  richTextNodes(html).forEach((node) => walk(node, false));
+  flush();
+  return lines.join("\n");
+}
+
+const FORMAT_BUTTONS = [
+  ["B", "Bold", "bold", "fw-bold"],
+  ["I", "Italic", "italic", "fst-italic"],
+  ["U", "Underline", "underline", "text-decoration-underline"],
+  ["• List", "Bulleted list", "insertUnorderedList", ""],
+  ["1. List", "Numbered list", "insertOrderedList", ""],
+];
+
+function richEditor(id, section, placeholder) {
+  const wrapper = el("div");
+  const toolbar = el("div", "btn-toolbar gap-1 mb-1");
+  const editor = el("div", "form-control overflow-auto");
+  editor.id = id;
+  editor.contentEditable = "true";
+  editor.style.minHeight = "6rem";
+  editor.style.maxHeight = "24rem";
+  editor.dataset.placeholder = placeholder;
+  editor.append(...richTextNodes(section.description));
+  editor.addEventListener("input", () => {
+    section.description = editor.innerHTML;
+    markUnsaved();
+  });
+  // Paste as plain text, so no outside styles come along.
+  editor.addEventListener("paste", (event) => {
+    event.preventDefault();
+    document.execCommand("insertText", false, event.clipboardData.getData("text/plain"));
+  });
+
+  for (const [label, title, command, style] of FORMAT_BUTTONS) {
+    const button = smallButton(label, title, () => {
+      editor.focus();
+      document.execCommand(command);
+      editor.dispatchEvent(new Event("input"));
+    });
+    if (style) button.className += ` ${style}`;
+    // Keep the selection in the editor when a button is pressed.
+    button.addEventListener("mousedown", (event) => event.preventDefault());
+    toolbar.append(button);
+  }
+  wrapper.append(toolbar, editor);
+  return wrapper;
+}
+
+function descriptionField(section, id, activity) {
+  const wrapper = el("div", "mb-2");
+  const rich = section.descriptionFormat === "rich";
+  const placeholder = activity ? "Read each item carefully and choose the letter of the correct answer."
+    : "At the end of this lesson, you will be able to...";
+
+  const top = el("div", "d-flex justify-content-between align-items-end mb-1");
+  const label = el("label", "form-label small mb-0", activity ? "Directions (optional)" : "Description");
+  label.htmlFor = `${id}-description`;
+  const toggle = el("div", "btn-group btn-group-sm");
+  for (const [format, name] of [["plain", "Plain text"], ["rich", "Formatted"]]) {
+    const button = el("button", `btn btn-outline-secondary ${format === section.descriptionFormat ? "active" : ""}`, name);
+    button.type = "button";
+    button.title = format === "rich" ? "Bold, italic, lists" : "Typed text only";
+    button.addEventListener("click", () => {
+      if (format === section.descriptionFormat) return;
+      section.description = format === "rich" ? plainToRich(section.description) : richToPlain(section.description);
+      section.descriptionFormat = format;
+      changed();
+    });
+    toggle.append(button);
+  }
+  top.append(label, toggle);
+  wrapper.append(top);
+
+  if (rich) {
+    wrapper.append(richEditor(`${id}-description`, section, placeholder));
+  } else {
+    const field = textField(`${id}-description`, "", section.description, placeholder,
+      (value) => (section.description = value), { multiline: true, maxLength: 20000 });
+    field.querySelector("label").remove();
+    field.classList.remove("mb-2");
+    wrapper.append(field);
+  }
+  return wrapper;
+}
+
 // --- Unsaved changes -----------------------------------------------------------
 
 function markUnsaved() {
@@ -170,6 +297,7 @@ function fromServer(section) {
     kind: section.kind,
     title: section.title,
     description: section.description,
+    descriptionFormat: section.description_format,
     questions: section.questions.map((question) => {
       const edited = { ...newQuestion(question.type), id: question.id, prompt: question.prompt,
         points: question.points };
@@ -196,6 +324,7 @@ function toServer(section) {
     kind: section.kind,
     title: section.title.trim(),
     description: section.description.trim(),
+    description_format: section.descriptionFormat,
     questions: section.kind === "text" ? [] : section.questions.map((question) => {
       const sent = { id: question.id, type: question.type, prompt: question.prompt,
         points: Number(question.points) };
@@ -414,11 +543,7 @@ function sectionCard(section, index) {
   const id = `section-${index}`;
   body.append(textField(`${id}-title`, "Title", section.title,
     activity ? "III. Pre-test" : "I. Title of the Lesson", (value) => (section.title = value)));
-  body.append(textField(`${id}-description`, activity ? "Directions (optional)" : "Description",
-    section.description,
-    activity ? "Read each item carefully and choose the letter of the correct answer."
-      : "At the end of this lesson, you will be able to...",
-    (value) => (section.description = value), { multiline: true, maxLength: 20000 }));
+  body.append(descriptionField(section, id, activity));
 
   if (activity) {
     const questions = el("div", "d-grid gap-2 my-3");
@@ -456,7 +581,7 @@ function render() {
 }
 
 function addSection(kind) {
-  sections.push({ kind, title: "", description: "", questions: [] });
+  sections.push({ kind, title: "", description: "", descriptionFormat: "plain", questions: [] });
   changed();
   document.getElementById(`section-${sections.length - 1}-title`).focus();
 }
@@ -634,7 +759,8 @@ document.getElementById("preview-button").addEventListener("click", () => {
     const block = el("section", "mb-4");
     if (section.title.trim()) block.append(el("h3", "h5", section.title.trim()));
     if (section.description.trim()) {
-      const text = el("p", "preserve-lines", section.description.trim());
+      const text = el("div", "preserve-lines");
+      showDescription(text, { description: section.description.trim(), description_format: section.descriptionFormat });
       if (section.kind === "activity") text.classList.add("fst-italic");
       block.append(text);
     }
