@@ -148,20 +148,24 @@ class AccountService(Service):
         """Create student accounts from spreadsheet rows [(row number, {name, username, grade,
         section, password})]. All or nothing: with any bad row, no one is created and every
         problem is listed with its row number. dry_run only checks (the preview).
+        A row whose name, grade and section match a student who already exists is skipped (so
+        uploading the same file again creates no one) and listed in "existing".
 
-        Returns {imported, students, errors}. After a real import each student has their
+        Returns {imported, students, existing, errors}. After a real import each student has their
         password (the one given, or a temporary one): it is shown once, like adding by hand."""
-        errors, students = [], []
+        errors, students, existing = [], [], []
+        known = self.users.student_usernames_by_identity()
         given_usernames = {}  # username typed in the file -> first row with it
         sections = {}  # section in any capitals -> how it is spelled (school first, then this file)
 
         for number, record in rows:
             try:
-                students.append(self.clean_import_row(number, record, given_usernames, sections))
+                student = self.clean_import_row(number, record, given_usernames, sections, known)
+                (existing if student.get("exists") else students).append(student)
             except ValidationError as problem:
                 errors.append({"row": number, "message": problem.message})
         if errors:
-            return {"imported": False, "students": [], "errors": errors}
+            return {"imported": False, "students": [], "existing": [], "errors": errors}
 
         # Usernames left empty: made from the name, avoiding every username already taken
         # (in the school, or typed or made earlier in this file).
@@ -171,10 +175,13 @@ class AccountService(Service):
                 student["username"] = self.free_username(student["first_name"], student["last_name"], used)
             used.add(student["username"])
 
+        skipped = [{key: student[key] for key in IMPORT_FIELDS} for student in existing]
         if dry_run:
-            return {"imported": False, "errors": [], "students": [
+            return {"imported": False, "errors": [], "existing": skipped, "students": [
                 {key: student[key] for key in IMPORT_FIELDS} | {"password_given": bool(student["password"])}
                 for student in students]}
+        if not students:
+            return {"imported": False, "errors": [], "existing": skipped, "students": []}
 
         created = []
         for student in students:
@@ -185,10 +192,13 @@ class AccountService(Service):
             created.append({key: student[key] for key in IMPORT_FIELDS}
                            | {"id": user_id, "password": password, "password_given": bool(student["password"])})
         self.commit()
-        return {"imported": True, "errors": [], "students": created}
+        return {"imported": True, "errors": [], "existing": skipped, "students": created}
 
-    def clean_import_row(self, number, record, given_usernames, sections):
+    def clean_import_row(self, number, record, given_usernames, sections, known=None):
         """One spreadsheet row checked with the same rules as adding a student by hand.
+        known = {(last, first, middle, grade, section) in lowercase: username} of the students who
+        exist: a row matching one comes back with "exists" set and the existing username, and is
+        not checked further.
         The name comes from Last name / First name / Middle initial columns, or one Name column
         written "Last, First" (with an optional ", M" or " M.")."""
         if record.get("last_name") or record.get("first_name") or not record.get("name"):
@@ -205,6 +215,12 @@ class AccountService(Service):
             if key not in sections:
                 sections[key] = self.users.section_spelling(section) or section
             section = sections[key]
+
+        identity = tuple(part.casefold() for part in (last, first, middle, grade, section))
+        if known and identity in known:
+            return {"row": number, "name": display_name(last, first, middle), "last_name": last,
+                    "first_name": first, "middle_initial": middle, "username": known[identity],
+                    "grade": grade, "section": section, "exists": True}
 
         username = ""
         if record["username"]:

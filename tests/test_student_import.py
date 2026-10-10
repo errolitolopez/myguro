@@ -71,6 +71,30 @@ def test_preview_then_import(admin):
     assert login.get_json()["must_change_password"] is True
 
 
+def test_upload_again_skips_students_who_exist(admin):
+    first = xlsx([("Reyes", "Ana", "", "", "Grade 7", "Rizal", ""),
+                  ("Cruz", "Ben", "", "bencruz", "Grade 8", "Luna", "")])
+    assert upload(admin, first, dry_run=False).get_json()["imported"] is True
+    total = admin.get("/api/users?role=student").get_json()["total"]
+
+    # The same file again, then a bigger one: a new student, a same name in another section.
+    for content in (first, xlsx([
+            ("reyes", "ANA", "", "", "7", "rizal", ""),               # exists (other capitals)
+            ("Cruz", "Ben", "", "bencruz", "Grade 8", "Luna", ""),    # exists, username typed
+            ("Cruz", "Ben", "", "", "Grade 8", "Mabini", ""),         # same name, other section: new
+            ("Lim", "Cy", "", "", "Grade 9", "", "")])):              # new
+        preview = upload(admin, content, dry_run=True).get_json()
+        assert preview["errors"] == []
+        assert [(r["row"], r["username"]) for r in preview["existing"]] == [(2, "areyes"), (3, "bencruz")]
+    assert [r["row"] for r in preview["students"]] == [4, 5]
+
+    result = upload(admin, first, dry_run=False).get_json()
+    assert result["imported"] is False and result["students"] == [] and len(result["existing"]) == 2
+    result = upload(admin, content, dry_run=False).get_json()
+    assert result["imported"] is True and len(result["students"]) == 2 and len(result["existing"]) == 2
+    assert admin.get("/api/users?role=student").get_json()["total"] == total + 2
+
+
 def test_one_name_column(admin):
     content = xlsx([("Altamerano, Rian Joshua", "Grade 9"), ("Dela Cruz, Juan, M", ""),
                     ("Santos, Maria Clara M.", ""), ("Juan Dela Cruz", "")], headers=("Name", "Grade"))

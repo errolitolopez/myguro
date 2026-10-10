@@ -107,6 +107,16 @@ class UserRepository(Repository):
         )
         return row["section"] if row else None
 
+    def student_usernames_by_identity(self):
+        """{(last name, first name, middle initial, grade, section) in lowercase: username} of every
+        student, to spot a student who already exists."""
+        return {
+            tuple(row[key].casefold() for key in ("last_name", "first_name", "middle_initial", "grade", "section")):
+                row["username"]
+            for row in self.all("SELECT last_name, first_name, middle_initial, grade, section, username "
+                                "FROM users WHERE role = 'student' ORDER BY id DESC")
+        }
+
     def count(self, role, active_only=False):
         return self.value("SELECT COUNT(*) FROM users WHERE role = ?" + (" AND active = 1" if active_only else ""),
                           (role,))
