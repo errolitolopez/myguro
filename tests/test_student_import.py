@@ -66,8 +66,13 @@ def test_preview_then_import(admin):
         == ("Cruz", "Ben Jr", "S")
     assert len(created["areyes"]["password"]) == 10
     assert admin.get("/api/users?role=student").get_json()["total"] == 52
+    # imported students start disabled: they cannot sign in until the admin enables them
+    areyes = created["areyes"]
+    assert admin.application.test_client().post(
+        "/api/login", json={"username": "areyes", "password": areyes["password"]}).status_code == 403
+    admin.put(f"/api/users/{areyes['id']}", json={"active": True})
     login = admin.application.test_client().post(
-        "/api/login", json={"username": "areyes", "password": created["areyes"]["password"]})
+        "/api/login", json={"username": "areyes", "password": areyes["password"]})
     assert login.get_json()["must_change_password"] is True
 
 

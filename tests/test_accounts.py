@@ -120,6 +120,16 @@ def test_list_rename_reset_deactivate(admin, app):
     assert admin.put(f"/api/users/{student['id']}", json={"active": False}).get_json()["user"]["active"] is False
 
 
+def test_new_student_starts_disabled_until_enabled(admin, app):
+    made = admin.post("/api/users", json={"role": "student", "last_name": "Dela Cruz", "first_name": "Juan",
+                                          "username": "juandc", "password": "password1"}).get_json()
+    assert made["user"]["active"] is False
+    login = {"username": "juandc", "password": "password1"}
+    assert app.test_client().post("/api/login", json=login).status_code == 403
+    admin.put(f"/api/users/{made['user']['id']}", json={"active": True})
+    assert app.test_client().post("/api/login", json=login).status_code == 200
+
+
 def test_admin_account_cannot_be_edited(admin):
     assert admin.put("/api/users/1", json={"active": False}).status_code == 404
 

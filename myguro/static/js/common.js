@@ -99,6 +99,8 @@ function showLoginDetails(user, password) {
   document.getElementById("details-name").textContent = user.name;
   document.getElementById("details-username").textContent = user.username;
   document.getElementById("details-password").textContent = password;
+  // A new student is disabled: they cannot log in until the admin enables the account.
+  document.getElementById("details-disabled").classList.toggle("d-none", user.active !== false);
   bootstrap.Modal.getOrCreateInstance(document.getElementById("login-details-modal")).show();
 }
 

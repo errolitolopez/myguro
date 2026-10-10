@@ -112,7 +112,7 @@ confirmButton.addEventListener("click", async () => {
     importPart("import-preview", false);
     confirmButton.classList.add("d-none");
     document.getElementById("import-done-text").textContent =
-      `${plural(data.students.length, "student")} added.` +
+      `${plural(data.students.length, "student")} added, disabled: enable them first so they can log in.` +
       (data.existing.length ? ` ${plural(data.existing.length, "student")} already existed and were skipped.` : "");
     document.getElementById("import-done-rows").replaceChildren(...data.students.map((student) =>
       tableRow([student.name, student.username, student.password, student.grade, student.section])));

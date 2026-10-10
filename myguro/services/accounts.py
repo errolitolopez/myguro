@@ -72,7 +72,9 @@ class AccountService(Service):
         password = check_new_account_password(str(data.get("password", "")) or make_temp_password())
         if self.users.username_taken(username):
             raise ValidationError(f"The username \"{username}\" is already taken.")
-        user_id = self.users.create(names, username, generate_password_hash(password), role, grade, section)
+        # A new student starts disabled: the admin enables the account first.
+        user_id = self.users.create(names, username, generate_password_hash(password), role, grade, section,
+                                    active=role != "student")
         self.commit()
         return self.account_json(self.users.get(user_id)), password
 
@@ -188,7 +190,7 @@ class AccountService(Service):
             password = student["password"] or make_temp_password()
             names = (student["last_name"], student["first_name"], student["middle_initial"])
             user_id = self.users.create(names, student["username"], generate_password_hash(password),
-                                        "student", student["grade"], student["section"])
+                                        "student", student["grade"], student["section"], active=False)
             created.append({key: student[key] for key in IMPORT_FIELDS}
                            | {"id": user_id, "password": password, "password_given": bool(student["password"])})
         self.commit()

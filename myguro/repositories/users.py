@@ -75,12 +75,13 @@ class UserRepository(Repository):
             return self.value("SELECT COUNT(*) FROM classes WHERE teacher_id = ?", (user["id"],))
         return self.value("SELECT COUNT(*) FROM class_students WHERE student_id = ?", (user["id"],))
 
-    def create(self, names, username, password_hash, role, grade="", section="", must_change_password=True):
+    def create(self, names, username, password_hash, role, grade="", section="", must_change_password=True,
+               active=True):
         """names = (last name, first name, middle initial)."""
         return self.execute(
             "INSERT INTO users (name, last_name, first_name, middle_initial, username, password_hash, role, "
-            "must_change_password, grade, section) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (display_name(*names), *names, username, password_hash, role, int(must_change_password), grade, section),
+            "must_change_password, grade, section, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (display_name(*names), *names, username, password_hash, role, int(must_change_password), grade, section, int(active)),
         ).lastrowid
 
     def set_names(self, user_id, names):
