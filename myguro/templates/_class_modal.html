@@ -7,10 +7,19 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <div class="mb-3">
-          <label for="class-name" class="form-label">Class name</label>
-          <input id="class-name" class="form-control" maxlength="100" autocomplete="off"
-                 placeholder="Grade 6 - Rizal" required>
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <label for="class-name" class="form-label">Grade</label>
+            <select id="class-name" class="form-select" required>
+              <option value="">Select a grade</option>
+              {% for grade in GRADES|reverse %}<option>{{ grade }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="col-6">
+            <label for="class-section" class="form-label">Section</label>
+            <input id="class-section" class="form-control" maxlength="50" autocomplete="off"
+                   placeholder="Rizal" required>
+          </div>
         </div>
         <div class="mb-3">
           <label for="class-subject" class="form-label">Subject <span class="text-body-secondary">(optional)</span></label>

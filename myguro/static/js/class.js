@@ -14,6 +14,7 @@ const classModalElement = document.getElementById("class-modal");
 const classModal = bootstrap.Modal.getOrCreateInstance(classModalElement);
 const classForm = document.getElementById("class-form");
 const classNameInput = document.getElementById("class-name");
+const classSectionInput = document.getElementById("class-section");
 const classSubjectInput = document.getElementById("class-subject");
 const classSaveButton = document.getElementById("class-save-button");
 let currentClass = null;
@@ -27,7 +28,23 @@ function showClass(item) {
 
 classModalElement.addEventListener("show.bs.modal", () => {
   document.getElementById("class-modal-title").textContent = "Edit class";
-  classNameInput.value = currentClass ? currentClass.name : "";
+  // "Grade 6 - Rizal" -> grade + section. Names that fit no grade stay selectable as they are.
+  classNameInput.querySelector("[data-legacy]")?.remove();
+  const name = currentClass ? currentClass.name : "";
+  const grades = [...classNameInput.options].map((option) => option.value).filter(Boolean);
+  const grade = grades.find((value) => name === value || name.startsWith(`${value} - `));
+  if (grade) {
+    classNameInput.value = grade;
+    classSectionInput.value = name.slice(grade.length + 3);
+  } else {
+    if (name) {
+      const legacy = new Option(name, name);
+      legacy.dataset.legacy = "";
+      classNameInput.add(legacy, 1);
+    }
+    classNameInput.value = name;
+    classSectionInput.value = "";
+  }
   classSubjectInput.value = currentClass ? currentClass.subject : "";
   hideError("class-form-error");
 });
@@ -36,9 +53,15 @@ classModalElement.addEventListener("shown.bs.modal", () => classNameInput.focus(
 classForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   hideError("class-form-error");
-  const name = classNameInput.value.trim();
-  if (!name) {
-    showError("class-form-error", "Class name is required.");
+  const name = joinClassName(classNameInput.value, classSectionInput.value);
+  if (!classNameInput.value) {
+    showError("class-form-error", "Select a grade.");
+    classNameInput.focus();
+    return;
+  }
+  if (!classSectionInput.value.trim()) {
+    showError("class-form-error", "Section is required.");
+    classSectionInput.focus();
     return;
   }
   classSaveButton.disabled = true;

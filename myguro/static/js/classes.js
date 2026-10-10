@@ -5,6 +5,7 @@ const modalElement = document.getElementById("class-modal");
 const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
 const form = document.getElementById("class-form");
 const nameInput = document.getElementById("class-name");
+const sectionInput = document.getElementById("class-section");
 const subjectInput = document.getElementById("class-subject");
 const saveButton = document.getElementById("class-save-button");
 
@@ -52,10 +53,15 @@ form.addEventListener("submit", async (event) => {
   event.preventDefault();
   hideError("class-form-error");
 
-  const name = nameInput.value.trim();
-  if (!name) {
-    showError("class-form-error", "Class name is required.");
+  const name = joinClassName(nameInput.value, sectionInput.value);
+  if (!nameInput.value) {
+    showError("class-form-error", "Select a grade.");
     nameInput.focus();
+    return;
+  }
+  if (!sectionInput.value.trim()) {
+    showError("class-form-error", "Section is required.");
+    sectionInput.focus();
     return;
   }
 

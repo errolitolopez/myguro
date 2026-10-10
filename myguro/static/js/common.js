@@ -15,6 +15,11 @@ function classTitle(item) {
   return item.subject ? `${item.name} · ${item.subject}` : item.name;
 }
 
+// Class name from the grade select and section input: "Grade 6 - Rizal" or "Grade 6"
+function joinClassName(grade, section) {
+  return [grade, section.trim()].filter(Boolean).join(" - ");
+}
+
 // "Grade 6 - Rizal", "Grade 7", "Rizal", or "" (irregular / not set)
 function gradeSection(student) {
   return [student.grade, student.section].filter(Boolean).join(" - ");
