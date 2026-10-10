@@ -10,9 +10,14 @@
 
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="h4 mb-0">Learning activity sheets</h1>
-    <button class="btn btn-success text-nowrap" data-bs-toggle="modal" data-bs-target="#new-activity-modal">
-      + New activity
-    </button>
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-success text-nowrap" data-bs-toggle="modal" data-bs-target="#import-sheet-modal">
+        Import from Excel
+      </button>
+      <button class="btn btn-success text-nowrap" data-bs-toggle="modal" data-bs-target="#new-activity-modal">
+        + New activity
+      </button>
+    </div>
   </div>
 
   <input id="search" type="search" class="form-control mb-3" placeholder="Search title or subject"
@@ -50,9 +55,11 @@
     </form>
   </div>
 </div>
+{% include "_import_sheet_modal.html" %}
 {% endblock %}
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/common.js') }}"></script>
 <script src="{{ url_for('static', filename='js/activities.js') }}"></script>
+<script src="{{ url_for('static', filename='js/activity-import.js') }}"></script>
 {% endblock %}

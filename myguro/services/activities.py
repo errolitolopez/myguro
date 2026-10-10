@@ -1,3 +1,4 @@
+from myguro.domain.sheet_import import sections_from_rows
 from myguro.domain.sheets import clean_max_attempts, clean_sections, clean_title_subject
 from myguro.errors import NotFoundError, ValidationError
 from myguro.services.base import Service
@@ -39,6 +40,27 @@ class ActivityService(Service):
         activity_id = self.activities.create(self.user["id"], *clean_title_subject(data))
         self.commit()
         return self.activity_json(self.require(activity_id))
+
+    def import_sheet(self, rows, data, dry_run):
+        """Make a new draft sheet from spreadsheet rows [(row number, record)] (see
+        domain/sheet_import.py), with the title and subject in data. All or nothing: with any bad
+        row nothing is created and every problem is listed with its row number. dry_run only checks.
+
+        Returns {imported, activity (after a real import), sections [{kind, title, questions, points}], errors}."""
+        title, subject = clean_title_subject(data)
+        sections, errors = sections_from_rows(rows)
+        if errors:
+            return {"imported": False, "activity": None, "sections": [], "errors": errors}
+        preview = [{"kind": section.kind, "title": section.title or section.description[:60],
+                    "questions": len(section.questions),
+                    "points": sum(question.points for question in section.questions)} for section in sections]
+        if dry_run:
+            return {"imported": False, "activity": None, "sections": preview, "errors": []}
+        activity_id = self.activities.create(self.user["id"], title, subject)
+        self.activities.save_sections(activity_id, sections)
+        self.commit()
+        return {"imported": True, "activity": self.activity_json(self.require(activity_id)),
+                "sections": preview, "errors": []}
 
     def get(self, activity_id):
         return {**self.activity_json(self.require(activity_id)), "sections": self.activities.sections(activity_id)}

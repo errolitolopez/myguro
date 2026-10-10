@@ -1,8 +1,12 @@
 """Teacher: activity sheets (editor), giving them to classes, and their settings."""
 
-from flask import Blueprint, jsonify, redirect, render_template, url_for
+import io
+
+from flask import Blueprint, jsonify, redirect, render_template, request, send_file, url_for
 
 from myguro.database import get_db
+from myguro.errors import ValidationError
+from myguro.imports import read_sheet_rows, sheet_template_xlsx_bytes
 from myguro.services import ActivityService, AssignmentService
 from myguro.web.security import current_user, json_body, role_required_api, role_required_page
 
@@ -17,6 +21,15 @@ def service():
 @role_required_page("teacher")
 def list_page():
     return render_template("activities.html", user=current_user())
+
+
+@bp.get("/activities/import-template.xlsx")
+@role_required_page("teacher")
+def import_template():
+    """The Excel file to fill in for importing an activity sheet."""
+    return send_file(io.BytesIO(sheet_template_xlsx_bytes()), as_attachment=True,
+                     download_name="myguro activity template.xlsx",
+                     mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 
 @bp.get("/activities/<int:activity_id>")
@@ -37,6 +50,19 @@ def api_list():
 @role_required_api("teacher")
 def api_create():
     return jsonify(activity=service().create(json_body())), 201
+
+
+@bp.post("/api/activities/import")
+@role_required_api("teacher")
+def api_import():
+    """Make a draft sheet from an uploaded .xlsx (form fields "file", "title", "subject").
+    dry_run=1 only checks it."""
+    upload = request.files.get("file")
+    if upload is None or not upload.filename:
+        raise ValidationError("Choose an Excel file (.xlsx).")
+    rows = read_sheet_rows(upload.read())
+    data = {"title": request.form.get("title"), "subject": request.form.get("subject")}
+    return jsonify(service().import_sheet(rows, data, dry_run=request.form.get("dry_run") == "1"))
 
 
 @bp.get("/api/activities/<int:activity_id>")
