@@ -31,6 +31,8 @@ const editNameButton = document.getElementById("edit-name-button");
 const resetButton = document.getElementById("reset-button");
 const activeButton = document.getElementById("active-button");
 const confirmBox = document.getElementById("confirm-box");
+const resetPasswordField = document.getElementById("reset-password-field");
+const resetPassword = document.getElementById("reset-password");
 
 
 // --- List --------------------------------------------------------------------
@@ -325,8 +327,10 @@ document.getElementById("edit-name-form").addEventListener("submit", async (even
   if (data) editModal.hide();
 });
 
-function askConfirm(text, yesLabel, action) {
+function askConfirm(text, yesLabel, action, withPassword = false) {
   document.getElementById("confirm-text").textContent = text;
+  resetPasswordField.classList.toggle("d-none", !withPassword);
+  resetPassword.value = "";
   document.getElementById("confirm-yes").textContent = yesLabel;
   confirmAction = action;
   confirmBox.classList.remove("d-none");
@@ -334,15 +338,17 @@ function askConfirm(text, yesLabel, action) {
 
 resetButton.addEventListener("click", () => {
   askConfirm(
-    `Make a new temporary password for ${editing.name}? Their current password will stop working.`,
+    `Set a new temporary password for ${editing.name}? Their current password will stop working.`,
     "Reset password",
     async () => {
-      const data = await updateUser({ reset_password: true });
+      const data = await updateUser({ reset_password: true, password: resetPassword.value });
       if (!data) return;
       editModal.hide();
       showLoginDetails(data.user, data.temp_password);
     },
+    true,
   );
+  resetPassword.focus();
 });
 
 activeButton.addEventListener("click", () => {

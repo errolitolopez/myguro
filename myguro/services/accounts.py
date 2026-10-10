@@ -82,10 +82,15 @@ class AccountService(Service):
 
     def update(self, user_id, data):
         """Edit a teacher or student: last_name / first_name / middle_initial (or name), grade +
-        section (students), active, reset_password. Returns (account, new temporary password or None)."""
+        section (students), active, reset_password (with an optional password; empty = make one).
+        Returns (account, new temporary password or None)."""
         account = self.users.get_account(user_id)
         if account is None:
             raise NotFoundError("Account not found.")
+        new_password = None
+        if data.get("reset_password"):
+            new_password = check_new_account_password(str(data.get("password") or "")) \
+                if data.get("password") else make_temp_password()
         if any(key in data for key in ("last_name", "first_name", "middle_initial", "name")):
             current = (account["last_name"], account["first_name"], account["middle_initial"])
             self.users.set_names(user_id, name_from_request(data, current))
@@ -94,9 +99,10 @@ class AccountService(Service):
             self.users.set_grade_section(user_id, *self.grade_section(merged, user_id))
         if "active" in data:
             self.users.set_active(user_id, bool(data["active"]))
-        temp_password = self.reset_password(user_id) if data.get("reset_password") else None
+        if new_password:
+            self.set_temp_password(user_id, new_password)
         self.commit()
-        return self.account_json(self.users.get_account(user_id)), temp_password
+        return self.account_json(self.users.get_account(user_id)), new_password
 
     def batch_update(self, data):
         """Change grade and/or section of many students at once. Students are user_ids, or
@@ -163,10 +169,8 @@ class AccountService(Service):
             raise ValidationError(f"Only students can be {verb}d here.")
         return ids
 
-    def reset_password(self, user_id):
-        temp_password = make_temp_password()
+    def set_temp_password(self, user_id, temp_password):
         self.users.set_password(user_id, generate_password_hash(temp_password), must_change_password=True)
-        return temp_password
 
     def grade_section(self, data, student_id=None):
         """(grade, section). A section typed in other capitals than an existing one ("rizal" when

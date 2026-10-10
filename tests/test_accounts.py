@@ -120,6 +120,17 @@ def test_list_rename_reset_deactivate(admin, app):
     assert admin.put(f"/api/users/{student['id']}", json={"active": False}).get_json()["user"]["active"] is False
 
 
+def test_reset_password_with_typed_password(admin, app):
+    student = admin.get("/api/users?role=student").get_json()["users"][0]
+    url = f"/api/users/{student['id']}"
+    assert error(admin.put(url, json={"reset_password": True, "password": "abc"})) \
+        == "Password must be at least 6 characters."
+    data = admin.put(url, json={"reset_password": True, "password": "typed-pass"}).get_json()
+    assert data["temp_password"] == "typed-pass" and data["user"]["must_change_password"] is True
+    login = app.test_client().post("/api/login", json={"username": student["username"], "password": "typed-pass"})
+    assert login.status_code == 200
+
+
 def test_new_student_starts_disabled_until_enabled(admin, app):
     made = admin.post("/api/users", json={"role": "student", "last_name": "Dela Cruz", "first_name": "Juan",
                                           "username": "juandc", "password": "password1"}).get_json()
