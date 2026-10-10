@@ -3,7 +3,7 @@
 
 const role = document.querySelector("main").dataset.role; // "teacher" or "student"
 const noun = role; // "teacher" / "student", used in messages
-// One page at a time; search and grade filter are done on the server.
+// One page at a time; search and filters are done on the server.
 let page = 1; // the page shown
 let pages = 1; // how many pages the current search has
 let loadNumber = 0; // only the newest request updates the list (typing fast sends several)
@@ -12,7 +12,10 @@ let confirmAction = null; // what "Yes" does in the confirm box
 
 const list = document.getElementById("user-list");
 const searchInput = document.getElementById("search");
-const gradeFilter = document.getElementById("grade-filter"); // students page only
+// Advanced filter (students page only): full name, grade, section
+const gradeFilter = document.getElementById("grade-filter");
+const nameFilter = document.getElementById("name-filter");
+const sectionFilter = document.getElementById("section-filter");
 
 const addModalElement = document.getElementById("add-user-modal");
 const addModal = bootstrap.Modal.getOrCreateInstance(addModalElement);
@@ -34,13 +37,16 @@ const confirmBox = document.getElementById("confirm-box");
 // One row: name and username on the left, status on the right. Tapping it opens the edit popup.
 // textContent is used (not innerHTML) so names can't inject HTML.
 function userItem(user) {
-  const row = document.createElement("button");
-  row.type = "button";
+  // A div (not a button) so the students page can put a checkbox in it (batch-edit.js).
+  const row = document.createElement("div");
+  row.tabIndex = 0;
+  row.setAttribute("role", "button");
   row.className =
-    "list-group-item list-group-item-action d-flex justify-content-between align-items-center";
+    "list-group-item list-group-item-action d-flex justify-content-between align-items-center gap-2";
   if (!user.active) row.classList.add("text-body-secondary");
 
   const left = document.createElement("div");
+  left.className = "me-auto";
   const name = document.createElement("div");
   name.textContent = user.name;
   // "msantos · 2 classes" (only the username in monospace)
@@ -66,8 +72,15 @@ function userItem(user) {
     badge.textContent = "Active";
   }
 
+  if (typeof selectionBox === "function") row.append(selectionBox(user)); // students page
   row.append(left, badge);
   row.addEventListener("click", () => openEdit(user));
+  row.addEventListener("keydown", (event) => {
+    if (event.target === row && (event.key === "Enter" || event.key === " ")) {
+      event.preventDefault();
+      openEdit(user);
+    }
+  });
   return row;
 }
 
@@ -78,8 +91,21 @@ function messageItem(text) {
   return div;
 }
 
+// How many advanced filter fields are filled in (students page).
+function filtersInUse() {
+  if (!gradeFilter) return 0;
+  return [nameFilter.value.trim() !== "", gradeFilter.value !== "*", sectionFilter.value.trim() !== ""]
+    .filter(Boolean).length;
+}
+
 function render(data) {
-  const searching = searchInput.value.trim() !== "" || (gradeFilter && gradeFilter.value !== "*");
+  const inUse = filtersInUse();
+  const searching = searchInput.value.trim() !== "" || inUse > 0;
+  const filterCount = document.getElementById("filter-count");
+  if (filterCount) {
+    filterCount.textContent = inUse;
+    filterCount.classList.toggle("d-none", inUse === 0);
+  }
   if (data.all_count === 0) {
     list.replaceChildren(messageItem(`No ${noun}s yet. Tap + Add ${noun} to create an account.`));
   } else if (data.users.length === 0) {
@@ -99,13 +125,18 @@ function render(data) {
   document.getElementById("page-info").textContent = `Page ${page} of ${pages}`;
   document.getElementById("prev-page").disabled = page <= 1;
   document.getElementById("next-page").disabled = page >= pages;
+  if (typeof selectionShown === "function") selectionShown(data); // students page
 }
 
 // Loads the current page of the search from the server.
 async function loadUsers() {
   const thisLoad = ++loadNumber;
   const params = new URLSearchParams({ role, page, q: searchInput.value.trim() });
-  if (gradeFilter && gradeFilter.value !== "*") params.set("grade", gradeFilter.value);
+  if (gradeFilter) {
+    if (gradeFilter.value !== "*") params.set("grade", gradeFilter.value);
+    if (nameFilter.value.trim()) params.set("name", nameFilter.value.trim());
+    if (sectionFilter.value.trim()) params.set("section", sectionFilter.value.trim());
+  }
   try {
     const response = await apiFetch(`/api/users?${params}`);
     if (!response || thisLoad !== loadNumber) return; // a newer search is on its way
@@ -131,11 +162,23 @@ document.getElementById("next-page").addEventListener("click", () => goToPage(pa
 
 // Search after a short pause in typing, from page 1 again.
 let searchTimer = null;
-searchInput.addEventListener("input", () => {
+function searchSoon() {
   clearTimeout(searchTimer);
   searchTimer = setTimeout(() => goToPage(1), 250);
-});
-if (gradeFilter) gradeFilter.addEventListener("change", () => goToPage(1));
+}
+searchInput.addEventListener("input", searchSoon);
+if (gradeFilter) {
+  nameFilter.addEventListener("input", searchSoon);
+  sectionFilter.addEventListener("input", searchSoon);
+  gradeFilter.addEventListener("change", () => goToPage(1));
+  document.getElementById("filter-clear").addEventListener("click", () => {
+    nameFilter.value = "";
+    sectionFilter.value = "";
+    gradeFilter.value = "*";
+    // Same events the boxes send, so batch-edit.js drops "all matching" too.
+    gradeFilter.dispatchEvent(new Event("change"));
+  });
+}
 
 // --- Add account -------------------------------------------------------------
 

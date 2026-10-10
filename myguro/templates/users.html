@@ -16,11 +16,11 @@
            placeholder="Search name, username{{ ' or section' if role == 'student' }}"
            aria-label="Search {{ nouns|lower }}" autocomplete="off">
     {% if role == "student" %}
-    <select id="grade-filter" class="form-select w-auto" aria-label="Filter by grade">
-      <option value="*">All grades</option>
-      {% for grade in GRADES %}<option>{{ grade }}</option>{% endfor %}
-      <option value="">No grade</option>
-    </select>
+    <button id="filter-toggle" type="button" class="btn btn-outline-secondary text-nowrap"
+            data-bs-toggle="collapse" data-bs-target="#advanced-filter" aria-expanded="false"
+            aria-controls="advanced-filter">
+      Filters<span id="filter-count" class="badge text-bg-success ms-1 d-none"></span>
+    </button>
     {% endif %}
     <button class="btn btn-success text-nowrap" data-bs-toggle="modal" data-bs-target="#add-user-modal">
       + Add {{ noun }}
@@ -32,9 +32,56 @@
     {% endif %}
   </div>
 
+  {% if role == "student" %}
+  <!-- Advanced filter: all fields together narrow the list (and "Select all N matching") -->
+  <div id="advanced-filter" class="collapse">
+    <div class="card card-body mb-3">
+      <div class="row g-2 align-items-end">
+        <div class="col-12 col-md-5">
+          <label for="name-filter" class="form-label small mb-1">Full name</label>
+          <input id="name-filter" type="search" class="form-control" autocomplete="off"
+                 placeholder="e.g. Altamerano Rian">
+        </div>
+        <div class="col-6 col-md-3">
+          <label for="grade-filter" class="form-label small mb-1">Grade</label>
+          <select id="grade-filter" class="form-select">
+            <option value="*">All grades</option>
+            {% for grade in GRADES %}<option>{{ grade }}</option>{% endfor %}
+            <option value="">No grade</option>
+          </select>
+        </div>
+        <div class="col-6 col-md-2">
+          <label for="section-filter" class="form-label small mb-1">Section</label>
+          <input id="section-filter" type="search" class="form-control" autocomplete="off"
+                 placeholder="e.g. Rizal">
+        </div>
+        <div class="col-12 col-md-2">
+          <button id="filter-clear" type="button" class="btn btn-outline-secondary w-100">Clear filters</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div id="users-notice" class="alert alert-success py-2 d-none" role="status"></div>
+  {% if role == "student" %}
+  <!-- Shown while students are selected -->
+  <div id="selection-bar" class="alert alert-primary py-2 d-flex flex-wrap align-items-center gap-2 d-none">
+    <span id="selection-text" class="me-auto"></span>
+    <button id="select-matching" type="button" class="btn btn-sm btn-link p-0 d-none"></button>
+    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#batch-modal">
+      Edit grade &amp; section
+    </button>
+    <button id="selection-clear" type="button" class="btn btn-sm btn-outline-secondary">Clear</button>
+  </div>
+  {% endif %}
+
   <div class="card">
-    <div class="card-header d-flex justify-content-between">
-      <span class="fw-semibold">{{ nouns }}</span>
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      {% if role == "student" %}
+      <input id="select-page" type="checkbox" class="form-check-input mt-0" aria-label="Select all on this page">
+      {% endif %}
+      <span class="fw-semibold me-auto">{{ nouns }}</span>
       <span id="user-summary" class="text-body-secondary small"></span>
     </div>
     <div id="user-list" class="list-group list-group-flush">
@@ -127,11 +174,14 @@
 </div>
 
 {% include "_login_details_modal.html" %}
-{% if role == "student" %}{% include "_import_students_modal.html" %}{% endif %}
+{% if role == "student" %}{% include "_import_students_modal.html" %}{% include "_batch_edit_modal.html" %}{% endif %}
 {% endblock %}
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/common.js') }}"></script>
 <script src="{{ url_for('static', filename='js/users.js') }}"></script>
-{% if role == "student" %}<script src="{{ url_for('static', filename='js/student-import.js') }}"></script>{% endif %}
+{% if role == "student" %}
+<script src="{{ url_for('static', filename='js/student-import.js') }}"></script>
+<script src="{{ url_for('static', filename='js/batch-edit.js') }}"></script>
+{% endif %}
 {% endblock %}

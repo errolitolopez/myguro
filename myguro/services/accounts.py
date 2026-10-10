@@ -12,6 +12,7 @@ from myguro.services.presenters import user_json
 
 
 DEFAULT_PER_PAGE = 20
+MAX_BATCH = 1000
 MAX_PER_PAGE = 100
 
 # What the import sends back for each student
@@ -25,17 +26,28 @@ class AccountService(Service):
         """user_json plus the role and how many classes the teacher teaches or the student is in."""
         return {**user_json(row), "role": row["role"], "classes": self.users.count_classes(row)}
 
-    def list(self, role, query="", grade=None, page=1, per_page=DEFAULT_PER_PAGE):
+    @staticmethod
+    def filters(query="", grade=None, name="", section=""):
+        """The search and the advanced filters (full name, grade, section) as the arguments the
+        repository takes after the role: (pattern, grade, name_words, section_pattern).
+        Every word typed in the full name must be in the name, in any order."""
+        pattern = like_pattern(clean_name(query))
+        name_words = tuple(like_pattern(word) for word in clean_name(name).replace(",", " ").split())
+        section = clean_name(section)
+        return pattern, grade, name_words, like_pattern(section) if section else None
+
+    def list(self, role, query="", grade=None, page=1, per_page=DEFAULT_PER_PAGE, name="", section=""):
         """One page of teachers or students, searched (name, username, section) and filtered by
-        grade (None = all, "" = no grade). A page past the end shows the last page."""
+        grade (None = all, "" = no grade), full name and section. A page past the end shows the
+        last page."""
         if role not in ACCOUNT_ROLES:
             raise ValidationError("Unknown role.")
         per_page = max(1, min(per_page, MAX_PER_PAGE))
-        pattern = like_pattern(clean_name(query))
-        total = self.users.count_matching(role, pattern, grade)
+        search = self.filters(query, grade, name, section)
+        total = self.users.count_matching(role, *search)
         pages = max(1, -(-total // per_page))  # rounded up
         page = max(1, min(page, pages))
-        rows = self.users.search(role, pattern, grade, limit=per_page, offset=(page - 1) * per_page)
+        rows = self.users.search(role, *search, limit=per_page, offset=(page - 1) * per_page)
         return {
             "users": [self.account_json(row) for row in rows],
             "page": page,
@@ -81,6 +93,43 @@ class AccountService(Service):
         temp_password = self.reset_password(user_id) if data.get("reset_password") else None
         self.commit()
         return self.account_json(self.users.get_account(user_id)), temp_password
+
+    def batch_update(self, data):
+        """Change grade and/or section of many students at once. Students are user_ids, or
+        match = {q, grade, name, section} for every student matching that search (all pages). A field not
+        sent is kept; grade "" = no grade, section "" = no section (irregular).
+        Returns how many students were changed."""
+        if "match" in data and isinstance(data["match"], dict):
+            match = data["match"]
+            search = self.filters(match.get("q"), match.get("grade"), match.get("name"), match.get("section"))
+            ids = self.users.matching_ids("student", *search)
+        else:
+            ids = data.get("user_ids")
+            if not isinstance(ids, list) or not all(isinstance(i, int) and not isinstance(i, bool) for i in ids):
+                ids = []
+        ids = sorted(set(ids))
+        if not ids:
+            raise ValidationError("Choose at least one student.")
+        if "grade" not in data and "section" not in data:
+            raise ValidationError("Choose a grade or section to change.")
+        if len(ids) > MAX_BATCH:
+            raise ValidationError(f"Change at most {MAX_BATCH} students at a time.")
+        if self.users.count_students(ids) != len(ids):
+            raise ValidationError("Only students can be changed here.")
+
+        grade = section = None
+        if "grade" in data:
+            grade = clean_grade_section({"grade": data["grade"]})[0]
+        if "section" in data:
+            section = clean_grade_section({"section": data["section"]})[1]
+            if section:
+                section = self.users.section_spelling(section) or section
+        if grade is not None:
+            self.users.set_grade_many(ids, grade)
+        if section is not None:
+            self.users.set_section_many(ids, section)
+        self.commit()
+        return len(ids)
 
     def reset_password(self, user_id):
         temp_password = make_temp_password()

@@ -32,8 +32,8 @@ def students_page():
 @bp.get("/api/users")
 @role_required_api("admin")
 def api_list():
-    """?role=teacher (default) or student, ?q= search, ?grade= (empty = no grade),
-    ?page= and ?per_page= (20 by default)."""
+    """?role=teacher (default) or student, ?q= search, ?grade= (empty = no grade), ?name= (full
+    name, any order) and ?section= (advanced filters), ?page= and ?per_page= (20 by default)."""
     args = request.args
     return jsonify(service().list(
         args.get("role", "teacher"),
@@ -41,6 +41,8 @@ def api_list():
         grade=args.get("grade") if "grade" in args else None,
         page=args.get("page", 1, type=int),
         per_page=args.get("per_page", 20, type=int),
+        name=args.get("name", ""),
+        section=args.get("section", ""),
     ))
 
 
@@ -49,6 +51,13 @@ def api_list():
 def api_create():
     user, temp_password = service().create(json_body())
     return jsonify(user=user, temp_password=temp_password), 201
+
+
+@bp.put("/api/users/batch")
+@role_required_api("admin")
+def api_batch_update():
+    """Grade and/or section of many students: {user_ids or match: {q, grade, name, section}, grade?, section?}."""
+    return jsonify(updated=service().batch_update(json_body()))
 
 
 @bp.put("/api/users/<int:user_id>")

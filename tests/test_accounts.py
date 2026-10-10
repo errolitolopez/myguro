@@ -128,3 +128,20 @@ def test_only_admin_manages_accounts(teacher):
     assert teacher.get("/api/users").status_code == 403
     assert teacher.post("/api/users", json={"role": "student", **person(), "username": "xyz"}).status_code == 403
     assert login("jdelacruz01").get("/api/users").status_code == 403
+
+
+def test_advanced_filter_full_name_grade_section(admin):
+    sample = admin.get("/api/users?role=student&per_page=100").get_json()["users"][0]
+    last, first = sample["last_name"], sample["first_name"]
+    # Full name: words in any order, with or without the comma
+    for typed in (f"{last} {first}", f"{first} {last}", f"{last}, {first}"):
+        found = admin.get("/api/users", query_string={"role": "student", "name": typed}).get_json()
+        assert sample["id"] in [u["id"] for u in found["users"]]
+    assert admin.get("/api/users?role=student&name=zzzz").get_json()["total"] == 0
+    # Grade + section + name narrow each other (AND)
+    both = admin.get("/api/users?role=student&grade=Grade+12&section=stem").get_json()
+    assert both["total"] == 6
+    assert all(u["grade"] == "Grade 12" and u["section"].lower() == "stem" for u in both["users"])
+    assert admin.get("/api/users?role=student&grade=Grade+9&section=stem").get_json()["total"] == 0
+    # % is not a wildcard in the section filter either
+    assert admin.get("/api/users?role=student&section=%25").get_json()["total"] == 0
