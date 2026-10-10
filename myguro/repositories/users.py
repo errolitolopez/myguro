@@ -80,8 +80,9 @@ class UserRepository(Repository):
         """names = (last name, first name, middle initial)."""
         return self.execute(
             "INSERT INTO users (name, last_name, first_name, middle_initial, username, password_hash, role, "
-            "must_change_password, grade, section, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (display_name(*names), *names, username, password_hash, role, int(must_change_password), grade, section, int(active)),
+            "must_change_password, grade, section, active, activated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (display_name(*names), *names, username, password_hash, role, int(must_change_password), grade, section,
+             int(active), int(active)),
         ).lastrowid
 
     def set_names(self, user_id, names):
@@ -93,7 +94,23 @@ class UserRepository(Repository):
         self.execute("UPDATE users SET grade = ?, section = ? WHERE id = ?", (grade, section, user_id))
 
     def set_active(self, user_id, active):
-        self.execute("UPDATE users SET active = ? WHERE id = ?", (int(active), user_id))
+        # Enabling once is forever: the account is no longer fresh.
+        self.execute("UPDATE users SET active = ?, activated = MAX(activated, ?) WHERE id = ?",
+                     (int(active), int(active), user_id))
+
+    def fresh_student_ids(self, user_ids):
+        """Of these ids, the students who were never activated and have no submitted work."""
+        marks = ",".join("?" * len(user_ids))
+        return [row["id"] for row in self.all(
+            f"SELECT id FROM users WHERE role = 'student' AND activated = 0 AND id IN ({marks}) "
+            "AND id NOT IN (SELECT student_id FROM submissions)", list(user_ids))]
+
+    def delete_students(self, user_ids):
+        """Removes these students and their class and assignment memberships."""
+        rows = [(user_id,) for user_id in user_ids]
+        self.db.executemany("DELETE FROM class_students WHERE student_id = ?", rows)
+        self.db.executemany("DELETE FROM assignment_students WHERE student_id = ?", rows)
+        self.db.executemany("DELETE FROM users WHERE id = ? AND role = 'student'", rows)
 
     def set_password(self, user_id, password_hash, must_change_password):
         self.execute("UPDATE users SET password_hash = ?, must_change_password = ? WHERE id = ?",

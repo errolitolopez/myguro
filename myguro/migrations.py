@@ -124,6 +124,14 @@ def add_missing_columns(db):
         db.execute("ALTER TABLE users ADD COLUMN grade TEXT NOT NULL DEFAULT ''")
     if "section" not in user_columns:
         db.execute("ALTER TABLE users ADD COLUMN section TEXT NOT NULL DEFAULT ''")
+    if "activated" not in user_columns:
+        db.execute("ALTER TABLE users ADD COLUMN activated INTEGER NOT NULL DEFAULT 1")
+        # Disabled students with no class and no work were never used: still fresh.
+        db.execute(
+            "UPDATE users SET activated = 0 WHERE role = 'student' AND active = 0 "
+            "AND id NOT IN (SELECT student_id FROM class_students) "
+            "AND id NOT IN (SELECT student_id FROM submissions)"
+        )
     if "last_name" not in user_columns:
         db.execute("ALTER TABLE users ADD COLUMN last_name TEXT NOT NULL DEFAULT ''")
         db.execute("ALTER TABLE users ADD COLUMN first_name TEXT NOT NULL DEFAULT ''")

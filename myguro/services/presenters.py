@@ -10,6 +10,7 @@ def user_json(row):
         "middle_initial": row["middle_initial"],
         "username": row["username"],
         "active": bool(row["active"]),
+        "activated": bool(row["activated"]),
         "must_change_password": bool(row["must_change_password"]),
         "created_at": row["created_at"],
         "grade": row["grade"],

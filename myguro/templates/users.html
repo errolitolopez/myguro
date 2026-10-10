@@ -72,6 +72,9 @@
     <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#batch-modal">
       Edit grade &amp; section
     </button>
+    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#delete-modal">
+      Delete
+    </button>
     <button id="selection-clear" type="button" class="btn btn-sm btn-outline-secondary">Clear</button>
   </div>
   {% endif %}
@@ -174,7 +177,7 @@
 </div>
 
 {% include "_login_details_modal.html" %}
-{% if role == "student" %}{% include "_import_students_modal.html" %}{% include "_batch_edit_modal.html" %}{% endif %}
+{% if role == "student" %}{% include "_import_students_modal.html" %}{% include "_batch_edit_modal.html" %}{% include "_batch_delete_modal.html" %}{% endif %}
 {% endblock %}
 
 {% block scripts %}

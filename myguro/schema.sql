@@ -14,6 +14,9 @@ CREATE TABLE IF NOT EXISTS users (
     role TEXT NOT NULL CHECK (role IN ('admin', 'teacher', 'student')),
     must_change_password INTEGER NOT NULL DEFAULT 1,
     active INTEGER NOT NULL DEFAULT 1,
+    -- 0 = never enabled (a fresh student: can still be deleted); set to 1 the first time
+    -- the account is enabled and never goes back, even if it is deactivated later
+    activated INTEGER NOT NULL DEFAULT 1,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     -- Students only, both optional (an irregular student may have no section): "Grade 6", "Rizal"
     grade TEXT NOT NULL DEFAULT '',

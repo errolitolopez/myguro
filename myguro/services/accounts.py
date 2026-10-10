@@ -101,23 +101,9 @@ class AccountService(Service):
         match = {q, grade, name, section} for every student matching that search (all pages). A field not
         sent is kept; grade "" = no grade, section "" = no section (irregular).
         Returns how many students were changed."""
-        if "match" in data and isinstance(data["match"], dict):
-            match = data["match"]
-            search = self.filters(match.get("q"), match.get("grade"), match.get("name"), match.get("section"))
-            ids = self.users.matching_ids("student", *search)
-        else:
-            ids = data.get("user_ids")
-            if not isinstance(ids, list) or not all(isinstance(i, int) and not isinstance(i, bool) for i in ids):
-                ids = []
-        ids = sorted(set(ids))
-        if not ids:
-            raise ValidationError("Choose at least one student.")
+        ids = self.batch_ids(data, "change")
         if "grade" not in data and "section" not in data:
             raise ValidationError("Choose a grade or section to change.")
-        if len(ids) > MAX_BATCH:
-            raise ValidationError(f"Change at most {MAX_BATCH} students at a time.")
-        if self.users.count_students(ids) != len(ids):
-            raise ValidationError("Only students can be changed here.")
 
         grade = section = None
         if "grade" in data:
@@ -132,6 +118,37 @@ class AccountService(Service):
             self.users.set_section_many(ids, section)
         self.commit()
         return len(ids)
+
+    def batch_delete(self, data):
+        """Delete many students at once (same selection as batch_update). Only fresh students,
+        never activated, can be deleted: an activated one is skipped even if deactivated now.
+        Returns {deleted, skipped}."""
+        ids = self.batch_ids(data, "delete")
+        fresh = self.users.fresh_student_ids(ids)
+        if fresh:
+            self.users.delete_students(fresh)
+            self.commit()
+        return {"deleted": len(fresh), "skipped": len(ids) - len(fresh)}
+
+    def batch_ids(self, data, verb):
+        """The students a batch request is about: user_ids, or match = {q, grade, name, section}
+        for every student matching that search (all pages)."""
+        if "match" in data and isinstance(data["match"], dict):
+            match = data["match"]
+            search = self.filters(match.get("q"), match.get("grade"), match.get("name"), match.get("section"))
+            ids = self.users.matching_ids("student", *search)
+        else:
+            ids = data.get("user_ids")
+            if not isinstance(ids, list) or not all(isinstance(i, int) and not isinstance(i, bool) for i in ids):
+                ids = []
+        ids = sorted(set(ids))
+        if not ids:
+            raise ValidationError("Choose at least one student.")
+        if len(ids) > MAX_BATCH:
+            raise ValidationError(f"{verb.capitalize()} at most {MAX_BATCH} students at a time.")
+        if self.users.count_students(ids) != len(ids):
+            raise ValidationError(f"Only students can be {verb}d here.")
+        return ids
 
     def reset_password(self, user_id):
         temp_password = make_temp_password()

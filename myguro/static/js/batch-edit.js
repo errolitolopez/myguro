@@ -172,3 +172,47 @@ batchForm.addEventListener("submit", async (event) => {
     save.disabled = false;
   }
 });
+
+// --- Delete -----------------------------------------------------------------------
+
+const deleteModal = bootstrap.Modal.getOrCreateInstance(document.getElementById("delete-modal"));
+
+document.getElementById("delete-modal").addEventListener("show.bs.modal", () => {
+  hideError("delete-error");
+  document.getElementById("delete-who").textContent = allMatching
+    ? `Delete all ${plural(allMatching.total, "student")} matching the search?`
+    : `Delete ${plural(selected.size, "selected student")}?`;
+});
+
+document.getElementById("delete-confirm").addEventListener("click", async (event) => {
+  hideError("delete-error");
+  const body = allMatching ? { match: {
+    q: allMatching.q, grade: allMatching.grade, name: allMatching.name, section: allMatching.section,
+  } } : { user_ids: [...selected] };
+  const button = event.target;
+  button.disabled = true;
+  try {
+    const response = await apiFetch("/api/users/batch-delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!response) return;
+    const data = await response.json();
+    if (!response.ok) {
+      showError("delete-error", data.error || "Could not delete.");
+      return;
+    }
+    deleteModal.hide();
+    const notice = document.getElementById("users-notice");
+    notice.textContent = `${plural(data.deleted, "student")} deleted.` +
+      (data.skipped ? ` ${plural(data.skipped, "student")} skipped: already activated once.` : "");
+    notice.classList.remove("d-none");
+    setTimeout(() => notice.classList.add("d-none"), 6000);
+    clearSelection();
+  } catch {
+    showError("delete-error", "Cannot reach the server. Check your connection.");
+  } finally {
+    button.disabled = false;
+  }
+});
