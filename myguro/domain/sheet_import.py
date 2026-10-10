@@ -6,6 +6,8 @@ The answer cell is read by question type (see sheets.py for the stored key):
   true_false       True / False
   identification   accepted answers split by /
   fill_blank       one answer per blank split by ; (spellings of one blank split by /)
+  matching         pairs "item = match" split by ; (Hinduism = India ; Taoism = China). Column B is
+                   the matches (each once, sorted A to Z) plus any extra choices from Choice A-F
   short_answer     an optional guide for checking
 """
 
@@ -18,6 +20,7 @@ QUESTION_TYPE_NAMES = {
     "mc": "multiple_choice", "multiple choice": "multiple_choice",
     "true or false": "true_false", "true/false": "true_false", "tf": "true_false",
     "fill in the blank": "fill_blank", "fill in the blanks": "fill_blank", "fill blank": "fill_blank",
+    "matching": "matching", "matching type": "matching",
     "short answer": "short_answer", "essay": "short_answer",
 }
 TRUE_FALSE = {"true": True, "t": True, "false": False, "f": False}
@@ -57,6 +60,28 @@ def sections_from_rows(rows):
     return sections, errors
 
 
+def matching_from_cells(answer, extras):
+    """(Column B choices, [{item, match}]) from the Answer cell "item = match ; item = match" and the
+    extra (unused) choices in Choice A to F. Column B is sorted A to Z so the key is not in order."""
+    pairs = []
+    for part in answer.split(";"):
+        item, equals, match = part.partition("=")
+        if not equals or not item.strip() or not match.strip():
+            raise ValidationError('Answer must be pairs like "Hinduism = India ; Taoism = China".')
+        pairs.append((item.strip(), match.strip()))
+    if len(pairs) < 2:
+        raise ValidationError("Matching needs at least 2 pairs, split by ;.")
+    texts = {}  # lower case -> spelling first used
+    for _, match in pairs:
+        texts.setdefault(match.casefold(), match)
+    for extra in extras:
+        if extra.strip():
+            texts.setdefault(extra.strip().casefold(), extra.strip())
+    choices = sorted(texts.values(), key=str.casefold)
+    index = {choice.casefold(): position for position, choice in enumerate(choices)}
+    return choices, [{"item": item, "match": index[match.casefold()]} for item, match in pairs]
+
+
 def question_from_record(record):
     """The question dict (as the editor posts it) for a question row, checked.
     Raises ValidationError with a message about this row."""
@@ -89,6 +114,9 @@ def question_from_record(record):
         question["answer"] = answer.split("/")
     elif kind == "fill_blank":
         question["answer"] = [blank.split("/") for blank in answer.split(";")]
+    elif kind == "matching":
+        question["choices"], question["answer"] = matching_from_cells(answer, [
+            record[f"choice_{letter}"] for letter in CHOICE_LETTERS])
     else:  # short_answer
         question["answer"] = answer
 

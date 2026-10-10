@@ -5,6 +5,8 @@ Question types and their answer keys (stored as JSON):
   true_false       answer true / false
   identification   answer ["Taoism", "Daoism"] (any of them is correct)
   fill_blank       ___ in the prompt for each blank, answer [["India"], ["China"]] (per blank)
+  matching         choices = Column B texts, answer [{"item": "Hinduism", "match": 2}, ...] (Column A item and
+                   the index of its Column B choice); the prompt is the instruction line
   short_answer     a short essay the teacher scores; answer is an optional guide for checking
 """
 
@@ -21,9 +23,11 @@ MAX_SECTIONS = 50
 MAX_DESCRIPTION_LENGTH = 20000
 SECTION_KINDS = ("text", "activity")
 DESCRIPTION_FORMATS = ("plain", "rich")
-QUESTION_TYPES = ("multiple_choice", "true_false", "identification", "fill_blank", "short_answer")
+QUESTION_TYPES = ("multiple_choice", "true_false", "identification", "fill_blank", "matching", "short_answer")
 MAX_QUESTIONS_PER_SECTION = 100
 MAX_CHOICES = 6
+MAX_MATCH_ITEMS = 10  # Column A of a matching question
+MAX_MATCH_CHOICES = 12  # Column B
 MAX_POINTS = 100
 MAX_ANSWER_LENGTH = 200
 MAX_ATTEMPTS_CHOICE = 10  # "Submissions allowed": 1 to 10, or unlimited (None)
@@ -146,6 +150,9 @@ def clean_question(question, where):
             raise ValidationError(f"{where}: choose True or False as the correct answer.")
     elif kind == "identification":
         answer = clean_accepted_answers(question.get("answer"), where)
+    elif kind == "matching":
+        choices = clean_choices(question.get("choices"), where, maximum=MAX_MATCH_CHOICES)
+        answer = clean_matches(question.get("answer"), len(choices), where)
     elif kind == "short_answer":
         # No right answer: the student writes their own and the teacher scores it.
         # The answer is an optional guide for checking (key points), seen only by the teacher.
@@ -157,17 +164,38 @@ def clean_question(question, where):
     return Question(type=kind, prompt=prompt, answer=answer, points=points, choices=choices, id=question.get("id"))
 
 
-def clean_choices(choices, where):
+def clean_choices(choices, where, maximum=MAX_CHOICES):
     if not isinstance(choices, list):
         raise ValidationError(f"{where}: the choices are not valid.")
     choices = [clean_name(choice) for choice in choices]
-    if len(choices) < 2 or len(choices) > MAX_CHOICES:
-        raise ValidationError(f"{where}: give 2 to {MAX_CHOICES} choices.")
+    if len(choices) < 2 or len(choices) > maximum:
+        raise ValidationError(f"{where}: give 2 to {maximum} choices.")
     if not all(choices):
         raise ValidationError(f"{where}: a choice is empty. Type it or remove it.")
     if any(len(choice) > MAX_ANSWER_LENGTH for choice in choices):
         raise ValidationError(f"{where}: a choice can be at most {MAX_ANSWER_LENGTH} characters.")
     return choices
+
+
+def clean_matches(values, choice_count, where):
+    """Column A of a matching question: [{"item": text, "match": index of the Column B choice}]."""
+    if not isinstance(values, list):
+        raise ValidationError(f"{where}: the items are not valid.")
+    if len(values) < 2 or len(values) > MAX_MATCH_ITEMS:
+        raise ValidationError(f"{where}: give 2 to {MAX_MATCH_ITEMS} items to match.")
+    matches = []
+    for number, value in enumerate(values, start=1):
+        if not isinstance(value, dict):
+            raise ValidationError(f"{where}: the items are not valid.")
+        item = clean_name(value.get("item"))
+        if not item:
+            raise ValidationError(f"{where}: item {number} is empty. Type it or remove it.")
+        if len(item) > MAX_ANSWER_LENGTH:
+            raise ValidationError(f"{where}: an item can be at most {MAX_ANSWER_LENGTH} characters.")
+        if not whole_number(value.get("match"), 0, choice_count - 1):
+            raise ValidationError(f"{where}: choose the match of item {number}.")
+        matches.append({"item": item, "match": value["match"]})
+    return matches
 
 
 def clean_accepted_answers(values, where):

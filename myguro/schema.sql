@@ -86,12 +86,14 @@ CREATE TABLE IF NOT EXISTS assignment_students (
 );
 
 -- The questions of an activity section, in position order.
--- type: multiple_choice, true_false, identification, fill_blank, short_answer (checked in app.py, so new
+-- type: multiple_choice, true_false, identification, fill_blank, matching, short_answer (checked in app.py, so new
 -- types can be added without rebuilding the table). choices and answer are JSON:
 --   multiple_choice: choices ["Hinduism", ...], answer 1 (the index of the correct choice)
 --   true_false:      answer true / false
 --   identification:  answer ["Taoism", "Daoism"] (any of them is correct)
 --   fill_blank:      prompt has ___ for each blank, answer [["Buddhism"], ["China"]] (per blank)
+--   matching:        choices = Column B texts, answer [{"item": "Hinduism", "match": 2}, ...] (Column A item +
+--                    index of its Column B choice); prompt = the instruction line
 --   short_answer:    a short essay the teacher scores; answer "key points..." (optional guide, may be "")
 CREATE TABLE IF NOT EXISTS questions (
     id INTEGER PRIMARY KEY,

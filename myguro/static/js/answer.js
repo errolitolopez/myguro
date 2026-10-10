@@ -10,7 +10,7 @@ let changedIds = new Set(); // questions changed since the last save
 let saveTimer = null;
 let saving = null; // the save request in progress, if any
 
-const LETTERS = "ABCDEF";
+const LETTERS = "ABCDEFGHIJKL";
 const BLANK = /_{3,}/g;
 const SAVE_DELAY = 800; // ms after the last change
 
@@ -27,7 +27,9 @@ function el(tag, className = "", text = "") {
 function isAnswered(value) {
   if (value === null || value === undefined) return false;
   if (typeof value === "string") return value.trim() !== "";
-  if (Array.isArray(value)) return value.some((item) => item.trim() !== "");
+  if (Array.isArray(value)) {
+    return value.some((item) => (typeof item === "string" ? item.trim() !== "" : item !== null));
+  }
   return true; // a choice index or true/false
 }
 
@@ -155,7 +157,35 @@ function questionItem(question, locked) {
   prompt.append(points);
   item.append(prompt);
 
-  if (question.type === "multiple_choice") {
+  if (question.type === "matching") {
+    // Column B listed with letters; each Column A item has a box to pick its letter.
+    const value = Array.isArray(answers[question.id]) ? [...answers[question.id]]
+      : Array(question.items.length).fill(null);
+    const columns = el("div", "row g-3 mt-1");
+    const columnA = el("div", "col-12 col-md-7");
+    question.items.forEach((text, index) => {
+      const row = el("div", "d-flex align-items-center gap-2 mb-2");
+      const select = el("select", "form-select form-select-sm flex-grow-0");
+      select.style.width = "5rem";
+      select.disabled = locked;
+      select.setAttribute("aria-label", `Answer for item ${index + 1}`);
+      select.append(new Option("—", ""));
+      question.choices.forEach((_, choiceIndex) =>
+        select.append(new Option(LETTERS[choiceIndex], String(choiceIndex))));
+      select.value = value[index] === null || value[index] === undefined ? "" : String(value[index]);
+      select.addEventListener("change", () => {
+        value[index] = select.value === "" ? null : Number(select.value);
+        setAnswer(question.id, [...value]);
+      });
+      row.append(select, el("span", "preserve-lines", `${index + 1}. ${text}`));
+      columnA.append(row);
+    });
+    const columnB = el("div", "col-12 col-md-5");
+    question.choices.forEach((choice, index) =>
+      columnB.append(el("div", "mb-1", `${LETTERS[index]}. ${choice}`)));
+    columns.append(columnA, columnB);
+    item.append(columns);
+  } else if (question.type === "multiple_choice") {
     item.append(choiceQuestion(question,
       question.choices.map((choice, index) => [index, `${LETTERS[index]}. ${choice}`]), locked));
   } else if (question.type === "true_false") {

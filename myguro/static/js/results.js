@@ -9,7 +9,7 @@ let openStudentId = null; // the student shown in the popup
 let detail = null; // the attempt shown in the popup
 let changedPoints = {}; // question id -> new points, not saved yet
 
-const LETTERS = "ABCDEF";
+const LETTERS = "ABCDEFGHIJKL";
 const STATUS = {
   not_started: ["Not started", "text-bg-light border"],
   in_progress: ["Answering", "text-bg-info"],
@@ -171,7 +171,15 @@ function answerText(question, value) {
   if (question.type === "multiple_choice") return `${LETTERS[value]}. ${question.choices[value]}`;
   if (question.type === "true_false") return value ? "True" : "False";
   if (question.type === "fill_blank") return value.map((item, index) => `${index + 1}) ${item || "—"}`).join("   ");
+  if (question.type === "matching") return matchText(question, value);
   return value;
+}
+
+// Matching, written out: "Hinduism → B. India", one line per Column A item.
+function matchText(question, picks) {
+  return picks.map((pick, index) =>
+    `${question.answer[index].item} → ${pick === null ? "—" : `${LETTERS[pick]}. ${question.choices[pick]}`}`)
+    .join("\n");
 }
 
 // The answer key, written out.
@@ -182,6 +190,7 @@ function keyText(question) {
   if (question.type === "fill_blank") {
     return question.answer.map((accepted, index) => `${index + 1}) ${accepted.join(" / ")}`).join("   ");
   }
+  if (question.type === "matching") return matchText(question, question.answer.map((pair) => pair.match));
   return question.answer; // short answer: the guide (may be empty)
 }
 

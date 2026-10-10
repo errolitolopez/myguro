@@ -13,6 +13,8 @@ def question_for_student(question):
     result = {key: question[key] for key in ("id", "type", "prompt", "choices", "points")}
     if question["type"] == "fill_blank":
         result["blanks"] = len(question["answer"])
+    elif question["type"] == "matching":
+        result["items"] = [match["item"] for match in question["answer"]]
     return result
 
 
@@ -41,12 +43,18 @@ def clean_student_answer(question, value):
             if any(len(item) > MAX_ANSWER_LENGTH for item in value):
                 raise ValidationError(f"An answer is too long (at most {MAX_ANSWER_LENGTH} characters).")
             return value if any(value) else None
+    elif kind == "matching":
+        items, choices = len(question["answer"]), len(question["choices"])
+        if isinstance(value, list) and len(value) == items and all(
+                item is None or (isinstance(item, int) and not isinstance(item, bool) and 0 <= item < choices)
+                for item in value):
+            return value if any(item is not None for item in value) else None
     raise ValidationError("An answer is not valid.")
 
 
 def check_answer(question, value):
     """(is_correct, points) for a submitted answer. Short answers: (None, None) — the teacher
-    scores them. Fill in the blank gives part of the points for each right blank."""
+    scores them. Fill in the blank and matching give part of the points for each right blank / match."""
     kind = question["type"]
     if kind == "short_answer":
         return None, None
@@ -58,6 +66,10 @@ def check_answer(question, value):
     if kind == "identification":
         correct = normalize(value) in {normalize(answer) for answer in question["answer"]}
         return correct, question["points"] if correct else 0
+    if kind == "matching":
+        right = sum(given == match["match"] for given, match in zip(value, question["answer"]))
+        items = len(question["answer"])
+        return right == items, question["points"] * right // items
     right = sum(
         normalize(given) in {normalize(answer) for answer in accepted}
         for given, accepted in zip(value, question["answer"])

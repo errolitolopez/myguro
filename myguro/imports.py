@@ -196,6 +196,8 @@ def sheet_template_xlsx_bytes():
          "Manila / City of Manila", 2),
         ("question", "", "___ is the capital of ___.", "fill_blank", "", "", "", "", "", "",
          "Manila ; Philippines", 2),
+        ("question", "", "Match the country with its capital.", "matching", "Tokyo", "", "", "", "", "",
+         "Philippines = Manila ; Japan = Kyoto ; Thailand = Bangkok", 3),
         ("question", "", "Explain why the sky is blue.", "short_answer", "", "", "", "", "", "",
          "Mention scattering of light (optional guide for checking)", 5),
     ]:
@@ -212,13 +214,18 @@ def sheet_template_xlsx_bytes():
                 "(Title + Description as directions). question = a question of the activity row above it."],
         ["Title", "For text and activity rows. Leave empty on question rows."],
         ["Description", "text: the reading. activity: the directions. question: the question itself."],
-        ["Question type", "multiple_choice, true_false, identification, fill_blank or short_answer "
+        ["Question type", "multiple_choice, true_false, identification, fill_blank, matching or short_answer "
                           "(question rows only)."],
-        ["Choice A to F", "Multiple choice only: 2 to 6 choices, filled from A without gaps."],
+        ["Choice A to F", "Multiple choice: 2 to 6 choices, filled from A without gaps. "
+                          "Matching: optional extra choices that match nothing."],
         ["Answer", "Multiple choice: the letter (B). True or false: True or False. "
                    "Identification: accepted answers split by / (Manila / City of Manila). "
                    "Fill in the blank: put ___ for each blank in the Description and one answer per blank "
-                   "split by ; (more spellings of one blank split by /). Short answer: an optional guide for checking."],
+                   "split by ; (more spellings of one blank split by /). "
+                   "Matching: the Description is the instruction; the Answer is item = match pairs split by ; "
+                   "(Hinduism = India ; Taoism = China), 2 to 10 pairs. Column B is made from the matches "
+                   "(sorted A to Z) plus any extra choices in Choice A to F. Don't use = or ; inside a pair. "
+                   "Short answer: an optional guide for checking."],
         ["Points", "Optional, 1 to 100. Empty = 1 (short answer = 5)."],
     ]:
         help_sheet.append(line)

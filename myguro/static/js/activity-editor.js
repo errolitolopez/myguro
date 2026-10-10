@@ -20,12 +20,15 @@ const QUESTION_TYPES = {
   true_false: "True or False",
   identification: "Identification",
   fill_blank: "Fill in the blank",
+  matching: "Matching",
   short_answer: "Short answer",
 };
 // Short answers are worth more than a one-word item by default.
 const DEFAULT_POINTS = { short_answer: 5 };
-const LETTERS = "ABCDEF";
+const LETTERS = "ABCDEFGHIJKL";
 const MAX_CHOICES = 6;
+const MAX_MATCH_ITEMS = 10; // Column A
+const MAX_MATCH_CHOICES = 12; // Column B
 const BLANK = /_{3,}/g; // ___ (three or more underscores) marks a blank
 
 // --- Small helpers ---------------------------------------------------------------
@@ -285,6 +288,9 @@ function newQuestion(type) {
     question.answer = null;
   } else if (type === "identification" || type === "short_answer") {
     question.answerText = "";
+  } else if (type === "matching") {
+    question.choices = ["", "", ""]; // Column B
+    question.items = [{ item: "", match: null }, { item: "", match: null }]; // Column A
   } else {
     question.blankAnswers = [];
   }
@@ -310,6 +316,9 @@ function fromServer(section) {
         edited.answerText = question.answer.join(" / ");
       } else if (question.type === "short_answer") {
         edited.answerText = question.answer;
+      } else if (question.type === "matching") {
+        edited.choices = question.choices;
+        edited.items = question.answer.map((pair) => ({ item: pair.item, match: pair.match }));
       } else {
         edited.blankAnswers = question.answer.map((answers) => answers.join(" / "));
       }
@@ -337,6 +346,9 @@ function toServer(section) {
         sent.answer = splitAnswers(question.answerText);
       } else if (question.type === "short_answer") {
         sent.answer = question.answerText.trim();
+      } else if (question.type === "matching") {
+        sent.choices = question.choices;
+        sent.answer = question.items;
       } else {
         // One list of accepted answers per blank (an answer box left empty sends []).
         sent.answer = Array.from({ length: blankCount(question.prompt) },
@@ -403,6 +415,89 @@ function multipleChoiceFields(question, id) {
     });
     wrapper.append(add);
   }
+  return wrapper;
+}
+
+// Matching: Column B (the choices, lettered) and Column A (the items, each with its match).
+function matchingFields(question, id) {
+  const wrapper = el("div", "mb-2");
+
+  wrapper.append(el("div", "form-label small mb-1", "Column B: the choices (may have extra ones)"));
+  question.choices.forEach((choice, index) => {
+    const row = el("div", "input-group input-group-sm mb-1");
+    const input = el("input", "form-control");
+    input.id = `${id}-choice-${index}`;
+    input.maxLength = 200;
+    input.placeholder = `Choice ${LETTERS[index]}`;
+    input.value = choice;
+    input.addEventListener("input", () => {
+      question.choices[index] = input.value;
+      markUnsaved();
+    });
+    const remove = smallButton("✕", `Remove choice ${LETTERS[index]}`, () => {
+      question.choices.splice(index, 1);
+      for (const pair of question.items) {
+        if (pair.match === index) pair.match = null;
+        else if (pair.match > index) pair.match -= 1;
+      }
+      changed();
+    }, question.choices.length <= 2);
+    row.append(el("span", "input-group-text", LETTERS[index]), input, remove);
+    wrapper.append(row);
+  });
+  if (question.choices.length < MAX_MATCH_CHOICES) {
+    const add = el("button", "btn btn-sm btn-link px-0 mb-2", "+ Add choice");
+    add.type = "button";
+    add.addEventListener("click", () => {
+      question.choices.push("");
+      changed();
+      document.getElementById(`${id}-choice-${question.choices.length - 1}`).focus();
+    });
+    wrapper.append(add);
+  }
+
+  wrapper.append(el("div", "form-label small mb-1", "Column A: the items, and the letter each one matches"));
+  question.items.forEach((pair, index) => {
+    const row = el("div", "input-group input-group-sm mb-1");
+    const input = el("input", "form-control");
+    input.id = `${id}-item-${index}`;
+    input.maxLength = 200;
+    input.placeholder = `Item ${index + 1}`;
+    input.value = pair.item;
+    input.addEventListener("input", () => {
+      pair.item = input.value;
+      markUnsaved();
+    });
+    const select = el("select", "form-select flex-grow-0");
+    select.style.width = "5.5rem";
+    select.setAttribute("aria-label", `Match of item ${index + 1}`);
+    select.append(new Option("Match", ""));
+    question.choices.forEach((_, choiceIndex) =>
+      select.append(new Option(LETTERS[choiceIndex], String(choiceIndex))));
+    select.value = pair.match === null ? "" : String(pair.match);
+    select.addEventListener("change", () => {
+      pair.match = select.value === "" ? null : Number(select.value);
+      markUnsaved();
+    });
+    const remove = smallButton("✕", `Remove item ${index + 1}`, () => {
+      question.items.splice(index, 1);
+      changed();
+    }, question.items.length <= 2);
+    row.append(el("span", "input-group-text", String(index + 1)), input, select, remove);
+    wrapper.append(row);
+  });
+  if (question.items.length < MAX_MATCH_ITEMS) {
+    const add = el("button", "btn btn-sm btn-link px-0", "+ Add item");
+    add.type = "button";
+    add.addEventListener("click", () => {
+      question.items.push({ item: "", match: null });
+      changed();
+      document.getElementById(`${id}-item-${question.items.length - 1}`).focus();
+    });
+    wrapper.append(add);
+  }
+  wrapper.append(el("div", "form-text mt-0",
+    "Each correct match is worth an equal share of the points."));
   return wrapper;
 }
 
@@ -488,6 +583,7 @@ function questionCard(section, question, index) {
 
   const placeholders = {
     fill_blank: "Buddhism originated in ___.",
+    matching: "Match Column A with Column B. Write the letter of the correct answer.",
     short_answer: "Which of the four questions above is the MOST important? Explain why.",
   };
   const prompt = textField(`${id}-prompt`, "Question", question.prompt,
@@ -503,6 +599,8 @@ function questionCard(section, question, index) {
     card.append(identificationFields(question, id));
   } else if (question.type === "short_answer") {
     card.append(shortAnswerFields(question, id));
+  } else if (question.type === "matching") {
+    card.append(matchingFields(question, id));
   } else {
     // Insert a blank at the cursor, then show one answer box per blank.
     const textarea = prompt.querySelector("textarea");
@@ -739,6 +837,15 @@ function previewQuestion(question) {
     item.append(el("div", "text-body-secondary small", "○ True   ○ False"));
   } else if (question.type === "identification") {
     item.append(el("div", "blank-line mt-1"));
+  } else if (question.type === "matching") {
+    const columns = el("div", "row g-2 mt-1");
+    const columnA = el("ol", "col-7 mb-0");
+    question.items.forEach((pair) => columnA.append(el("li", "", pair.item)));
+    const columnB = el("ol", "col-5 mb-0");
+    columnB.type = "A";
+    question.choices.forEach((choice) => columnB.append(el("li", "", choice)));
+    columns.append(columnA, columnB);
+    item.append(columns);
   } else if (question.type === "short_answer") {
     // An empty box with room for a few lines, like the "Answer: ____" lines on paper.
     const box = el("div", "border rounded mt-1 p-2 text-body-secondary small", "Answer:");

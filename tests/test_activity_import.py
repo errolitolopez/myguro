@@ -105,3 +105,32 @@ def test_bad_files_and_title(teacher):
 
 def test_teachers_only(admin):
     assert upload(admin, xlsx(GOOD), dry_run=True).status_code in (401, 403)
+
+
+def test_matching_rows(teacher):
+    rows = [
+        ("activity", "Match", "Directions.", None, None, None, None, None, None, None, None, None),
+        question("matching", "Match the country with its capital.",
+                 "Philippines = Manila ; Japan = Tokyo ; Thailand = bangkok", ["Seoul", "tokyo"], points=6),
+    ]
+    data = upload(teacher, xlsx(rows), dry_run=False).get_json()
+    assert data["errors"] == [] and data["imported"] is True
+    activity = teacher.get(f"/api/activities/{data['activity']['id']}").get_json()["activity"]
+    matching = activity["sections"][0]["questions"][0]
+    assert matching["type"] == "matching" and matching["points"] == 6
+    assert matching["choices"] == ["bangkok", "Manila", "Seoul", "Tokyo"]  # sorted, Seoul is an extra
+    assert [(pair["item"], matching["choices"][pair["match"]]) for pair in matching["answer"]] == \
+        [("Philippines", "Manila"), ("Japan", "Tokyo"), ("Thailand", "bangkok")]
+
+
+def test_matching_problems(teacher):
+    rows = [
+        ("activity", "A", "Directions.", None, None, None, None, None, None, None, None, None),
+        question("matching", "No pairs", "Manila"),
+        question("matching", "One pair", "Japan = Tokyo"),
+        question("matching", "Empty side", "Japan = ; Peru = Lima"),
+    ]
+    errors = upload(teacher, xlsx(rows), dry_run=True).get_json()["errors"]
+    pairs = 'Answer must be pairs like "Hinduism = India ; Taoism = China".'
+    assert [(e["row"], e["message"]) for e in errors] == [
+        (3, pairs), (4, "Matching needs at least 2 pairs, split by ;."), (5, pairs)]
