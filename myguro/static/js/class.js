@@ -4,6 +4,7 @@
 const classId = document.querySelector("main").dataset.classId;
 let students = []; // students in this class; the search filters them here
 let selected = null; // the student open in the student popup
+const chosen = new Set(); // ids of the students ticked for a batch remove
 
 const list = document.getElementById("student-list");
 const searchInput = document.getElementById("search");
@@ -128,19 +129,35 @@ function showActivities(activities) {
 
 // --- Student list --------------------------------------------------------------
 
-// One row: name and username on the left, status on the right. Tapping it opens the edit popup.
+// One row: checkbox, name and username on the left, status on the right. Tapping it opens the
+// edit popup. A div (not a button) so it can hold the checkbox.
 // textContent is used (not innerHTML) so names can't inject HTML.
 function studentItem(student) {
-  const row = document.createElement("button");
-  row.type = "button";
+  const row = document.createElement("div");
   row.className =
-    "list-group-item list-group-item-action d-flex justify-content-between align-items-center";
+    "list-group-item list-group-item-action d-flex align-items-center gap-2";
+  row.tabIndex = 0;
+  row.setAttribute("role", "button");
+  row.style.cursor = "pointer";
+
+  const box = document.createElement("input");
+  box.type = "checkbox";
+  box.className = "form-check-input mt-0 flex-shrink-0";
+  box.checked = chosen.has(student.id);
+  box.setAttribute("aria-label", `Select ${student.name}`);
+  box.addEventListener("click", (event) => event.stopPropagation());
+  box.addEventListener("change", () => {
+    if (box.checked) chosen.add(student.id);
+    else chosen.delete(student.id);
+    showSelection();
+  });
 
   const left = document.createElement("div");
+  left.className = "me-auto";
   const name = document.createElement("div");
   name.textContent = student.name;
   left.append(name, studentDetails(student));
-  row.append(left);
+  row.append(box, left);
 
   if (!student.active) {
     const badge = document.createElement("span");
@@ -156,8 +173,52 @@ function studentItem(student) {
   }
 
   row.addEventListener("click", () => openStudent(student));
+  row.addEventListener("keydown", (event) => {
+    if (event.target === row && (event.key === "Enter" || event.key === " ")) {
+      event.preventDefault();
+      openStudent(student);
+    }
+  });
   return row;
 }
+
+// The students the search shows, or all of them.
+function shownStudents() {
+  const query = searchInput.value.trim().toLowerCase();
+  return students.filter(
+    (student) =>
+      student.name.toLowerCase().includes(query) ||
+      student.username.includes(query) ||
+      student.section.toLowerCase().includes(query),
+  );
+}
+
+const selectionBar = document.getElementById("selection-bar");
+const selectAll = document.getElementById("select-all");
+
+// Shows how many are ticked, and keeps the select-all box in step with the shown rows.
+function showSelection() {
+  document.getElementById("selection-text").textContent = `${chosen.size} selected`;
+  selectionBar.classList.toggle("d-none", chosen.size === 0);
+  const shown = shownStudents();
+  const ticked = shown.filter((student) => chosen.has(student.id)).length;
+  selectAll.disabled = shown.length === 0;
+  selectAll.checked = shown.length > 0 && ticked === shown.length;
+  selectAll.indeterminate = ticked > 0 && ticked < shown.length;
+}
+
+selectAll.addEventListener("change", () => {
+  for (const student of shownStudents()) {
+    if (selectAll.checked) chosen.add(student.id);
+    else chosen.delete(student.id);
+  }
+  render();
+});
+
+document.getElementById("selection-clear").addEventListener("click", () => {
+  chosen.clear();
+  render();
+});
 
 function messageItem(text) {
   const div = document.createElement("div");
@@ -168,12 +229,7 @@ function messageItem(text) {
 
 function render() {
   const query = searchInput.value.trim().toLowerCase();
-  const shown = students.filter(
-    (student) =>
-      student.name.toLowerCase().includes(query) ||
-      student.username.includes(query) ||
-      student.section.toLowerCase().includes(query),
-  );
+  const shown = shownStudents();
 
   if (students.length === 0) {
     list.replaceChildren(messageItem("No students yet. Tap + Add students to pick them from the school list."));
@@ -186,6 +242,7 @@ function render() {
   document.getElementById("student-summary").textContent = query
     ? `${shown.length} found`
     : plural(students.length, "student");
+  showSelection();
 }
 
 async function loadClass() {
@@ -205,6 +262,9 @@ async function loadClass() {
     showClass(data.class);
     showActivities(data.activities);
     students = data.students;
+    // Forget ticks for students no longer in the class.
+    const ids = new Set(students.map((student) => student.id));
+    for (const id of chosen) if (!ids.has(id)) chosen.delete(id);
     render();
   } catch {
     showError("class-error", "Cannot reach the server. Check your connection.");
@@ -418,6 +478,43 @@ document.getElementById("confirm-yes").addEventListener("click", async (event) =
     showError("student-error", "Cannot reach the server. Check your connection.");
   } finally {
     event.target.disabled = false;
+  }
+});
+
+// --- Remove several students -------------------------------------------------------
+
+const removeModalElement = document.getElementById("remove-modal");
+const removeModal = bootstrap.Modal.getOrCreateInstance(removeModalElement);
+const removeConfirm = document.getElementById("remove-confirm");
+
+removeModalElement.addEventListener("show.bs.modal", () => {
+  document.getElementById("remove-who").textContent =
+    `Remove ${plural(chosen.size, "student")} from this class?`;
+  hideError("remove-error");
+});
+
+removeConfirm.addEventListener("click", async () => {
+  removeConfirm.disabled = true;
+  hideError("remove-error");
+  try {
+    const response = await apiFetch(`/api/classes/${classId}/students/remove`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ student_ids: [...chosen] }),
+    });
+    if (!response) return;
+    const data = await response.json();
+    if (!response.ok) {
+      showError("remove-error", data.error || "Could not remove the students.");
+      return;
+    }
+    chosen.clear();
+    removeModal.hide();
+    await loadClass();
+  } catch {
+    showError("remove-error", "Cannot reach the server. Check your connection.");
+  } finally {
+    removeConfirm.disabled = false;
   }
 });
 

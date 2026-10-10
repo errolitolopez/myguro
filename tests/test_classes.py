@@ -50,6 +50,19 @@ def test_remove_student(teacher):
     assert len(teacher.get(f"/api/classes/{class_id}").get_json()["students"]) == 5
 
 
+def test_batch_remove_students(teacher, other_teacher):
+    class_id, students = make_class(teacher)
+    ids = [student["id"] for student in students]
+    url = f"/api/classes/{class_id}/students/remove"
+    assert error(teacher.post(url, json={"student_ids": []})) == "Choose at least one student."
+    assert error(teacher.post(url, json={"student_ids": "1"})) == "Choose at least one student."
+    assert other_teacher.post(url, json={"student_ids": ids}).status_code == 404
+    assert teacher.post(url, json={"student_ids": ids[:3] + [999999, "x"]}).get_json()["removed"] == 3
+    assert teacher.post(url, json={"student_ids": ids[:3]}).get_json()["removed"] == 0
+    remaining = teacher.get(f"/api/classes/{class_id}").get_json()["students"]
+    assert [student["id"] for student in remaining] == ids[3:]
+
+
 def test_students_and_admin_cannot_use_classes(admin):
     assert admin.get("/api/classes").status_code == 403
     assert login("jdelacruz01").get("/api/classes").status_code == 403

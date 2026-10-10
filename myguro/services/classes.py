@@ -102,3 +102,18 @@ class ClassService(Service):
             raise NotFoundError("Student not found in this class.")
         self.classes.remove_student(class_id, student_id)
         self.commit()
+
+    def remove_students(self, class_id, data):
+        """Take several students out of the class: student_ids. Ids not in the class are skipped.
+        Returns how many were removed."""
+        self.require(class_id)
+        ids = data.get("student_ids")
+        if not isinstance(ids, list) or not ids:
+            raise ValidationError("Choose at least one student.")
+        removed = 0
+        for student_id in set(ids):
+            if isinstance(student_id, int) and self.classes.has_student(class_id, student_id):
+                self.classes.remove_student(class_id, student_id)
+                removed += 1
+        self.commit()
+        return removed

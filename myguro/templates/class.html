@@ -37,9 +37,19 @@
     </button>
   </div>
 
+  <!-- Shown while students are ticked -->
+  <div id="selection-bar" class="alert alert-primary py-2 d-flex flex-wrap align-items-center gap-2 d-none">
+    <span id="selection-text" class="me-auto"></span>
+    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#remove-modal">
+      Remove from class
+    </button>
+    <button id="selection-clear" type="button" class="btn btn-sm btn-outline-secondary">Clear</button>
+  </div>
+
   <div class="card">
-    <div class="card-header d-flex justify-content-between">
-      <span class="fw-semibold">Students</span>
+    <div class="card-header d-flex align-items-center gap-2">
+      <input id="select-all" type="checkbox" class="form-check-input mt-0" aria-label="Select all shown students">
+      <span class="fw-semibold me-auto">Students</span>
       <span id="student-summary" class="text-body-secondary small"></span>
     </div>
     <div id="student-list" class="list-group list-group-flush">
@@ -86,6 +96,27 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-success" data-bs-dismiss="modal">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Remove the ticked students from this class -->
+<div class="modal fade" id="remove-modal" tabindex="-1" aria-labelledby="remove-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="remove-title">Remove students</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p id="remove-who" class="mb-2"></p>
+        <p class="mb-0 text-body-secondary small">Their accounts are kept.</p>
+        <div id="remove-error" class="alert alert-danger py-2 mt-3 mb-0 d-none" role="alert"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button id="remove-confirm" type="button" class="btn btn-danger">Remove</button>
       </div>
     </div>
   </div>

@@ -65,6 +65,13 @@ def api_add_students(class_id):
     return jsonify(added=service().add_students(class_id, json_body())), 201
 
 
+@bp.post("/api/classes/<int:class_id>/students/remove")
+@role_required_api("teacher")
+def api_remove_students(class_id):
+    """{student_ids}: take several students out of the class at once."""
+    return jsonify(removed=service().remove_students(class_id, json_body()))
+
+
 @bp.delete("/api/classes/<int:class_id>/students/<int:student_id>")
 @role_required_api("teacher")
 def api_remove_student(class_id, student_id):
