@@ -151,7 +151,8 @@ batchForm.addEventListener("submit", async (event) => {
   }
 
   const save = document.getElementById("batch-save");
-  save.disabled = true;
+  const stopLoading = startLoading(save);
+  if (!stopLoading) return;
   try {
     const response = await apiFetch("/api/users/batch", {
       method: "PUT",
@@ -173,7 +174,7 @@ batchForm.addEventListener("submit", async (event) => {
   } catch {
     showError("batch-error", "Cannot reach the server. Check your connection.");
   } finally {
-    save.disabled = false;
+    stopLoading();
   }
 });
 
@@ -195,7 +196,8 @@ document.getElementById("delete-confirm").addEventListener("click", async (event
     status: allMatching.status,
   } } : { user_ids: [...selected] };
   const button = event.target;
-  button.disabled = true;
+  const stopLoading = startLoading(button);
+  if (!stopLoading) return;
   try {
     const response = await apiFetch("/api/users/batch-delete", {
       method: "POST",
@@ -218,7 +220,7 @@ document.getElementById("delete-confirm").addEventListener("click", async (event
   } catch {
     showError("delete-error", "Cannot reach the server. Check your connection.");
   } finally {
-    button.disabled = false;
+    stopLoading();
   }
 });
 
@@ -231,7 +233,8 @@ document.getElementById("batch-activate").addEventListener("click", async (event
   } } : { user_ids: [...selected] };
   const button = event.target;
   const notice = document.getElementById("users-notice");
-  button.disabled = true;
+  const stopLoading = startLoading(button);
+  if (!stopLoading) return;
   try {
     const response = await apiFetch("/api/users/batch-activate", {
       method: "POST",
@@ -253,6 +256,6 @@ document.getElementById("batch-activate").addEventListener("click", async (event
   } catch {
     showError("users-error", "Cannot reach the server. Check your connection.");
   } finally {
-    button.disabled = false;
+    stopLoading();
   }
 });

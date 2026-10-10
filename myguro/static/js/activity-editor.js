@@ -889,7 +889,8 @@ copyButton.addEventListener("click", async () => {
     showEditorError("Save your changes first, then make a copy.");
     return;
   }
-  copyButton.disabled = true;
+  const stopLoading = startLoading(copyButton);
+  if (!stopLoading) return;
   try {
     const response = await apiFetch(`/api/activities/${activityId}/duplicate`, { method: "POST" });
     if (!response) return;
@@ -902,7 +903,7 @@ copyButton.addEventListener("click", async () => {
   } catch {
     showEditorError("Cannot reach the server. Check your connection.");
   } finally {
-    copyButton.disabled = false;
+    stopLoading();
   }
 });
 
@@ -912,7 +913,8 @@ const deleteConfirm = document.getElementById("delete-confirm");
 document.getElementById("delete-button").addEventListener("click", () => deleteConfirm.classList.remove("d-none"));
 document.getElementById("delete-no").addEventListener("click", () => deleteConfirm.classList.add("d-none"));
 document.getElementById("delete-yes").addEventListener("click", async (event) => {
-  event.target.disabled = true;
+  const stopLoading = startLoading(event.currentTarget);
+  if (!stopLoading) return;
   try {
     const response = await apiFetch(`/api/activities/${activityId}`, { method: "DELETE" });
     if (!response) return;
@@ -927,7 +929,7 @@ document.getElementById("delete-yes").addEventListener("click", async (event) =>
   } catch {
     showEditorError("Cannot reach the server. Check your connection.");
   } finally {
-    event.target.disabled = false;
+    stopLoading();
   }
 });
 

@@ -57,6 +57,29 @@ async function apiFetch(url, options) {
   return response;
 }
 
+// Marks a button as busy while its request runs: disabled, with a spinner in front of the label.
+// Returns a function that puts the button back, or null when the button is already busy, so a
+// double click or a repeated Enter sends only one request:
+//   const stopLoading = startLoading(button);
+//   if (!stopLoading) return;
+//   try { ... } finally { stopLoading(); }
+const busyButtons = new WeakSet();
+
+function startLoading(button) {
+  if (busyButtons.has(button)) return null;
+  busyButtons.add(button);
+  const spinner = document.createElement("span");
+  spinner.className = "spinner-border spinner-border-sm me-1";
+  spinner.setAttribute("aria-hidden", "true");
+  button.prepend(spinner);
+  button.disabled = true;
+  return () => {
+    spinner.remove();
+    button.disabled = false;
+    busyButtons.delete(button);
+  };
+}
+
 const logoutButton = document.getElementById("logout-button");
 if (logoutButton) {
   logoutButton.addEventListener("click", async () => {

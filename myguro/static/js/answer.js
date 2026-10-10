@@ -352,7 +352,8 @@ document.getElementById("submit-button").addEventListener("click", () => {
 });
 
 document.getElementById("confirm-submit-button").addEventListener("click", async (event) => {
-  event.target.disabled = true;
+  const stopLoading = startLoading(event.currentTarget);
+  if (!stopLoading) return;
   hideError("answer-error");
   clearTimeout(saveTimer);
   if (saving) await saving;
@@ -383,14 +384,15 @@ document.getElementById("confirm-submit-button").addEventListener("click", async
     submitModal.hide();
     showError("answer-error", "Cannot reach the server. Your answers are kept here; try again.");
   } finally {
-    event.target.disabled = false;
+    stopLoading();
   }
 });
 
 // --- Try again ---------------------------------------------------------------------------
 
 document.getElementById("retry-button").addEventListener("click", async (event) => {
-  event.target.disabled = true;
+  const stopLoading = startLoading(event.currentTarget);
+  if (!stopLoading) return;
   hideError("answer-error");
   try {
     const response = await apiFetch(`/api/my-activities/${assignmentId}/retry`, { method: "POST" });
@@ -407,7 +409,7 @@ document.getElementById("retry-button").addEventListener("click", async (event) 
   } catch {
     showError("answer-error", "Cannot reach the server. Check your connection.");
   } finally {
-    event.target.disabled = false;
+    stopLoading();
   }
 });
 

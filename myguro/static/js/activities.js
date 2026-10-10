@@ -94,7 +94,8 @@ form.addEventListener("submit", async (event) => {
     return;
   }
 
-  createButton.disabled = true;
+  const stopLoading = startLoading(createButton);
+  if (!stopLoading) return;
   try {
     const response = await apiFetch("/api/activities", {
       method: "POST",
@@ -111,7 +112,7 @@ form.addEventListener("submit", async (event) => {
   } catch {
     showError("new-activity-error", "Cannot reach the server. Check your connection.");
   } finally {
-    createButton.disabled = false;
+    stopLoading();
   }
 });
 

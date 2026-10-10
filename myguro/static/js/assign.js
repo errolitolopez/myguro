@@ -173,7 +173,8 @@ assignSaveButton.addEventListener("click", async () => {
       student_ids: [...item.draft.student_ids],
     }));
 
-  assignSaveButton.disabled = true;
+  const stopLoading = startLoading(assignSaveButton);
+  if (!stopLoading) return;
   try {
     const response = await apiFetch(`/api/activities/${activityId}/assignments`, {
       method: "PUT",
@@ -192,7 +193,7 @@ assignSaveButton.addEventListener("click", async () => {
   } catch {
     showError("assign-error", "Cannot reach the server. Check your connection.");
   } finally {
-    assignSaveButton.disabled = false;
+    stopLoading();
   }
 });
 

@@ -65,7 +65,8 @@ form.addEventListener("submit", async (event) => {
     return;
   }
 
-  saveButton.disabled = true;
+  const stopLoading = startLoading(saveButton);
+  if (!stopLoading) return;
   try {
     const response = await apiFetch("/api/classes", {
       method: "POST",
@@ -83,7 +84,7 @@ form.addEventListener("submit", async (event) => {
   } catch {
     showError("class-form-error", "Cannot reach the server. Check your connection.");
   } finally {
-    saveButton.disabled = false;
+    stopLoading();
   }
 });
 

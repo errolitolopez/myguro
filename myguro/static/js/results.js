@@ -138,7 +138,8 @@ async function loadResults() {
 }
 
 document.getElementById("release-button").addEventListener("click", async (event) => {
-  event.target.disabled = true;
+  const stopLoading = startLoading(event.currentTarget);
+  if (!stopLoading) return;
   hideError("results-error");
   try {
     const response = await apiFetch(`/api/assignments/${assignmentId}/release`, {
@@ -156,7 +157,7 @@ document.getElementById("release-button").addEventListener("click", async (event
   } catch {
     showError("results-error", "Cannot reach the server. Check your connection.");
   } finally {
-    event.target.disabled = false;
+    stopLoading();
   }
 });
 
@@ -453,7 +454,8 @@ document.getElementById("reopen-no").addEventListener("click", () => {
   document.getElementById("reopen-confirm").classList.add("d-none");
 });
 document.getElementById("reopen-yes").addEventListener("click", async (event) => {
-  event.target.disabled = true;
+  const stopLoading = startLoading(event.currentTarget);
+  if (!stopLoading) return;
   hideError("student-error");
   try {
     const response = await apiFetch(`/api/assignments/${assignmentId}/students/${openStudentId}/reopen`,
@@ -469,7 +471,7 @@ document.getElementById("reopen-yes").addEventListener("click", async (event) =>
   } catch {
     showError("student-error", "Cannot reach the server. Check your connection.");
   } finally {
-    event.target.disabled = false;
+    stopLoading();
   }
 });
 

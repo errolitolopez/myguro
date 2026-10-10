@@ -239,7 +239,8 @@ addForm.addEventListener("submit", async (event) => {
     return;
   }
 
-  addButton.disabled = true;
+  const stopLoading = startLoading(addButton);
+  if (!stopLoading) return;
   try {
     const response = await apiFetch("/api/users", {
       method: "POST",
@@ -259,7 +260,7 @@ addForm.addEventListener("submit", async (event) => {
   } catch {
     showError("add-user-error", "Cannot reach the server. Check your connection.");
   } finally {
-    addButton.disabled = false;
+    stopLoading();
   }
 });
 
@@ -321,9 +322,10 @@ document.getElementById("edit-name-form").addEventListener("submit", async (even
     showError("edit-user-error", nameProblem);
     return;
   }
-  editNameButton.disabled = true;
+  const stopLoading = startLoading(editNameButton);
+  if (!stopLoading) return;
   const data = await updateUser({ ...name, ...gradeSectionValues("edit") });
-  editNameButton.disabled = false;
+  stopLoading();
   if (data) editModal.hide();
 });
 
@@ -353,9 +355,10 @@ resetButton.addEventListener("click", () => {
 
 activeButton.addEventListener("click", () => {
   if (!editing.active) {
-    activeButton.disabled = true;
+    const stopLoading = startLoading(activeButton);
+    if (!stopLoading) return;
     updateUser({ active: true }).then((data) => {
-      activeButton.disabled = false;
+      stopLoading();
       if (data) editModal.hide();
     });
     return;
@@ -374,9 +377,10 @@ document.getElementById("confirm-no").addEventListener("click", () => {
   confirmBox.classList.add("d-none");
 });
 document.getElementById("confirm-yes").addEventListener("click", async (event) => {
-  event.target.disabled = true;
+  const stopLoading = startLoading(event.currentTarget);
+  if (!stopLoading) return;
   await confirmAction();
-  event.target.disabled = false;
+  stopLoading();
   confirmBox.classList.add("d-none");
 });
 

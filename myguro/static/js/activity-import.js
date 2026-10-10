@@ -65,7 +65,8 @@ sheetCheckButton.addEventListener("click", async () => {
     showError("import-sheet-error", "Type the title of the activity.");
     return;
   }
-  sheetCheckButton.disabled = true;
+  const stopLoading = startLoading(sheetCheckButton);
+  if (!stopLoading) return;
   try {
     const data = await sendSheet(true);
     if (!data) return;
@@ -85,13 +86,14 @@ sheetCheckButton.addEventListener("click", async () => {
   } catch {
     showError("import-sheet-error", "Cannot reach the server. Check your connection.");
   } finally {
-    sheetCheckButton.disabled = false;
+    stopLoading();
   }
 });
 
 sheetConfirmButton.addEventListener("click", async () => {
   hideError("import-sheet-error");
-  sheetConfirmButton.disabled = true;
+  const stopLoading = startLoading(sheetConfirmButton);
+  if (!stopLoading) return;
   try {
     const data = await sendSheet(false);
     if (!data) return;
@@ -105,7 +107,7 @@ sheetConfirmButton.addEventListener("click", async () => {
   } catch {
     showError("import-sheet-error", "Cannot reach the server. Check your connection.");
   } finally {
-    sheetConfirmButton.disabled = false;
+    stopLoading();
   }
 });
 

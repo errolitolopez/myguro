@@ -65,7 +65,8 @@ classForm.addEventListener("submit", async (event) => {
     classSectionInput.focus();
     return;
   }
-  classSaveButton.disabled = true;
+  const stopLoading = startLoading(classSaveButton);
+  if (!stopLoading) return;
   try {
     const response = await apiFetch(`/api/classes/${classId}`, {
       method: "PUT",
@@ -83,7 +84,7 @@ classForm.addEventListener("submit", async (event) => {
   } catch {
     showError("class-form-error", "Cannot reach the server. Check your connection.");
   } finally {
-    classSaveButton.disabled = false;
+    stopLoading();
   }
 });
 
@@ -404,9 +405,10 @@ async function addStudent(student, button) {
 
 // Adds everyone shown who isn't in the class yet, e.g. a whole section.
 addAllButton.addEventListener("click", async () => {
-  addAllButton.disabled = true;
+  const stopLoading = startLoading(addAllButton);
+  if (!stopLoading) return;
   if (await sendAdd(addable.map((student) => student.id))) await searchStudents();
-  addAllButton.disabled = false;
+  stopLoading();
 });
 
 // Search after a short pause in typing; filters search right away.
@@ -462,7 +464,8 @@ document.getElementById("confirm-no").addEventListener("click", () => {
 });
 
 document.getElementById("confirm-yes").addEventListener("click", async (event) => {
-  event.target.disabled = true;
+  const stopLoading = startLoading(event.currentTarget);
+  if (!stopLoading) return;
   hideError("student-error");
   try {
     const response = await apiFetch(`/api/classes/${classId}/students/${selected.id}`, { method: "DELETE" });
@@ -477,7 +480,7 @@ document.getElementById("confirm-yes").addEventListener("click", async (event) =
   } catch {
     showError("student-error", "Cannot reach the server. Check your connection.");
   } finally {
-    event.target.disabled = false;
+    stopLoading();
   }
 });
 
@@ -494,7 +497,8 @@ removeModalElement.addEventListener("show.bs.modal", () => {
 });
 
 removeConfirm.addEventListener("click", async () => {
-  removeConfirm.disabled = true;
+  const stopLoading = startLoading(removeConfirm);
+  if (!stopLoading) return;
   hideError("remove-error");
   try {
     const response = await apiFetch(`/api/classes/${classId}/students/remove`, {
@@ -514,7 +518,7 @@ removeConfirm.addEventListener("click", async () => {
   } catch {
     showError("remove-error", "Cannot reach the server. Check your connection.");
   } finally {
-    removeConfirm.disabled = false;
+    stopLoading();
   }
 });
 
