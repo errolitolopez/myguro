@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% set noun = role %}
+{% set nouns = "Teachers" if role == "teacher" else "Students" %}
+
+{% block title %}{{ nouns }} · myguro{% endblock %}
+
+{% block content %}
+{% include "_navbar.html" %}
+
+<main class="container py-3" data-role="{{ role }}">
+  <div id="users-error" class="alert alert-danger d-none" role="alert"></div>
+
+  <div class="d-flex gap-2 mb-3">
+    <input id="search" type="search" class="form-control"
+           placeholder="Search name, username{{ ' or section' if role == 'student' }}"
+           aria-label="Search {{ nouns|lower }}" autocomplete="off">
+    {% if role == "student" %}
+    <select id="grade-filter" class="form-select w-auto" aria-label="Filter by grade">
+      <option value="*">All grades</option>
+      {% for grade in GRADES %}<option>{{ grade }}</option>{% endfor %}
+      <option value="">No grade</option>
+    </select>
+    {% endif %}
+    <button class="btn btn-success text-nowrap" data-bs-toggle="modal" data-bs-target="#add-user-modal">
+      + Add {{ noun }}
+    </button>
+  </div>
+
+  <div class="card">
+    <div class="card-header d-flex justify-content-between">
+      <span class="fw-semibold">{{ nouns }}</span>
+      <span id="user-summary" class="text-body-secondary small"></span>
+    </div>
+    <div id="user-list" class="list-group list-group-flush">
+      <div class="list-group-item text-body-secondary">Loading...</div>
+    </div>
+  </div>
+</main>
+
+<!-- Add account form (opens as a popup) -->
+<div class="modal fade" id="add-user-modal" tabindex="-1" aria-labelledby="add-user-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form id="add-user-form" class="modal-content" novalidate>
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="add-user-title">Add {{ noun }}</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="add-name" class="form-label">Full name</label>
+          <input id="add-name" class="form-control" maxlength="100" autocomplete="off"
+                 placeholder="{{ 'Maria Santos' if role == 'teacher' else 'Juan Dela Cruz' }}" required>
+        </div>
+        <div class="mb-3">
+          <label for="add-username" class="form-label">Username</label>
+          <input id="add-username" class="form-control" maxlength="30" autocomplete="off"
+                 autocapitalize="none" spellcheck="false" placeholder="{{ 'msantos' if role == 'teacher' else 'jdelacruz' }}" required>
+          <div class="form-text">Used to log in. Letters, numbers, dots, dashes or underscores.</div>
+        </div>
+        {% if role == "student" %}
+        {% with prefix="add" %}{% include "_grade_section_fields.html" %}{% endwith %}
+        {% endif %}
+        <div class="mb-3">
+          <label for="add-password" class="form-label">
+            Temporary password <span class="text-body-secondary">(optional)</span>
+          </label>
+          <input id="add-password" class="form-control font-monospace" autocomplete="off"
+                 spellcheck="false" placeholder="Leave empty to make one">
+          <div class="form-text">At least 8 characters. The {{ noun }} changes it on first login.</div>
+        </div>
+        <div id="add-user-error" class="alert alert-danger py-2 mb-0 d-none" role="alert"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button id="add-user-button" type="submit" class="btn btn-success">Create account</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit account (opens when a person is tapped) -->
+<div class="modal fade" id="edit-user-modal" tabindex="-1" aria-labelledby="edit-user-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="edit-user-title">{{ noun|capitalize }}</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="edit-name-form" class="mb-3" novalidate>
+          <div class="mb-3">
+            <label for="edit-name" class="form-label">Full name</label>
+            <input id="edit-name" class="form-control" maxlength="100" autocomplete="off" required>
+            <div class="form-text">Username: <span id="edit-username" class="font-monospace"></span></div>
+          </div>
+          {% if role == "student" %}
+          {% with prefix="edit" %}{% include "_grade_section_fields.html" %}{% endwith %}
+          {% endif %}
+          <button id="edit-name-button" type="submit" class="btn btn-outline-success w-100">Save changes</button>
+        </form>
+        <hr>
+
+        <div class="d-grid gap-2">
+          <button id="reset-button" type="button" class="btn btn-outline-warning">Reset password</button>
+          <button id="active-button" type="button" class="btn btn-outline-danger">Deactivate</button>
+        </div>
+
+        <!-- Asks before resetting or deactivating -->
+        <div id="confirm-box" class="alert alert-warning mt-3 mb-0 d-none">
+          <p id="confirm-text" class="mb-2"></p>
+          <div class="d-flex gap-2 justify-content-end">
+            <button id="confirm-no" type="button" class="btn btn-sm btn-outline-secondary">Cancel</button>
+            <button id="confirm-yes" type="button" class="btn btn-sm btn-warning">Yes</button>
+          </div>
+        </div>
+
+        <div id="edit-user-error" class="alert alert-danger py-2 mt-3 mb-0 d-none" role="alert"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% include "_login_details_modal.html" %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/users.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Activities · myguro{% endblock %}
+
+{% block content %}
+{% include "_navbar.html" %}
+
+<main class="container py-3">
+  <div id="activities-error" class="alert alert-danger d-none" role="alert"></div>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Learning activity sheets</h1>
+    <button class="btn btn-success text-nowrap" data-bs-toggle="modal" data-bs-target="#new-activity-modal">
+      + New activity
+    </button>
+  </div>
+
+  <input id="search" type="search" class="form-control mb-3" placeholder="Search title or subject"
+         aria-label="Search activities" autocomplete="off">
+
+  <div id="activity-list" class="list-group">
+    <div class="list-group-item text-body-secondary">Loading...</div>
+  </div>
+</main>
+
+<!-- New activity: title + subject, then the editor opens -->
+<div class="modal fade" id="new-activity-modal" tabindex="-1" aria-labelledby="new-activity-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form id="new-activity-form" class="modal-content" novalidate>
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="new-activity-title">New activity</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="new-title" class="form-label">Title</label>
+          <input id="new-title" class="form-control" maxlength="150" autocomplete="off"
+                 placeholder="The Parts of a Cell" required>
+        </div>
+        <div class="mb-3">
+          <label for="new-subject" class="form-label">Subject <span class="text-body-secondary">(optional)</span></label>
+          <input id="new-subject" class="form-control" maxlength="100" autocomplete="off" placeholder="Science">
+        </div>
+        <div id="new-activity-error" class="alert alert-danger py-2 mb-0 d-none" role="alert"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button id="new-activity-button" type="submit" class="btn btn-success">Create and edit</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/activities.js') }}"></script>
+{% endblock %}

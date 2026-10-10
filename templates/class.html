@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Class · myguro{% endblock %}
+
+{% block content %}
+{% include "_navbar.html" %}
+
+<main class="container py-3" data-class-id="{{ class_id }}">
+  <div id="class-error" class="alert alert-danger d-none" role="alert"></div>
+
+  <a href="{{ url_for('classes_page') }}" class="small">‹ My classes</a>
+  <div class="d-flex justify-content-between align-items-start gap-2 mt-1 mb-3">
+    <div>
+      <h1 class="h4 mb-0" id="class-name-heading">Loading...</h1>
+      <div class="text-body-secondary" id="class-subject-heading"></div>
+    </div>
+    <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#class-modal">
+      Edit
+    </button>
+  </div>
+
+  <div class="d-flex gap-2 mb-3">
+    <input id="search" type="search" class="form-control" placeholder="Search name, username or section"
+           aria-label="Search students" autocomplete="off">
+    <button class="btn btn-success text-nowrap" data-bs-toggle="modal" data-bs-target="#add-student-modal">
+      + Add students
+    </button>
+  </div>
+
+  <div class="card">
+    <div class="card-header d-flex justify-content-between">
+      <span class="fw-semibold">Students</span>
+      <span id="student-summary" class="text-body-secondary small"></span>
+    </div>
+    <div id="student-list" class="list-group list-group-flush">
+      <div class="list-group-item text-body-secondary">Loading...</div>
+    </div>
+  </div>
+</main>
+
+{% include "_class_modal.html" %}
+
+<!-- Add students: search the school's student list (accounts are made by the admin) -->
+<div class="modal fade" id="add-student-modal" tabindex="-1" aria-labelledby="add-student-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="add-student-title">Add students</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <input id="student-search" type="search" class="form-control mb-2" autocomplete="off"
+               placeholder="Search name, username or section" aria-label="Search students">
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <select id="grade-filter" class="form-select" aria-label="Filter by grade">
+              <option value="">All grades</option>
+              {% for grade in GRADES %}<option>{{ grade }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="col-6">
+            <select id="section-filter" class="form-select" aria-label="Filter by section">
+              <option value="*">All sections</option>
+            </select>
+          </div>
+        </div>
+        <div id="add-student-error" class="alert alert-danger py-2 d-none" role="alert"></div>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span id="result-summary" class="small text-body-secondary"></span>
+          <button id="add-all-button" type="button" class="btn btn-sm btn-success d-none">Add all</button>
+        </div>
+        <div id="search-results" class="list-group"></div>
+        <p class="small text-body-secondary mt-3 mb-0">
+          Student not in the list? Ask the admin to create their account.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- A student in this class (opens when a student is tapped) -->
+<div class="modal fade" id="student-modal" tabindex="-1" aria-labelledby="student-modal-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="student-modal-title">Student</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-1">Username: <span id="student-username" class="font-monospace"></span></p>
+        <p class="mb-3 text-body-secondary" id="student-grade-section"></p>
+        <div id="confirm-box" class="d-grid gap-2">
+          <button id="remove-button" type="button" class="btn btn-outline-danger">Remove from this class</button>
+        </div>
+        <div id="confirm-remove" class="alert alert-warning mb-0 d-none">
+          <p id="confirm-text" class="mb-2"></p>
+          <div class="d-flex gap-2 justify-content-end">
+            <button id="confirm-no" type="button" class="btn btn-sm btn-outline-secondary">Cancel</button>
+            <button id="confirm-yes" type="button" class="btn btn-sm btn-danger">Remove</button>
+          </div>
+        </div>
+        <p class="small text-body-secondary mt-3 mb-0">
+          Forgot their password, or their name is wrong? Ask the admin.
+        </p>
+        <div id="student-error" class="alert alert-danger py-2 mt-3 mb-0 d-none" role="alert"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/class.js') }}"></script>
+{% endblock %}

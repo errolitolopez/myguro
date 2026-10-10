@@ -12,6 +12,17 @@ function showError(message) {
   errorBox.classList.remove("d-none");
 }
 
+// Asks the browser to show its "Save password?" prompt (Chrome, Edge). Other browsers,
+// or pages not on https/localhost, skip this and rely on their own detection.
+async function offerToSavePassword(username, password) {
+  if (!window.PasswordCredential) return;
+  try {
+    await navigator.credentials.store(new PasswordCredential({ id: username, password }));
+  } catch {
+    // Saving the password is only a convenience; never block the login.
+  }
+}
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   errorBox.classList.add("d-none");
@@ -33,15 +44,19 @@ form.addEventListener("submit", async (event) => {
     const data = await response.json();
 
     if (response.ok) {
+      // A temporary password isn't worth saving: it is replaced right away on the change password page.
+      if (!data.must_change_password) await offerToSavePassword(username, password);
       window.location.href = data.must_change_password ? "/change-password" : "/dashboard";
       return;
     }
+    // Only clear the password after a failed login: on success the browser
+    // reads it from the field to offer "Save password?".
+    passwordInput.value = "";
+    passwordInput.focus();
     showError(data.error || "Login failed.");
   } catch {
     showError("Cannot reach the server. Check your connection.");
   } finally {
     button.disabled = false;
-    passwordInput.value = "";
-    passwordInput.focus();
   }
 });

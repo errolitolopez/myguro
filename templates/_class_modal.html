@@ -1,0 +1,27 @@
+<!-- New class / edit class form (opens as a popup) -->
+<div class="modal fade" id="class-modal" tabindex="-1" aria-labelledby="class-modal-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form id="class-form" class="modal-content" novalidate>
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="class-modal-title">New class</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="class-name" class="form-label">Class name</label>
+          <input id="class-name" class="form-control" maxlength="100" autocomplete="off"
+                 placeholder="Grade 6 - Rizal" required>
+        </div>
+        <div class="mb-3">
+          <label for="class-subject" class="form-label">Subject <span class="text-body-secondary">(optional)</span></label>
+          <input id="class-subject" class="form-control" maxlength="100" autocomplete="off" placeholder="Science">
+        </div>
+        <div id="class-form-error" class="alert alert-danger py-2 mb-0 d-none" role="alert"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button id="class-save-button" type="submit" class="btn btn-success">Save</button>
+      </div>
+    </form>
+  </div>
+</div>

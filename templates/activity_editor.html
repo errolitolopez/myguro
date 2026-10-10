@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Edit activity · myguro{% endblock %}
+
+{% block head %}
+<style>
+  /* Keep the teacher's line breaks in the preview, like students will see them. */
+  .preserve-lines { white-space: pre-wrap; }
+  /* A blank in a fill-in-the-blank question, in the preview */
+  .blank-line { display: inline-block; min-width: 6em; border-bottom: 1px solid currentColor; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "_navbar.html" %}
+
+<main class="container py-3 pb-5" style="max-width: 860px;" data-activity-id="{{ activity_id }}">
+  <a href="{{ url_for('activities_page') }}" class="small">‹ My activities</a>
+
+  <div id="editor-error" class="alert alert-danger mt-2 d-none" role="alert"></div>
+
+  <!-- Title and subject -->
+  <div class="card mt-2 mb-4">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <label for="activity-title" class="form-label mb-0 fw-semibold">Title</label>
+        <span id="status-badge" class="badge text-bg-secondary">Draft</span>
+      </div>
+      <input id="activity-title" class="form-control form-control-lg mb-3" maxlength="150" autocomplete="off">
+      <label for="activity-subject" class="form-label">Subject <span class="text-body-secondary">(optional)</span></label>
+      <input id="activity-subject" class="form-control" maxlength="100" autocomplete="off" placeholder="Science">
+    </div>
+  </div>
+
+  <!-- Sections: text only (title + description) or activity (title + directions + questions) -->
+  <h2 class="h5 mb-1">Sections</h2>
+  <p class="text-body-secondary small mb-3">
+    Build the sheet part by part, like <em>I. Title of the Lesson</em>, <em>III. Pre-test</em>,
+    <em>VI. Let's Learn</em>. A <strong>text</strong> section is for reading; an <strong>activity</strong>
+    section has directions and questions.
+  </p>
+  <div id="section-list" class="d-grid gap-3 mb-3"></div>
+  <p id="no-sections" class="text-body-secondary d-none">No sections yet.</p>
+  <div class="row g-2 mb-5">
+    <div class="col-6">
+      <button id="add-text-button" type="button" class="btn btn-outline-success w-100">+ Text section</button>
+    </div>
+    <div class="col-6">
+      <button id="add-activity-button" type="button" class="btn btn-outline-primary w-100">+ Activity section</button>
+    </div>
+  </div>
+
+  <!-- Delete (asks first) -->
+  <div class="mb-5">
+    <button id="delete-button" type="button" class="btn btn-link link-danger p-0">Delete this activity</button>
+    <div id="delete-confirm" class="alert alert-danger mt-2 d-none">
+      <p class="mb-2">Delete this activity with all its sections and questions? This can't be undone.</p>
+      <div class="d-flex gap-2 justify-content-end">
+        <button id="delete-no" type="button" class="btn btn-sm btn-outline-secondary">Cancel</button>
+        <button id="delete-yes" type="button" class="btn btn-sm btn-danger">Delete</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Save bar, always visible at the bottom -->
+<div class="position-fixed bottom-0 start-0 end-0 bg-body border-top py-2">
+  <div class="container d-flex justify-content-between align-items-center gap-2" style="max-width: 860px;">
+    <div>
+      <div id="save-status" class="small text-body-secondary">Loading...</div>
+      <div id="totals" class="small text-body-secondary"></div>
+    </div>
+    <div class="d-flex gap-2">
+      <button id="preview-button" type="button" class="btn btn-outline-secondary">Preview</button>
+      <button id="save-button" type="button" class="btn btn-success" disabled>Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Preview: how students will see the sheet (without the answers) -->
+<div class="modal fade" id="preview-modal" tabindex="-1" aria-labelledby="preview-title" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title fs-5" id="preview-title"></h2>
+          <div class="small text-body-secondary" id="preview-subject"></div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="preview-body"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/activity-editor.js') }}"></script>
+{% endblock %}

@@ -12,11 +12,11 @@
   {% if user.role == "admin" %}
   <div class="row g-3">
     <div class="col-6 col-md-3">
-      <div class="card h-100"><div class="card-body">
+      <a class="card h-100 text-decoration-none" href="{{ url_for('teachers_page') }}"><div class="card-body">
         <div class="text-body-secondary small">Teachers</div>
         <div class="fs-3 fw-semibold" id="stat-teachers">–</div>
         <div class="text-body-secondary small" id="stat-active-teachers"></div>
-      </div></div>
+      </div></a>
     </div>
     <div class="col-6 col-md-3">
       <div class="card h-100"><div class="card-body">
@@ -25,10 +25,10 @@
       </div></div>
     </div>
     <div class="col-6 col-md-3">
-      <div class="card h-100"><div class="card-body">
+      <a class="card h-100 text-decoration-none" href="{{ url_for('students_page') }}"><div class="card-body">
         <div class="text-body-secondary small">Students</div>
         <div class="fs-3 fw-semibold" id="stat-students">–</div>
-      </div></div>
+      </div></a>
     </div>
     <div class="col-6 col-md-3">
       <div class="card h-100"><div class="card-body">
@@ -37,6 +37,25 @@
       </div></div>
     </div>
   </div>
+  {% elif user.role == "student" %}
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="card h-100"><div class="card-body">
+        <div class="text-body-secondary small">Classes</div>
+        <div class="fs-3 fw-semibold" id="stat-classes">–</div>
+      </div></div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card h-100"><div class="card-body">
+        <div class="text-body-secondary small">Activities answered</div>
+        <div class="fs-3 fw-semibold" id="stat-submitted">–</div>
+      </div></div>
+    </div>
+  </div>
+
+  <h2 class="h5">My classes</h2>
+  <div id="class-list" class="list-group"></div>
+  <p id="no-classes" class="text-body-secondary d-none">You're not in a class yet. Ask your teacher to add you.</p>
   {% else %}
   <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
@@ -46,16 +65,16 @@
       </div></div>
     </div>
     <div class="col-6 col-md-3">
-      <div class="card h-100"><div class="card-body">
+      <a class="card h-100 text-decoration-none" href="{{ url_for('activities_page') }}"><div class="card-body">
         <div class="text-body-secondary small">Published activities</div>
         <div class="fs-3 fw-semibold" id="stat-published">–</div>
-      </div></div>
+      </div></a>
     </div>
     <div class="col-6 col-md-3">
-      <div class="card h-100"><div class="card-body">
+      <a class="card h-100 text-decoration-none" href="{{ url_for('activities_page') }}"><div class="card-body">
         <div class="text-body-secondary small">Drafts</div>
         <div class="fs-3 fw-semibold" id="stat-drafts">–</div>
-      </div></div>
+      </div></a>
     </div>
     <div class="col-6 col-md-3">
       <div class="card h-100"><div class="card-body">
@@ -65,9 +84,14 @@
     </div>
   </div>
 
-  <h2 class="h5">My classes</h2>
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h2 class="h5 mb-0">My classes</h2>
+    <a class="btn btn-sm btn-outline-success" href="{{ url_for('classes_page') }}">Manage classes</a>
+  </div>
   <div id="class-list" class="list-group"></div>
-  <p id="no-classes" class="text-body-secondary d-none">No classes yet.</p>
+  <p id="no-classes" class="text-body-secondary d-none">
+    No classes yet. <a href="{{ url_for('classes_page') }}">Create your first class</a>.
+  </p>
   {% endif %}
 </main>
 {% endblock %}

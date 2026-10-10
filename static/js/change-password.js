@@ -4,12 +4,23 @@ const form = document.getElementById("password-form");
 const currentInput = document.getElementById("current-password");
 const newInput = document.getElementById("new-password");
 const confirmInput = document.getElementById("confirm-password");
+const usernameInput = document.querySelector('input[name="username"]');
 const errorBox = document.getElementById("password-error");
 const button = document.getElementById("password-button");
 
 function showError(message) {
   errorBox.textContent = message;
   errorBox.classList.remove("d-none");
+}
+
+// Asks the browser to save (or update) the password for this username. See login.js.
+async function offerToSavePassword(username, password) {
+  if (!window.PasswordCredential) return;
+  try {
+    await navigator.credentials.store(new PasswordCredential({ id: username, password }));
+  } catch {
+    // Saving the password is only a convenience; never block going to the dashboard.
+  }
 }
 
 form.addEventListener("submit", async (event) => {
@@ -44,6 +55,7 @@ form.addEventListener("submit", async (event) => {
       return;
     }
     if (response.ok) {
+      await offerToSavePassword(usernameInput.value, newInput.value);
       window.location.href = "/dashboard";
       return;
     }

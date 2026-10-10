@@ -1,0 +1,25 @@
+<!-- Shows the login details once, after creating an account or resetting a password -->
+<div class="modal fade" id="login-details-modal" tabindex="-1" aria-labelledby="login-details-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="login-details-title">Login details</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Give these to <strong id="details-name"></strong>. The password is shown only now.</p>
+        <dl class="row mb-2">
+          <dt class="col-4">Username</dt>
+          <dd class="col-8 font-monospace" id="details-username"></dd>
+          <dt class="col-4">Password</dt>
+          <dd class="col-8 font-monospace fs-5" id="details-password"></dd>
+        </dl>
+        <p class="small text-body-secondary mb-0">They will be asked to choose their own password when they log in.</p>
+      </div>
+      <div class="modal-footer">
+        <button id="copy-details-button" type="button" class="btn btn-outline-secondary">Copy</button>
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal">Done</button>
+      </div>
+    </div>
+  </div>
+</div>

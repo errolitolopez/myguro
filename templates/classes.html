@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Classes · myguro{% endblock %}
+
+{% block content %}
+{% include "_navbar.html" %}
+
+<main class="container py-3">
+  <div id="classes-error" class="alert alert-danger d-none" role="alert"></div>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">My classes</h1>
+    <button class="btn btn-success text-nowrap" data-bs-toggle="modal" data-bs-target="#class-modal">
+      + New class
+    </button>
+  </div>
+
+  <div id="class-list" class="list-group">
+    <div class="list-group-item text-body-secondary">Loading...</div>
+  </div>
+</main>
+
+{% include "_class_modal.html" %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/classes.js') }}"></script>
+{% endblock %}
