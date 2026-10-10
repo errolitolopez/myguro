@@ -1,0 +1,18 @@
+<nav class="navbar bg-success" data-bs-theme="dark">
+  <div class="container">
+    <span class="navbar-brand">myguro</span>
+    <div class="d-flex align-items-center gap-2">
+      <span class="navbar-text small d-none d-sm-inline">{{ user.name }} ({{ user.role }})</span>
+      <a class="btn btn-outline-light btn-sm" href="{{ url_for('change_password_page') }}">Password</a>
+      <button id="logout-button" class="btn btn-outline-light btn-sm">Logout</button>
+    </div>
+  </div>
+  <div class="container">
+    <ul class="nav nav-underline">
+      <li class="nav-item">
+        <a class="nav-link {{ 'active' if request.endpoint == 'dashboard_page' }}"
+           href="{{ url_for('dashboard_page') }}">Dashboard</a>
+      </li>
+    </ul>
+  </div>
+</nav>

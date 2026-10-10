@@ -1,0 +1,12 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Private data: database and secret key
+instance/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store

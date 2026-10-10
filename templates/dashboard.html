@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard · myguro{% endblock %}
+
+{% block content %}
+{% include "_navbar.html" %}
+
+<main class="container py-4">
+  <h1 class="h4 mb-3">Hi, {{ user.name }}!</h1>
+  <div id="dashboard-error" class="alert alert-danger d-none" role="alert"></div>
+
+  {% if user.role == "admin" %}
+  <div class="row g-3">
+    <div class="col-6 col-md-3">
+      <div class="card h-100"><div class="card-body">
+        <div class="text-body-secondary small">Teachers</div>
+        <div class="fs-3 fw-semibold" id="stat-teachers">–</div>
+        <div class="text-body-secondary small" id="stat-active-teachers"></div>
+      </div></div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card h-100"><div class="card-body">
+        <div class="text-body-secondary small">Classes</div>
+        <div class="fs-3 fw-semibold" id="stat-classes">–</div>
+      </div></div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card h-100"><div class="card-body">
+        <div class="text-body-secondary small">Students</div>
+        <div class="fs-3 fw-semibold" id="stat-students">–</div>
+      </div></div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card h-100"><div class="card-body">
+        <div class="text-body-secondary small">Activities</div>
+        <div class="fs-3 fw-semibold" id="stat-activities">–</div>
+      </div></div>
+    </div>
+  </div>
+  {% else %}
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="card h-100"><div class="card-body">
+        <div class="text-body-secondary small">Students</div>
+        <div class="fs-3 fw-semibold" id="stat-students">–</div>
+      </div></div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card h-100"><div class="card-body">
+        <div class="text-body-secondary small">Published activities</div>
+        <div class="fs-3 fw-semibold" id="stat-published">–</div>
+      </div></div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card h-100"><div class="card-body">
+        <div class="text-body-secondary small">Drafts</div>
+        <div class="fs-3 fw-semibold" id="stat-drafts">–</div>
+      </div></div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card h-100"><div class="card-body">
+        <div class="text-body-secondary small">Answers submitted</div>
+        <div class="fs-3 fw-semibold" id="stat-submissions">–</div>
+      </div></div>
+    </div>
+  </div>
+
+  <h2 class="h5">My classes</h2>
+  <div id="class-list" class="list-group"></div>
+  <p id="no-classes" class="text-body-secondary d-none">No classes yet.</p>
+  {% endif %}
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
