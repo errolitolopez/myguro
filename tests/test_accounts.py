@@ -155,3 +155,16 @@ def test_advanced_filter_full_name_grade_section(admin):
     assert admin.get("/api/users?role=student&grade=Grade+9&section=stem").get_json()["total"] == 0
     # % is not a wildcard in the section filter either
     assert admin.get("/api/users?role=student&section=%25").get_json()["total"] == 0
+
+
+def test_status_filter(admin):
+    everyone = admin.get("/api/users?role=student&per_page=100").get_json()
+    counts = {}
+    for status in ("active", "pending", "deactivated"):
+        found = admin.get("/api/users", query_string={"role": "student", "status": status, "per_page": 100}).get_json()
+        counts[status] = found["total"]
+        for user in found["users"]:
+            shown = ("deactivated" if not user["active"]
+                     else "pending" if user["must_change_password"] else "active")
+            assert shown == status
+    assert sum(counts.values()) == everyone["all_count"]

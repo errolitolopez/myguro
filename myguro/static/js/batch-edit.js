@@ -3,7 +3,7 @@
 // for each row and selectionShown() after each page loads.
 
 const selected = new Set(); // ids picked one by one (kept when changing page or search)
-let allMatching = null; // {q, grade, name, section, total}: every student matching that search, on all pages
+let allMatching = null; // {q, grade, name, section, status, total}: every student matching that search, on all pages
 let shownData = null; // the page on screen (from users.js)
 
 const selectionBar = document.getElementById("selection-bar");
@@ -11,12 +11,13 @@ const selectPage = document.getElementById("select-page");
 const selectMatching = document.getElementById("select-matching");
 const batchModal = bootstrap.Modal.getOrCreateInstance(document.getElementById("batch-modal"));
 
-// The search and filters on screen: {q, grade, name, section} (each only when used)
+// The search and filters on screen: {q, grade, name, section, status} (each only when used)
 function currentSearch() {
   const search = { q: searchInput.value.trim() };
   if (gradeFilter.value !== "*") search.grade = gradeFilter.value;
   if (nameFilter.value.trim()) search.name = nameFilter.value.trim();
   if (sectionFilter.value.trim()) search.section = sectionFilter.value.trim();
+  if (statusFilter.value) search.status = statusFilter.value;
   return search;
 }
 
@@ -100,9 +101,11 @@ for (const box of [searchInput, nameFilter, sectionFilter]) {
     if (allMatching) clearSelection();
   });
 }
-gradeFilter.addEventListener("change", () => {
-  if (allMatching) clearSelection();
-});
+for (const select of [gradeFilter, statusFilter]) {
+  select.addEventListener("change", () => {
+    if (allMatching) clearSelection();
+  });
+}
 
 // --- The popup --------------------------------------------------------------------
 
@@ -127,6 +130,7 @@ batchForm.addEventListener("submit", async (event) => {
   hideError("batch-error");
   const body = allMatching ? { match: {
     q: allMatching.q, grade: allMatching.grade, name: allMatching.name, section: allMatching.section,
+    status: allMatching.status,
   } } : { user_ids: [...selected] };
   const grade = document.getElementById("batch-grade").value;
   if (grade !== "*") body.grade = grade;
@@ -188,6 +192,7 @@ document.getElementById("delete-confirm").addEventListener("click", async (event
   hideError("delete-error");
   const body = allMatching ? { match: {
     q: allMatching.q, grade: allMatching.grade, name: allMatching.name, section: allMatching.section,
+    status: allMatching.status,
   } } : { user_ids: [...selected] };
   const button = event.target;
   button.disabled = true;
@@ -222,6 +227,7 @@ document.getElementById("delete-confirm").addEventListener("click", async (event
 document.getElementById("batch-activate").addEventListener("click", async (event) => {
   const body = allMatching ? { match: {
     q: allMatching.q, grade: allMatching.grade, name: allMatching.name, section: allMatching.section,
+    status: allMatching.status,
   } } : { user_ids: [...selected] };
   const button = event.target;
   const notice = document.getElementById("users-notice");

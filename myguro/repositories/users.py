@@ -1,6 +1,13 @@
 from myguro.domain.accounts import display_name
 from myguro.repositories.base import Repository
 
+# The status filter on the students page, as the badge in each row shows it
+STATUS_WHERE = {
+    "active": "active = 1 AND must_change_password = 0",
+    "pending": "active = 1 AND must_change_password = 1",  # not logged in yet
+    "deactivated": "active = 0",
+}
+
 
 class UserRepository(Repository):
     def get(self, user_id):
@@ -24,10 +31,11 @@ class UserRepository(Repository):
                         + (" AND active = 1" if active_only else ""), (student_id,))
 
     @staticmethod
-    def _matching(role, pattern, grade, name_words=(), section_pattern=None):
+    def _matching(role, pattern, grade, name_words=(), section_pattern=None, status=None):
         """WHERE for accounts of this role whose name, username or section matches the LIKE
         pattern; grade filters exactly ("" = no grade, None = any). Advanced filters: every
-        word of name_words is in the full name, and the section contains section_pattern."""
+        word of name_words is in the full name, the section contains section_pattern, and status is
+        one of STATUS_WHERE (active, pending = not logged in yet, deactivated)."""
         where = ("role = ? AND (name LIKE ? ESCAPE '\\' OR username LIKE ? ESCAPE '\\' "
                  "OR section LIKE ? ESCAPE '\\')")
         params = [role, pattern, pattern, pattern]
@@ -40,22 +48,25 @@ class UserRepository(Repository):
         if section_pattern is not None:
             where += " AND section LIKE ? ESCAPE '\\'"
             params.append(section_pattern)
+        if status in STATUS_WHERE:
+            where += f" AND {STATUS_WHERE[status]}"
         return where, params
 
-    def count_matching(self, role, pattern, grade=None, name_words=(), section_pattern=None):
-        where, params = self._matching(role, pattern, grade, name_words, section_pattern)
+    def count_matching(self, role, pattern, grade=None, name_words=(), section_pattern=None, status=None):
+        where, params = self._matching(role, pattern, grade, name_words, section_pattern, status)
         return self.value(f"SELECT COUNT(*) FROM users WHERE {where}", params)
 
-    def search(self, role, pattern, grade=None, name_words=(), section_pattern=None, limit=20, offset=0):
+    def search(self, role, pattern, grade=None, name_words=(), section_pattern=None, status=None,
+               limit=20, offset=0):
         """One page of the matching accounts: active ones first, then by name (Last, First =
         by last name)."""
-        where, params = self._matching(role, pattern, grade, name_words, section_pattern)
+        where, params = self._matching(role, pattern, grade, name_words, section_pattern, status)
         return self.all(f"SELECT * FROM users WHERE {where} ORDER BY active DESC, name COLLATE NOCASE, id "
                         "LIMIT ? OFFSET ?", [*params, limit, offset])
 
-    def matching_ids(self, role, pattern, grade=None, name_words=(), section_pattern=None):
+    def matching_ids(self, role, pattern, grade=None, name_words=(), section_pattern=None, status=None):
         """Ids of every account matching a search (all pages)."""
-        where, params = self._matching(role, pattern, grade, name_words, section_pattern)
+        where, params = self._matching(role, pattern, grade, name_words, section_pattern, status)
         return [row["id"] for row in self.all(f"SELECT id FROM users WHERE {where}", params)]
 
     def count_students(self, user_ids):

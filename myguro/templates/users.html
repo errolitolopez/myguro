@@ -37,12 +37,12 @@
   <div id="advanced-filter" class="collapse">
     <div class="card card-body mb-3">
       <div class="row g-2 align-items-end">
-        <div class="col-12 col-md-5">
+        <div class="col-12 col-md-4">
           <label for="name-filter" class="form-label small mb-1">Full name</label>
           <input id="name-filter" type="search" class="form-control" autocomplete="off"
                  placeholder="e.g. Altamerano Rian">
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-6 col-md-2">
           <label for="grade-filter" class="form-label small mb-1">Grade</label>
           <select id="grade-filter" class="form-select">
             <option value="*">All grades</option>
@@ -54,6 +54,15 @@
           <label for="section-filter" class="form-label small mb-1">Section</label>
           <input id="section-filter" type="search" class="form-control" autocomplete="off"
                  placeholder="e.g. Rizal">
+        </div>
+        <div class="col-6 col-md-2">
+          <label for="status-filter" class="form-label small mb-1">Status</label>
+          <select id="status-filter" class="form-select">
+            <option value="">All statuses</option>
+            <option value="active">Active</option>
+            <option value="pending">Not logged in yet</option>
+            <option value="deactivated">Deactivated</option>
+          </select>
         </div>
         <div class="col-12 col-md-2">
           <button id="filter-clear" type="button" class="btn btn-outline-secondary w-100">Clear filters</button>

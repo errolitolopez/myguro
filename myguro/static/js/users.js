@@ -16,6 +16,7 @@ const searchInput = document.getElementById("search");
 const gradeFilter = document.getElementById("grade-filter");
 const nameFilter = document.getElementById("name-filter");
 const sectionFilter = document.getElementById("section-filter");
+const statusFilter = document.getElementById("status-filter");
 
 const addModalElement = document.getElementById("add-user-modal");
 const addModal = bootstrap.Modal.getOrCreateInstance(addModalElement);
@@ -94,7 +95,8 @@ function messageItem(text) {
 // How many advanced filter fields are filled in (students page).
 function filtersInUse() {
   if (!gradeFilter) return 0;
-  return [nameFilter.value.trim() !== "", gradeFilter.value !== "*", sectionFilter.value.trim() !== ""]
+  return [nameFilter.value.trim() !== "", gradeFilter.value !== "*", sectionFilter.value.trim() !== "",
+    statusFilter.value !== ""]
     .filter(Boolean).length;
 }
 
@@ -136,6 +138,7 @@ async function loadUsers() {
     if (gradeFilter.value !== "*") params.set("grade", gradeFilter.value);
     if (nameFilter.value.trim()) params.set("name", nameFilter.value.trim());
     if (sectionFilter.value.trim()) params.set("section", sectionFilter.value.trim());
+    if (statusFilter.value) params.set("status", statusFilter.value);
   }
   try {
     const response = await apiFetch(`/api/users?${params}`);
@@ -171,10 +174,12 @@ if (gradeFilter) {
   nameFilter.addEventListener("input", searchSoon);
   sectionFilter.addEventListener("input", searchSoon);
   gradeFilter.addEventListener("change", () => goToPage(1));
+  statusFilter.addEventListener("change", () => goToPage(1));
   document.getElementById("filter-clear").addEventListener("click", () => {
     nameFilter.value = "";
     sectionFilter.value = "";
     gradeFilter.value = "*";
+    statusFilter.value = "";
     // Same events the boxes send, so batch-edit.js drops "all matching" too.
     gradeFilter.dispatchEvent(new Event("change"));
   });
