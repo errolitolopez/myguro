@@ -3,7 +3,12 @@
 -- All accounts. There is no sign-up: the admin creates teachers, teachers create students.
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY,
+    -- Shown and sorted as "Last, First M." (built from the three parts below; the admin
+    -- account has only this)
     name TEXT NOT NULL,
+    last_name TEXT NOT NULL DEFAULT '',
+    first_name TEXT NOT NULL DEFAULT '',
+    middle_initial TEXT NOT NULL DEFAULT '',
     username TEXT NOT NULL UNIQUE COLLATE NOCASE,
     password_hash TEXT NOT NULL,
     role TEXT NOT NULL CHECK (role IN ('admin', 'teacher', 'student')),

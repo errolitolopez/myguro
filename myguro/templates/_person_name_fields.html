@@ -1,0 +1,20 @@
+<!-- A person's name as Last name, First name, Middle initial (optional).
+     Set "prefix" before including: ids become <prefix>-last, <prefix>-first, <prefix>-middle. -->
+<div class="row g-2 mb-3">
+  <div class="col-12 col-sm-5">
+    <label for="{{ prefix }}-last" class="form-label">Last name</label>
+    <input id="{{ prefix }}-last" class="form-control" maxlength="50" autocomplete="off"
+           placeholder="Altamerano" required>
+  </div>
+  <div class="col-8 col-sm-5">
+    <label for="{{ prefix }}-first" class="form-label">First name</label>
+    <input id="{{ prefix }}-first" class="form-control" maxlength="50" autocomplete="off"
+           placeholder="Rian Joshua" required>
+  </div>
+  <div class="col-4 col-sm-2">
+    <label for="{{ prefix }}-middle" class="form-label text-nowrap">M.I.</label>
+    <input id="{{ prefix }}-middle" class="form-control text-uppercase" maxlength="2" autocomplete="off"
+           placeholder="M" aria-label="Middle initial (optional)">
+  </div>
+  <div class="col-12 form-text mt-1">Shown as: Last name, First name M. — the middle initial is optional.</div>
+</div>

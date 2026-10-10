@@ -1,12 +1,21 @@
 from werkzeug.security import generate_password_hash
 
 from myguro.domain.accounts import (
-    ACCOUNT_ROLES, check_name, check_new_account_password, clean_grade_section, clean_username, make_temp_password,
+    ACCOUNT_ROLES, MAX_SECTION_LENGTH, check_new_account_password, clean_grade_section, clean_middle_initial,
+    clean_person_name, clean_username, display_name, grade_from_text, make_temp_password, name_from_request,
+    split_full_name, suggest_username,
 )
-from myguro.domain.text import clean_name
+from myguro.domain.text import clean_name, like_pattern
 from myguro.errors import NotFoundError, ValidationError
 from myguro.services.base import Service
 from myguro.services.presenters import user_json
+
+
+DEFAULT_PER_PAGE = 20
+MAX_PER_PAGE = 100
+
+# What the import sends back for each student
+IMPORT_FIELDS = ("row", "name", "last_name", "first_name", "middle_initial", "username", "grade", "section")
 
 
 class AccountService(Service):
@@ -16,10 +25,26 @@ class AccountService(Service):
         """user_json plus the role and how many classes the teacher teaches or the student is in."""
         return {**user_json(row), "role": row["role"], "classes": self.users.count_classes(row)}
 
-    def list(self, role):
+    def list(self, role, query="", grade=None, page=1, per_page=DEFAULT_PER_PAGE):
+        """One page of teachers or students, searched (name, username, section) and filtered by
+        grade (None = all, "" = no grade). A page past the end shows the last page."""
         if role not in ACCOUNT_ROLES:
             raise ValidationError("Unknown role.")
-        return [self.account_json(row) for row in self.users.list_by_role(role)]
+        per_page = max(1, min(per_page, MAX_PER_PAGE))
+        pattern = like_pattern(clean_name(query))
+        total = self.users.count_matching(role, pattern, grade)
+        pages = max(1, -(-total // per_page))  # rounded up
+        page = max(1, min(page, pages))
+        rows = self.users.search(role, pattern, grade, limit=per_page, offset=(page - 1) * per_page)
+        return {
+            "users": [self.account_json(row) for row in rows],
+            "page": page,
+            "pages": pages,
+            "per_page": per_page,
+            "total": total,  # matching the search / filter
+            "all_count": self.users.count(role),
+            "active_count": self.users.count(role, active_only=True),
+        }
 
     def create(self, data):
         """Create a teacher or student. Returns (account, temporary password): the password is
@@ -27,7 +52,7 @@ class AccountService(Service):
         role = data.get("role", "teacher")
         if role not in ACCOUNT_ROLES:
             raise ValidationError("Unknown role.")
-        name = check_name(clean_name(data.get("name")))
+        names = name_from_request(data)
         grade, section = "", ""
         if role == "student":
             grade, section = self.grade_section(data)
@@ -35,18 +60,19 @@ class AccountService(Service):
         password = check_new_account_password(str(data.get("password", "")) or make_temp_password())
         if self.users.username_taken(username):
             raise ValidationError(f"The username \"{username}\" is already taken.")
-        user_id = self.users.create(name, username, generate_password_hash(password), role, grade, section)
+        user_id = self.users.create(names, username, generate_password_hash(password), role, grade, section)
         self.commit()
         return self.account_json(self.users.get(user_id)), password
 
     def update(self, user_id, data):
-        """Edit a teacher or student: name, grade + section (students), active, reset_password.
-        Returns (account, new temporary password or None)."""
+        """Edit a teacher or student: last_name / first_name / middle_initial (or name), grade +
+        section (students), active, reset_password. Returns (account, new temporary password or None)."""
         account = self.users.get_account(user_id)
         if account is None:
             raise NotFoundError("Account not found.")
-        if "name" in data:
-            self.users.set_name(user_id, check_name(clean_name(data["name"])))
+        if any(key in data for key in ("last_name", "first_name", "middle_initial", "name")):
+            current = (account["last_name"], account["first_name"], account["middle_initial"])
+            self.users.set_names(user_id, name_from_request(data, current))
         if account["role"] == "student" and ("grade" in data or "section" in data):
             merged = {"grade": account["grade"], "section": account["section"], **data}
             self.users.set_grade_section(user_id, *self.grade_section(merged, user_id))
@@ -68,3 +94,92 @@ class AccountService(Service):
         if section:
             section = self.users.section_spelling(section, student_id) or section
         return grade, section
+
+    def import_students(self, rows, dry_run):
+        """Create student accounts from spreadsheet rows [(row number, {name, username, grade,
+        section, password})]. All or nothing: with any bad row, no one is created and every
+        problem is listed with its row number. dry_run only checks (the preview).
+
+        Returns {imported, students, errors}. After a real import each student has their
+        password (the one given, or a temporary one): it is shown once, like adding by hand."""
+        errors, students = [], []
+        given_usernames = {}  # username typed in the file -> first row with it
+        sections = {}  # section in any capitals -> how it is spelled (school first, then this file)
+
+        for number, record in rows:
+            try:
+                students.append(self.clean_import_row(number, record, given_usernames, sections))
+            except ValidationError as problem:
+                errors.append({"row": number, "message": problem.message})
+        if errors:
+            return {"imported": False, "students": [], "errors": errors}
+
+        # Usernames left empty: made from the name, avoiding every username already taken
+        # (in the school, or typed or made earlier in this file).
+        used = set(given_usernames)
+        for student in students:
+            if not student["username"]:
+                student["username"] = self.free_username(student["first_name"], student["last_name"], used)
+            used.add(student["username"])
+
+        if dry_run:
+            return {"imported": False, "errors": [], "students": [
+                {key: student[key] for key in IMPORT_FIELDS} | {"password_given": bool(student["password"])}
+                for student in students]}
+
+        created = []
+        for student in students:
+            password = student["password"] or make_temp_password()
+            names = (student["last_name"], student["first_name"], student["middle_initial"])
+            user_id = self.users.create(names, student["username"], generate_password_hash(password),
+                                        "student", student["grade"], student["section"])
+            created.append({key: student[key] for key in IMPORT_FIELDS}
+                           | {"id": user_id, "password": password, "password_given": bool(student["password"])})
+        self.commit()
+        return {"imported": True, "errors": [], "students": created}
+
+    def clean_import_row(self, number, record, given_usernames, sections):
+        """One spreadsheet row checked with the same rules as adding a student by hand.
+        The name comes from Last name / First name / Middle initial columns, or one Name column
+        written "Last, First" (with an optional ", M" or " M.")."""
+        if record.get("last_name") or record.get("first_name") or not record.get("name"):
+            last, first, middle = clean_person_name(record.get("last_name"), record.get("first_name"),
+                                                    clean_middle_initial(record.get("middle_initial")))
+        else:
+            last, first, middle = split_full_name(record["name"])
+        grade = grade_from_text(record["grade"])
+        section = clean_name(record["section"])
+        if len(section) > MAX_SECTION_LENGTH:
+            raise ValidationError(f"Section can be at most {MAX_SECTION_LENGTH} characters.")
+        if section:
+            key = section.casefold()
+            if key not in sections:
+                sections[key] = self.users.section_spelling(section) or section
+            section = sections[key]
+
+        username = ""
+        if record["username"]:
+            username = clean_username(record["username"])
+            if self.users.username_taken(username):
+                raise ValidationError(f"The username \"{username}\" is already taken.")
+            if username in given_usernames:
+                raise ValidationError(f"The username \"{username}\" is used twice in the file "
+                                      f"(rows {given_usernames[username]} and {number}).")
+            given_usernames[username] = number
+        password = str(record["password"])
+        if password:
+            check_new_account_password(password)
+        return {"row": number, "name": display_name(last, first, middle), "last_name": last, "first_name": first,
+                "middle_initial": middle, "username": username, "grade": grade, "section": section,
+                "password": password}
+
+    def free_username(self, first_name, last_name, used):
+        """A username made from the name that nobody has: jdelacruz, jdelacruz2, jdelacruz3..."""
+        name = display_name(last_name, first_name)
+        base = suggest_username(first_name, last_name) or "student"
+        candidates = ([base] if len(base) >= 3 else []) + [f"{base[:27]}{n}" for n in range(2, 10000)]
+        for candidate in candidates:
+            if candidate not in used and not self.users.username_taken(candidate):
+                return candidate
+        raise ValidationError(f"Could not make a username for {name}. Type one in the file.")
+

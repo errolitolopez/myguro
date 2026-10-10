@@ -1,3 +1,4 @@
+from myguro.domain.accounts import display_name
 from myguro.repositories.base import Repository
 
 
@@ -22,8 +23,28 @@ class UserRepository(Repository):
         return self.one("SELECT * FROM users WHERE id = ? AND role = 'student'"
                         + (" AND active = 1" if active_only else ""), (student_id,))
 
-    def list_by_role(self, role):
-        return self.all("SELECT * FROM users WHERE role = ? ORDER BY active DESC, name COLLATE NOCASE", (role,))
+    @staticmethod
+    def _matching(role, pattern, grade):
+        """WHERE for accounts of this role whose name, username or section matches the LIKE
+        pattern; grade filters exactly ("" = no grade, None = any)."""
+        where = ("role = ? AND (name LIKE ? ESCAPE '\\' OR username LIKE ? ESCAPE '\\' "
+                 "OR section LIKE ? ESCAPE '\\')")
+        params = [role, pattern, pattern, pattern]
+        if grade is not None:
+            where += " AND grade = ?"
+            params.append(grade)
+        return where, params
+
+    def count_matching(self, role, pattern, grade=None):
+        where, params = self._matching(role, pattern, grade)
+        return self.value(f"SELECT COUNT(*) FROM users WHERE {where}", params)
+
+    def search(self, role, pattern, grade=None, limit=20, offset=0):
+        """One page of the matching accounts: active ones first, then by name (Last, First =
+        by last name)."""
+        where, params = self._matching(role, pattern, grade)
+        return self.all(f"SELECT * FROM users WHERE {where} ORDER BY active DESC, name COLLATE NOCASE, id "
+                        "LIMIT ? OFFSET ?", [*params, limit, offset])
 
     def count_classes(self, user):
         """How many classes the teacher teaches or the student is in."""
@@ -31,15 +52,18 @@ class UserRepository(Repository):
             return self.value("SELECT COUNT(*) FROM classes WHERE teacher_id = ?", (user["id"],))
         return self.value("SELECT COUNT(*) FROM class_students WHERE student_id = ?", (user["id"],))
 
-    def create(self, name, username, password_hash, role, grade="", section="", must_change_password=True):
+    def create(self, names, username, password_hash, role, grade="", section="", must_change_password=True):
+        """names = (last name, first name, middle initial)."""
         return self.execute(
-            "INSERT INTO users (name, username, password_hash, role, must_change_password, grade, section) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (name, username, password_hash, role, int(must_change_password), grade, section),
+            "INSERT INTO users (name, last_name, first_name, middle_initial, username, password_hash, role, "
+            "must_change_password, grade, section) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (display_name(*names), *names, username, password_hash, role, int(must_change_password), grade, section),
         ).lastrowid
 
-    def set_name(self, user_id, name):
-        self.execute("UPDATE users SET name = ? WHERE id = ?", (name, user_id))
+    def set_names(self, user_id, names):
+        """names = (last name, first name, middle initial); the shown name follows."""
+        self.execute("UPDATE users SET name = ?, last_name = ?, first_name = ?, middle_initial = ? WHERE id = ?",
+                     (display_name(*names), *names, user_id))
 
     def set_grade_section(self, user_id, grade, section):
         self.execute("UPDATE users SET grade = ?, section = ? WHERE id = ?", (grade, section, user_id))

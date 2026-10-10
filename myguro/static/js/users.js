@@ -3,7 +3,10 @@
 
 const role = document.querySelector("main").dataset.role; // "teacher" or "student"
 const noun = role; // "teacher" / "student", used in messages
-let users = []; // all accounts of this role from the server; the search filters them here
+// One page at a time; search and grade filter are done on the server.
+let page = 1; // the page shown
+let pages = 1; // how many pages the current search has
+let loadNumber = 0; // only the newest request updates the list (typing fast sends several)
 let editing = null; // the person open in the edit popup
 let confirmAction = null; // what "Yes" does in the confirm box
 
@@ -14,14 +17,12 @@ const gradeFilter = document.getElementById("grade-filter"); // students page on
 const addModalElement = document.getElementById("add-user-modal");
 const addModal = bootstrap.Modal.getOrCreateInstance(addModalElement);
 const addForm = document.getElementById("add-user-form");
-const addName = document.getElementById("add-name");
 const addUsername = document.getElementById("add-username");
 const addPassword = document.getElementById("add-password");
 const addButton = document.getElementById("add-user-button");
 
 const editModalElement = document.getElementById("edit-user-modal");
 const editModal = bootstrap.Modal.getOrCreateInstance(editModalElement);
-const editName = document.getElementById("edit-name");
 const editNameButton = document.getElementById("edit-name-button");
 const resetButton = document.getElementById("reset-button");
 const activeButton = document.getElementById("active-button");
@@ -77,49 +78,64 @@ function messageItem(text) {
   return div;
 }
 
-function render() {
-  const query = searchInput.value.trim().toLowerCase();
-  const grade = gradeFilter ? gradeFilter.value : "*"; // "*" = all grades, "" = no grade
-  const shown = users.filter(
-    (user) =>
-      (grade === "*" || user.grade === grade) &&
-      (user.name.toLowerCase().includes(query) ||
-        user.username.includes(query) ||
-        user.section.toLowerCase().includes(query)),
-  );
-
-  if (users.length === 0) {
+function render(data) {
+  const searching = searchInput.value.trim() !== "" || (gradeFilter && gradeFilter.value !== "*");
+  if (data.all_count === 0) {
     list.replaceChildren(messageItem(`No ${noun}s yet. Tap + Add ${noun} to create an account.`));
-  } else if (shown.length === 0) {
+  } else if (data.users.length === 0) {
     list.replaceChildren(messageItem(`No ${noun} matches your search.`));
   } else {
-    list.replaceChildren(...shown.map(userItem));
+    list.replaceChildren(...data.users.map(userItem));
   }
 
-  const active = users.filter((user) => user.active).length;
-  document.getElementById("user-summary").textContent = query || grade !== "*"
-    ? `${shown.length} found`
-    : `${users.length} total · ${active} active`;
+  document.getElementById("user-summary").textContent = searching
+    ? `${data.total} found`
+    : `${data.all_count} total · ${data.active_count} active`;
+
+  // ‹ Prev · Page 2 of 3 · Next ›
+  page = data.page;
+  pages = data.pages;
+  document.getElementById("pager").classList.toggle("d-none", pages <= 1);
+  document.getElementById("page-info").textContent = `Page ${page} of ${pages}`;
+  document.getElementById("prev-page").disabled = page <= 1;
+  document.getElementById("next-page").disabled = page >= pages;
 }
 
+// Loads the current page of the search from the server.
 async function loadUsers() {
+  const thisLoad = ++loadNumber;
+  const params = new URLSearchParams({ role, page, q: searchInput.value.trim() });
+  if (gradeFilter && gradeFilter.value !== "*") params.set("grade", gradeFilter.value);
   try {
-    const response = await apiFetch(`/api/users?role=${role}`);
-    if (!response) return;
+    const response = await apiFetch(`/api/users?${params}`);
+    if (!response || thisLoad !== loadNumber) return; // a newer search is on its way
     if (!response.ok) {
       showError("users-error", `Could not load the ${noun}s.`);
       return;
     }
     hideError("users-error");
-    users = (await response.json()).users;
-    render();
+    render(await response.json());
   } catch {
     showError("users-error", "Cannot reach the server. Check your connection.");
   }
 }
 
-searchInput.addEventListener("input", render);
-if (gradeFilter) gradeFilter.addEventListener("change", render);
+function goToPage(newPage) {
+  page = newPage;
+  loadUsers();
+  window.scrollTo({ top: 0 });
+}
+
+document.getElementById("prev-page").addEventListener("click", () => goToPage(page - 1));
+document.getElementById("next-page").addEventListener("click", () => goToPage(page + 1));
+
+// Search after a short pause in typing, from page 1 again.
+let searchTimer = null;
+searchInput.addEventListener("input", () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => goToPage(1), 250);
+});
+if (gradeFilter) gradeFilter.addEventListener("change", () => goToPage(1));
 
 // --- Add account -------------------------------------------------------------
 
@@ -135,9 +151,15 @@ function gradeSectionValues(prefix) {
 // The username is suggested from the name until the admin types their own.
 let usernameTyped = false;
 
-addName.addEventListener("input", () => {
-  if (!usernameTyped) addUsername.value = suggestUsername(addName.value);
-});
+// While typing the name, suggest a username (until the admin types their own).
+for (const box of ["add-last", "add-first"]) {
+  document.getElementById(box).addEventListener("input", () => {
+    if (!usernameTyped) {
+      const name = personNameValues("add");
+      addUsername.value = suggestUsername(name.first_name, name.last_name);
+    }
+  });
+}
 addUsername.addEventListener("input", () => {
   usernameTyped = addUsername.value !== "";
 });
@@ -146,12 +168,13 @@ addForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   hideError("add-user-error");
 
-  const name = addName.value.trim();
+  const name = personNameValues("add");
   const username = addUsername.value.trim().toLowerCase();
   const password = addPassword.value;
-  if (!name) {
-    showError("add-user-error", "Full name is required.");
-    addName.focus();
+  const nameProblem = personNameProblem(name);
+  if (nameProblem) {
+    showError("add-user-error", nameProblem);
+    document.getElementById(name.last_name ? "add-first" : "add-last").focus();
     return;
   }
   if (!/^[a-z0-9._-]{3,30}$/.test(username)) {
@@ -171,7 +194,7 @@ addForm.addEventListener("submit", async (event) => {
     const response = await apiFetch("/api/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ role, name, username, password, ...gradeSectionValues("add") }),
+      body: JSON.stringify({ role, ...name, username, password, ...gradeSectionValues("add") }),
     });
     if (!response) return;
     const data = await response.json();
@@ -196,7 +219,7 @@ addModalElement.addEventListener("show.bs.modal", () => {
   usernameTyped = false;
   hideError("add-user-error");
 });
-addModalElement.addEventListener("shown.bs.modal", () => addName.focus());
+addModalElement.addEventListener("shown.bs.modal", () => document.getElementById("add-last").focus());
 
 // --- Edit account ------------------------------------------------------------
 
@@ -204,7 +227,7 @@ function openEdit(user) {
   editing = user;
   document.getElementById("edit-user-title").textContent = user.name;
   document.getElementById("edit-username").textContent = user.username;
-  editName.value = user.name;
+  setPersonName("edit", user);
   if (role === "student") {
     document.getElementById("edit-grade").value = user.grade;
     document.getElementById("edit-section").value = user.section;
@@ -242,13 +265,14 @@ async function updateUser(changes) {
 
 document.getElementById("edit-name-form").addEventListener("submit", async (event) => {
   event.preventDefault();
-  const name = editName.value.trim();
-  if (!name) {
-    showError("edit-user-error", "Full name is required.");
+  const name = personNameValues("edit");
+  const nameProblem = personNameProblem(name);
+  if (nameProblem) {
+    showError("edit-user-error", nameProblem);
     return;
   }
   editNameButton.disabled = true;
-  const data = await updateUser({ name, ...gradeSectionValues("edit") });
+  const data = await updateUser({ ...name, ...gradeSectionValues("edit") });
   editNameButton.disabled = false;
   if (data) editModal.hide();
 });

@@ -11,8 +11,8 @@
 <main class="container py-3" data-role="{{ role }}">
   <div id="users-error" class="alert alert-danger d-none" role="alert"></div>
 
-  <div class="d-flex gap-2 mb-3">
-    <input id="search" type="search" class="form-control"
+  <div class="d-flex flex-wrap gap-2 mb-3">
+    <input id="search" type="search" class="form-control flex-grow-1" style="min-width: 12rem; width: auto;"
            placeholder="Search name, username{{ ' or section' if role == 'student' }}"
            aria-label="Search {{ nouns|lower }}" autocomplete="off">
     {% if role == "student" %}
@@ -25,6 +25,11 @@
     <button class="btn btn-success text-nowrap" data-bs-toggle="modal" data-bs-target="#add-user-modal">
       + Add {{ noun }}
     </button>
+    {% if role == "student" %}
+    <button class="btn btn-outline-success text-nowrap" data-bs-toggle="modal" data-bs-target="#import-modal">
+      Import from Excel
+    </button>
+    {% endif %}
   </div>
 
   <div class="card">
@@ -36,6 +41,13 @@
       <div class="list-group-item text-body-secondary">Loading...</div>
     </div>
   </div>
+
+  <!-- Page controls (hidden when everything fits on one page) -->
+  <nav id="pager" class="d-flex justify-content-between align-items-center mt-3 d-none" aria-label="Pages">
+    <button id="prev-page" type="button" class="btn btn-outline-success btn-sm">‹ Prev</button>
+    <span id="page-info" class="small text-body-secondary"></span>
+    <button id="next-page" type="button" class="btn btn-outline-success btn-sm">Next ›</button>
+  </nav>
 </main>
 
 <!-- Add account form (opens as a popup) -->
@@ -47,15 +59,11 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <div class="mb-3">
-          <label for="add-name" class="form-label">Full name</label>
-          <input id="add-name" class="form-control" maxlength="100" autocomplete="off"
-                 placeholder="{{ 'Maria Santos' if role == 'teacher' else 'Juan Dela Cruz' }}" required>
-        </div>
+        {% with prefix="add" %}{% include "_person_name_fields.html" %}{% endwith %}
         <div class="mb-3">
           <label for="add-username" class="form-label">Username</label>
           <input id="add-username" class="form-control" maxlength="30" autocomplete="off"
-                 autocapitalize="none" spellcheck="false" placeholder="{{ 'msantos' if role == 'teacher' else 'jdelacruz' }}" required>
+                 autocapitalize="none" spellcheck="false" placeholder="raltamerano" required>
           <div class="form-text">Used to log in. Letters, numbers, dots, dashes or underscores.</div>
         </div>
         {% if role == "student" %}
@@ -89,11 +97,8 @@
       </div>
       <div class="modal-body">
         <form id="edit-name-form" class="mb-3" novalidate>
-          <div class="mb-3">
-            <label for="edit-name" class="form-label">Full name</label>
-            <input id="edit-name" class="form-control" maxlength="100" autocomplete="off" required>
-            <div class="form-text">Username: <span id="edit-username" class="font-monospace"></span></div>
-          </div>
+          {% with prefix="edit" %}{% include "_person_name_fields.html" %}{% endwith %}
+          <div class="form-text mt-n2 mb-3">Username: <span id="edit-username" class="font-monospace"></span></div>
           {% if role == "student" %}
           {% with prefix="edit" %}{% include "_grade_section_fields.html" %}{% endwith %}
           {% endif %}
@@ -122,9 +127,11 @@
 </div>
 
 {% include "_login_details_modal.html" %}
+{% if role == "student" %}{% include "_import_students_modal.html" %}{% endif %}
 {% endblock %}
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/common.js') }}"></script>
 <script src="{{ url_for('static', filename='js/users.js') }}"></script>
+{% if role == "student" %}<script src="{{ url_for('static', filename='js/student-import.js') }}"></script>{% endif %}
 {% endblock %}

@@ -59,4 +59,4 @@ def test_student_dashboard_lists_classes(teacher):
     make_class(teacher)
     student = login("jdelacruz01").get("/api/dashboard").get_json()
     assert [c["name"] for c in student["classes"]] == ["Grade 9 - Rizal"]
-    assert student["classes"][0]["teacher"] == "Elena Cruz"
+    assert student["classes"][0]["teacher"] == "Cruz, Elena M."

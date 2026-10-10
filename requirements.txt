@@ -2,3 +2,5 @@ flask==3.1.3
 # Exporting results: Excel (.xlsx) and PDF
 openpyxl==3.1.5
 fpdf2==2.8.9
+# Lets openpyxl read uploaded Excel files safely
+defusedxml==0.7.1

@@ -13,20 +13,22 @@ from flask.cli import with_appcontext
 from werkzeug.security import generate_password_hash
 
 from myguro.database import get_db
+from myguro.repositories import UserRepository
 
 TEACHER_PASSWORD = "1234"
 STUDENT_PASSWORD = "1234"
 STUDENTS_PER_SECTION = 6
 
-# (name, username)
+# (last name, first name, middle initial, username)
 TEACHERS = [
-    ("Elena Cruz", "ecruz"),
-    ("Roberto Diaz", "rdiaz"),
-    ("Liza Manalo", "lmanalo"),
-    ("Ramon Aguilar", "raguilar"),
-    ("Grace Pascual", "gpascual"),
-    ("Arnel Valdez", "avaldez"),
+    ("Cruz", "Elena", "M", "ecruz"),
+    ("Diaz", "Roberto", "S", "rdiaz"),
+    ("Manalo", "Liza", "", "lmanalo"),
+    ("Aguilar", "Ramon", "T", "raguilar"),
+    ("Pascual", "Grace", "A", "gpascual"),
+    ("Valdez", "Arnel", "", "avaldez"),
 ]
+MIDDLE_INITIALS = "ABCDEGLMPRST"
 
 SECTIONS = {
     "Grade 9": ["Rizal", "Bonifacio"],
@@ -47,7 +49,8 @@ LAST_NAMES = [
 
 
 def sample_students():
-    """(first name, last name, grade, section) for every sample student. The same list every run."""
+    """(first name, last name, middle initial, grade, section) for every sample student.
+    The same list every run."""
     students = []
     number = 0
     for grade, sections in SECTIONS.items():
@@ -55,7 +58,8 @@ def sample_students():
             for _ in range(STUDENTS_PER_SECTION):
                 first = FIRST_NAMES[number % len(FIRST_NAMES)]
                 last = LAST_NAMES[(number * 7) % len(LAST_NAMES)]
-                students.append((first, last, grade, section))
+                middle = "" if number % 5 == 4 else MIDDLE_INITIALS[number % len(MIDDLE_INITIALS)]
+                students.append((first, last, middle, grade, section))
                 number += 1
     return students
 
@@ -65,15 +69,13 @@ def username_for(first, last, number):
     return f"{first[0]}{last.replace(' ', '')}{number + 1:02d}".lower()
 
 
-def add_account(db, name, username, password_hash, role, grade="", section=""):
-    """Add one account unless the username is taken. Returns True when it was added."""
-    if db.execute("SELECT 1 FROM users WHERE username = ?", (username,)).fetchone():
+def add_account(db, names, username, password_hash, role, grade="", section=""):
+    """Add one account unless the username is taken. names = (last, first, middle initial).
+    Returns True when it was added."""
+    users = UserRepository(db)
+    if users.username_taken(username):
         return False
-    db.execute(
-        "INSERT INTO users (name, username, password_hash, role, must_change_password, grade, section) "
-        "VALUES (?, ?, ?, ?, 0, ?, ?)",
-        (name, username, password_hash, role, grade, section),
-    )
+    users.create(names, username, password_hash, role, grade, section, must_change_password=False)
     return True
 
 
@@ -84,13 +86,14 @@ def seed_command():
     db = get_db()
 
     teacher_hash = generate_password_hash(TEACHER_PASSWORD)
-    teachers = sum(add_account(db, name, username, teacher_hash, "teacher") for name, username in TEACHERS)
+    teachers = sum(add_account(db, (last, first, middle), username, teacher_hash, "teacher")
+                   for last, first, middle, username in TEACHERS)
 
     student_hash = generate_password_hash(STUDENT_PASSWORD)
     students = sum(
-        add_account(db, f"{first} {last}", username_for(first, last, number), student_hash, "student",
+        add_account(db, (last, first, middle), username_for(first, last, number), student_hash, "student",
                     grade, section)
-        for number, (first, last, grade, section) in enumerate(sample_students())
+        for number, (first, last, middle, grade, section) in enumerate(sample_students())
     )
 
     db.commit()

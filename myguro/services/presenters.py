@@ -4,7 +4,10 @@
 def user_json(row):
     return {
         "id": row["id"],
-        "name": row["name"],
+        "name": row["name"],  # "Last, First M."
+        "last_name": row["last_name"],
+        "first_name": row["first_name"],
+        "middle_initial": row["middle_initial"],
         "username": row["username"],
         "active": bool(row["active"]),
         "must_change_password": bool(row["must_change_password"]),

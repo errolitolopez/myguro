@@ -1,0 +1,144 @@
+"""Admin: importing student accounts from an Excel file."""
+
+import io
+
+from openpyxl import Workbook, load_workbook
+
+from conftest import error
+
+
+COLUMNS = ("Last name", "First name", "Middle initial", "Username", "Grade", "Section", "Password")
+
+
+def xlsx(rows, headers=COLUMNS):
+    """An .xlsx file (bytes) with a header row and these rows."""
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.append(list(headers))
+    for row in rows:
+        sheet.append(list(row))
+    data = io.BytesIO()
+    workbook.save(data)
+    return data.getvalue()
+
+
+def upload(admin, content, dry_run, filename="students.xlsx"):
+    return admin.post("/api/users/import", data={"file": (io.BytesIO(content), filename),
+                                                 "dry_run": "1" if dry_run else "0"},
+                      content_type="multipart/form-data")
+
+
+def test_template_download(admin):
+    response = admin.get("/students/import-template.xlsx")
+    assert response.status_code == 200
+    sheet = load_workbook(io.BytesIO(response.data)).active
+    assert tuple(cell.value for cell in sheet[1]) == COLUMNS
+
+
+def test_preview_then_import(admin):
+    content = xlsx([
+        ("Reyes", "Ana", "", "", "Grade 7", "rizal", ""),            # existing section spelling "Rizal"
+        ("  Cruz ", "Ben   Jr", "S.", "bencruz", 8, "Luna", "secret123"),  # grade as a number
+        ("Dela Cruz", "Juan", None, None, "kinder", None, None),        # username: jdelacruz
+        (None, None, None, None, None, None, None),                     # empty row: skipped
+        ("Reyes", "Ana", "B", "", "", "", ""),                          # same name: username gets a number
+    ])
+    preview = upload(admin, content, dry_run=True)
+    assert preview.status_code == 200
+    data = preview.get_json()
+    assert data["errors"] == [] and data["imported"] is False
+    rows = data["students"]
+    assert [(r["row"], r["name"], r["username"], r["grade"], r["section"]) for r in rows] == [
+        (2, "Reyes, Ana", "areyes", "Grade 7", "Rizal"),
+        (3, "Cruz, Ben Jr S.", "bencruz", "Grade 8", "Luna"),
+        (4, "Dela Cruz, Juan", "jdelacruz", "Kinder", ""),
+        (6, "Reyes, Ana B.", "areyes2", "", ""),
+    ]
+    assert [r["password_given"] for r in rows] == [False, True, False, False]
+    assert "password" not in rows[0]  # nothing is created on a preview
+    assert admin.get("/api/users?role=student").get_json()["total"] == 48
+
+    result = upload(admin, content, dry_run=False).get_json()
+    assert result["imported"] is True and len(result["students"]) == 4
+    created = {r["username"]: r for r in result["students"]}
+    assert created["bencruz"]["password"] == "secret123"
+    assert (created["bencruz"]["last_name"], created["bencruz"]["first_name"], created["bencruz"]["middle_initial"]) \
+        == ("Cruz", "Ben Jr", "S")
+    assert len(created["areyes"]["password"]) == 10
+    assert admin.get("/api/users?role=student").get_json()["total"] == 52
+    login = admin.application.test_client().post(
+        "/api/login", json={"username": "areyes", "password": created["areyes"]["password"]})
+    assert login.get_json()["must_change_password"] is True
+
+
+def test_one_name_column(admin):
+    content = xlsx([("Altamerano, Rian Joshua", "Grade 9"), ("Dela Cruz, Juan, M", ""),
+                    ("Santos, Maria Clara M.", ""), ("Juan Dela Cruz", "")], headers=("Name", "Grade"))
+    data = upload(admin, content, True).get_json()
+    assert data["errors"] == [{"row": 5, "message": "Write the name as Last name, First name "
+                                                    "(e.g. Altamerano, Rian Joshua)."}]
+    content = xlsx([("Altamerano, Rian Joshua", "Grade 9"), ("Dela Cruz, Juan, M", ""),
+                    ("Santos, Maria Clara M.", "")], headers=("Name", "Grade"))
+    rows = upload(admin, content, True).get_json()["students"]
+    assert [(r["name"], r["username"]) for r in rows] == [
+        ("Altamerano, Rian Joshua", "raltamerano"), ("Dela Cruz, Juan M.", "jdelacruz"),
+        ("Santos, Maria Clara M.", "msantos")]
+
+
+def test_all_or_nothing_with_row_errors(admin):
+    content = xlsx([
+        ("Student", "Good", "", "", "Grade 9", "Rizal", ""),
+        ("", "Nolast", "", "nameless", "", "", ""),           # no last name
+        ("Grade", "Bad", "", "", "Grade 13", "", ""),
+        ("Taken", "User", "", "ecruz", "", "", ""),           # a teacher's username
+        ("Pass", "Short", "", "", "", "", "123"),
+        ("Username", "Bad", "", "has space", "", "", ""),
+        ("A", "Twice", "", "twice", "", "", ""),
+        ("B", "Twice", "", "TWICE", "", "", ""),               # same username twice in the file
+        ("Middle", "Bad", "9", "", "", "", ""),
+    ])
+    for dry_run in (True, False):
+        data = upload(admin, content, dry_run).get_json()
+        assert data["imported"] is False
+        assert [(e["row"], e["message"]) for e in data["errors"]] == [
+            (3, "Last name is required."),
+            (4, "Choose a grade from the list."),
+            (5, 'The username "ecruz" is already taken.'),
+            (6, "Password must be at least 8 characters."),
+            (7, "Username must be 3 to 30 letters, numbers, dots, dashes or underscores, with no spaces."),
+            (9, 'The username "twice" is used twice in the file (rows 8 and 9).'),
+            (10, "The middle initial must be a letter."),
+        ]
+    assert admin.get("/api/users?role=student").get_json()["total"] == 48
+
+
+def test_bad_files(admin):
+    assert error(admin.post("/api/users/import", data={}, content_type="multipart/form-data")) == \
+        "Choose an Excel file (.xlsx)."
+    assert error(upload(admin, b"not excel", True)).startswith("This is not an Excel .xlsx file")
+    assert error(upload(admin, xlsx([("A",)], headers=("Student",)), True)) == \
+        'The first row must have the column names: "Last name" and "First name" (or one "Name" column).'
+    assert error(upload(admin, xlsx([]), True)) == "The file has no students."
+
+
+def test_headers_any_order_and_case(admin):
+    content = xlsx([("Grade 10", "Mabini", "Zed", "Ocampo")], headers=("grade", "SECTION", "Given name", "SURNAME"))
+    rows = upload(admin, content, True).get_json()["students"]
+    assert (rows[0]["name"], rows[0]["username"], rows[0]["grade"], rows[0]["section"]) == \
+        ("Ocampo, Zed", "zocampo", "Grade 10", "Mabini")
+
+
+def test_only_admin(teacher):
+    assert teacher.post("/api/users/import", data={}, content_type="multipart/form-data").status_code == 403
+    assert teacher.get("/students/import-template.xlsx").headers["Location"].endswith("/dashboard")
+
+
+def test_new_section_spelled_the_same_within_the_file(admin):
+    content = xlsx([("Uno", "Al", "", "", "Grade 7", "Sampaguita", ""), ("Dos", "Bo", "", "", "Grade 7", "SAMPAGUITA", "")])
+    rows = upload(admin, content, True).get_json()["students"]
+    assert [row["section"] for row in rows] == ["Sampaguita", "Sampaguita"]
+
+
+def test_file_too_big(admin):
+    response = upload(admin, b"x" * (3 * 1024 * 1024), True)
+    assert response.status_code == 413 and error(response) == "The file is too big (at most 2 MB)."

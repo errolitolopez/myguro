@@ -5,6 +5,8 @@ import secrets
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+MAX_UPLOAD_MB = 2
+
 # Due dates are calendar days at the school, wherever the server runs.
 SCHOOL_TIMEZONE = ZoneInfo("Asia/Manila")
 
@@ -25,6 +27,8 @@ def configure(app, test_config=None):
     app.config["DATABASE"] = os.environ.get("MYGURO_DATABASE", os.path.join(app.instance_path, "myguro.db"))
     # No "remember me": the login ends when the browser is closed, since school computers are shared.
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+    # Largest upload accepted (an Excel file of students). Bigger requests get "too big".
+    app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_MB * 1024 * 1024
     app.secret_key = load_secret_key(app.instance_path)
     if test_config:
         app.config.update(test_config)

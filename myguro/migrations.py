@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS (schema.sql) skips tables that already exist, so chan
 are handled here: upgrade_old_tables() runs before schema.sql, add_missing_columns() after.
 """
 
+from myguro.domain.accounts import display_name, guess_name_parts
 
 # Tables from before students became accounts (when they joined with a class code + PIN).
 OLD_CLASS_TABLES = ["submission_answers", "submissions", "questions", "activities", "students", "classes"]
@@ -123,6 +124,11 @@ def add_missing_columns(db):
         db.execute("ALTER TABLE users ADD COLUMN grade TEXT NOT NULL DEFAULT ''")
     if "section" not in user_columns:
         db.execute("ALTER TABLE users ADD COLUMN section TEXT NOT NULL DEFAULT ''")
+    if "last_name" not in user_columns:
+        db.execute("ALTER TABLE users ADD COLUMN last_name TEXT NOT NULL DEFAULT ''")
+        db.execute("ALTER TABLE users ADD COLUMN first_name TEXT NOT NULL DEFAULT ''")
+        db.execute("ALTER TABLE users ADD COLUMN middle_initial TEXT NOT NULL DEFAULT ''")
+        split_old_names(db)
 
     activity_columns = [row["name"] for row in db.execute("PRAGMA table_info(activities)")]
     if "max_attempts" not in activity_columns:
@@ -141,3 +147,13 @@ def add_missing_columns(db):
             "CHECK (kind IN ('text', 'activity'))"
         )
     db.commit()
+
+
+def split_old_names(db):
+    """Teachers and students saved with one name ("Juan Dela Cruz") get Last, First, M.I.
+    (a guess: commas if any, else the last word is the last name; the admin can fix it)."""
+    for row in db.execute("SELECT id, name FROM users WHERE role IN ('teacher', 'student')").fetchall():
+        last, first, middle = guess_name_parts(row["name"])
+        db.execute("UPDATE users SET last_name = ?, first_name = ?, middle_initial = ?, name = ? WHERE id = ?",
+                   (last, first, middle, display_name(last, first, middle), row["id"]))
+

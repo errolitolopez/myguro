@@ -6,10 +6,12 @@ Built with Python (Flask), SQLite, vanilla JavaScript and Bootstrap 5.
 
 ## Features
 
+- Names are **Last name, First name, Middle initial (optional)**, typed in three boxes and shown as "Altamerano, Rian Joshua J."; every list sorts by last name. Usernames are suggested as first letter + last name (raltamerano)
+
 - One login page for admin, teachers and students (no sign-up; 5 wrong tries locks that device + username for 5 minutes; the login ends when the browser is closed)
 - Default admin account `admin` / `admin`, created on first start — the password must be changed at first login
 - Change password (forced while using a temporary password)
-- Teachers and Students pages (admin only): the admin makes every account — one account per student for the whole school. Students have an optional grade (Kinder, Grade 1–12) and section (empty for irregular students); the Students page filters by grade. Create with a temporary password (shown once, with a Copy button), search, rename, reset a password, deactivate or activate. Deactivated accounts can't log in; their classes are kept
+- Teachers and Students pages (admin only), 20 per page with Prev / Next; search (name, username, section) and the grade filter run on the server across all accounts: the admin makes every account — one account per student for the whole school. Students have an optional grade (Kinder, Grade 1–12) and section (empty for irregular students); the Students page filters by grade. **Import from Excel** (Students page): download the template (Last name and First name required; Middle initial, Username, Grade, Section, Password optional — or one Name column written "Altamerano, Rian Joshua, J"), check the file — a preview, or every problem with its row number — then import. All or nothing: a file with a bad row imports no one. Empty usernames are made from the name (with a number if taken), empty passwords are made, grades can be typed as "9". Afterwards download the login details (CSV) to give out Create with a temporary password (shown once, with a Copy button), search, rename, reset a password, deactivate or activate. Deactivated accounts can't log in; their classes are kept
 - Dashboard: admin sees totals (teachers, classes, students, activities); teachers see their students, activities, answers submitted, and their classes; students see their classes and teachers
 - Classes (teacher): create classes (name + optional subject), edit them
 - Students in a class (teacher): search the school's student list (filter by grade and section) and add them one by one or a whole section with "Add all", search the class, remove a student from the class (account kept). Several teachers add the same student account to their own classes
@@ -55,6 +57,7 @@ myguro/
   schema.sql            the tables
   seed.py               flask --app app seed (sample accounts)
   exports.py            results to Excel / PDF
+  imports.py            reading students from an Excel file, and its template
   domain/               rules with no Flask or SQL: cleaning input, sheets and questions,
                         checking answers, adding up scores, due dates and tries
   repositories/         all SQL, one class per kind of data (users, classes, activities,

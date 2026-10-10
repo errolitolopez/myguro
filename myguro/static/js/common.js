@@ -60,18 +60,37 @@ if (logoutButton) {
   });
 }
 
-// "Maria Santos" -> "msantos" (first letter of the first name + the last name).
-function suggestUsername(name) {
-  const words = name
+// "Rian Joshua" + "Altamerano" -> "raltamerano" (first letter of the first name + the last name).
+function suggestUsername(firstName, lastName) {
+  const plain = (text) => text
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "") // ñ -> n, é -> e
     .toLowerCase()
-    .replace(/[^a-z0-9 ]/g, "")
-    .split(" ")
-    .filter(Boolean);
-  if (words.length === 0) return "";
-  if (words.length === 1) return words[0];
-  return words[0][0] + words[words.length - 1];
+    .replace(/[^a-z0-9]/g, "");
+  const first = plain(firstName);
+  return ((first.slice(0, 1) + plain(lastName)) || first).slice(0, 30);
+}
+
+// The name boxes of templates/_person_name_fields.html (ids <prefix>-last, -first, -middle).
+function personNameValues(prefix) {
+  return {
+    last_name: document.getElementById(`${prefix}-last`).value.trim(),
+    first_name: document.getElementById(`${prefix}-first`).value.trim(),
+    middle_initial: document.getElementById(`${prefix}-middle`).value.trim(),
+  };
+}
+
+function setPersonName(prefix, person) {
+  document.getElementById(`${prefix}-last`).value = person.last_name;
+  document.getElementById(`${prefix}-first`).value = person.first_name;
+  document.getElementById(`${prefix}-middle`).value = person.middle_initial;
+}
+
+// The message for a missing last or first name, or "" when both are there.
+function personNameProblem(values) {
+  if (!values.last_name) return "Last name is required.";
+  if (!values.first_name) return "First name is required.";
+  return "";
 }
 
 // The login details popup (templates/_login_details_modal.html): shows a new account's
