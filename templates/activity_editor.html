@@ -18,6 +18,10 @@
   <a href="{{ url_for('activities_page') }}" class="small">‹ My activities</a>
 
   <div id="editor-error" class="alert alert-danger mt-2 d-none" role="alert"></div>
+  <div id="locked-notice" class="alert alert-info mt-2 d-none">
+    A student already submitted this activity, so it can't be changed anymore (their scores must stay fair).
+    You can still assign it to more classes.
+  </div>
 
   <!-- Title and subject -->
   <div class="card mt-2 mb-4">
@@ -29,6 +33,22 @@
       <input id="activity-title" class="form-control form-control-lg mb-3" maxlength="150" autocomplete="off">
       <label for="activity-subject" class="form-label">Subject <span class="text-body-secondary">(optional)</span></label>
       <input id="activity-subject" class="form-control" maxlength="100" autocomplete="off" placeholder="Science">
+      <div class="d-flex align-items-center flex-wrap gap-2 mt-3">
+        <label for="max-attempts" class="form-label mb-0">Submissions allowed</label>
+        <select id="max-attempts" class="form-select form-select-sm w-auto">
+          {% for number in range(1, 11) %}<option value="{{ number }}">{{ number }}</option>{% endfor %}
+          <option value="">Unlimited</option>
+        </select>
+        <span id="max-attempts-status" class="small text-body-secondary"></span>
+      </div>
+      <div class="form-text mt-1">How many times a student may submit. Their latest submission counts.</div>
+      <div class="d-flex justify-content-between align-items-start gap-2 mt-3 pt-3 border-top">
+        <div class="small">
+          <div class="fw-semibold">Given to</div>
+          <div id="assigned-summary" class="text-body-secondary">Loading...</div>
+        </div>
+        <button id="assign-button" type="button" class="btn btn-sm btn-primary text-nowrap">Assign to classes</button>
+      </div>
     </div>
   </div>
 
@@ -77,6 +97,29 @@
   </div>
 </div>
 
+<!-- Assign: give the sheet to classes (everyone or selected students), optional due date -->
+<div class="modal fade" id="assign-modal" tabindex="-1" aria-labelledby="assign-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="assign-title">Assign to classes</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small text-body-secondary">
+          Tick the classes that get this activity. Students can still submit after the due date; it is marked late.
+        </p>
+        <div id="assign-classes" class="d-grid gap-2"></div>
+        <div id="assign-error" class="alert alert-danger py-2 mt-3 mb-0 d-none" role="alert"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button id="assign-save-button" type="button" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Preview: how students will see the sheet (without the answers) -->
 <div class="modal fade" id="preview-modal" tabindex="-1" aria-labelledby="preview-title" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
@@ -97,4 +140,5 @@
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/common.js') }}"></script>
 <script src="{{ url_for('static', filename='js/activity-editor.js') }}"></script>
+<script src="{{ url_for('static', filename='js/assign.js') }}"></script>
 {% endblock %}

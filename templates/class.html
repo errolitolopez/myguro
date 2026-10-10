@@ -19,6 +19,16 @@
     </button>
   </div>
 
+  <div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span class="fw-semibold">Activities</span>
+      <a href="{{ url_for('activities_page') }}" class="small">Assign from Activities ›</a>
+    </div>
+    <div id="activity-list" class="list-group list-group-flush">
+      <div class="list-group-item text-body-secondary">Loading...</div>
+    </div>
+  </div>
+
   <div class="d-flex gap-2 mb-3">
     <input id="search" type="search" class="form-control" placeholder="Search name, username or section"
            aria-label="Search students" autocomplete="off">

@@ -32,13 +32,13 @@ CREATE TABLE IF NOT EXISTS class_students (
 );
 
 -- A learning activity sheet. It belongs to the teacher who wrote it, so the same sheet
--- can be given to several classes (activity_classes).
+-- can be given to several classes (assignments). A sheet with no assignments is a draft.
 CREATE TABLE IF NOT EXISTS activities (
     id INTEGER PRIMARY KEY,
     teacher_id INTEGER NOT NULL REFERENCES users (id),
     title TEXT NOT NULL,
     subject TEXT NOT NULL DEFAULT '',
-    status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published')),
+    max_attempts INTEGER DEFAULT 1,  -- how many times a student may submit; NULL = unlimited
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -54,13 +54,23 @@ CREATE TABLE IF NOT EXISTS activity_sections (
     description TEXT NOT NULL DEFAULT ''  -- the text, or the directions of an activity
 );
 
--- Which classes a sheet is given to.
-CREATE TABLE IF NOT EXISTS activity_classes (
+-- A sheet given to a class: to everyone in it (also students added later), or only to the
+-- students in assignment_students. due_date is optional ("2026-10-15", Philippine time);
+-- students can still submit after it, marked late.
+CREATE TABLE IF NOT EXISTS assignments (
+    id INTEGER PRIMARY KEY,
     activity_id INTEGER NOT NULL REFERENCES activities (id),
     class_id INTEGER NOT NULL REFERENCES classes (id),
+    everyone INTEGER NOT NULL DEFAULT 1,
+    due_date TEXT,
     assigned_at TEXT NOT NULL DEFAULT (datetime('now')),
-    due_at TEXT,
-    PRIMARY KEY (activity_id, class_id)
+    UNIQUE (activity_id, class_id)
+);
+
+CREATE TABLE IF NOT EXISTS assignment_students (
+    assignment_id INTEGER NOT NULL REFERENCES assignments (id),
+    student_id INTEGER NOT NULL REFERENCES users (id),
+    PRIMARY KEY (assignment_id, student_id)
 );
 
 -- The questions of an activity section, in position order.
@@ -83,20 +93,35 @@ CREATE TABLE IF NOT EXISTS questions (
     points INTEGER NOT NULL DEFAULT 1
 );
 
+-- A student's work on an assignment, one row per attempt (1, 2, ... up to the activity's
+-- max_attempts). Answers are saved while they work (submitted_at is NULL); submitting sets
+-- submitted_at, checks the answers, and marks it late if it was after the due date.
+-- The latest submitted attempt is the one that counts (a paper score is an attempt too).
 CREATE TABLE IF NOT EXISTS submissions (
     id INTEGER PRIMARY KEY,
-    activity_id INTEGER NOT NULL REFERENCES activities (id),
+    assignment_id INTEGER NOT NULL REFERENCES assignments (id),
     student_id INTEGER NOT NULL REFERENCES users (id),
-    submitted_at TEXT NOT NULL DEFAULT (datetime('now')),
-    score INTEGER NOT NULL DEFAULT 0,
-    UNIQUE (activity_id, student_id)
+    attempt INTEGER NOT NULL DEFAULT 1,
+    started_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    submitted_at TEXT,
+    late INTEGER NOT NULL DEFAULT 0,
+    -- Paper: the student answered on paper and the teacher typed in the total score.
+    paper INTEGER NOT NULL DEFAULT 0,
+    paper_score INTEGER,
+    note TEXT NOT NULL DEFAULT '',
+    UNIQUE (assignment_id, student_id, attempt)
 );
 
+-- One answer per question. answer is JSON, like the question's answer key: a choice index,
+-- true/false, text, or a list of texts (one per blank).
+-- is_correct and points are set when submitted; both stay NULL for a short answer until
+-- the teacher scores it.
 CREATE TABLE IF NOT EXISTS submission_answers (
-    id INTEGER PRIMARY KEY,
     submission_id INTEGER NOT NULL REFERENCES submissions (id),
     question_id INTEGER NOT NULL REFERENCES questions (id),
     answer TEXT NOT NULL,
-    is_correct INTEGER NOT NULL DEFAULT 0,
-    points INTEGER NOT NULL DEFAULT 0
+    is_correct INTEGER,
+    points INTEGER,
+    PRIMARY KEY (submission_id, question_id)
 );

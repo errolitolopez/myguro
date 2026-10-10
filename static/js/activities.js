@@ -37,8 +37,8 @@ function activityItem(activity) {
   left.append(title, details);
 
   const badge = document.createElement("span");
-  badge.className = activity.status === "published" ? "badge text-bg-success" : "badge text-bg-secondary";
-  badge.textContent = activity.status === "published" ? "Published" : "Draft";
+  badge.className = activity.assigned ? "badge text-bg-primary" : "badge text-bg-secondary";
+  badge.textContent = activity.assigned ? `Assigned · ${plural(activity.assigned, "class", "classes")}` : "Draft";
 
   row.append(left, badge);
   return row;

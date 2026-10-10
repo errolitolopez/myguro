@@ -23,6 +23,12 @@
            href="{{ url_for('students_page') }}">Students</a>
       </li>
       {% endif %}
+      {% if user.role == "student" %}
+      <li class="nav-item">
+        <a class="nav-link {{ 'active' if request.endpoint in ('my_activities_page', 'answer_page') }}"
+           href="{{ url_for('my_activities_page') }}">Activities</a>
+      </li>
+      {% endif %}
       {% if user.role == "teacher" %}
       <li class="nav-item">
         <a class="nav-link {{ 'active' if request.endpoint in ('activities_page', 'activity_editor_page') }}"

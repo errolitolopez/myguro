@@ -55,6 +55,7 @@ async function loadDashboard() {
     } else if (data.role === "student") {
       setText("stat-classes", data.classes.length);
       setText("stat-submitted", data.submitted);
+      setText("stat-to-do", data.to_do);
       showClasses(data.classes, "student");
     } else {
       setText("stat-students", data.students);

@@ -75,6 +75,34 @@ function studentDetails(student) {
   return details;
 }
 
+// --- Activities given to this class ---------------------------------------------
+
+// One row per sheet: title, subject, due date, who gets it. Tapping it opens the results.
+function showActivities(activities) {
+  const list = document.getElementById("activity-list");
+  if (activities.length === 0) {
+    list.replaceChildren(messageItem("No activities yet. Open one in Activities and tap Assign to classes."));
+    return;
+  }
+  list.replaceChildren(...activities.map((activity) => {
+    const row = document.createElement("a");
+    row.href = `/results/${activity.id}`;
+    row.className = "list-group-item list-group-item-action";
+    const title = document.createElement("div");
+    title.className = "fw-semibold";
+    title.textContent = activity.title;
+    const details = document.createElement("div");
+    details.className = "small text-body-secondary";
+    details.textContent = [
+      activity.subject,
+      activity.everyone ? "All students" : plural(activity.selected, "student"),
+      activity.due_date ? `due ${formatDay(activity.due_date)}` : "no due date",
+    ].filter(Boolean).join(" · ");
+    row.append(title, details);
+    return row;
+  }));
+}
+
 // --- Student list --------------------------------------------------------------
 
 // One row: name and username on the left, status on the right. Tapping it opens the edit popup.
@@ -152,6 +180,7 @@ async function loadClass() {
     hideError("class-error");
     const data = await response.json();
     showClass(data.class);
+    showActivities(data.activities);
     students = data.students;
     render();
   } catch {

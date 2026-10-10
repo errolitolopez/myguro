@@ -466,15 +466,59 @@ document.getElementById("add-activity-button").addEventListener("click", () => a
 
 // --- Load and save ---------------------------------------------------------------
 
+// "Assigned" when the sheet is given to at least one class, else "Draft".
+function showStatusBadge(assignedClasses) {
+  const badge = document.getElementById("status-badge");
+  badge.textContent = assignedClasses ? "Assigned" : "Draft";
+  badge.className = assignedClasses ? "badge text-bg-primary" : "badge text-bg-secondary";
+}
+
 function showActivity(activity) {
   document.title = `${activity.title} · myguro`;
   titleInput.value = activity.title;
   subjectInput.value = activity.subject;
-  const badge = document.getElementById("status-badge");
-  badge.textContent = activity.status === "published" ? "Published" : "Draft";
-  badge.className = activity.status === "published" ? "badge text-bg-success" : "badge text-bg-secondary";
+  showStatusBadge(activity.assigned);
   sections = activity.sections.map(fromServer);
+  maxAttemptsSelect.value = activity.max_attempts === null ? "" : String(activity.max_attempts);
   render();
+  if (activity.locked) lockEditor();
+}
+
+// --- Submissions allowed (saved right away; can change even after students submitted) ---
+
+const maxAttemptsSelect = document.getElementById("max-attempts");
+maxAttemptsSelect.addEventListener("change", async () => {
+  const status = document.getElementById("max-attempts-status");
+  status.textContent = "Saving...";
+  try {
+    const response = await apiFetch(`/api/activities/${activityId}/settings`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        max_attempts: maxAttemptsSelect.value === "" ? null : Number(maxAttemptsSelect.value),
+      }),
+    });
+    if (!response) return;
+    const data = await response.json();
+    status.textContent = response.ok ? "Saved" : data.error || "Could not save.";
+  } catch {
+    status.textContent = "Cannot reach the server.";
+  }
+});
+
+// After a student submits, the sheet can't change: show it read-only (Assign still works).
+function lockEditor() {
+  document.getElementById("locked-notice").classList.remove("d-none");
+  const editorArea = document.querySelector("main");
+  editorArea.querySelectorAll("input, textarea, select").forEach((field) => (field.disabled = true));
+  editorArea.querySelectorAll("button").forEach((button) => {
+    if (button.id !== "assign-button") button.disabled = true;
+  });
+  maxAttemptsSelect.disabled = false; // more tries can still be given
+  editorArea.querySelectorAll("#add-text-button, #add-activity-button, #delete-button")
+    .forEach((button) => button.classList.add("d-none"));
+  saveButton.classList.add("d-none");
+  saveStatus.textContent = "Locked";
 }
 
 async function loadActivity() {
@@ -489,8 +533,8 @@ async function loadActivity() {
       showEditorError("Could not load the activity.");
       return;
     }
-    showActivity((await response.json()).activity);
     markSaved();
+    showActivity((await response.json()).activity); // after markSaved, so "Locked" stays shown
   } catch {
     showEditorError("Cannot reach the server. Check your connection.");
   }

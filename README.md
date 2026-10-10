@@ -14,10 +14,14 @@ Built with Python (Flask), SQLite, vanilla JavaScript and Bootstrap 5.
 - Classes (teacher): create classes (name + optional subject), edit them
 - Students in a class (teacher): search the school's student list (filter by grade and section) and add them one by one or a whole section with "Add all", search the class, remove a student from the class (account kept). Several teachers add the same student account to their own classes
 - Learning activity sheets (teacher, Activities tab): start a sheet with a title and optional subject, then build it section by section (like the LAS parts I–XI). Each section is either **text** (a title + description, for reading) or an **activity** (a title + directions + questions). Question types: multiple choice, true or false, identification (several accepted answers, separated by /), fill in the blank (`___` marks each blank), each with its answer key; and short answer (a short essay the teacher scores, default 5 points, with an optional guide for checking only the teacher sees). Each question has points. Reorder and delete sections and questions, save (Ctrl+S; the page warns about unsaved changes), preview it as students will see it (no answers), delete a sheet. A sheet belongs to the teacher, so it can later be given to several classes
+- Assign (teacher): from the activity editor, give a sheet to one or more classes — to everyone in the class (also students added later) or to selected students — with an optional due date. Late work will still be accepted, marked late. The class page lists its activities; sheets show Assigned or Draft
+- Students: My activities (To do / Submitted, with due dates, overdue and late), answer page for all question types (answers save automatically as they go), submit and see the score right away — short answers wait for the teacher. The teacher sets how many submissions are allowed per activity (1–10 or unlimited); with tries left, Try again starts a new attempt with the last answers, and the latest submission counts. Checking: identification and fill in the blank ignore capitals and extra spaces; fill in the blank gives part of the points per right blank. Once a student submits, the teacher can no longer edit that sheet
+- Results (teacher): per class and activity — submitted / not started / late / average / points to check, and a table of every student with their score and a score per activity section (e.g. pre-test vs post-test), with search and filters. Tap a student to see their answers next to the answer key, score short answers, change any question's points (e.g. accept another spelling), look at earlier attempts, or give them another try. For a student who answered on paper, enter a paper score (the total, optional late and note); it counts like a submission and can be edited or removed. After a paper score the student can't answer online unless the teacher gives them another try
+- Export results to Excel or PDF from the results page: summary and one row per student with status, submitted time, score, percent and a score per activity section (Excel for computing grades, PDF to print or send)
 
 ### Planned
 
-Matching type, giving sheets to classes, answering and scoring, results.
+Matching type, tables in text sections, import from Word, export results.
 
 ## Getting started
 
@@ -36,4 +40,4 @@ Log in with `admin` / `admin` and set a new password.
 .venv/bin/flask --app app seed
 ```
 
-Adds 6 sample teachers (e.g. `ecruz`, password `teacher123`) and 48 sample students: Grades 9 to 12, two sections each, 6 students per section (e.g. `jdelacruz01`, Grade 9 - Rizal, password `student123`). They can log in right away. Safe to run again: existing usernames are skipped.
+Adds 6 sample teachers (e.g. `ecruz`) and 48 sample students: Grades 9 to 12, two sections each, 6 students per section (e.g. `jdelacruz01`, Grade 9 - Rizal). All sample accounts use the password `1234`. They can log in right away. Safe to run again: existing usernames are skipped.

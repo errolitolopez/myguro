@@ -20,6 +20,14 @@ function gradeSection(student) {
   return [student.grade, student.section].filter(Boolean).join(" - ");
 }
 
+// "2026-10-15" -> "Oct 15, 2026". Read as a calendar day, so no time zone can shift it.
+function formatDay(isoDate) {
+  const [year, month, day] = isoDate.split("-").map(Number);
+  return new Date(year, month - 1, day).toLocaleDateString(undefined, {
+    month: "short", day: "numeric", year: "numeric",
+  });
+}
+
 // plural(1, "student") -> "1 student", plural(2, "activity", "activities") -> "2 activities"
 function plural(count, one, many = `${one}s`) {
   return `${count} ${count === 1 ? one : many}`;

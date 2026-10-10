@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Activity · myguro{% endblock %}
+
+{% block head %}
+<style>
+  .preserve-lines { white-space: pre-wrap; }
+  /* Fill-in-the-blank boxes sit inside the sentence, like blanks on paper. */
+  .blank-input { display: inline-block; width: 9em; max-width: 100%; vertical-align: baseline; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "_navbar.html" %}
+
+<main class="container py-3 pb-5 mb-5" style="max-width: 760px;" data-assignment-id="{{ assignment_id }}">
+  <a href="{{ url_for('my_activities_page') }}" class="small">‹ My activities</a>
+  <div id="answer-error" class="alert alert-danger mt-2 d-none" role="alert"></div>
+
+  <header class="mt-2 mb-3">
+    <h1 class="h4 mb-1" id="activity-title">Loading...</h1>
+    <div class="small text-body-secondary" id="activity-details"></div>
+    <div class="small mt-1" id="activity-due"></div>
+  </header>
+
+  <!-- Shown after submitting -->
+  <div id="result-card" class="card border-success mb-4 d-none">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center gap-2">
+        <div>
+          <div class="small text-body-secondary">Your score</div>
+          <div class="fs-3 fw-semibold" id="result-score"></div>
+        </div>
+        <span id="result-late" class="badge text-bg-warning d-none">Submitted late</span>
+      </div>
+      <div class="small text-body-secondary" id="result-note"></div>
+      <div class="d-flex justify-content-between align-items-center gap-2 mt-2 pt-2 border-top">
+        <span class="small" id="result-attempts"></span>
+        <button id="retry-button" type="button" class="btn btn-sm btn-outline-primary d-none">Try again</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shown while working on another attempt -->
+  <div id="retry-banner" class="alert alert-info mb-4 d-none"></div>
+
+  <div id="sections" class="d-grid gap-4"></div>
+</main>
+
+<!-- Bottom bar: progress, save status, Submit -->
+<div id="answer-bar" class="position-fixed bottom-0 start-0 end-0 bg-body border-top py-2 d-none">
+  <div class="container d-flex justify-content-between align-items-center gap-2" style="max-width: 760px;">
+    <div>
+      <div id="progress" class="small fw-semibold"></div>
+      <div id="save-status" class="small text-body-secondary"></div>
+    </div>
+    <button id="submit-button" type="button" class="btn btn-success">Submit</button>
+  </div>
+</div>
+
+<!-- Asks before submitting -->
+<div class="modal fade" id="submit-modal" tabindex="-1" aria-labelledby="submit-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="submit-title">Submit your answers?</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p id="submit-warning" class="text-danger-emphasis fw-semibold d-none"></p>
+        <p class="mb-0" id="submit-note">You can't change your answers after submitting.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Not yet</button>
+        <button id="confirm-submit-button" type="button" class="btn btn-success">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/answer.js') }}"></script>
+{% endblock %}

@@ -46,10 +46,16 @@
       </div></div>
     </div>
     <div class="col-6 col-md-3">
-      <div class="card h-100"><div class="card-body">
-        <div class="text-body-secondary small">Activities answered</div>
+      <a class="card h-100 text-decoration-none" href="{{ url_for('my_activities_page') }}"><div class="card-body">
+        <div class="text-body-secondary small">To do</div>
+        <div class="fs-3 fw-semibold" id="stat-to-do">–</div>
+      </div></a>
+    </div>
+    <div class="col-6 col-md-3">
+      <a class="card h-100 text-decoration-none" href="{{ url_for('my_activities_page') }}"><div class="card-body">
+        <div class="text-body-secondary small">Submitted</div>
         <div class="fs-3 fw-semibold" id="stat-submitted">–</div>
-      </div></div>
+      </div></a>
     </div>
   </div>
 

@@ -3,8 +3,8 @@
 
 Run with: flask --app app seed
 
-Sample teachers have the password "teacher123", students "student123". They don't
-have to change it, so they can log in right away. Safe to run again: accounts whose
+All sample accounts have the password "1234" (easy for testing; shorter than the app allows
+for real passwords). They don't have to change it, so they can log in right away. Safe to run again: accounts whose
 username already exists are skipped.
 """
 
@@ -14,8 +14,8 @@ from werkzeug.security import generate_password_hash
 
 from db import get_db
 
-TEACHER_PASSWORD = "teacher123"
-STUDENT_PASSWORD = "student123"
+TEACHER_PASSWORD = "1234"
+STUDENT_PASSWORD = "1234"
 STUDENTS_PER_SECTION = 6
 
 # (name, username)
