@@ -60,6 +60,13 @@ def api_batch_update():
     return jsonify(updated=service().batch_update(json_body()))
 
 
+@bp.post("/api/users/batch-activate")
+@role_required_api("admin")
+def api_batch_activate():
+    """Enable students: {user_ids or match: {q, grade, name, section}}. Returns {activated, skipped}."""
+    return jsonify(service().batch_activate(json_body()))
+
+
 @bp.post("/api/users/batch-delete")
 @role_required_api("admin")
 def api_batch_delete():

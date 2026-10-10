@@ -216,3 +216,37 @@ document.getElementById("delete-confirm").addEventListener("click", async (event
     button.disabled = false;
   }
 });
+
+// --- Activate ---------------------------------------------------------------------
+
+document.getElementById("batch-activate").addEventListener("click", async (event) => {
+  const body = allMatching ? { match: {
+    q: allMatching.q, grade: allMatching.grade, name: allMatching.name, section: allMatching.section,
+  } } : { user_ids: [...selected] };
+  const button = event.target;
+  const notice = document.getElementById("users-notice");
+  button.disabled = true;
+  try {
+    const response = await apiFetch("/api/users/batch-activate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!response) return;
+    const data = await response.json();
+    if (!response.ok) {
+      showError("users-error", data.error || "Could not activate.");
+      return;
+    }
+    hideError("users-error");
+    notice.textContent = `${plural(data.activated, "student")} activated.` +
+      (data.skipped ? ` ${plural(data.skipped, "student")} skipped: already active.` : "");
+    notice.classList.remove("d-none");
+    setTimeout(() => notice.classList.add("d-none"), 6000);
+    clearSelection();
+  } catch {
+    showError("users-error", "Cannot reach the server. Check your connection.");
+  } finally {
+    button.disabled = false;
+  }
+});

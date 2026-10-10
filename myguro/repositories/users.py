@@ -98,6 +98,16 @@ class UserRepository(Repository):
         self.execute("UPDATE users SET active = ?, activated = MAX(activated, ?) WHERE id = ?",
                      (int(active), int(active), user_id))
 
+    def inactive_ids(self, user_ids):
+        """Of these ids, the accounts that are deactivated now."""
+        marks = ",".join("?" * len(user_ids))
+        return [row["id"] for row in self.all(
+            f"SELECT id FROM users WHERE active = 0 AND id IN ({marks})", list(user_ids))]
+
+    def activate_many(self, user_ids):
+        self.db.executemany("UPDATE users SET active = 1, activated = 1 WHERE id = ?",
+                            [(user_id,) for user_id in user_ids])
+
     def fresh_student_ids(self, user_ids):
         """Of these ids, the students who were never activated and have no submitted work."""
         marks = ",".join("?" * len(user_ids))

@@ -119,6 +119,16 @@ class AccountService(Service):
         self.commit()
         return len(ids)
 
+    def batch_activate(self, data):
+        """Enable many students at once (same selection as batch_update). Students already
+        active are skipped. Returns {activated, skipped}."""
+        ids = self.batch_ids(data, "activate")
+        inactive = self.users.inactive_ids(ids)
+        if inactive:
+            self.users.activate_many(inactive)
+            self.commit()
+        return {"activated": len(inactive), "skipped": len(ids) - len(inactive)}
+
     def batch_delete(self, data):
         """Delete many students at once (same selection as batch_update). Only fresh students,
         never activated, can be deleted: an activated one is skipped even if deactivated now.
