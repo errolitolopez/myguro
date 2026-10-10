@@ -41,3 +41,42 @@ Log in with `admin` / `admin` and set a new password.
 ```
 
 Adds 6 sample teachers (e.g. `ecruz`) and 48 sample students: Grades 9 to 12, two sections each, 6 students per section (e.g. `jdelacruz01`, Grade 9 - Rizal). All sample accounts use the password `1234`. They can log in right away. Safe to run again: existing usernames are skipped.
+
+## Code structure
+
+```
+app.py                  entry point (flask --app app ...): app = create_app()
+myguro/
+  __init__.py           create_app(): config, database, blueprints, CLI commands
+  config.py             database path, secret key, school time zone
+  errors.py             ValidationError / NotFoundError / ... -> JSON {"error": ...}
+  database.py           connection per request, init-db, default admin
+  migrations.py         upgrading databases made by older versions
+  schema.sql            the tables
+  seed.py               flask --app app seed (sample accounts)
+  exports.py            results to Excel / PDF
+  domain/               rules with no Flask or SQL: cleaning input, sheets and questions,
+                        checking answers, adding up scores, due dates and tries
+  repositories/         all SQL, one class per kind of data (users, classes, activities,
+                        assignments, submissions); they never commit
+  services/             use cases, one class per area (auth, accounts, classes, activities,
+                        assignments, student work, results, dashboard); they commit
+  web/                  Flask blueprints, one per area (pages + JSON API), login/role checks
+  templates/, static/, fonts/
+tests/                  pytest suite
+```
+
+Each layer only uses the ones below it: web → services → repositories / domain.
+A route reads the request, calls a service, and returns JSON; a service raises
+`ValidationError("...")` (or `NotFoundError`, ...) and the error becomes `{"error": "..."}`
+with the right status, with nothing saved.
+
+## Tests
+
+```bash
+.venv/bin/pip install -r requirements-dev.txt   # once
+.venv/bin/pytest
+```
+
+Every test starts from a fresh throwaway database with the sample accounts.
+

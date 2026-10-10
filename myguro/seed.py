@@ -12,7 +12,7 @@ import click
 from flask.cli import with_appcontext
 from werkzeug.security import generate_password_hash
 
-from db import get_db
+from myguro.database import get_db
 
 TEACHER_PASSWORD = "1234"
 STUDENT_PASSWORD = "1234"

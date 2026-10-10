@@ -13,7 +13,7 @@
 {% include "_navbar.html" %}
 
 <main class="container py-3" data-assignment-id="{{ assignment_id }}">
-  <a id="back-link" href="{{ url_for('classes_page') }}" class="small">‹ Class</a>
+  <a id="back-link" href="{{ url_for('classes.list_page') }}" class="small">‹ Class</a>
   <div id="results-error" class="alert alert-danger mt-2 d-none" role="alert"></div>
 
   <header class="d-flex justify-content-between align-items-start gap-2 mt-2 mb-3">
@@ -23,9 +23,9 @@
     </div>
     <div class="d-flex flex-wrap justify-content-end gap-2">
       <a class="btn btn-sm btn-outline-success text-nowrap"
-         href="{{ url_for('export_results', assignment_id=assignment_id, kind='xlsx') }}">Export Excel</a>
+         href="{{ url_for('results.export', assignment_id=assignment_id, kind='xlsx') }}">Export Excel</a>
       <a class="btn btn-sm btn-outline-danger text-nowrap"
-         href="{{ url_for('export_results', assignment_id=assignment_id, kind='pdf') }}">Export PDF</a>
+         href="{{ url_for('results.export', assignment_id=assignment_id, kind='pdf') }}">Export PDF</a>
       <a id="edit-link" class="btn btn-sm btn-outline-secondary text-nowrap" href="#">Open activity</a>
     </div>
   </header>

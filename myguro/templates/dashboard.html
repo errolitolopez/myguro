@@ -12,7 +12,7 @@
   {% if user.role == "admin" %}
   <div class="row g-3">
     <div class="col-6 col-md-3">
-      <a class="card h-100 text-decoration-none" href="{{ url_for('teachers_page') }}"><div class="card-body">
+      <a class="card h-100 text-decoration-none" href="{{ url_for('accounts.teachers_page') }}"><div class="card-body">
         <div class="text-body-secondary small">Teachers</div>
         <div class="fs-3 fw-semibold" id="stat-teachers">–</div>
         <div class="text-body-secondary small" id="stat-active-teachers"></div>
@@ -25,7 +25,7 @@
       </div></div>
     </div>
     <div class="col-6 col-md-3">
-      <a class="card h-100 text-decoration-none" href="{{ url_for('students_page') }}"><div class="card-body">
+      <a class="card h-100 text-decoration-none" href="{{ url_for('accounts.students_page') }}"><div class="card-body">
         <div class="text-body-secondary small">Students</div>
         <div class="fs-3 fw-semibold" id="stat-students">–</div>
       </div></a>
@@ -46,13 +46,13 @@
       </div></div>
     </div>
     <div class="col-6 col-md-3">
-      <a class="card h-100 text-decoration-none" href="{{ url_for('my_activities_page') }}"><div class="card-body">
+      <a class="card h-100 text-decoration-none" href="{{ url_for('student.activities_page') }}"><div class="card-body">
         <div class="text-body-secondary small">To do</div>
         <div class="fs-3 fw-semibold" id="stat-to-do">–</div>
       </div></a>
     </div>
     <div class="col-6 col-md-3">
-      <a class="card h-100 text-decoration-none" href="{{ url_for('my_activities_page') }}"><div class="card-body">
+      <a class="card h-100 text-decoration-none" href="{{ url_for('student.activities_page') }}"><div class="card-body">
         <div class="text-body-secondary small">Submitted</div>
         <div class="fs-3 fw-semibold" id="stat-submitted">–</div>
       </div></a>
@@ -71,13 +71,13 @@
       </div></div>
     </div>
     <div class="col-6 col-md-3">
-      <a class="card h-100 text-decoration-none" href="{{ url_for('activities_page') }}"><div class="card-body">
+      <a class="card h-100 text-decoration-none" href="{{ url_for('activities.list_page') }}"><div class="card-body">
         <div class="text-body-secondary small">Published activities</div>
         <div class="fs-3 fw-semibold" id="stat-published">–</div>
       </div></a>
     </div>
     <div class="col-6 col-md-3">
-      <a class="card h-100 text-decoration-none" href="{{ url_for('activities_page') }}"><div class="card-body">
+      <a class="card h-100 text-decoration-none" href="{{ url_for('activities.list_page') }}"><div class="card-body">
         <div class="text-body-secondary small">Drafts</div>
         <div class="fs-3 fw-semibold" id="stat-drafts">–</div>
       </div></a>
@@ -92,11 +92,11 @@
 
   <div class="d-flex justify-content-between align-items-center mb-2">
     <h2 class="h5 mb-0">My classes</h2>
-    <a class="btn btn-sm btn-outline-success" href="{{ url_for('classes_page') }}">Manage classes</a>
+    <a class="btn btn-sm btn-outline-success" href="{{ url_for('classes.list_page') }}">Manage classes</a>
   </div>
   <div id="class-list" class="list-group"></div>
   <p id="no-classes" class="text-body-secondary d-none">
-    No classes yet. <a href="{{ url_for('classes_page') }}">Create your first class</a>.
+    No classes yet. <a href="{{ url_for('classes.list_page') }}">Create your first class</a>.
   </p>
   {% endif %}
 </main>

@@ -3,40 +3,40 @@
     <span class="navbar-brand">myguro</span>
     <div class="d-flex align-items-center gap-2">
       <span class="navbar-text small d-none d-sm-inline">{{ user.name }} ({{ user.role }})</span>
-      <a class="btn btn-outline-light btn-sm" href="{{ url_for('change_password_page') }}">Password</a>
+      <a class="btn btn-outline-light btn-sm" href="{{ url_for('auth.change_password_page') }}">Password</a>
       <button id="logout-button" class="btn btn-outline-light btn-sm">Logout</button>
     </div>
   </div>
   <div class="container">
     <ul class="nav nav-underline">
       <li class="nav-item">
-        <a class="nav-link {{ 'active' if request.endpoint == 'dashboard_page' }}"
-           href="{{ url_for('dashboard_page') }}">Dashboard</a>
+        <a class="nav-link {{ 'active' if request.endpoint == 'dashboard.page' }}"
+           href="{{ url_for('dashboard.page') }}">Dashboard</a>
       </li>
       {% if user.role == "admin" %}
       <li class="nav-item">
-        <a class="nav-link {{ 'active' if request.endpoint == 'teachers_page' }}"
-           href="{{ url_for('teachers_page') }}">Teachers</a>
+        <a class="nav-link {{ 'active' if request.endpoint == 'accounts.teachers_page' }}"
+           href="{{ url_for('accounts.teachers_page') }}">Teachers</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link {{ 'active' if request.endpoint == 'students_page' }}"
-           href="{{ url_for('students_page') }}">Students</a>
+        <a class="nav-link {{ 'active' if request.endpoint == 'accounts.students_page' }}"
+           href="{{ url_for('accounts.students_page') }}">Students</a>
       </li>
       {% endif %}
       {% if user.role == "student" %}
       <li class="nav-item">
-        <a class="nav-link {{ 'active' if request.endpoint in ('my_activities_page', 'answer_page') }}"
-           href="{{ url_for('my_activities_page') }}">Activities</a>
+        <a class="nav-link {{ 'active' if request.endpoint in ('student.activities_page', 'student.answer_page') }}"
+           href="{{ url_for('student.activities_page') }}">Activities</a>
       </li>
       {% endif %}
       {% if user.role == "teacher" %}
       <li class="nav-item">
-        <a class="nav-link {{ 'active' if request.endpoint in ('activities_page', 'activity_editor_page') }}"
-           href="{{ url_for('activities_page') }}">Activities</a>
+        <a class="nav-link {{ 'active' if request.endpoint in ('activities.list_page', 'activities.editor_page') }}"
+           href="{{ url_for('activities.list_page') }}">Activities</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link {{ 'active' if request.endpoint in ('classes_page', 'class_page') }}"
-           href="{{ url_for('classes_page') }}">Classes</a>
+        <a class="nav-link {{ 'active' if request.endpoint in ('classes.list_page', 'classes.detail_page') }}"
+           href="{{ url_for('classes.list_page') }}">Classes</a>
       </li>
       {% endif %}
     </ul>
