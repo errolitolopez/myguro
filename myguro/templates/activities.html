@@ -20,11 +20,16 @@
     </div>
   </div>
 
-  <input id="search" type="search" class="form-control mb-3" placeholder="Search title or subject"
-         aria-label="Search activities" autocomplete="off">
+  <div class="d-flex flex-column flex-sm-row gap-2 mb-3">
+    <input id="search" type="search" class="form-control" placeholder="Search title or subject"
+           aria-label="Search activities" autocomplete="off">
+    <select id="subject-filter" class="form-select w-auto d-none" aria-label="Filter by subject"></select>
+  </div>
 
-  <div id="activity-list" class="list-group">
-    <div class="list-group-item text-body-secondary">Loading...</div>
+  <div id="activity-list">
+    <div class="list-group">
+      <div class="list-group-item text-body-secondary">Loading...</div>
+    </div>
   </div>
 </main>
 

@@ -41,6 +41,55 @@ function plural(count, one, many = `${one}s`) {
 // fetch() that sends the user to the login page when the session has ended,
 // or to the change password page while they still have a temporary password.
 // Returns null in those cases, so callers can simply stop: if (!response) return;
+// --- Grouping by subject (Activities page and My activities) ---
+
+// "Science", " science ", "SCIENCE" are one subject.
+function subjectKey(subject) {
+  return (subject || "").trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+// Items grouped by subject: [{key, label, items}], A to Z, "No subject" last. The label is the
+// way the subject was first written.
+function groupBySubject(items) {
+  const groups = new Map();
+  for (const item of items) {
+    const key = subjectKey(item.subject);
+    if (!groups.has(key)) {
+      groups.set(key, { key, label: key ? item.subject.trim().replace(/\s+/g, " ") : "No subject", items: [] });
+    }
+    groups.get(key).items.push(item);
+  }
+  return [...groups.values()].sort((a, b) =>
+    (a.key === "") - (b.key === "") || a.label.localeCompare(b.label));
+}
+
+// One collapsible block per subject, each a list of buildItem(item) rows.
+function subjectGroupElements(items, buildItem) {
+  return groupBySubject(items).map((group) => {
+    const block = document.createElement("details");
+    block.className = "mb-3";
+    block.open = true;
+    const heading = document.createElement("summary");
+    heading.className = "fw-semibold mb-2";
+    heading.textContent = `${group.label} (${group.items.length})`;
+    const rows = document.createElement("div");
+    rows.className = "list-group";
+    rows.append(...group.items.map(buildItem));
+    block.append(heading, rows);
+    return block;
+  });
+}
+
+// Fills the subject filter from all items; keeps the choice when it still exists.
+function fillSubjectFilter(select, items) {
+  const chosen = select.value;
+  const groups = groupBySubject(items);
+  select.replaceChildren(new Option("All subjects", ""));
+  groups.forEach((group) => select.append(new Option(`${group.label} (${group.items.length})`, group.key)));
+  select.value = groups.some((group) => group.key === chosen) ? chosen : "";
+  select.classList.toggle("d-none", groups.length < 2);
+}
+
 async function apiFetch(url, options) {
   const response = await fetch(url, options);
   if (response.status === 401) {

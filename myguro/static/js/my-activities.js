@@ -1,10 +1,12 @@
 // Student: the activities given to them. "To do" (never submitted, soonest due first) and
-// "Submitted" (with the score that counts: the latest submission). Tapping one opens it.
+// "Submitted" (with the score that counts: the latest submission), grouped by subject.
+// Tapping one opens it.
 
 let activities = [];
 let today = "";
 
 const list = document.getElementById("activity-list");
+const subjectFilter = document.getElementById("subject-filter");
 
 // The badge on the right: due date / overdue, or the score once submitted.
 function statusBadges(activity) {
@@ -60,19 +62,24 @@ function activityItem(activity) {
 function render() {
   const showDone = document.getElementById("show-done").checked;
   // Once submitted it stays under Submitted, even while trying again.
-  const todo = activities.filter((activity) => !activity.done);
-  const done = activities.filter((activity) => activity.done);
+  const subject = subjectFilter.value;
+  const inSubject = activities.filter((activity) => !subject || subjectKey(activity.subject) === subject);
+  const todo = inSubject.filter((activity) => !activity.done);
+  const done = inSubject.filter((activity) => activity.done);
   document.getElementById("count-todo").textContent = `(${todo.length})`;
   document.getElementById("count-done").textContent = `(${done.length})`;
 
   const shown = showDone ? done : todo;
   if (shown.length === 0) {
+    const box = document.createElement("div");
+    box.className = "list-group";
     const empty = document.createElement("div");
     empty.className = "list-group-item text-body-secondary";
     empty.textContent = showDone ? "Nothing submitted yet." : "Nothing to do. Great job!";
-    list.replaceChildren(empty);
+    box.append(empty);
+    list.replaceChildren(box);
   } else {
-    list.replaceChildren(...shown.map(activityItem));
+    list.replaceChildren(...subjectGroupElements(shown, activityItem));
   }
 }
 
@@ -88,12 +95,14 @@ async function loadActivities() {
     const data = await response.json();
     activities = data.activities;
     today = data.today;
+    fillSubjectFilter(subjectFilter, activities);
     render();
   } catch {
     showError("list-error", "Cannot reach the server. Check your connection.");
   }
 }
 
+subjectFilter.addEventListener("change", render);
 document.querySelectorAll('input[name="show"]').forEach((radio) => radio.addEventListener("change", render));
 
 loadActivities();

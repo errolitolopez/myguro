@@ -1,9 +1,10 @@
-// Teacher's learning activity sheets: list them (tap to edit) and start new ones.
+// Teacher's learning activity sheets: list them by subject (tap to edit) and start new ones.
 
 let activities = []; // all of the teacher's sheets; the search filters them here
 
 const list = document.getElementById("activity-list");
 const searchInput = document.getElementById("search");
+const subjectFilter = document.getElementById("subject-filter");
 const modalElement = document.getElementById("new-activity-modal");
 const form = document.getElementById("new-activity-form");
 const titleInput = document.getElementById("new-title");
@@ -45,24 +46,29 @@ function activityItem(activity) {
 }
 
 function messageItem(text) {
+  const box = document.createElement("div");
+  box.className = "list-group";
   const div = document.createElement("div");
   div.className = "list-group-item text-body-secondary";
   div.textContent = text;
-  return div;
+  box.append(div);
+  return box;
 }
 
 function render() {
   const query = searchInput.value.trim().toLowerCase();
+  const subject = subjectFilter.value;
   const shown = activities.filter(
     (activity) =>
-      activity.title.toLowerCase().includes(query) || activity.subject.toLowerCase().includes(query),
+      (!subject || subjectKey(activity.subject) === subject) &&
+      (activity.title.toLowerCase().includes(query) || activity.subject.toLowerCase().includes(query)),
   );
   if (activities.length === 0) {
     list.replaceChildren(messageItem("No activities yet. Tap + New activity to write your first one."));
   } else if (shown.length === 0) {
     list.replaceChildren(messageItem("No activity matches your search."));
   } else {
-    list.replaceChildren(...shown.map(activityItem));
+    list.replaceChildren(...subjectGroupElements(shown, activityItem));
   }
 }
 
@@ -76,6 +82,7 @@ async function loadActivities() {
     }
     hideError("activities-error");
     activities = (await response.json()).activities;
+    fillSubjectFilter(subjectFilter, activities);
     render();
   } catch {
     showError("activities-error", "Cannot reach the server. Check your connection.");
@@ -83,6 +90,7 @@ async function loadActivities() {
 }
 
 searchInput.addEventListener("input", render);
+subjectFilter.addEventListener("change", render);
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
