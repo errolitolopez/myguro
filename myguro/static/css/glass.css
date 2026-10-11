@@ -194,3 +194,24 @@ body:has(.position-fixed.bottom-0) > footer { padding-bottom: 5rem !important; }
   }
   .list-group { --bs-list-group-bg: var(--glass-solid); }
 }
+
+/* A faint myguro mark in the bottom-right corner of the page, behind everything (the same idea as
+   the watermark in DB2Spring): black on the light theme, white on the dark theme. The glass
+   panels blur it where they cover it. */
+body::before {
+  content: "";
+  position: fixed;
+  right: 2rem;
+  bottom: 2rem;
+  width: min(400px, 60vw);
+  height: min(400px, 60vw);
+  z-index: -1;
+  background: url("../img/mark-black.png") no-repeat bottom right / contain;
+  opacity: 0.05;
+  pointer-events: none;
+}
+[data-bs-theme="dark"] body::before {
+  background-image: url("../img/mark-white.png");
+  opacity: 0.06;
+}
+@media print { body::before { display: none; } }
