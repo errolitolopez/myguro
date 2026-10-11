@@ -11,17 +11,21 @@
         crossorigin="anonymous">
   {% block head %}{% endblock %}
 </head>
-<body class="bg-body-tertiary">
+<body class="bg-body-tertiary d-flex flex-column min-vh-100">
   {% block content %}{% endblock %}
 
-  {% if SUPPORT %}
-  <!-- Support: a small note at the end of the page (admin and teachers only); the button opens
-       the ways to give. -->
-  <footer class="container py-3 text-center small text-body-secondary">
-    <div>{{ SUPPORT.message }}</div>
+  <!-- Footer on every page. The support note and its button are for admin and teachers only;
+       the button opens the ways to give. -->
+  <footer class="container py-3 mt-auto text-center small text-body-secondary">
+    <div>myguro is a free, non-profit tool for schools.</div>
+    {% if SUPPORT %}
+    <div class="mt-1">{{ SUPPORT.message }}</div>
     <button type="button" class="btn btn-sm btn-outline-secondary mt-1" data-bs-toggle="modal"
             data-bs-target="#support-modal">{{ SUPPORT.label }}</button>
+    {% endif %}
   </footer>
+
+  {% if SUPPORT %}
 
   <div class="modal fade" id="support-modal" tabindex="-1" aria-labelledby="support-modal-title" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

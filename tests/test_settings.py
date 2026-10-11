@@ -130,3 +130,9 @@ def test_gcash_number_shown_to_staff(admin, teacher):
     page = teacher.get("/dashboard").get_data(as_text=True)
     assert "0917 123 4567" in page and "Juan D." in page and 'data-number="09171234567"' in page
     assert "ko-fi.com" not in page and "Open Ko-fi" not in page  # no Ko-fi link set
+
+
+def test_footer_on_every_page(admin):
+    anonymous = admin.application.test_client()
+    assert "free, non-profit tool for schools" in anonymous.get("/login").get_data(as_text=True)
+    assert "free, non-profit tool for schools" in admin.get("/dashboard").get_data(as_text=True)
