@@ -9,6 +9,7 @@ from myguro.domain.text import clean_name, like_pattern
 from myguro.errors import NotFoundError, ValidationError
 from myguro.services.base import Service
 from myguro.services.presenters import user_json
+from myguro.services.settings import SettingsService
 
 
 DEFAULT_PER_PAGE = 20
@@ -116,6 +117,7 @@ class AccountService(Service):
         grade = section = None
         if "grade" in data:
             grade = clean_grade_section({"grade": data["grade"]})[0]
+            self.check_grade_enabled(grade)
         if "section" in data:
             section = clean_grade_section({"section": data["section"]})[1]
             if section:
@@ -176,9 +178,16 @@ class AccountService(Service):
         """(grade, section). A section typed in other capitals than an existing one ("rizal" when
         "Rizal" exists) takes the existing spelling, so the same section isn't listed twice."""
         grade, section = clean_grade_section(data)
+        current = self.users.get_account(student_id)["grade"] if student_id else ""
+        self.check_grade_enabled(grade, current)
         if section:
             section = self.users.section_spelling(section, student_id) or section
         return grade, section
+
+    def check_grade_enabled(self, grade, current=""):
+        """A disabled grade can't be given to anyone, except a student who already has it."""
+        if grade and grade != current and grade in SettingsService(self.db).disabled_grades():
+            raise ValidationError(f"{grade} is disabled. Choose another grade (Settings page).")
 
     def import_students(self, rows, dry_run):
         """Create student accounts from spreadsheet rows [(row number, {name, username, grade,
@@ -243,6 +252,7 @@ class AccountService(Service):
         else:
             last, first, middle = split_full_name(record["name"])
         grade = grade_from_text(record["grade"])
+        self.check_grade_enabled(grade)
         section = clean_name(record["section"])
         if len(section) > MAX_SECTION_LENGTH:
             raise ValidationError(f"Section can be at most {MAX_SECTION_LENGTH} characters.")

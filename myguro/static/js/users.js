@@ -280,7 +280,15 @@ function openEdit(user) {
   document.getElementById("edit-username").textContent = user.username;
   setPersonName("edit", user);
   if (role === "student") {
-    document.getElementById("edit-grade").value = user.grade;
+    const gradeSelect = document.getElementById("edit-grade");
+    gradeSelect.querySelectorAll("[data-kept]").forEach((option) => option.remove());
+    // A disabled grade is not in the list, but the student keeps it unless it is changed.
+    if (user.grade && ![...gradeSelect.options].some((option) => option.value === user.grade)) {
+      const kept = new Option(`${user.grade} (disabled)`, user.grade);
+      kept.dataset.kept = "1";
+      gradeSelect.append(kept);
+    }
+    gradeSelect.value = user.grade;
     document.getElementById("edit-section").value = user.section;
   }
   activeButton.textContent = user.active ? "Deactivate" : "Activate";

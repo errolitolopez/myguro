@@ -139,3 +139,10 @@ CREATE TABLE IF NOT EXISTS submission_answers (
     points INTEGER,
     PRIMARY KEY (submission_id, question_id)
 );
+
+-- School-wide settings the admin can change (key -> value as text). A missing key means the
+-- default, so the table can start empty.
+CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);

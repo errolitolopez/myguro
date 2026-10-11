@@ -12,7 +12,7 @@
             <label for="class-name" class="form-label">Grade</label>
             <select id="class-name" class="form-select" required>
               <option value="">Select a grade</option>
-              {% for grade in GRADES|reverse %}<option>{{ grade }}</option>{% endfor %}
+              {% for grade in GRADES %}<option>{{ grade }}</option>{% endfor %}
             </select>
           </div>
           <div class="col-6">

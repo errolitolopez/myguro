@@ -12,7 +12,7 @@
           <label for="batch-grade" class="form-label">Grade</label>
           <select id="batch-grade" class="form-select">
             <option value="*">Keep as is</option>
-            {% for grade in GRADES|reverse %}<option>{{ grade }}</option>{% endfor %}
+            {% for grade in GRADES %}<option>{{ grade }}</option>{% endfor %}
             <option value="">No grade</option>
           </select>
         </div>

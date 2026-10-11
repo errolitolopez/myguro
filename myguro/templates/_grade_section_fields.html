@@ -5,7 +5,7 @@
     <label for="{{ prefix }}-grade" class="form-label">Grade <span class="text-body-secondary">(optional)</span></label>
     <select id="{{ prefix }}-grade" class="form-select">
       <option value="">—</option>
-      {% for grade in GRADES|reverse %}<option>{{ grade }}</option>{% endfor %}
+      {% for grade in GRADES %}<option>{{ grade }}</option>{% endfor %}
     </select>
   </div>
   <div class="col-6">

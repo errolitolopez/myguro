@@ -10,9 +10,9 @@ Layers (each only uses the ones below it):
 from flask import Flask
 
 from myguro import config, database, seed
-from myguro.domain.accounts import GRADES
+from myguro.database import get_db
 from myguro.errors import register_error_handlers
-from myguro.services import LoginThrottle
+from myguro.services import LoginThrottle, SettingsService
 from myguro.web import BLUEPRINTS
 
 
@@ -27,5 +27,12 @@ def create_app(test_config=None):
     register_error_handlers(app)
     for blueprint in BLUEPRINTS:
         app.register_blueprint(blueprint)
-    app.jinja_env.globals["GRADES"] = GRADES
+
+    @app.context_processor
+    def grade_options():
+        """The grades for the dropdowns, in the order the admin chose (Settings page): GRADES are
+        the ones that can be given to someone, ALL_GRADES also the disabled ones (for filters)."""
+        settings = SettingsService(get_db())
+        return {"GRADES": settings.grade_options(), "ALL_GRADES": settings.all_grade_options()}
+
     return app

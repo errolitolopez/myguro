@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Settings · myguro{% endblock %}
+
+{% block content %}
+{% include "_navbar.html" %}
+
+<main class="container py-3" style="max-width: 760px;">
+  <div id="settings-error" class="alert alert-danger d-none" role="alert"></div>
+  <h1 class="h4 mb-3">Settings</h1>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="form-check form-switch">
+        <input id="grades-high-to-low" class="form-check-input" type="checkbox" role="switch" disabled>
+        <label for="grades-high-to-low" class="form-check-label fw-semibold">Show grades from highest to lowest</label>
+      </div>
+      <div class="form-text">
+        On: Grade 12 first, Kinder last. Off: Kinder first, Grade 12 last. Applies to every grade
+        dropdown for everyone. Takes effect the next time a page is opened.
+      </div>
+    </div>
+  </div>
+
+  <div class="card mt-3">
+    <div class="card-body">
+      <h2 class="h6 fw-semibold mb-1">Grades in use</h2>
+      <div class="form-text mb-2">
+        Turn off the grades your school doesn't have. A disabled grade is hidden from the dropdowns
+        and can't be given to a student or a class. Students who already have it keep it, and the
+        Students filter still lists it so you can move them.
+      </div>
+      <div id="grade-list" class="row row-cols-2 row-cols-sm-3 g-2"></div>
+    </div>
+  </div>
+  <div id="settings-status" class="small text-body-secondary mt-2"></div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+{% endblock %}

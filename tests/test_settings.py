@@ -1,0 +1,84 @@
+"""Admin settings: the order of the grade dropdowns, saved in the database."""
+
+import re
+
+from conftest import error, login, make_class
+
+
+def grade_options(html, select_id):
+    """The option texts of the <select id=...> in a page."""
+    select = re.search(rf'<select id="{select_id}".*?</select>', html, re.S).group(0)
+    return re.findall(r"<option[^>]*>([^<]*)</option>", select)
+
+
+def test_default_is_highest_first(admin):
+    settings = admin.get("/api/settings").get_json()["settings"]
+    assert settings["grades_high_to_low"] is True
+    assert settings["grades"][0] == {"name": "Grade 12", "enabled": True}
+    assert len(settings["grades"]) == 13 and all(grade["enabled"] for grade in settings["grades"])
+    html = admin.get("/students").get_data(as_text=True)
+    grades = [grade for grade in grade_options(html, "grade-filter") if grade.startswith(("Grade", "Kinder"))]
+    assert grades[0] == "Grade 12" and grades[-1] == "Kinder"
+
+
+def test_turn_off_saves_and_changes_every_dropdown(admin, teacher):
+    response = admin.put("/api/settings", json={"grades_high_to_low": False})
+    assert response.get_json()["settings"]["grades_high_to_low"] is False
+    # Saved in the database: a new session sees it too
+    assert login("admin", "adminpass1").get("/api/settings").get_json()["settings"]["grades_high_to_low"] is False
+
+    class_id, _ = make_class(teacher)
+    page = teacher.get(f"/classes/{class_id}").get_data(as_text=True)
+    grades = grade_options(page, "grade-filter")
+    assert grades[:2] == ["All grades", "Kinder"] and grades[-1] == "Grade 12"
+
+    admin.put("/api/settings", json={"grades_high_to_low": True})
+    page = teacher.get(f"/classes/{class_id}").get_data(as_text=True)
+    assert grade_options(page, "grade-filter")[:2] == ["All grades", "Grade 12"]
+
+
+def test_only_admin_changes_it(teacher):
+    assert teacher.put("/api/settings", json={"grades_high_to_low": False}).status_code == 403
+    assert teacher.get("/settings").status_code == 302  # sent back to the dashboard
+
+
+def test_value_must_be_on_or_off(admin):
+    assert error(admin.put("/api/settings", json={"grades_high_to_low": "no"})) == "Choose on or off."
+    assert error(admin.put("/api/settings", json={"disabled_grades": ["Grade 99"]})) == \
+        "Choose grades from the list."
+    assert error(admin.put("/api/settings", json={"disabled_grades": "Kinder"})) == "Choose grades from the list."
+    assert admin.get("/api/settings").get_json()["settings"]["grades_high_to_low"] is True
+    assert admin.get("/settings").status_code == 200
+
+
+def new_student(admin, grade, username="jtest"):
+    return admin.post("/api/users", json={"role": "student", "last_name": "Test", "first_name": "Juan",
+                                          "username": username, "grade": grade, "section": "Rizal"})
+
+
+def test_disabled_grade_hidden_and_refused(admin, teacher):
+    admin.put("/api/settings", json={"disabled_grades": ["Kinder", "Grade 1"]})
+    settings = admin.get("/api/settings").get_json()["settings"]
+    assert [g["name"] for g in settings["grades"] if not g["enabled"]] == ["Grade 1", "Kinder"]
+
+    page = admin.get("/students").get_data(as_text=True)
+    assert "Kinder" not in grade_options(page, "add-grade") and "Grade 1" not in grade_options(page, "add-grade")
+    assert "Kinder" not in grade_options(page, "batch-grade")
+    # the Students filter still lists them, so students there can be found and moved
+    assert "Kinder" in grade_options(page, "grade-filter")
+
+    assert error(new_student(admin, "Kinder")) == "Kinder is disabled. Choose another grade (Settings page)."
+    assert new_student(admin, "Grade 2").status_code == 201
+
+
+def test_student_keeps_a_grade_that_gets_disabled(admin):
+    student = new_student(admin, "Grade 7").get_json()["user"]
+    admin.put("/api/settings", json={"disabled_grades": ["Grade 7"]})
+    # changing only the section keeps the grade
+    response = admin.put(f"/api/users/{student['id']}", json={"grade": "Grade 7", "section": "Luna"})
+    assert response.status_code == 200 and response.get_json()["user"]["grade"] == "Grade 7"
+    # moving someone into it is refused, moving out works
+    other = new_student(admin, "Grade 8", "jother").get_json()["user"]
+    assert admin.put(f"/api/users/{other['id']}", json={"grade": "Grade 7"}).status_code == 400
+    assert admin.put(f"/api/users/{student['id']}", json={"grade": "Grade 8"}).status_code == 200
+    assert admin.put("/api/users/batch", json={"user_ids": [other["id"]], "grade": "Grade 7"}).status_code == 400

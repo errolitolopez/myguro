@@ -1,6 +1,7 @@
 from myguro.domain import scoring
 from myguro.repositories import (
-    ActivityRepository, AssignmentRepository, ClassRepository, SubmissionRepository, UserRepository,
+    ActivityRepository, AssignmentRepository, ClassRepository, SettingsRepository, SubmissionRepository,
+    UserRepository,
 )
 
 
@@ -17,6 +18,7 @@ class Service:
         self.activities = ActivityRepository(db)
         self.assignments = AssignmentRepository(db)
         self.submissions = SubmissionRepository(db)
+        self.settings = SettingsRepository(db)
 
     def commit(self):
         self.db.commit()
