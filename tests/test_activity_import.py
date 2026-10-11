@@ -134,3 +134,10 @@ def test_matching_problems(teacher):
     pairs = 'Answer must be pairs like "Hinduism = India ; Taoism = China".'
     assert [(e["row"], e["message"]) for e in errors] == [
         (3, pairs), (4, "Matching needs at least 2 pairs, split by ;."), (5, pairs)]
+
+
+def test_slash_without_spaces_is_part_of_the_answer():
+    from myguro.domain.sheet_import import SPELLING_SEPARATOR
+
+    assert SPELLING_SEPARATOR.split("Manila / City of Manila") == ["Manila", "City of Manila"]
+    assert SPELLING_SEPARATOR.split("1/2") == ["1/2"]

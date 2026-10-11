@@ -4,12 +4,14 @@ Each row is a "text" section, an "activity" section, or a "question" of the acti
 The answer cell is read by question type (see sheets.py for the stored key):
   multiple_choice  the letter of the correct choice (B)
   true_false       True / False
-  identification   accepted answers split by /
-  fill_blank       one answer per blank split by ; (spellings of one blank split by /)
+  identification   accepted answers split by " / " (a slash with spaces around it)
+  fill_blank       one answer per blank split by ; (spellings of one blank split by " / ")
   matching         pairs "item = match" split by ; (Hinduism = India ; Taoism = China). Column B is
                    the matches (each once, sorted A to Z) plus any extra choices from Choice A-F
   short_answer     an optional guide for checking
 """
+
+import re
 
 from myguro.domain.sheets import MAX_SECTIONS, QUESTION_TYPES, clean_question, clean_section
 from myguro.errors import ValidationError
@@ -25,6 +27,7 @@ QUESTION_TYPE_NAMES = {
 }
 TRUE_FALSE = {"true": True, "t": True, "false": False, "f": False}
 CHOICE_LETTERS = "abcdef"
+SPELLING_SEPARATOR = re.compile(r"\s+/\s+")  # spaces around it, so 1/2 and km/h stay whole
 
 
 def sections_from_rows(rows):
@@ -111,9 +114,9 @@ def question_from_record(record):
             raise ValidationError("Answer must be True or False.")
         question["answer"] = value
     elif kind == "identification":
-        question["answer"] = answer.split("/")
+        question["answer"] = SPELLING_SEPARATOR.split(answer)
     elif kind == "fill_blank":
-        question["answer"] = [blank.split("/") for blank in answer.split(";")]
+        question["answer"] = [SPELLING_SEPARATOR.split(blank) for blank in answer.split(";")]
     elif kind == "matching":
         question["choices"], question["answer"] = matching_from_cells(answer, [
             record[f"choice_{letter}"] for letter in CHOICE_LETTERS])

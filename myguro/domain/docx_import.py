@@ -21,7 +21,7 @@ lettered lines Column B.
 
 import re
 
-from myguro.domain.sheet_import import DEFAULT_POINTS, QUESTION_TYPE_NAMES
+from myguro.domain.sheet_import import DEFAULT_POINTS, QUESTION_TYPE_NAMES, SPELLING_SEPARATOR
 from myguro.domain.sheets import QUESTION_TYPES, clean_question, clean_section
 from myguro.errors import ValidationError
 
@@ -35,7 +35,6 @@ CHOICE = re.compile(r"^([A-La-l])\s*[.)]\s+(.*)$")
 COLUMN_LABEL = re.compile(r"^column\s+[ab]\b", re.IGNORECASE)
 ANSWER_SPACE = re.compile(r"\s*(?:answer\s*:)?(?:\s*_{3,})+\s*$", re.IGNORECASE)
 PARENTHETICAL = re.compile(r"\s*\([^)]*\)\s*$")
-SPELLING_SEPARATOR = re.compile(r"\s+/\s+")  # spaces around it, so 1/2 and km/h stay whole
 LETTER = re.compile(r"^([A-Za-z])\b")
 TRUE_FALSE = re.compile(r"^(true|false|t|f)\b", re.IGNORECASE)
 

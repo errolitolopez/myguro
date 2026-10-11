@@ -219,9 +219,10 @@ def sheet_template_xlsx_bytes():
         ["Choice A to F", "Multiple choice: 2 to 6 choices, filled from A without gaps. "
                           "Matching: optional extra choices that match nothing."],
         ["Answer", "Multiple choice: the letter (B). True or false: True or False. "
-                   "Identification: accepted answers split by / (Manila / City of Manila). "
+                   "Identification: accepted answers split by a slash with spaces around it (Manila / City of Manila); "
+                   "a slash without spaces, like 1/2, is part of the answer. "
                    "Fill in the blank: put ___ for each blank in the Description and one answer per blank "
-                   "split by ; (more spellings of one blank split by /). "
+                   "split by ; (more spellings of one blank split by \" / \"). "
                    "Matching: the Description is the instruction; the Answer is item = match pairs split by ; "
                    "(Hinduism = India ; Taoism = China), 2 to 10 pairs. Column B is made from the matches "
                    "(sorted A to Z) plus any extra choices in Choice A to F. Don't use = or ; inside a pair. "
