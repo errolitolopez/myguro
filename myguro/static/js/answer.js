@@ -1,7 +1,8 @@
 // Student answer page: shows the sheet section by section, saves answers automatically
-// while the student works, and submits. After submitting, the answers are shown read-only
-// with the score (short answers wait for the teacher). If the activity allows more
-// submissions, Try again starts the next attempt with the same answers; the latest counts.
+// while the student works, and submits. After submitting, the questions are shown read-only
+// and blank (the student's answers are not shown back), with the score (short answers wait
+// for the teacher). If the activity allows more submissions, Try again starts the next
+// attempt with the same answers; the latest counts.
 
 const assignmentId = document.querySelector("main").dataset.assignmentId;
 let activity = null;
@@ -302,6 +303,7 @@ function render() {
   const sectionsArea = document.getElementById("sections");
   sectionsArea.replaceChildren(...activity.sections.map((section) => sectionBlock(section, locked)));
   sectionsArea.classList.toggle("d-none", locked && activity.paper);
+  document.getElementById("answers-hidden-note").classList.toggle("d-none", !locked || activity.paper);
   document.querySelectorAll("#sections textarea").forEach((textarea) => {
     textarea.style.height = "auto";
     textarea.style.height = `${Math.max(textarea.scrollHeight + 2, 100)}px`;

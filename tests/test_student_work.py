@@ -47,6 +47,9 @@ def test_submit_checks_answers(teacher):
     # MC 1 + identification 2 + 1 of 2 blanks = 1; short answer (5) waits for the teacher
     assert activity["score"]["total"] == {"earned": 4, "pending": 5, "possible": 11}
     assert activity["late"] is False and activity["can_retry"] is False
+    # The submitted sheet is shown blank: questions stay, the student's answers are not sent back
+    assert activity["answers"] == {} and activity["sections"][1]["questions"]
+    assert student.get(f"/api/my-activities/{assignment_id}").get_json()["activity"]["answers"] == {}
     assert error(student.post(f"/api/my-activities/{assignment_id}/submit", json={"answers": {}})) == \
         "You already submitted this activity."
     assert student.get("/api/dashboard").get_json()["submitted"] == 1

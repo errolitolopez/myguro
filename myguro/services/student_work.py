@@ -71,7 +71,9 @@ class StudentWorkService(Service):
             "teacher": assignment["teacher"],
             "due_date": assignment["due_date"],
             "sections": sections,
-            "answers": self.submissions.answers(submission["id"] if submission else None),
+            # A submitted attempt shows the blank sheet: the student's answers are not shown back.
+            "answers": {} if submission and submission["submitted_at"]
+            else self.submissions.answers(submission["id"] if submission else None),
             "submitted_at": submission["submitted_at"] if submission else None,
             "attempt": submission["attempt"] if submission else 1,
             "max_attempts": assignment["max_attempts"],
