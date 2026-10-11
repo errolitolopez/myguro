@@ -130,3 +130,11 @@ def test_not_a_docx_and_wrong_extension(teacher):
 
 def test_admin_cannot_import(admin):
     assert upload(admin, docx_bytes(GOOD)).status_code in (401, 403)
+
+
+def test_slash_without_spaces_is_part_of_the_answer():
+    from myguro.domain.docx_import import accepted
+
+    assert accepted("Card 3 (Taoism) / Card three") == ["Card 3", "Card three"]
+    assert accepted("1/2") == ["1/2"]
+    assert accepted("km/h / kilometers per hour") == ["km/h", "kilometers per hour"]

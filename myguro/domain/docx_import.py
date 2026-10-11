@@ -13,7 +13,7 @@ for headings and "p" for everything else (tables are already flattened into line
 
 What counts as the answer is read by type, the rest of the line (such as "(Hinduism)") is ignored:
   multiple_choice  the letter           true_false     True / False
-  identification   answers split by /   fill_blank      blanks split by ; (spellings by /)
+  identification   answers split by " / "   fill_blank   blanks split by ; (spellings by " / ")
   matching         one letter per Column A item         short_answer  optional guide for checking
 A matching section is one question: Directions are its instruction, numbered lines are Column A,
 lettered lines Column B.
@@ -35,6 +35,7 @@ CHOICE = re.compile(r"^([A-La-l])\s*[.)]\s+(.*)$")
 COLUMN_LABEL = re.compile(r"^column\s+[ab]\b", re.IGNORECASE)
 ANSWER_SPACE = re.compile(r"\s*(?:answer\s*:)?(?:\s*_{3,})+\s*$", re.IGNORECASE)
 PARENTHETICAL = re.compile(r"\s*\([^)]*\)\s*$")
+SPELLING_SEPARATOR = re.compile(r"\s+/\s+")  # spaces around it, so 1/2 and km/h stay whole
 LETTER = re.compile(r"^([A-Za-z])\b")
 TRUE_FALSE = re.compile(r"^(true|false|t|f)\b", re.IGNORECASE)
 
@@ -224,8 +225,9 @@ def single_question(kind, item, key, has_key, fail):
 
 
 def accepted(text):
-    """The accepted spellings in "Card 3 (Taoism) / Card three": split by /, notes in () dropped."""
-    return [PARENTHETICAL.sub("", spelling).strip() for spelling in text.split("/")]
+    """The accepted spellings in "Card 3 (Taoism) / Card three": split by " / " (a slash with
+    spaces around it), notes in () dropped."""
+    return [PARENTHETICAL.sub("", spelling).strip() for spelling in SPELLING_SEPARATOR.split(text)]
 
 
 def matching_question(heading, items, directions, key, has_key, fail):
