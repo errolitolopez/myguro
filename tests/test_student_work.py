@@ -56,6 +56,12 @@ def test_submit_checks_answers(teacher):
     # The sheet is locked for the teacher now
     assert teacher.get(f"/api/activities/{activity_id}").get_json()["activity"]["locked"] is True
     assert teacher.put(f"/api/activities/{activity_id}", json={"title": "x", "sections": []}).status_code == 400
+    # ...but its title and subject (and tries allowed) can still change
+    renamed = teacher.put(f"/api/activities/{activity_id}/settings",
+                          json={"title": " New title ", "subject": "Science"}).get_json()["activity"]
+    assert renamed["title"] == "New title" and renamed["subject"] == "Science"
+    assert error(teacher.put(f"/api/activities/{activity_id}/settings", json={"title": " ", "subject": ""})) == \
+        "Title is required."
     assert teacher.put(f"/api/activities/{activity_id}/assignments", json={"assignments": []}).status_code == 400
 
 

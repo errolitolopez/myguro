@@ -97,9 +97,12 @@ class ActivityService(Service):
         self.commit()
 
     def update_settings(self, activity_id, data):
-        """Settings that may change anytime, even after students submitted:
-        max_attempts (1 to 10, or None = unlimited)."""
+        """Settings that may change anytime, even after students submitted: max_attempts
+        (1 to 10, or None = unlimited), and title with subject (they don't affect any score)."""
         self.require(activity_id)
-        self.activities.set_max_attempts(activity_id, clean_max_attempts(data.get("max_attempts")))
+        if "max_attempts" in data:
+            self.activities.set_max_attempts(activity_id, clean_max_attempts(data.get("max_attempts")))
+        if "title" in data or "subject" in data:
+            self.activities.update_title(activity_id, *clean_title_subject(data))
         self.commit()
         return self.activity_json(self.require(activity_id))

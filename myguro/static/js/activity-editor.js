@@ -253,8 +253,10 @@ window.addEventListener("beforeunload", (event) => {
   if (unsaved) event.preventDefault();
 });
 
-titleInput.addEventListener("input", markUnsaved);
-subjectInput.addEventListener("input", markUnsaved);
+let sheetLocked = false; // a student submitted: only title, subject and tries can change
+
+titleInput.addEventListener("input", () => { if (!sheetLocked) markUnsaved(); });
+subjectInput.addEventListener("input", () => { if (!sheetLocked) markUnsaved(); });
 
 // The error box is at the top of the page and Save is at the bottom, so scroll to it.
 function showEditorError(message) {
@@ -729,8 +731,40 @@ maxAttemptsSelect.addEventListener("change", async () => {
   }
 });
 
-// After a student submits, the sheet can't change: show it read-only (Assign still works).
+// On a locked sheet, title and subject are saved as soon as the box is left.
+async function saveTitleSubject() {
+  if (!sheetLocked) return;
+  if (!titleInput.value.trim()) {
+    saveStatus.textContent = "Title is required.";
+    titleInput.focus();
+    return;
+  }
+  saveStatus.textContent = "Saving...";
+  try {
+    const response = await apiFetch(`/api/activities/${activityId}/settings`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: titleInput.value.trim(), subject: subjectInput.value.trim() }),
+    });
+    if (!response) return;
+    const data = await response.json();
+    if (!response.ok) {
+      saveStatus.textContent = data.error || "Could not save.";
+      return;
+    }
+    document.title = `${data.activity.title} · myguro`;
+    saveStatus.textContent = "Locked · title and subject saved";
+  } catch {
+    saveStatus.textContent = "Cannot reach the server.";
+  }
+}
+titleInput.addEventListener("change", saveTitleSubject);
+subjectInput.addEventListener("change", saveTitleSubject);
+
+// After a student submits, the questions can't change: show the sheet read-only. Assign, the
+// tries allowed, and the title and subject still work.
 function lockEditor() {
+  sheetLocked = true;
   document.getElementById("locked-notice").classList.remove("d-none");
   const editorArea = document.querySelector("main");
   editorArea.querySelectorAll("input, textarea, select").forEach((field) => (field.disabled = true));
@@ -738,6 +772,8 @@ function lockEditor() {
     if (button.id !== "assign-button" && button.id !== "copy-button") button.disabled = true;
   });
   maxAttemptsSelect.disabled = false; // more tries can still be given
+  titleInput.disabled = false;
+  subjectInput.disabled = false;
   editorArea.querySelectorAll("#add-text-button, #add-activity-button, #delete-button")
     .forEach((button) => button.classList.add("d-none"));
   saveButton.classList.add("d-none");
