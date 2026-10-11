@@ -13,7 +13,9 @@ let saving = null; // the save request in progress, if any
 
 const LETTERS = "ABCDEFGHIJKL";
 const BLANK = /_{3,}/g;
-const SAVE_DELAY = 800; // ms after the last change
+// ms after the last change. Long on purpose: the free PythonAnywhere plan has one worker and a
+// daily CPU quota, so fewer saves are kinder. The Save progress button saves right away.
+const SAVE_DELAY = 3000;
 
 const saveStatus = document.getElementById("save-status");
 const submitModal = bootstrap.Modal.getOrCreateInstance(document.getElementById("submit-modal"));
@@ -55,6 +57,11 @@ function setAnswer(questionId, value) {
   saveTimer = setTimeout(saveAnswers, SAVE_DELAY);
 }
 
+// savedText() -> "Saved at 3:42 PM"
+function savedText() {
+  return `Saved at ${new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
+}
+
 // Sends only the changed answers. Empty answers are sent as null (removes them).
 async function saveAnswers() {
   clearTimeout(saveTimer);
@@ -79,7 +86,7 @@ async function saveAnswers() {
         saveStatus.textContent = data.error || "Could not save.";
         return false;
       }
-      saveStatus.textContent = "All answers saved";
+      saveStatus.textContent = savedText();
       return true;
     } catch {
       // Try again with the next change; keep these answers marked as not saved.
@@ -92,6 +99,18 @@ async function saveAnswers() {
   saving = null;
   return ok;
 }
+
+// Save progress button: saves now instead of waiting for the delay.
+document.getElementById("save-button").addEventListener("click", async (event) => {
+  const stopLoading = startLoading(event.currentTarget);
+  if (!stopLoading) return;
+  try {
+    // Nothing changed since the last save still counts as saved.
+    if (await saveAnswers()) saveStatus.textContent = savedText();
+  } finally {
+    stopLoading();
+  }
+});
 
 // Save right away when the student leaves the page or switches apps (common on phones).
 document.addEventListener("visibilitychange", () => {
