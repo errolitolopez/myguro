@@ -4,3 +4,5 @@ openpyxl==3.1.5
 fpdf2==2.8.9
 # Lets openpyxl read uploaded Excel files safely
 defusedxml==0.7.1
+# Importing activity sheets from Word (.docx)
+python-docx==1.2.0

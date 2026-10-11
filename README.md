@@ -64,6 +64,7 @@ myguro/
   seed.py               flask --app app seed (sample accounts)
   exports.py            results to Excel / PDF
   imports.py            reading students from an Excel file, and its template
+  docx_files.py         reading an activity sheet from a Word file into lines, and the Word template
   domain/               rules with no Flask or SQL: cleaning input, sheets and questions,
                         checking answers, adding up scores, due dates and tries
   repositories/         all SQL, one class per kind of data (users, classes, activities,
