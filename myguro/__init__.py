@@ -14,6 +14,7 @@ from myguro.database import get_db
 from myguro.errors import register_error_handlers
 from myguro.services import LoginThrottle, SettingsService
 from myguro.web import BLUEPRINTS
+from myguro.web.security import current_user
 
 
 def create_app(test_config=None):
@@ -33,6 +34,12 @@ def create_app(test_config=None):
         """The grades for the dropdowns, in the order the admin chose (Settings page): GRADES are
         the ones that can be given to someone, ALL_GRADES also the disabled ones (for filters)."""
         settings = SettingsService(get_db())
-        return {"GRADES": settings.grade_options(), "ALL_GRADES": settings.all_grade_options()}
+        user = current_user()
+        return {
+            "GRADES": settings.grade_options(),
+            "ALL_GRADES": settings.all_grade_options(),
+            # The "Support myguro" link in the page footer: admin and teachers only, when turned on
+            "SUPPORT": settings.support_for(user["role"]) if user else None,
+        }
 
     return app

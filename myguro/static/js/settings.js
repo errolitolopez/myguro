@@ -4,7 +4,57 @@ const gradesSwitch = document.getElementById("grades-high-to-low");
 const gradeList = document.getElementById("grade-list");
 const status = document.getElementById("settings-status");
 
+const supportForm = document.getElementById("support-form");
+const supportEnabled = document.getElementById("support-enabled");
+const supportUrl = document.getElementById("support-url");
+const supportMessage = document.getElementById("support-message");
+const supportLabel = document.getElementById("support-label");
+const supportGcashNumber = document.getElementById("support-gcash-number");
+const supportGcashName = document.getElementById("support-gcash-name");
+const supportSave = document.getElementById("support-save");
+const supportStatus = document.getElementById("support-status");
+
+function showSupport(support) {
+  supportEnabled.checked = support.enabled;
+  supportUrl.value = support.url;
+  supportMessage.value = support.message;
+  supportLabel.value = support.label;
+  supportGcashNumber.value = support.gcash_display;
+  supportGcashName.value = support.gcash_name;
+}
+
+supportForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  hideError("support-error");
+  const stopLoading = startLoading(supportSave);
+  if (!stopLoading) return;
+  supportStatus.textContent = "";
+  try {
+    const response = await apiFetch("/api/settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ support: {
+        enabled: supportEnabled.checked, url: supportUrl.value, message: supportMessage.value,
+        label: supportLabel.value, gcash_number: supportGcashNumber.value, gcash_name: supportGcashName.value,
+      } }),
+    });
+    if (!response) return;
+    const data = await response.json();
+    if (!response.ok) {
+      showError("support-error", data.error || "Could not save.");
+      return;
+    }
+    showSupport(data.settings.support);
+    supportStatus.textContent = "Saved. Shown from the next page you open.";
+  } catch {
+    showError("support-error", "Cannot reach the server. Check your connection.");
+  } finally {
+    stopLoading();
+  }
+});
+
 function showSettings(settings) {
+  showSupport(settings.support);
   gradesSwitch.checked = settings.grades_high_to_low;
   gradesSwitch.disabled = false;
   gradeList.replaceChildren(...settings.grades.map((grade, index) => {

@@ -82,3 +82,51 @@ def test_student_keeps_a_grade_that_gets_disabled(admin):
     assert admin.put(f"/api/users/{other['id']}", json={"grade": "Grade 7"}).status_code == 400
     assert admin.put(f"/api/users/{student['id']}", json={"grade": "Grade 8"}).status_code == 200
     assert admin.put("/api/users/batch", json={"user_ids": [other["id"]], "grade": "Grade 7"}).status_code == 400
+
+
+SUPPORT = {"enabled": True, "url": "https://ko-fi.com/myguro", "message": "Help pay for hosting",
+           "label": "Donate", "gcash_number": "", "gcash_name": ""}
+
+
+def test_support_link_off_by_default_and_for_staff_only(admin, teacher):
+    assert admin.get("/api/settings").get_json()["settings"]["support"]["enabled"] is False
+    assert "ko-fi.com" not in teacher.get("/dashboard").get_data(as_text=True)
+
+    saved = admin.put("/api/settings", json={"support": SUPPORT}).get_json()["settings"]["support"]
+    assert {key: saved[key] for key in SUPPORT} == SUPPORT
+    for client in (admin, teacher):
+        page = client.get("/dashboard").get_data(as_text=True)
+        assert "https://ko-fi.com/myguro" in page and "Help pay for hosting" in page and "Donate" in page
+        assert 'id="support-modal"' in page and "Open Ko-fi" in page and "data-number" not in page
+    # students never see it
+    class_id, students = make_class(teacher)
+    teacher.post(f"/api/classes/{class_id}/students", json={"student_ids": []})
+    admin.put(f"/api/users/{students[0]['id']}", json={"active": True})
+    assert "ko-fi.com" not in login(students[0]["username"]).get("/dashboard").get_data(as_text=True)
+
+    admin.put("/api/settings", json={"support": {**SUPPORT, "enabled": False}})
+    assert "ko-fi.com" not in teacher.get("/dashboard").get_data(as_text=True)
+    # the link and text are kept while it is off
+    assert admin.get("/api/settings").get_json()["settings"]["support"]["url"] == "https://ko-fi.com/myguro"
+
+
+def test_support_link_checked(admin):
+    put = lambda **changes: error(admin.put("/api/settings", json={"support": {**SUPPORT, **changes}}))
+    assert put(url="") == "Add a link or a GCash number before turning the support link on."
+    assert put(gcash_number="12345") == "GCash number must be a mobile number like 0917 123 4567."
+    assert put(gcash_name="x" * 61) == "GCash name can be at most 60 characters."
+    assert put(url="javascript:alert(1)") == "Link must be a web address starting with http:// or https://."
+    assert put(url="ko-fi.com/me") == "Link must be a web address starting with http:// or https://."
+    assert put(label="x" * 31) == "Button text can be at most 30 characters."
+    # empty text uses the defaults
+    saved = admin.put("/api/settings", json={"support": {**SUPPORT, "message": "", "label": ""}}).get_json()
+    assert saved["settings"]["support"]["label"] == "Support myguro"
+
+
+def test_gcash_number_shown_to_staff(admin, teacher):
+    support = {**SUPPORT, "url": "", "gcash_number": "+63 917-123-4567", "gcash_name": "Juan D."}
+    saved = admin.put("/api/settings", json={"support": support}).get_json()["settings"]["support"]
+    assert saved["gcash_number"] == "09171234567" and saved["gcash_display"] == "0917 123 4567"
+    page = teacher.get("/dashboard").get_data(as_text=True)
+    assert "0917 123 4567" in page and "Juan D." in page and 'data-number="09171234567"' in page
+    assert "ko-fi.com" not in page and "Open Ko-fi" not in page  # no Ko-fi link set

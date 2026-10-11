@@ -14,6 +14,63 @@
 <body class="bg-body-tertiary">
   {% block content %}{% endblock %}
 
+  {% if SUPPORT %}
+  <!-- Support: a small note at the end of the page (admin and teachers only); the button opens
+       the ways to give. -->
+  <footer class="container py-3 text-center small text-body-secondary">
+    <div>{{ SUPPORT.message }}</div>
+    <button type="button" class="btn btn-sm btn-outline-secondary mt-1" data-bs-toggle="modal"
+            data-bs-target="#support-modal">{{ SUPPORT.label }}</button>
+  </footer>
+
+  <div class="modal fade" id="support-modal" tabindex="-1" aria-labelledby="support-modal-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title fs-5" id="support-modal-title">{{ SUPPORT.label }}</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-body-secondary">{{ SUPPORT.message }} Choose how you want to give:</p>
+          <div class="list-group">
+            {% for option in SUPPORT.options %}
+            <div class="list-group-item d-flex justify-content-between align-items-center gap-2">
+              <div>
+                <div class="fw-semibold">{{ option.title }}</div>
+                {% if option.kind == "number" %}
+                <div>{{ option.display }}</div>
+                {% if option.name %}<div class="small text-body-secondary">{{ option.name }}</div>{% endif %}
+                {% endif %}
+              </div>
+              {% if option.kind == "link" %}
+              <a class="btn btn-sm btn-success text-nowrap" href="{{ option.url }}" target="_blank"
+                 rel="noopener noreferrer">Open {{ option.title }}</a>
+              {% elif option.kind == "number" %}
+              <button type="button" class="btn btn-sm btn-success text-nowrap support-copy"
+                      data-number="{{ option.number }}">Copy number</button>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    document.querySelectorAll(".support-copy").forEach((button) => {
+      button.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(button.dataset.number);
+          button.textContent = "Copied";
+        } catch {
+          button.textContent = "Copy failed";
+        }
+        setTimeout(() => (button.textContent = "Copy number"), 2000);
+      });
+    });
+  </script>
+  {% endif %}
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
           integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
           crossorigin="anonymous"></script>
