@@ -76,8 +76,8 @@ footer {
 .modal-content { background: var(--glass-bg-strong); }
 .modal-backdrop.show { opacity: 0.35; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
 
-/* The top bar: frosted glass that follows the theme. Green stays as the accent (brand name,
-   active tab). */
+/* The top bar: frosted glass that follows the theme. The brand and the active tab use the
+   plain text colour (black on light, white on dark). */
 .navbar.bg-success {
   background-color: var(--navbar-bg) !important;
   border-bottom: 1px solid var(--glass-border);
@@ -85,8 +85,8 @@ footer {
   backdrop-filter: var(--glass-blur);
   box-shadow: var(--glass-shadow);
 }
-.navbar .nav-underline { --bs-nav-underline-link-active-color: var(--bs-success); }
-.navbar .nav-link.active { border-bottom-color: var(--bs-success); }
+.navbar .nav-underline { --bs-nav-underline-link-active-color: var(--bs-emphasis-color); }
+.navbar .nav-link.active { border-bottom-color: var(--bs-emphasis-color); }
 
 /* Fixed bottom bars (answering, editor) and other bg-body boxes */
 .bg-body { --bs-bg-opacity: 0.72; }

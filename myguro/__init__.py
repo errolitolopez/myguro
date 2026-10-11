@@ -7,7 +7,7 @@ Layers (each only uses the ones below it):
   domain/        rules with no Flask or SQL: cleaning input, checking answers, adding up scores
 """
 
-from flask import Flask
+from flask import Flask, redirect, url_for
 
 from myguro import config, database, seed
 from myguro.database import get_db
@@ -28,6 +28,11 @@ def create_app(test_config=None):
     register_error_handlers(app)
     for blueprint in BLUEPRINTS:
         app.register_blueprint(blueprint)
+
+    @app.get("/favicon.ico")
+    def favicon():
+        """Browsers ask for /favicon.ico by themselves."""
+        return redirect(url_for("static", filename="img/favicon.ico"))
 
     @app.context_processor
     def grade_options():

@@ -136,3 +136,11 @@ def test_footer_on_every_page(admin):
     anonymous = admin.application.test_client()
     assert "free, non-profit tool for schools" in anonymous.get("/login").get_data(as_text=True)
     assert "free, non-profit tool for schools" in admin.get("/dashboard").get_data(as_text=True)
+
+
+def test_icons_are_served(admin):
+    anonymous = admin.application.test_client()
+    assert "img/favicon.svg" in anonymous.get("/login").get_data(as_text=True)
+    assert anonymous.get("/favicon.ico").status_code == 302
+    for name in ("favicon.svg", "favicon.ico", "favicon-32.png", "apple-touch-icon.png", "mark.svg"):
+        assert anonymous.get(f"/static/img/{name}").status_code == 200
