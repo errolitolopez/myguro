@@ -16,6 +16,7 @@ const BLANK = /_{3,}/g;
 // ms after the last change. Long on purpose: the free PythonAnywhere plan has one worker and a
 // daily CPU quota, so fewer saves are kinder. The Save progress button saves right away.
 const SAVE_DELAY = 3000;
+const SAVE_COOLDOWN = 2000; // ms the Save progress button stays off after a click
 
 const saveStatus = document.getElementById("save-status");
 const submitModal = bootstrap.Modal.getOrCreateInstance(document.getElementById("submit-modal"));
@@ -102,13 +103,17 @@ async function saveAnswers() {
 
 // Save progress button: saves now instead of waiting for the delay.
 document.getElementById("save-button").addEventListener("click", async (event) => {
-  const stopLoading = startLoading(event.currentTarget);
+  const button = event.currentTarget;
+  const stopLoading = startLoading(button);
   if (!stopLoading) return;
   try {
     // Nothing changed since the last save still counts as saved.
     if (await saveAnswers()) saveStatus.textContent = savedText();
   } finally {
     stopLoading();
+    // Short pause so fast repeated clicks cannot flood the free server.
+    button.disabled = true;
+    setTimeout(() => (button.disabled = false), SAVE_COOLDOWN);
   }
 });
 
