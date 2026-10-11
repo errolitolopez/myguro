@@ -10,6 +10,7 @@
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
         crossorigin="anonymous">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/glass.css') }}">
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
   {% block head %}{% endblock %}
 </head>
 <body class="d-flex flex-column min-vh-100">
@@ -19,6 +20,8 @@
        the button opens the ways to give. -->
   <footer class="container py-3 mt-auto text-center small text-body-secondary">
     <div>myguro is a free, non-profit tool for schools.</div>
+    <button type="button" class="btn btn-link btn-sm text-body-secondary p-0 mt-1" data-theme-toggle
+            aria-label="Change theme">Theme</button>
     {% if SUPPORT %}
     <div class="mt-1">{{ SUPPORT.message }}</div>
     <button type="button" class="btn btn-sm btn-outline-secondary mt-1" data-bs-toggle="modal"
