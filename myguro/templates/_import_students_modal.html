@@ -20,7 +20,7 @@
             <input id="import-file" type="file" class="form-control" style="max-width: 24rem;"
                    accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                    aria-label="Excel file">
-            <button id="import-check" type="button" class="btn btn-outline-success">Check file</button>
+            <button id="import-check" type="button" class="btn btn-outline-success bi bi-check2-circle">Check file</button>
           </div>
         </div>
 
@@ -63,7 +63,7 @@
           <div class="alert alert-success py-2" id="import-done-text"></div>
           <p class="small">Give each student their login details. <strong>The passwords are shown only now</strong>:
             download them before closing. Students choose their own password when they log in.</p>
-          <button id="import-download" type="button" class="btn btn-success mb-2">Download login details</button>
+          <button id="import-download" type="button" class="btn btn-success mb-2 bi bi-download">Download login details</button>
           <div class="table-responsive border rounded" style="max-height: 40vh;">
             <table class="table table-sm mb-0">
               <thead class="table-light"><tr><th>Name</th><th>Username</th><th>Password</th><th>Grade</th><th>Section</th></tr></thead>
@@ -73,8 +73,8 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-        <button id="import-confirm" type="button" class="btn btn-success d-none">Import</button>
+        <button type="button" class="btn btn-outline-secondary bi bi-x-lg" data-bs-dismiss="modal">Close</button>
+        <button id="import-confirm" type="button" class="btn btn-success d-none bi bi-upload">Import</button>
       </div>
     </div>
   </div>

@@ -13,6 +13,10 @@
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
         crossorigin="anonymous">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+        integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+"
+        crossorigin="anonymous">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/glass.css') }}">
   <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
   {% block head %}{% endblock %}
@@ -24,11 +28,11 @@
        the button opens the ways to give. -->
   <footer class="container py-3 mt-auto text-center small text-body-secondary">
     <div>myguro is a free, non-profit tool for schools.</div>
-    <button type="button" class="btn btn-link btn-sm text-body-secondary p-0 mt-1" data-theme-toggle
+    <button type="button" class="btn btn-link btn-sm text-body-secondary p-0 mt-1 bi bi-circle-half" data-theme-toggle
             aria-label="Change theme">Theme</button>
     {% if SUPPORT %}
     <div class="mt-1">{{ SUPPORT.message }}</div>
-    <button type="button" class="btn btn-sm btn-outline-secondary mt-1" data-bs-toggle="modal"
+    <button type="button" class="btn btn-sm btn-outline-secondary mt-1 bi bi-heart" data-bs-toggle="modal"
             data-bs-target="#support-modal">{{ SUPPORT.label }}</button>
     {% endif %}
   </footer>
@@ -55,10 +59,10 @@
                 {% endif %}
               </div>
               {% if option.kind == "link" %}
-              <a class="btn btn-sm btn-success text-nowrap" href="{{ option.url }}" target="_blank"
+              <a class="btn btn-sm btn-success text-nowrap bi bi-box-arrow-up-right" href="{{ option.url }}" target="_blank"
                  rel="noopener noreferrer">Open {{ option.title }}</a>
               {% elif option.kind == "number" %}
-              <button type="button" class="btn btn-sm btn-success text-nowrap support-copy"
+              <button type="button" class="btn btn-sm btn-success text-nowrap support-copy bi bi-clipboard"
                       data-number="{{ option.number }}">Copy number</button>
               {% endif %}
             </div>

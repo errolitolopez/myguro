@@ -14,7 +14,7 @@
       <h1 class="h4 mb-0" id="class-name-heading">Loading...</h1>
       <div class="text-body-secondary" id="class-subject-heading"></div>
     </div>
-    <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#class-modal">
+    <button class="btn btn-sm btn-outline-secondary bi bi-pencil" data-bs-toggle="modal" data-bs-target="#class-modal">
       Edit
     </button>
   </div>
@@ -32,18 +32,18 @@
   <div class="d-flex gap-2 mb-3">
     <input id="search" type="search" class="form-control" placeholder="Search name, username or section"
            aria-label="Search students" autocomplete="off">
-    <button class="btn btn-success text-nowrap" data-bs-toggle="modal" data-bs-target="#add-student-modal">
-      + Add students
+    <button class="btn btn-success text-nowrap bi bi-plus-lg" data-bs-toggle="modal" data-bs-target="#add-student-modal">
+      Add students
     </button>
   </div>
 
   <!-- Shown while students are ticked -->
   <div id="selection-bar" class="alert alert-primary py-2 d-flex flex-wrap align-items-center gap-2 d-none">
     <span id="selection-text" class="me-auto"></span>
-    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#remove-modal">
+    <button type="button" class="btn btn-sm btn-outline-danger bi bi-person-dash" data-bs-toggle="modal" data-bs-target="#remove-modal">
       Remove from class
     </button>
-    <button id="selection-clear" type="button" class="btn btn-sm btn-outline-secondary">Clear</button>
+    <button id="selection-clear" type="button" class="btn btn-sm btn-outline-secondary bi bi-x-circle">Clear</button>
   </div>
 
   <div class="card">
@@ -87,7 +87,7 @@
         <div id="add-student-error" class="alert alert-danger py-2 d-none" role="alert"></div>
         <div class="d-flex justify-content-between align-items-center mb-2">
           <span id="result-summary" class="small text-body-secondary"></span>
-          <button id="add-all-button" type="button" class="btn btn-sm btn-success d-none">Add all</button>
+          <button id="add-all-button" type="button" class="btn btn-sm btn-success d-none bi bi-people">Add all</button>
         </div>
         <div id="search-results" class="list-group"></div>
         <p class="small text-body-secondary mt-3 mb-0">
@@ -95,7 +95,7 @@
         </p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-success" data-bs-dismiss="modal">Done</button>
+        <button type="button" class="btn btn-success bi bi-check-lg" data-bs-dismiss="modal">Done</button>
       </div>
     </div>
   </div>
@@ -115,8 +115,8 @@
         <div id="remove-error" class="alert alert-danger py-2 mt-3 mb-0 d-none" role="alert"></div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button id="remove-confirm" type="button" class="btn btn-danger">Remove</button>
+        <button type="button" class="btn btn-outline-secondary bi bi-x-lg" data-bs-dismiss="modal">Cancel</button>
+        <button id="remove-confirm" type="button" class="btn btn-danger bi bi-person-dash">Remove</button>
       </div>
     </div>
   </div>
@@ -134,7 +134,7 @@
         <p class="mb-1">Username: <span id="student-username" class="font-monospace"></span></p>
         <p class="mb-3 text-body-secondary" id="student-grade-section"></p>
         <div id="confirm-box" class="d-grid gap-2">
-          <button id="remove-button" type="button" class="btn btn-outline-danger">Remove from this class</button>
+          <button id="remove-button" type="button" class="btn btn-outline-danger bi bi-person-dash">Remove from this class</button>
         </div>
         <div id="confirm-remove" class="alert alert-warning mb-0 d-none">
           <p id="confirm-text" class="mb-2"></p>

@@ -68,10 +68,23 @@ footer {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
-  border-radius: 1rem;
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
 }
+
+/* Rounder corners. Set through Bootstrap's own variables so the header, footer and body inside
+   follow the same curve. The "inner" radius must be set too: Bootstrap 5.3 builds it from
+   --bs-border-radius, not from the card's own variable, so the header kept a 5px corner and its
+   square tint showed outside the curve. */
+.card {
+  --bs-card-border-radius: 1rem;
+  --bs-card-inner-border-radius: calc(1rem - var(--bs-card-border-width));
+}
+.modal-content {
+  --bs-modal-border-radius: 1rem;
+  --bs-modal-inner-border-radius: calc(1rem - var(--bs-modal-border-width));
+}
+.dropdown-menu { --bs-dropdown-border-radius: 0.75rem; }
 
 .modal-content { background: var(--glass-bg-strong); }
 .modal-backdrop.show { opacity: 0.35; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
@@ -134,6 +147,16 @@ footer {
 /* Tables and alerts inside glass */
 .table { --bs-table-bg: transparent; }
 .alert { -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+
+/* Buttons keep Bootstrap's colours by meaning: green = save / create / confirm, blue = assign
+   and open, red = delete, gray = cancel and secondary. A button with a "bi bi-..." class shows
+   its icon before the text (the icon is drawn by ::before, so changing the button's text from
+   script keeps it). */
+.btn.bi::before {
+  margin-right: 0.45em;
+  vertical-align: -0.125em;
+}
+.btn.bi:empty::before { margin-right: 0; }
 
 /* Slim scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }

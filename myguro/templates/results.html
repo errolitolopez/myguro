@@ -22,12 +22,12 @@
       <div class="small text-body-secondary" id="results-details"></div>
     </div>
     <div class="d-flex flex-wrap justify-content-end gap-2">
-      <button id="release-button" type="button" class="btn btn-sm btn-primary text-nowrap">Release scores</button>
-      <a class="btn btn-sm btn-outline-success text-nowrap"
+      <button id="release-button" type="button" class="btn btn-sm btn-primary text-nowrap bi bi-unlock">Release scores</button>
+      <a class="btn btn-sm btn-outline-success text-nowrap bi bi-file-earmark-excel"
          href="{{ url_for('results.export', assignment_id=assignment_id, kind='xlsx') }}">Export Excel</a>
-      <a class="btn btn-sm btn-outline-danger text-nowrap"
+      <a class="btn btn-sm btn-outline-danger text-nowrap bi bi-file-earmark-pdf"
          href="{{ url_for('results.export', assignment_id=assignment_id, kind='pdf') }}">Export PDF</a>
-      <a id="edit-link" class="btn btn-sm btn-outline-secondary text-nowrap" href="#">Open activity</a>
+      <a id="edit-link" class="btn btn-sm btn-outline-secondary text-nowrap bi bi-box-arrow-up-right" href="#">Open activity</a>
     </div>
   </header>
 
@@ -88,8 +88,8 @@
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
           <div id="attempt-buttons" class="btn-group btn-group-sm flex-wrap" role="group" aria-label="Attempts"></div>
           <div class="d-flex gap-2">
-            <button id="paper-button" type="button" class="btn btn-sm btn-outline-secondary">Enter paper score</button>
-            <button id="reopen-button" type="button" class="btn btn-sm btn-outline-primary d-none">Give another try</button>
+            <button id="paper-button" type="button" class="btn btn-sm btn-outline-secondary bi bi-pencil">Enter paper score</button>
+            <button id="reopen-button" type="button" class="btn btn-sm btn-outline-primary d-none bi bi-arrow-counterclockwise">Give another try</button>
           </div>
         </div>
         <!-- Paper score: the student answered on paper; the teacher types the total -->
@@ -107,10 +107,10 @@
           <input id="paper-note" class="form-control form-control-sm mb-2" maxlength="200"
                  placeholder="Note (optional), e.g. Passed on paper Oct 14">
           <div class="d-flex justify-content-between gap-2">
-            <button id="paper-delete" type="button" class="btn btn-sm btn-link link-danger p-0 d-none">Remove paper score</button>
+            <button id="paper-delete" type="button" class="btn btn-sm btn-link link-danger p-0 d-none bi bi-trash">Remove paper score</button>
             <div class="d-flex gap-2 ms-auto">
-              <button id="paper-cancel" type="button" class="btn btn-sm btn-outline-secondary">Cancel</button>
-              <button id="paper-save" type="submit" class="btn btn-sm btn-success">Save</button>
+              <button id="paper-cancel" type="button" class="btn btn-sm btn-outline-secondary bi bi-x-lg">Cancel</button>
+              <button id="paper-save" type="submit" class="btn btn-sm btn-success bi bi-check-lg">Save</button>
             </div>
           </div>
           <div class="form-text">Saved as one of the student's submissions. The latest submission counts.</div>
@@ -119,8 +119,8 @@
           <p class="mb-2">Let this student change their answers and submit again (even past the limit)?
             Their current score counts until they submit.</p>
           <div class="d-flex gap-2 justify-content-end">
-            <button id="reopen-no" type="button" class="btn btn-sm btn-outline-secondary">Cancel</button>
-            <button id="reopen-yes" type="button" class="btn btn-sm btn-primary">Give another try</button>
+            <button id="reopen-no" type="button" class="btn btn-sm btn-outline-secondary bi bi-x-lg">Cancel</button>
+            <button id="reopen-yes" type="button" class="btn btn-sm btn-primary bi bi-arrow-counterclockwise">Give another try</button>
           </div>
         </div>
         <div id="student-detail"></div>
@@ -128,8 +128,8 @@
       <div class="modal-footer justify-content-between">
         <span id="points-status" class="small text-body-secondary"></span>
         <div class="d-flex gap-2">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-          <button id="save-points-button" type="button" class="btn btn-success" disabled>Save scores</button>
+          <button type="button" class="btn btn-outline-secondary bi bi-x-lg" data-bs-dismiss="modal">Close</button>
+          <button id="save-points-button" type="button" class="btn btn-success bi bi-check-lg" disabled>Save scores</button>
         </div>
       </div>
     </div>
