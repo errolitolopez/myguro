@@ -14,6 +14,7 @@ const STATUS = {
   not_started: ["Not started", "text-bg-light border"],
   in_progress: ["Answering", "text-bg-info"],
   submitted: ["Submitted", "text-bg-success"],
+  excluded: ["Excluded", "text-bg-secondary"],
 };
 
 const studentModal = bootstrap.Modal.getOrCreateInstance(document.getElementById("student-modal"));
@@ -40,6 +41,44 @@ function scoreCell(score) {
 
 // --- The table ----------------------------------------------------------------------
 
+// excludeCell(student) -> the table cell with an "Exclude" button, or "Add back" for an excluded
+// student. A student who already submitted has no button.
+function excludeCell(student) {
+  const cell = el("td", "text-end");
+  if (!student.excluded && student.attempts > 0) return cell;
+  const button = el("button",
+    `btn btn-sm text-nowrap bi ${student.excluded ? "btn-outline-primary bi-person-plus" : "btn-outline-secondary bi-person-dash"}`,
+    student.excluded ? "Add back" : "Exclude");
+  button.type = "button";
+  // The row opens the student's answers: keep a click or Enter on the button from doing that too.
+  button.addEventListener("keydown", (event) => event.stopPropagation());
+  button.addEventListener("click", async (event) => {
+    event.stopPropagation();
+    const stopLoading = startLoading(button);
+    if (!stopLoading) return;
+    hideError("results-error");
+    try {
+      const response = await apiFetch(`/api/assignments/${assignmentId}/students/${student.id}/excluded`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ excluded: !student.excluded }),
+      });
+      if (!response) return;
+      if (!response.ok) {
+        showError("results-error", (await response.json()).error || "Could not save.");
+        return;
+      }
+      await loadResults(); // the totals change too
+    } catch {
+      showError("results-error", "Cannot reach the server. Check your connection.");
+    } finally {
+      stopLoading();
+    }
+  });
+  cell.append(button);
+  return cell;
+}
+
 function render() {
   const { assignment, sections, students, summary } = results;
   document.title = `${assignment.title} · Results · myguro`;
@@ -49,7 +88,8 @@ function render() {
     assignment.due_date ? `due ${formatDay(assignment.due_date)}` : "no due date",
     assignment.max_attempts === null ? "unlimited submissions"
       : plural(assignment.max_attempts, "submission") + " allowed",
-  ].join(" · ");
+    summary.excluded ? `${plural(summary.excluded, "student")} excluded` : null,
+  ].filter(Boolean).join(" · ");
   const back = document.getElementById("back-link");
   // A direct assignment has no class page: go back to the activities list.
   back.href = assignment.class_id === null ? "/activities" : `/classes/${assignment.class_id}`;
@@ -71,14 +111,15 @@ function render() {
 
   const head = document.getElementById("results-head");
   head.replaceChildren(el("th", "", "Student"), el("th", "", "Status"), el("th", "", "Score"),
-    ...sections.map((section) => el("th", "small fw-normal", section.title)), el("th", "", "Tries"));
+    ...sections.map((section) => el("th", "small fw-normal", section.title)), el("th", "", "Tries"),
+    el("th", "visually-hidden", "Actions"));
 
   const query = document.getElementById("search").value.trim().toLowerCase();
   const filter = document.getElementById("filter").value;
   const shown = students.filter((student) => {
     if (query && !student.name.toLowerCase().includes(query) && !student.username.includes(query)) return false;
     if (filter === "submitted") return student.score !== null;
-    if (filter === "not_submitted") return student.score === null;
+    if (filter === "not_submitted") return student.score === null && !student.excluded;
     if (filter === "to_check") return student.score !== null && student.score.pending > 0;
     if (filter === "late") return student.late;
     return true;
@@ -89,13 +130,13 @@ function render() {
     const row = el("tr");
     const cell = el("td", "text-body-secondary",
       students.length ? "No student matches." : "No students in this assignment.");
-    cell.colSpan = 4 + sections.length;
+    cell.colSpan = 5 + sections.length;
     row.append(cell);
     body.replaceChildren(row);
     return;
   }
   body.replaceChildren(...shown.map((student) => {
-    const row = el("tr");
+    const row = el("tr", student.excluded ? "text-body-secondary" : "");
     row.tabIndex = 0;
     row.addEventListener("click", () => openStudent(student.id));
     row.addEventListener("keydown", (event) => {
@@ -113,7 +154,8 @@ function render() {
 
     row.append(name, status, scoreCell(student.score),
       ...sections.map((section) => scoreCell(student.section_scores[section.id])),
-      el("td", "text-body-secondary", student.attempts ? String(student.attempts) : "–"));
+      el("td", "text-body-secondary", student.attempts ? String(student.attempts) : "–"),
+      excludeCell(student));
     return row;
   }));
 }
