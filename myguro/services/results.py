@@ -19,6 +19,25 @@ class ResultsService(Service):
     def exists(self, assignment_id):
         return self.assignments.get_for_teacher(assignment_id, self.user["id"]) is not None
 
+    def require_included(self, assignment_id, student_id):
+        """Refuse to work on a student the teacher excluded from this assignment."""
+        if student_id in self.assignments.excluded_ids(assignment_id):
+            raise ValidationError("Add the student back first.")
+
+    def set_excluded(self, assignment_id, student_id, excluded):
+        """Exclude a student from this assignment (for example absent) or add them back. Saved
+        answers are kept. A student who already submitted can't be excluded."""
+        assignment = self.require(assignment_id)
+        if not isinstance(excluded, bool):
+            raise ValidationError("Choose whether to exclude the student.")
+        if student_id not in {row["id"] for row in self.assignments.students(assignment)}:
+            raise NotFoundError("This student doesn't have this activity.")
+        if excluded and self.submissions.latest(assignment_id, student_id, submitted_only=True):
+            raise ValidationError("This student already submitted, so they can't be excluded.")
+        self.assignments.set_excluded(assignment_id, student_id, excluded)
+        self.commit()
+        return {"excluded": excluded}
+
     def require_submission(self, submission_id, message="Not found."):
         submission = self.submissions.get_for_teacher(submission_id, self.user["id"])
         if submission is None:
@@ -174,6 +193,7 @@ class ResultsService(Service):
         """Give one student another try, even past the activity's limit: a new attempt starting
         from their last answers. Their counted score stays until they submit it."""
         self.require(assignment_id)
+        self.require_included(assignment_id, student_id)
         attempts = self.submissions.attempts(assignment_id, student_id)
         if not attempts:
             raise ValidationError("The student hasn't started yet.")
@@ -191,6 +211,7 @@ class ResultsService(Service):
         assignment = self.require(assignment_id)
         if student_id not in {row["id"] for row in self.assignments.students(assignment)}:
             raise NotFoundError("This student doesn't have this activity.")
+        self.require_included(assignment_id, student_id)
         possible = self.activities.total_points(assignment["activity_id"])
         if possible == 0:
             raise ValidationError("This activity has no questions to score.")

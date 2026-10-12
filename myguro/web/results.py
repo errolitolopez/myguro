@@ -82,6 +82,13 @@ def api_reopen(assignment_id, student_id):
     return jsonify(service().reopen(assignment_id, student_id))
 
 
+@bp.put("/api/assignments/<int:assignment_id>/students/<int:student_id>/excluded")
+@role_required_api("teacher")
+def api_excluded(assignment_id, student_id):
+    """{excluded: true} for a student who is absent; {excluded: false} adds them back."""
+    return jsonify(service().set_excluded(assignment_id, student_id, json_body().get("excluded")))
+
+
 @bp.post("/api/assignments/<int:assignment_id>/students/<int:student_id>/paper")
 @role_required_api("teacher")
 def api_add_paper(assignment_id, student_id):

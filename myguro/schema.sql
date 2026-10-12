@@ -91,6 +91,15 @@ CREATE TABLE IF NOT EXISTS assignment_students (
     PRIMARY KEY (assignment_id, student_id)
 );
 
+-- A student the teacher excluded from one assignment (for example absent): they don't see it and
+-- can't answer it until added back. Their saved answers are kept.
+CREATE TABLE IF NOT EXISTS assignment_exclusions (
+    assignment_id INTEGER NOT NULL REFERENCES assignments (id),
+    student_id INTEGER NOT NULL REFERENCES users (id),
+    excluded_at TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (assignment_id, student_id)
+);
+
 -- The questions of an activity section, in position order.
 -- type: multiple_choice, true_false, identification, fill_blank, matching, short_answer (checked in app.py, so new
 -- types can be added without rebuilding the table). choices and answer are JSON:

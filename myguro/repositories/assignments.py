@@ -5,13 +5,18 @@ DIRECT_CLASS_NAME = "Individual students"
 
 # A student sees an assignment when they are in its class and it is for everyone, or they are one
 # of its chosen students. A direct assignment (class_id NULL) is seen only by its chosen students.
+# A student the teacher excluded (for example absent) does not see it until added back.
 VISIBLE_TO_STUDENT = """
     (
-        (asg.class_id IN (SELECT class_id FROM class_students WHERE student_id = :student)
-         AND (asg.everyone = 1 OR EXISTS (SELECT 1 FROM assignment_students s
-                                          WHERE s.assignment_id = asg.id AND s.student_id = :student)))
-        OR (asg.class_id IS NULL AND EXISTS (SELECT 1 FROM assignment_students s
-                                             WHERE s.assignment_id = asg.id AND s.student_id = :student))
+        (
+            (asg.class_id IN (SELECT class_id FROM class_students WHERE student_id = :student)
+             AND (asg.everyone = 1 OR EXISTS (SELECT 1 FROM assignment_students s
+                                              WHERE s.assignment_id = asg.id AND s.student_id = :student)))
+            OR (asg.class_id IS NULL AND EXISTS (SELECT 1 FROM assignment_students s
+                                                 WHERE s.assignment_id = asg.id AND s.student_id = :student))
+        )
+        AND NOT EXISTS (SELECT 1 FROM assignment_exclusions x
+                        WHERE x.assignment_id = asg.id AND x.student_id = :student)
     )
 """
 
@@ -52,6 +57,20 @@ class AssignmentRepository(Repository):
         self.db.executemany("INSERT INTO assignment_students (assignment_id, student_id) VALUES (?, ?)",
                             [(assignment_id, student_id) for student_id in student_ids])
 
+    def excluded_ids(self, assignment_id):
+        """Ids of the students the teacher excluded from this assignment."""
+        return [row["student_id"] for row in self.all(
+            "SELECT student_id FROM assignment_exclusions WHERE assignment_id = ?", (assignment_id,))]
+
+    def set_excluded(self, assignment_id, student_id, excluded):
+        """Exclude a student from the assignment, or add them back. Doing it twice is fine."""
+        if excluded:
+            self.execute("INSERT OR IGNORE INTO assignment_exclusions (assignment_id, student_id) VALUES (?, ?)",
+                         (assignment_id, student_id))
+        else:
+            self.execute("DELETE FROM assignment_exclusions WHERE assignment_id = ? AND student_id = ?",
+                         (assignment_id, student_id))
+
     def has_submitted_work(self, assignment_id):
         return self.one("SELECT 1 FROM submissions WHERE assignment_id = ? AND submitted_at IS NOT NULL",
                         (assignment_id,)) is not None
@@ -62,6 +81,7 @@ class AssignmentRepository(Repository):
                      "(SELECT id FROM submissions WHERE assignment_id = ?)", (assignment_id,))
         self.execute("DELETE FROM submissions WHERE assignment_id = ?", (assignment_id,))
         self.execute("DELETE FROM assignment_students WHERE assignment_id = ?", (assignment_id,))
+        self.execute("DELETE FROM assignment_exclusions WHERE assignment_id = ?", (assignment_id,))
         self.execute("DELETE FROM assignments WHERE id = ?", (assignment_id,))
 
     def for_class(self, class_id):
