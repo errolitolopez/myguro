@@ -1,11 +1,18 @@
 from myguro.repositories.base import Repository
 
-# A student sees an assignment when they are in its class and it is for everyone,
-# or they are one of its chosen students.
+# What students, results and exports call the group of students given a sheet with no class.
+DIRECT_CLASS_NAME = "Individual students"
+
+# A student sees an assignment when they are in its class and it is for everyone, or they are one
+# of its chosen students. A direct assignment (class_id NULL) is seen only by its chosen students.
 VISIBLE_TO_STUDENT = """
-    asg.class_id IN (SELECT class_id FROM class_students WHERE student_id = :student)
-    AND (asg.everyone = 1 OR EXISTS (SELECT 1 FROM assignment_students s
-                                     WHERE s.assignment_id = asg.id AND s.student_id = :student))
+    (
+        (asg.class_id IN (SELECT class_id FROM class_students WHERE student_id = :student)
+         AND (asg.everyone = 1 OR EXISTS (SELECT 1 FROM assignment_students s
+                                          WHERE s.assignment_id = asg.id AND s.student_id = :student)))
+        OR (asg.class_id IS NULL AND EXISTS (SELECT 1 FROM assignment_students s
+                                             WHERE s.assignment_id = asg.id AND s.student_id = :student))
+    )
 """
 
 
@@ -13,10 +20,15 @@ class AssignmentRepository(Repository):
     def get(self, activity_id, class_id):
         return self.one("SELECT * FROM assignments WHERE activity_id = ? AND class_id = ?", (activity_id, class_id))
 
+    def get_direct(self, activity_id):
+        """The sheet's direct assignment (given to students with no class), or None."""
+        return self.one("SELECT * FROM assignments WHERE activity_id = ? AND class_id IS NULL", (activity_id,))
+
     def ids_by_class(self, activity_id):
-        """{class id: assignment id} of a sheet."""
+        """{class id: assignment id} of a sheet (the direct assignment has no class and is left out)."""
         return {row["class_id"]: row["id"] for row in self.all(
-            "SELECT id, class_id FROM assignments WHERE activity_id = ?", (activity_id,))}
+            "SELECT id, class_id FROM assignments WHERE activity_id = ? AND class_id IS NOT NULL",
+            (activity_id,))}
 
     def chosen_students(self, assignment_id):
         return [row["student_id"] for row in self.all(
@@ -68,11 +80,12 @@ class AssignmentRepository(Repository):
     def get_for_teacher(self, assignment_id, teacher_id):
         """An assignment of the teacher's sheet, with the sheet and class details."""
         return self.one(
-            """
-            SELECT asg.*, a.title, a.subject, a.max_attempts, c.name AS class_name, c.subject AS class_subject
+            f"""
+            SELECT asg.*, a.title, a.subject, a.max_attempts,
+                   COALESCE(c.name, '{DIRECT_CLASS_NAME}') AS class_name, COALESCE(c.subject, '') AS class_subject
             FROM assignments asg
             JOIN activities a ON a.id = asg.activity_id
-            JOIN classes c ON c.id = asg.class_id
+            LEFT JOIN classes c ON c.id = asg.class_id
             WHERE asg.id = ? AND a.teacher_id = ?
             """,
             (assignment_id, teacher_id),
@@ -83,10 +96,11 @@ class AssignmentRepository(Repository):
         return self.one(
             f"""
             SELECT asg.*, a.title, a.subject, a.teacher_id, a.max_attempts,
-                   c.name AS class_name, c.subject AS class_subject, t.name AS teacher
+                   COALESCE(c.name, '{DIRECT_CLASS_NAME}') AS class_name, COALESCE(c.subject, '') AS class_subject,
+                   t.name AS teacher
             FROM assignments asg
             JOIN activities a ON a.id = asg.activity_id
-            JOIN classes c ON c.id = asg.class_id
+            LEFT JOIN classes c ON c.id = asg.class_id
             JOIN users t ON t.id = a.teacher_id
             WHERE asg.id = :assignment AND {VISIBLE_TO_STUDENT}
             """,
@@ -99,12 +113,13 @@ class AssignmentRepository(Repository):
         return self.all(
             f"""
             SELECT asg.id, asg.due_date, asg.scores_released, a.title, a.subject, a.id AS activity_id, a.max_attempts,
-                   c.name AS class_name, c.subject AS class_subject, t.name AS teacher,
+                   COALESCE(c.name, '{DIRECT_CLASS_NAME}') AS class_name, COALESCE(c.subject, '') AS class_subject,
+                   t.name AS teacher,
                    sub.id AS submission_id, sub.submitted_at, sub.attempt, sub.paper,
                    last.id AS last_id, last.late AS last_late, last.paper AS last_paper
             FROM assignments asg
             JOIN activities a ON a.id = asg.activity_id
-            JOIN classes c ON c.id = asg.class_id
+            LEFT JOIN classes c ON c.id = asg.class_id
             JOIN users t ON t.id = a.teacher_id
             LEFT JOIN submissions sub ON sub.id = (
                 SELECT id FROM submissions WHERE assignment_id = asg.id AND student_id = :student
@@ -121,7 +136,9 @@ class AssignmentRepository(Repository):
     def students(self, assignment):
         """The students who got this assignment, plus anyone who already worked on it
         (e.g. removed from the class later), in name order."""
-        if assignment["everyone"]:
+        if assignment["class_id"] is None:
+            given = "SELECT student_id FROM assignment_students WHERE assignment_id = :assignment"
+        elif assignment["everyone"]:
             given = "SELECT student_id FROM class_students WHERE class_id = :class"
         else:
             given = ("SELECT student_id FROM assignment_students WHERE assignment_id = :assignment "
