@@ -1,30 +1,44 @@
 // Assign popup in the activity editor: give the sheet to some of the teacher's classes,
-// each to everyone or to selected students, with an optional due date.
+// each to everyone or to selected students, and/or to individual students who are in no class,
+// with an optional due date.
 // Uses activityId, unsaved, el(), showEditorError() and showStatusBadge() from activity-editor.js.
 
 let assignClasses = []; // the teacher's classes, each with .assignment (null = not given)
+let assignDirect = null; // the direct assignment (individual students, no class), or null
+let directDraft = null; // popup choices until Save: { due_date, students: Map of student id -> student }
+
+const DIRECT_TITLE = "Individual students";
+const DIRECT_SEARCH_DELAY = 300; // ms after the last key
 
 const assignModal = bootstrap.Modal.getOrCreateInstance(document.getElementById("assign-modal"));
 const assignList = document.getElementById("assign-classes");
 const assignSaveButton = document.getElementById("assign-save-button");
 
-// "Grade 9 - Rizal · Science (due Oct 15, 2026), Grade 9 - Bonifacio · Science (5 students)"
+// "Grade 9 - Rizal · Science (due Oct 15, 2026), Individual students (3 students)"
 function showAssignedSummary() {
   const given = assignClasses.filter((item) => item.assignment);
-  showStatusBadge(given.length);
+  showStatusBadge(given.length + (assignDirect ? 1 : 0));
   const summary = document.getElementById("assigned-summary");
-  if (given.length === 0) {
-    summary.replaceChildren("No class yet — this is a draft only you can see.");
+  if (given.length === 0 && !assignDirect) {
+    summary.replaceChildren("No class or student yet — this is a draft only you can see.");
     return;
   }
-  // One line per class, each with a link to its results.
-  summary.replaceChildren(...given.map((item) => {
+  // One line per class or group, each with a link to its results.
+  const lines = given.map((item) => {
     const details = [];
     if (!item.assignment.everyone) details.push(plural(item.assignment.student_ids.length, "student"));
     if (item.assignment.due_date) details.push(`due ${formatDay(item.assignment.due_date)}`);
-    const line = el("div", "", classTitle(item) + (details.length ? ` (${details.join(", ")})` : "") + " · ");
+    return [classTitle(item), details, item.assignment.id];
+  });
+  if (assignDirect) {
+    const details = [plural(assignDirect.student_ids.length, "student")];
+    if (assignDirect.due_date) details.push(`due ${formatDay(assignDirect.due_date)}`);
+    lines.push([DIRECT_TITLE, details, assignDirect.id]);
+  }
+  summary.replaceChildren(...lines.map(([title, details, assignmentId]) => {
+    const line = el("div", "", title + (details.length ? ` (${details.join(", ")})` : "") + " · ");
     const link = el("a", "", "Results");
-    link.href = `/results/${item.assignment.id}`;
+    link.href = `/results/${assignmentId}`;
     line.append(link);
     return line;
   }));
@@ -38,7 +52,9 @@ async function loadAssignments() {
       document.getElementById("assigned-summary").textContent = "Could not load the classes.";
       return;
     }
-    assignClasses = (await response.json()).classes;
+    const data = await response.json();
+    assignClasses = data.classes;
+    assignDirect = data.direct;
     showAssignedSummary();
   } catch {
     document.getElementById("assigned-summary").textContent = "Cannot reach the server.";
@@ -133,6 +149,135 @@ function assignItem(item) {
   return box;
 }
 
+// --- Individual students (no class) ---------------------------------------------------
+
+// The "Individual students" part of the popup: due date, chosen students as removable chips,
+// and a search of the school's students to add more. Choices stay in directDraft until Save.
+function directBlock() {
+  const box = el("div", "border rounded p-2");
+  box.append(el("div", "fw-semibold", DIRECT_TITLE));
+  box.append(el("div", "small text-body-secondary mb-2",
+    "Give it to students who are not in your classes. Leave it empty for none."));
+
+  // Due date
+  const dueRow = el("div", "d-flex align-items-center gap-2 mb-2");
+  const dueLabel = el("label", "small text-nowrap", "Due date");
+  dueLabel.htmlFor = "due-direct";
+  const due = el("input", "form-control form-control-sm");
+  due.type = "date";
+  due.id = "due-direct";
+  due.value = directDraft.due_date || "";
+  due.style.maxWidth = "11rem";
+  due.addEventListener("input", () => (directDraft.due_date = due.value || null));
+  dueRow.append(dueLabel, due, el("span", "small text-body-secondary", "(optional)"));
+  box.append(dueRow);
+
+  // Chosen students
+  const chips = el("div", "d-flex flex-wrap gap-1 mb-2");
+  const results = el("div", "border rounded p-2 overflow-auto");
+  results.style.maxHeight = "14rem";
+  let found = []; // the last search result
+
+  const drawChips = () => {
+    if (directDraft.students.size === 0) {
+      chips.replaceChildren(el("span", "small text-body-secondary", "No students chosen yet."));
+      return;
+    }
+    chips.replaceChildren(...[...directDraft.students.values()].map((student) => {
+      const chip = el("span", "badge text-bg-secondary d-inline-flex align-items-center gap-1", student.name);
+      const remove = el("button", "btn-close btn-close-white");
+      remove.type = "button";
+      remove.style.fontSize = "0.6rem";
+      remove.setAttribute("aria-label", `Remove ${student.name}`);
+      remove.addEventListener("click", () => {
+        directDraft.students.delete(student.id);
+        drawChips();
+        drawResults();
+      });
+      chip.append(remove);
+      return chip;
+    }));
+  };
+
+  const drawResults = () => {
+    if (found.length === 0) {
+      results.replaceChildren(el("div", "small text-body-secondary", "No students found."));
+      return;
+    }
+    results.replaceChildren(...found.map((student) => {
+      const row = el("div", "d-flex justify-content-between align-items-center gap-2 small py-1");
+      const label = el("span", "", student.name);
+      const place = gradeSection(student);
+      if (place) label.append(el("span", "text-body-secondary", ` · ${place}`));
+      const add = el("button", "btn btn-sm btn-outline-primary py-0 bi bi-plus-lg", "Add");
+      add.type = "button";
+      add.disabled = directDraft.students.has(student.id);
+      add.addEventListener("click", () => {
+        directDraft.students.set(student.id, student);
+        drawChips();
+        drawResults();
+      });
+      row.append(label, add);
+      return row;
+    }));
+  };
+
+  // Search: text + one grade/section choice, run a moment after the last change.
+  const searchRow = el("div", "d-flex flex-wrap gap-2 mb-2");
+  const search = el("input", "form-control form-control-sm flex-grow-1");
+  search.type = "search";
+  search.placeholder = "Search name, username or section";
+  search.setAttribute("aria-label", "Search students");
+  const place = el("select", "form-select form-select-sm w-auto");
+  place.setAttribute("aria-label", "Grade and section");
+  place.append(new Option("All grades and sections", ""));
+  searchRow.append(search, place);
+
+  let timer = null;
+  let latest = 0; // ignore a slow answer to an older search
+  const runSearch = async () => {
+    const ticket = ++latest;
+    const params = new URLSearchParams({ q: search.value });
+    if (place.value !== "") {
+      const [grade, section] = JSON.parse(place.value);
+      params.set("grade", grade);
+      params.set("section", section);
+    }
+    try {
+      const response = await apiFetch(`/api/activities/${activityId}/student-search?${params}`);
+      if (!response || ticket !== latest) return;
+      if (!response.ok) {
+        results.replaceChildren(el("div", "small text-danger", "Could not search."));
+        return;
+      }
+      const data = await response.json();
+      found = data.students;
+      // Fill the grade/section dropdown once, keeping the choice.
+      if (place.options.length === 1) {
+        data.sections.forEach((item) => place.append(
+          new Option(gradeSection(item) || "No grade or section", JSON.stringify([item.grade, item.section]))));
+      }
+      drawResults();
+      if (data.more) {
+        results.append(el("div", "small text-body-secondary pt-1", "More students match: search to narrow."));
+      }
+    } catch {
+      results.replaceChildren(el("div", "small text-danger", "Cannot reach the server."));
+    }
+  };
+  search.addEventListener("input", () => {
+    clearTimeout(timer);
+    timer = setTimeout(runSearch, DIRECT_SEARCH_DELAY);
+  });
+  place.addEventListener("change", runSearch);
+
+  box.append(chips, searchRow, results);
+  drawChips();
+  results.replaceChildren(el("div", "small text-body-secondary", "Loading..."));
+  runSearch();
+  return box;
+}
+
 document.getElementById("assign-button").addEventListener("click", async () => {
   if (unsaved) {
     showEditorError("Save your changes before assigning.");
@@ -149,16 +294,21 @@ document.getElementById("assign-button").addEventListener("click", async () => {
       student_ids: new Set(given ? given.student_ids : []),
     };
   }
+  directDraft = {
+    due_date: assignDirect ? assignDirect.due_date : null,
+    students: new Map((assignDirect ? assignDirect.students : []).map((student) => [student.id, student])),
+  };
   if (assignClasses.length === 0) {
     const empty = el("p", "text-body-secondary mb-0", "You have no classes yet. ");
     const link = el("a", "", "Create a class");
     link.href = "/classes";
-    empty.append(link, " first.");
+    empty.append(link, " first, or choose individual students below.");
     assignList.replaceChildren(empty);
   } else {
     assignList.replaceChildren(...assignClasses.map(assignItem));
   }
-  assignSaveButton.disabled = assignClasses.length === 0;
+  document.getElementById("assign-direct").replaceChildren(directBlock());
+  assignSaveButton.disabled = false;
   assignModal.show();
 });
 
@@ -172,6 +322,10 @@ assignSaveButton.addEventListener("click", async () => {
       everyone: item.draft.everyone,
       student_ids: [...item.draft.student_ids],
     }));
+  // No chosen students takes the direct assignment back.
+  const direct = directDraft.students.size
+    ? { due_date: directDraft.due_date, student_ids: [...directDraft.students.keys()] }
+    : null;
 
   const stopLoading = startLoading(assignSaveButton);
   if (!stopLoading) return;
@@ -179,7 +333,7 @@ assignSaveButton.addEventListener("click", async () => {
     const response = await apiFetch(`/api/activities/${activityId}/assignments`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ assignments }),
+      body: JSON.stringify({ assignments, direct }),
     });
     if (!response) return;
     const data = await response.json();
@@ -188,6 +342,7 @@ assignSaveButton.addEventListener("click", async () => {
       return;
     }
     assignClasses = data.classes;
+    assignDirect = data.direct;
     showAssignedSummary();
     assignModal.hide();
   } catch {

@@ -51,8 +51,9 @@ function render() {
       : plural(assignment.max_attempts, "submission") + " allowed",
   ].join(" · ");
   const back = document.getElementById("back-link");
-  back.href = `/classes/${assignment.class_id}`;
-  back.textContent = `‹ ${assignment.class_name}`;
+  // A direct assignment has no class page: go back to the activities list.
+  back.href = assignment.class_id === null ? "/activities" : `/classes/${assignment.class_id}`;
+  back.textContent = assignment.class_id === null ? "‹ Activities" : `‹ ${assignment.class_name}`;
   document.getElementById("edit-link").href = `/activities/${assignment.activity_id}`;
 
   const released = assignment.scores_released;
