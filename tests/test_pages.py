@@ -34,3 +34,15 @@ def test_login_page_and_redirects(app, teacher):
     assert app.test_client().get("/login").status_code == 200
     assert teacher.get("/login").headers["Location"].endswith("/dashboard")
     assert teacher.get("/").headers["Location"].endswith("/dashboard")
+
+
+def test_tip_box_for_teachers_and_students_not_on_answer_page(admin, teacher):
+    class_id, students = make_class(teacher)
+    activity_id, _ = make_activity(teacher)
+    assignment_id = assign(teacher, activity_id, class_id)
+    student = login(students[0]["username"])
+
+    assert 'id="tip-box"' not in admin.get("/dashboard").get_data(as_text=True)
+    assert 'id="tip-box" class="container d-none" data-role="teacher"' in teacher.get("/dashboard").get_data(as_text=True)
+    assert 'data-role="student"' in student.get("/my-activities").get_data(as_text=True)
+    assert 'id="tip-box"' not in student.get(f"/my-activities/{assignment_id}").get_data(as_text=True)

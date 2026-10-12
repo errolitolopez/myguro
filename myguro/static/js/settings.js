@@ -134,4 +134,41 @@ async function loadSettings(clearStatus = true) {
   }
 }
 
+// Lists the tips from tips.js, so the admin can read what teachers and students will see.
+function showTips() {
+  for (const role of ["teacher", "student"]) {
+    const tips = (window.myguroTips && window.myguroTips[role]) || [];
+    document.getElementById(`tips-${role}`).replaceChildren(...tips.map((tip) => {
+      const item = document.createElement("li");
+      item.className = "list-group-item small";
+      item.textContent = tip;
+      return item;
+    }));
+  }
+}
+
+// The tip box as a teacher sees it, one tip further each click. Closing it only hides the preview.
+let previewIndex = 0;
+document.getElementById("tip-preview").addEventListener("click", () => {
+  const all = window.myguroTips || {};
+  const tips = [...(all.teacher || []), ...(all.student || [])];
+  if (!tips.length) return;
+  const strong = document.createElement("strong");
+  strong.textContent = "Tip: ";
+  const text = document.createElement("span");
+  text.textContent = tips[previewIndex % tips.length];
+  previewIndex += 1;
+  const close = document.createElement("button");
+  close.type = "button";
+  close.className = "btn-close";
+  close.setAttribute("aria-label", "Close tip");
+  const box = document.createElement("div");
+  box.className = "alert alert-info alert-dismissible mb-0 small";
+  box.setAttribute("role", "status");
+  box.append(strong, text, close);
+  close.addEventListener("click", () => box.remove());
+  document.getElementById("tip-preview-box").replaceChildren(box);
+});
+
+showTips();
 loadSettings();

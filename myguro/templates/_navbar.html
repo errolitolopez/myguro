@@ -48,3 +48,7 @@
     </ul>
   </div>
 </nav>
+{# A closable tip, filled in by tips.js. Not on the answer page, so nobody is interrupted mid-activity. #}
+{% if user.role in ("teacher", "student") and request.endpoint != "student.answer_page" %}
+<div id="tip-box" class="container d-none" data-role="{{ user.role }}"></div>
+{% endif %}

@@ -92,6 +92,22 @@
     </div>
   </div>
 
+  <div class="card mt-3">
+    <div class="card-body">
+      <h2 class="h6 fw-semibold mb-1">Tips preview</h2>
+      <div class="form-text mb-3">
+        Teachers and students see one of these in a closable box under the menu, a new one every 3 days.
+        They can close it or turn tips off. Never shown on the answer page.
+      </div>
+      <h3 class="small fw-semibold text-body-secondary mb-1">Teachers</h3>
+      <ul id="tips-teacher" class="list-group mb-3"></ul>
+      <h3 class="small fw-semibold text-body-secondary mb-1">Students</h3>
+      <ul id="tips-student" class="list-group"></ul>
+      <button id="tip-preview" type="button" class="btn btn-outline-secondary btn-sm bi bi-eye mt-3">Preview a tip</button>
+      <div id="tip-preview-box" class="mt-2"></div>
+    </div>
+  </div>
+
   <div id="settings-status" class="small text-body-secondary mt-2"></div>
 </main>
 {% endblock %}
