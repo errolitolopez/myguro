@@ -28,7 +28,7 @@ def test_results_table_and_summary(teacher, other_teacher):
     data = teacher.get(f"/api/assignments/{assignment_id}/results").get_json()
     assert [section["title"] for section in data["sections"]] == ["III. Pre-test", "XI. Reflection"]
     assert data["summary"] == {"students": 6, "submitted": 1, "not_started": 4, "late": 1, "to_check": 5,
-                               "average": 50}
+                               "average": 50, "excluded": 0}
     rows = {row["id"]: row for row in data["students"]}
     assert rows[students[0]["id"]]["status"] == "submitted" and rows[students[1]["id"]]["status"] == "in_progress"
     assert other_teacher.get(f"/api/assignments/{assignment_id}/results").status_code == 404
