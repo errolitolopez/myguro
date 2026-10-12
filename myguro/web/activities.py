@@ -118,3 +118,11 @@ def api_assignments(activity_id):
 @role_required_api("teacher")
 def api_save_assignments(activity_id):
     return jsonify(AssignmentService(get_db(), current_user()).save(activity_id, json_body()))
+
+
+@bp.get("/api/activities/<int:activity_id>/student-search")
+@role_required_api("teacher")
+def api_search_students(activity_id):
+    """?q= name, username or section; ?grade= and ?section= filter exactly (?section= empty = no section)."""
+    return jsonify(AssignmentService(get_db(), current_user()).search_students(
+        activity_id, request.args.get("q", ""), request.args.get("grade"), request.args.get("section")))

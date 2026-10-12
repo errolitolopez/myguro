@@ -199,3 +199,19 @@ def test_direct_assignment_rules(teacher, other_teacher, admin):
     assert error(put(activity_id, {"student_ids": [outside[1]["id"]]})) == not_found
 
     assert put(empty_id, {"student_ids": [outside[0]["id"]]}).status_code == 400
+
+
+def test_student_search_covers_the_whole_school(teacher, other_teacher):
+    outside = outside_students(other_teacher)
+    activity_id, _ = make_activity(teacher)
+    found = teacher.get(f"/api/activities/{activity_id}/student-search?grade=Grade+9&section=Bonifacio").get_json()
+    assert {student["id"] for student in found["students"]} == {student["id"] for student in outside}
+    assert found["more"] is False
+    assert {"grade": "Grade 9", "section": "Bonifacio"} in found["sections"]
+
+    by_name = teacher.get(
+        f"/api/activities/{activity_id}/student-search?q={outside[0]['last_name']}").get_json()["students"]
+    assert outside[0]["id"] in [student["id"] for student in by_name]
+
+    assert other_teacher.get(f"/api/activities/{activity_id}/student-search").status_code == 404
+    assert login(outside[0]["username"]).get(f"/api/activities/{activity_id}/student-search").status_code == 403

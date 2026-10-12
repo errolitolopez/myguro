@@ -1,10 +1,11 @@
 from myguro.config import school_today
+from myguro.domain.text import clean_name, like_pattern
 from myguro.domain.work import clean_due_date
 from myguro.errors import ValidationError
 from myguro.repositories.assignments import DIRECT_CLASS_NAME
 from myguro.services.activities import ActivityService
 from myguro.services.base import Service
-from myguro.services.classes import ClassService
+from myguro.services.classes import MAX_SEARCH_RESULTS, ClassService
 from myguro.services.presenters import class_title, user_json
 
 
@@ -64,6 +65,22 @@ class AssignmentService(Service):
                 raise ValidationError(f"{label}: a chosen student is not in this class.")
             student_ids = sorted(set(student_ids))
         return {"class_id": class_row["id"], "everyone": everyone, "student_ids": student_ids, "due_date": due_date}
+
+    def search_students(self, activity_id, query="", grade=None, section=None):
+        """Search the school's active students to give the sheet to directly: name, username or
+        section; grade / section filter exactly (section "" = no section). Also the grade + section
+        pairs, for the dropdown."""
+        ActivityService(self.db, self.user).require(activity_id)
+        # Class id None: nobody is "in the class", so the in_class column is not used here.
+        rows = self.classes.search_students(
+            None, like_pattern(clean_name(query)), grade or None,
+            None if section is None else clean_name(section), MAX_SEARCH_RESULTS,
+        )
+        return {
+            "students": [user_json(row) for row in rows],
+            "more": len(rows) == MAX_SEARCH_RESULTS,
+            "sections": [{"grade": row["grade"], "section": row["section"]} for row in self.classes.grade_sections()],
+        }
 
     def clean_direct(self, posted):
         """{due_date, student_ids} for the individual students, or None to take it back.
