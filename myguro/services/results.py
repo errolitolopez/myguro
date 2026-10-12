@@ -55,13 +55,17 @@ class ResultsService(Service):
                     for number, section in enumerate(self.activities.sections(activity_id), start=1)
                     if section["kind"] == "activity"]
 
+        excluded_ids = set(self.assignments.excluded_ids(assignment_id))
         students = []
         for student in self.assignments.students(assignment):
             attempts = self.submissions.attempts(assignment_id, student["id"])
             submitted = [attempt for attempt in attempts if attempt["submitted_at"]]
             latest = attempts[-1] if attempts else None
             counted = submitted[-1] if submitted else None
-            if latest is None:
+            excluded = student["id"] in excluded_ids
+            if excluded:
+                status = "excluded"  # the teacher took this student off the activity (absent)
+            elif latest is None:
                 status = "not_started"
             elif latest["submitted_at"]:
                 status = "submitted"
@@ -71,6 +75,7 @@ class ResultsService(Service):
             students.append({
                 **user_json(student),
                 "status": status,
+                "excluded": excluded,
                 "attempts": len(submitted),
                 "submitted_at": counted["submitted_at"] if counted else None,
                 "late": bool(counted and counted["late"]),
@@ -79,14 +84,17 @@ class ResultsService(Service):
                 "section_scores": {str(key): value for key, value in score["sections"].items()} if score else {},
             })
 
-        scored = [student["score"] for student in students if student["score"]]
+        # Excluded students stay in the list but do not count in the totals or the average.
+        counted_students = [student for student in students if not student["excluded"]]
+        scored = [student["score"] for student in counted_students if student["score"]]
         summary = {
-            "students": len(students),
+            "students": len(counted_students),
             "submitted": len(scored),
-            "not_started": sum(student["status"] == "not_started" for student in students),
-            "late": sum(student["late"] for student in students),
+            "not_started": sum(student["status"] == "not_started" for student in counted_students),
+            "late": sum(student["late"] for student in counted_students),
             "to_check": sum(score["pending"] for score in scored),
             "average": scoring.average_percent(scored),
+            "excluded": len(students) - len(counted_students),
         }
         return {
             "assignment": {

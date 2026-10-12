@@ -111,3 +111,43 @@ def test_deleting_a_student_clears_their_exclusions(app, teacher):
         UserRepository(db).delete_students([students[0]["id"]])
         db.commit()
         assert db.execute("SELECT COUNT(*) FROM assignment_exclusions").fetchone()[0] == 0
+
+
+def test_results_leave_excluded_students_out_of_the_totals(teacher):
+    _, _, assignment_id, students, _ = class_assignment(teacher)
+    total = len(students)
+    first = login(students[0]["username"])
+    assert first.post(f"/api/my-activities/{assignment_id}/submit", json={"answers": {}}).status_code == 200
+    assert exclude(teacher, assignment_id, students[1]["id"]).status_code == 200
+
+    results = teacher.get(f"/api/assignments/{assignment_id}/results").get_json()
+    by_id = {item["id"]: item for item in results["students"]}
+    assert len(results["students"]) == total  # still listed
+    assert by_id[students[1]["id"]]["status"] == "excluded"
+    assert by_id[students[1]["id"]]["excluded"] is True
+    assert by_id[students[0]["id"]]["excluded"] is False
+    summary = results["summary"]
+    assert (summary["students"], summary["submitted"], summary["not_started"], summary["excluded"]) == \
+        (total - 1, 1, total - 2, 1)
+
+    assert exclude(teacher, assignment_id, students[1]["id"], False).status_code == 200
+    results = teacher.get(f"/api/assignments/{assignment_id}/results").get_json()
+    assert results["summary"]["students"] == total and results["summary"]["excluded"] == 0
+    assert {item["id"]: item for item in results["students"]}[students[1]["id"]]["status"] == "not_started"
+
+
+def test_exports_list_excluded_students(teacher):
+    _, _, assignment_id, students, _ = class_assignment(teacher)
+    assert exclude(teacher, assignment_id, students[0]["id"]).status_code == 200
+    for kind in ("xlsx", "pdf"):
+        assert teacher.get(f"/results/{assignment_id}/export.{kind}").status_code == 200
+
+
+def test_student_dashboard_does_not_count_an_excluded_activity(teacher):
+    _, _, assignment_id, students, _ = class_assignment(teacher)
+    student = login(students[0]["username"])
+    count = lambda: student.get("/api/dashboard").get_json()["classes"][0]["activities"]
+    assert count() == 1
+    assert exclude(teacher, assignment_id, students[0]["id"]).status_code == 200
+    assert count() == 0
+    assert student.get("/api/dashboard").get_json()["to_do"] == 0

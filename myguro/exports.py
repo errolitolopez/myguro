@@ -15,7 +15,8 @@ from openpyxl.utils import get_column_letter
 
 FONTS_DIR = os.path.join(os.path.dirname(__file__), "fonts")
 
-STATUS = {"not_started": "Not started", "in_progress": "Answering", "submitted": "Submitted"}
+STATUS = {"not_started": "Not started", "in_progress": "Answering", "submitted": "Submitted",
+          "excluded": "Excluded"}
 
 
 def local_time(utc_text, timezone_info):

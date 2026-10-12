@@ -93,7 +93,9 @@ class ClassRepository(Repository):
                    (SELECT COUNT(*) FROM assignments asg
                     WHERE asg.class_id = c.id AND (asg.everyone = 1 OR EXISTS (
                         SELECT 1 FROM assignment_students s
-                        WHERE s.assignment_id = asg.id AND s.student_id = cs.student_id))) AS activities
+                        WHERE s.assignment_id = asg.id AND s.student_id = cs.student_id))
+                      AND NOT EXISTS (SELECT 1 FROM assignment_exclusions x
+                                      WHERE x.assignment_id = asg.id AND x.student_id = cs.student_id)) AS activities
             FROM class_students cs
             JOIN classes c ON c.id = cs.class_id
             JOIN users t ON t.id = c.teacher_id
