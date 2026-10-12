@@ -144,3 +144,38 @@ def test_icons_are_served(admin):
     assert anonymous.get("/favicon.ico").status_code == 302
     for name in ("favicon.svg", "favicon.ico", "favicon-32.png", "apple-touch-icon.png", "mark.svg"):
         assert anonymous.get(f"/static/img/{name}").status_code == 200
+
+
+def test_support_popup_for_teachers_only_as_often_as_chosen(admin, teacher):
+    marker = "bootstrap.Modal.getOrCreateInstance(document.getElementById(\"support-modal\")).show()"
+    shows = lambda client: marker in client.get("/dashboard").get_data(as_text=True)
+    put = lambda popup: admin.put("/api/settings", json={"support": {**SUPPORT, "popup": popup}})
+
+    # off by default, even with the support link on
+    admin.put("/api/settings", json={"support": SUPPORT})
+    assert admin.get("/api/settings").get_json()["settings"]["support"]["popup"] == "off"
+    assert not shows(teacher)
+
+    # once per login: opens on the first page only, and again after a new login
+    put("login")
+    assert shows(teacher) and not shows(teacher)
+    assert not shows(admin)  # admin has the footer button only
+    assert shows(login("ecruz"))
+
+    # on every page
+    put("always")
+    assert shows(teacher) and shows(teacher)
+
+    # the support link off: no pop-up
+    admin.put("/api/settings", json={"support": {**SUPPORT, "popup": "always", "enabled": False}})
+    assert not shows(teacher)
+
+    # students never see it
+    put("always")
+    class_id, students = make_class(teacher)
+    assert not shows(login(students[0]["username"]))
+
+
+def test_support_popup_mode_checked(admin):
+    response = admin.put("/api/settings", json={"support": {**SUPPORT, "popup": "sometimes"}})
+    assert error(response) == "Choose when to show the pop-up from the list."

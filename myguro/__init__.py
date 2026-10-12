@@ -7,10 +7,13 @@ Layers (each only uses the ones below it):
   domain/        rules with no Flask or SQL: cleaning input, checking answers, adding up scores
 """
 
-from flask import Flask, redirect, url_for
+from datetime import date
+
+from flask import Flask, redirect, session, url_for
 
 from myguro import config, database, seed
 from myguro.database import get_db
+from myguro.domain.support import popup_due
 from myguro.errors import register_error_handlers
 from myguro.services import LoginThrottle, SettingsService
 from myguro.web import BLUEPRINTS
@@ -40,11 +43,21 @@ def create_app(test_config=None):
         the ones that can be given to someone, ALL_GRADES also the disabled ones (for filters)."""
         settings = SettingsService(get_db())
         user = current_user()
+        support = settings.support_for(user["role"]) if user else None
+        # The window opens by itself for teachers, as often as the admin chose. The day it last
+        # opened is kept in the login session, so a new login starts again.
+        popup = False
+        if support:
+            today = date.today().isoformat()
+            popup = popup_due(settings.popup_mode(user["role"]), session.get("support_popup_day"), today)
+            if popup:
+                session["support_popup_day"] = today
         return {
             "GRADES": settings.grade_options(),
             "ALL_GRADES": settings.all_grade_options(),
             # The "Support myguro" link in the page footer: admin and teachers only, when turned on
-            "SUPPORT": settings.support_for(user["role"]) if user else None,
+            "SUPPORT": support,
+            "SUPPORT_POPUP": popup,
         }
 
     return app

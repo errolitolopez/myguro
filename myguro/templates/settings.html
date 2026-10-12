@@ -75,6 +75,16 @@
                    placeholder="Support myguro">
           </div>
         </div>
+        <div class="mb-3">
+          <label for="support-popup" class="form-label">Pop-up for teachers</label>
+          <select id="support-popup" class="form-select w-auto">
+            <option value="off">Never (only the footer button)</option>
+            <option value="login">Once each time they log in</option>
+            <option value="daily">Once a day</option>
+            <option value="always">On every page</option>
+          </select>
+          <div class="form-text">Opens the support window by itself. Only teachers see it, never students.</div>
+        </div>
         <div id="support-error" class="alert alert-danger py-2 d-none" role="alert"></div>
         <button id="support-save" type="submit" class="btn btn-success bi bi-check-lg">Save</button>
         <span id="support-status" class="small text-body-secondary ms-2"></span>

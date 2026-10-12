@@ -1,15 +1,18 @@
 import json
 
 from myguro.domain.accounts import GRADES
-from myguro.domain.support import DEFAULT_LABEL, DEFAULT_MESSAGE, clean_support, format_gcash_number
+from myguro.domain.support import (DEFAULT_LABEL, DEFAULT_MESSAGE, DEFAULT_POPUP, POPUP_MODES, clean_support,
+                                   format_gcash_number)
 from myguro.errors import ValidationError
 from myguro.services.base import Service
 
 GRADES_HIGH_TO_LOW = "grades_high_to_low"
 DISABLED_GRADES = "disabled_grades"
 SUPPORT_KEYS = {"enabled": "support_enabled", "message": "support_message", "label": "support_label",
-                "url": "support_url", "gcash_number": "support_gcash_number", "gcash_name": "support_gcash_name"}
+                "url": "support_url", "gcash_number": "support_gcash_number", "gcash_name": "support_gcash_name",
+                "popup": "support_popup"}
 SUPPORT_ROLES = ("admin", "teacher")  # students never see it
+POPUP_ROLES = ("teacher",)  # the pop-up opens by itself for teachers only
 
 
 class SettingsService(Service):
@@ -48,6 +51,7 @@ class SettingsService(Service):
             "gcash_number": saved["gcash_number"] or "",
             "gcash_display": format_gcash_number(saved["gcash_number"] or ""),
             "gcash_name": saved["gcash_name"] or "",
+            "popup": saved["popup"] if saved["popup"] in POPUP_MODES else DEFAULT_POPUP,
         }
 
     def support_options(self, support):
@@ -68,6 +72,10 @@ class SettingsService(Service):
         if role in SUPPORT_ROLES and support["enabled"] and options:
             return {**support, "options": options}
         return None
+
+    def popup_mode(self, role):
+        """When the support window opens by itself for this role ("off" for anyone but a teacher)."""
+        return self.support()["popup"] if role in POPUP_ROLES else "off"
 
     def get(self):
         disabled = self.disabled_grades()

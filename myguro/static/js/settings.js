@@ -11,6 +11,7 @@ const supportMessage = document.getElementById("support-message");
 const supportLabel = document.getElementById("support-label");
 const supportGcashNumber = document.getElementById("support-gcash-number");
 const supportGcashName = document.getElementById("support-gcash-name");
+const supportPopup = document.getElementById("support-popup");
 const supportSave = document.getElementById("support-save");
 const supportStatus = document.getElementById("support-status");
 
@@ -21,6 +22,7 @@ function showSupport(support) {
   supportLabel.value = support.label;
   supportGcashNumber.value = support.gcash_display;
   supportGcashName.value = support.gcash_name;
+  supportPopup.value = support.popup;
 }
 
 supportForm.addEventListener("submit", async (event) => {
@@ -36,6 +38,7 @@ supportForm.addEventListener("submit", async (event) => {
       body: JSON.stringify({ support: {
         enabled: supportEnabled.checked, url: supportUrl.value, message: supportMessage.value,
         label: supportLabel.value, gcash_number: supportGcashNumber.value, gcash_name: supportGcashName.value,
+        popup: supportPopup.value,
       } }),
     });
     if (!response) return;

@@ -1,4 +1,4 @@
-"""The "Support myguro" link shown to admin and teachers (never to students)."""
+"""The "Support myguro" link shown to admin and teachers (never to students), and the teacher pop-up."""
 
 import re
 from urllib.parse import urlparse
@@ -13,6 +13,23 @@ MAX_GCASH_NAME_LENGTH = 60
 
 DEFAULT_MESSAGE = "Enjoying myguro? Help keep it running."
 DEFAULT_LABEL = "Support myguro"
+
+# When the support window opens by itself for a teacher: never, once per login, once a day
+# (while logged in), or on every page.
+POPUP_MODES = ("off", "login", "daily", "always")
+DEFAULT_POPUP = "off"
+
+
+def popup_due(mode, last_shown_day, today):
+    """True if the support window should open now. last_shown_day is the ISO day it last opened
+    in this login (None if not yet); today is the ISO day now."""
+    if mode == "always":
+        return True
+    if mode == "login":
+        return last_shown_day is None
+    if mode == "daily":
+        return last_shown_day != today
+    return False
 
 
 def clean_gcash_number(value):
@@ -36,8 +53,8 @@ def format_gcash_number(number):
 
 
 def clean_support(data):
-    """(enabled, message, label, url, gcash_number, gcash_name) from posted data. An empty
-    message or label uses the default text. To turn it on there must be a link (a web address,
+    """(enabled, message, label, url, gcash_number, gcash_name, popup) from posted data. An empty
+    message or label uses the default text, a missing popup is off. To turn it on there must be a link (a web address,
     http or https) or a GCash number."""
     enabled = data.get("enabled")
     if not isinstance(enabled, bool):
@@ -57,6 +74,9 @@ def clean_support(data):
     gcash_name = clean_name(data.get("gcash_name"))
     if len(gcash_name) > MAX_GCASH_NAME_LENGTH:
         raise ValidationError(f"GCash name can be at most {MAX_GCASH_NAME_LENGTH} characters.")
+    popup = data.get("popup", DEFAULT_POPUP)
+    if popup not in POPUP_MODES:
+        raise ValidationError("Choose when to show the pop-up from the list.")
     if enabled and not url and not gcash_number:
         raise ValidationError("Add a link or a GCash number before turning the support link on.")
-    return enabled, message, label, url, gcash_number, gcash_name
+    return enabled, message, label, url, gcash_number, gcash_name, popup
