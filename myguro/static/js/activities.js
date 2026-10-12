@@ -37,9 +37,11 @@ function activityItem(activity) {
   ].filter(Boolean).join(" · ");
   left.append(title, details);
 
+  // "Published · 2 classes", "Unpublished" (the classes are shown when it is given to some)
   const badge = document.createElement("span");
-  badge.className = activity.assigned ? "badge text-bg-primary" : "badge text-bg-secondary";
-  badge.textContent = activity.assigned ? `Assigned · ${plural(activity.assigned, "class", "classes")}` : "Draft";
+  badge.className = activity.published ? "badge text-bg-success" : "badge text-bg-secondary";
+  badge.textContent = (activity.published ? "Published" : "Unpublished")
+    + (activity.assigned ? ` · ${plural(activity.assigned, "class", "classes")}` : "");
 
   row.append(left, badge);
   return row;

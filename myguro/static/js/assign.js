@@ -1,7 +1,7 @@
 // Assign popup in the activity editor: give the sheet to some of the teacher's classes,
 // each to everyone or to selected students, and/or to individual students who are in no class,
 // with an optional due date.
-// Uses activityId, unsaved, el(), showEditorError() and showStatusBadge() from activity-editor.js.
+// Uses activityId, unsaved, el() and showEditorError() from activity-editor.js.
 
 let assignClasses = []; // the teacher's classes, each with .assignment (null = not given)
 let assignDirect = null; // the direct assignment (individual students, no class), or null
@@ -17,10 +17,9 @@ const assignSaveButton = document.getElementById("assign-save-button");
 // "Grade 9 - Rizal · Science (due Oct 15, 2026), Individual students (3 students)"
 function showAssignedSummary() {
   const given = assignClasses.filter((item) => item.assignment);
-  showStatusBadge(given.length + (assignDirect ? 1 : 0));
   const summary = document.getElementById("assigned-summary");
   if (given.length === 0 && !assignDirect) {
-    summary.replaceChildren("No class or student yet — this is a draft only you can see.");
+    summary.replaceChildren("Not given to any class or student yet.");
     return;
   }
   // One line per class or group, each with a link to its results.
