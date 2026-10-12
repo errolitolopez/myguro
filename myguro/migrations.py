@@ -87,6 +87,13 @@ def upgrade_old_tables(db):
     if submission_columns and "attempt" not in submission_columns:
         rename_for_rebuild(db, "submissions")
         rebuilt.append("submissions")
+
+    # A sheet can now be given to students directly: class_id may be NULL. SQLite can't drop a
+    # NOT NULL, so the table is rebuilt. Rows and ids are kept (submissions point to them).
+    class_column = [row for row in db.execute("PRAGMA table_info(assignments)") if row["name"] == "class_id"]
+    if class_column and class_column[0]["notnull"]:
+        rename_for_rebuild(db, "assignments")
+        rebuilt.append("assignments")
     return rebuilt
 
 

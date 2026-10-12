@@ -67,10 +67,12 @@ CREATE TABLE IF NOT EXISTS activity_sections (
 -- A sheet given to a class: to everyone in it (also students added later), or only to the
 -- students in assignment_students. due_date is optional ("2026-10-15", Philippine time);
 -- students can still submit after it, marked late.
+-- class_id NULL = a direct assignment: given to the students in assignment_students only, who
+-- need not be in any class (everyone is ignored). One per activity (see the index below).
 CREATE TABLE IF NOT EXISTS assignments (
     id INTEGER PRIMARY KEY,
     activity_id INTEGER NOT NULL REFERENCES activities (id),
-    class_id INTEGER NOT NULL REFERENCES classes (id),
+    class_id INTEGER REFERENCES classes (id),
     everyone INTEGER NOT NULL DEFAULT 1,
     due_date TEXT,
     -- 0 = students don't see their scores yet (so answers can't be passed around); the teacher releases them
@@ -78,6 +80,10 @@ CREATE TABLE IF NOT EXISTS assignments (
     assigned_at TEXT NOT NULL DEFAULT (datetime('now')),
     UNIQUE (activity_id, class_id)
 );
+
+-- UNIQUE treats NULLs as different, so "one direct assignment per activity" needs its own index.
+CREATE UNIQUE INDEX IF NOT EXISTS one_direct_assignment_per_activity
+    ON assignments (activity_id) WHERE class_id IS NULL;
 
 CREATE TABLE IF NOT EXISTS assignment_students (
     assignment_id INTEGER NOT NULL REFERENCES assignments (id),
