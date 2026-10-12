@@ -112,6 +112,8 @@ function assignItem(item) {
     radio.addEventListener("change", () => {
       draft.everyone = value;
       studentList.classList.toggle("d-none", draft.everyone);
+      // Nothing picked yet: start with everyone ticked, so excluding one student is one untick.
+      if (!draft.everyone && draft.student_ids.size === 0) setAll(true);
     });
     const radioLabel = el("label", "form-check-label small", text);
     radioLabel.htmlFor = radio.id;
@@ -125,6 +127,35 @@ function assignItem(item) {
   if (item.students.length === 0) {
     studentList.append(el("div", "small text-body-secondary", "No students in this class yet."));
   }
+  // "Select all" sits above the students and follows their ticks: checked when all are
+  // ticked, dashed (indeterminate) when only some are.
+  const ticks = [];
+  let selectAll = null;
+  const syncSelectAll = () => {
+    if (!selectAll) return;
+    const count = ticks.filter((tick) => tick.checked).length;
+    selectAll.checked = count === ticks.length;
+    selectAll.indeterminate = count > 0 && count < ticks.length;
+  };
+  const setAll = (checked) => {
+    for (const tick of ticks) tick.checked = checked;
+    for (const student of item.students) {
+      if (checked) draft.student_ids.add(student.id);
+      else draft.student_ids.delete(student.id);
+    }
+    syncSelectAll();
+  };
+  if (item.students.length > 0) {
+    const allRow = el("div", "form-check border-bottom pb-1 mb-1");
+    selectAll = el("input", "form-check-input");
+    selectAll.type = "checkbox";
+    selectAll.id = `pick-all-${item.id}`;
+    selectAll.addEventListener("change", () => setAll(selectAll.checked));
+    const allLabel = el("label", "form-check-label small fw-semibold", "Select all");
+    allLabel.htmlFor = selectAll.id;
+    allRow.append(selectAll, allLabel);
+    studentList.append(allRow);
+  }
   for (const student of item.students) {
     const row = el("div", "form-check");
     const tick = el("input", "form-check-input");
@@ -134,7 +165,9 @@ function assignItem(item) {
     tick.addEventListener("change", () => {
       if (tick.checked) draft.student_ids.add(student.id);
       else draft.student_ids.delete(student.id);
+      syncSelectAll();
     });
+    ticks.push(tick);
     const tickLabel = el("label", "form-check-label small", student.name);
     tickLabel.htmlFor = tick.id;
     const place = gradeSection(student);
@@ -142,6 +175,7 @@ function assignItem(item) {
     row.append(tick, tickLabel);
     studentList.append(row);
   }
+  syncSelectAll();
   options.append(studentList);
 
   box.append(options);
