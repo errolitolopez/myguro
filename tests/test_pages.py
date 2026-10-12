@@ -12,14 +12,14 @@ def test_pages_per_role(admin, teacher):
     for path in ["/dashboard", "/teachers", "/students", "/change-password"]:
         assert admin.get(path).status_code == 200, path
     for path in ["/dashboard", "/activities", f"/activities/{activity_id}", "/classes", f"/classes/{class_id}",
-                 f"/results/{assignment_id}"]:
+                 f"/results/{assignment_id}", f"/results/{assignment_id}/students/{students[0]['id']}"]:
         assert teacher.get(path).status_code == 200, path
     for path in ["/dashboard", "/my-activities", f"/my-activities/{assignment_id}"]:
         assert student.get(path).status_code == 200, path
 
     # Wrong role -> back to the dashboard
     for client, path in [(teacher, "/teachers"), (student, "/activities"), (student, f"/results/{assignment_id}"),
-                         (admin, "/classes"), (teacher, "/my-activities")]:
+                         (student, f"/results/{assignment_id}/students/{students[0]['id']}"), (admin, "/classes"), (teacher, "/my-activities")]:
         assert client.get(path).headers["Location"].endswith("/dashboard"), path
 
 

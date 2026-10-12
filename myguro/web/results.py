@@ -37,6 +37,15 @@ def page(assignment_id):
     return render_template("results.html", user=current_user(), assignment_id=assignment_id)
 
 
+@bp.get("/results/<int:assignment_id>/students/<int:student_id>")
+@role_required_page("teacher")
+def check_page(assignment_id, student_id):
+    """Checking one student's answers, with a button to the next student."""
+    if not service().exists(assignment_id):
+        return redirect(url_for("activities.list_page"))
+    return render_template("check.html", user=current_user(), assignment_id=assignment_id, student_id=student_id)
+
+
 @bp.get("/results/<int:assignment_id>/export.<kind>")
 @role_required_page("teacher")
 def export(assignment_id, kind):

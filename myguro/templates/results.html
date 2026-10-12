@@ -4,7 +4,6 @@
 
 {% block head %}
 <style>
-  .preserve-lines { white-space: pre-wrap; }
   #results-table tbody tr { cursor: pointer; }
 </style>
 {% endblock %}
@@ -69,72 +68,8 @@
       <tbody id="results-body"><tr><td class="text-body-secondary">Loading...</td></tr></tbody>
     </table>
   </div>
-  <p class="small text-body-secondary">Tap a student to see their answers and score short answers.</p>
+  <p class="small text-body-secondary">Tap a student to check their answers and score short answers.</p>
 </main>
-
-<!-- One student's answers -->
-<div class="modal fade" id="student-modal" tabindex="-1" aria-labelledby="student-title" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-fullscreen-md-down modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header">
-        <div>
-          <h2 class="modal-title fs-5" id="student-title"></h2>
-          <div class="small text-body-secondary" id="student-subtitle"></div>
-        </div>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div id="student-error" class="alert alert-danger py-2 d-none" role="alert"></div>
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-          <div id="attempt-buttons" class="btn-group btn-group-sm flex-wrap" role="group" aria-label="Attempts"></div>
-          <div class="d-flex gap-2">
-            <button id="paper-button" type="button" class="btn btn-sm btn-outline-secondary bi bi-pencil">Enter paper score</button>
-            <button id="reopen-button" type="button" class="btn btn-sm btn-outline-primary d-none bi bi-arrow-counterclockwise">Give another try</button>
-          </div>
-        </div>
-        <!-- Paper score: the student answered on paper; the teacher types the total -->
-        <form id="paper-form" class="card card-body bg-body-tertiary mb-3 d-none" novalidate>
-          <div class="fw-semibold mb-2" id="paper-form-title">Paper score</div>
-          <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-            <label for="paper-score" class="form-label mb-0">Total score</label>
-            <input id="paper-score" type="number" min="0" class="form-control form-control-sm" style="width: 6rem;">
-            <span class="small text-body-secondary" id="paper-possible"></span>
-            <div class="form-check ms-2">
-              <input id="paper-late" type="checkbox" class="form-check-input">
-              <label for="paper-late" class="form-check-label small">Submitted late</label>
-            </div>
-          </div>
-          <input id="paper-note" class="form-control form-control-sm mb-2" maxlength="200"
-                 placeholder="Note (optional), e.g. Passed on paper Oct 14">
-          <div class="d-flex justify-content-between gap-2">
-            <button id="paper-delete" type="button" class="btn btn-sm btn-link link-danger p-0 d-none bi bi-trash">Remove paper score</button>
-            <div class="d-flex gap-2 ms-auto">
-              <button id="paper-cancel" type="button" class="btn btn-sm btn-outline-secondary bi bi-x-lg">Cancel</button>
-              <button id="paper-save" type="submit" class="btn btn-sm btn-success bi bi-check-lg">Save</button>
-            </div>
-          </div>
-          <div class="form-text">Saved as one of the student's submissions. The latest submission counts.</div>
-        </form>
-        <div id="reopen-confirm" class="alert alert-info d-none">
-          <p class="mb-2">Let this student change their answers and submit again (even past the limit)?
-            Their current score counts until they submit.</p>
-          <div class="d-flex gap-2 justify-content-end">
-            <button id="reopen-no" type="button" class="btn btn-sm btn-outline-secondary bi bi-x-lg">Cancel</button>
-            <button id="reopen-yes" type="button" class="btn btn-sm btn-primary bi bi-arrow-counterclockwise">Give another try</button>
-          </div>
-        </div>
-        <div id="student-detail"></div>
-      </div>
-      <div class="modal-footer justify-content-between">
-        <span id="points-status" class="small text-body-secondary"></span>
-        <div class="d-flex gap-2">
-          <button type="button" class="btn btn-outline-secondary bi bi-x-lg" data-bs-dismiss="modal">Close</button>
-          <button id="save-points-button" type="button" class="btn btn-success bi bi-check-lg" disabled>Save scores</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 {% endblock %}
 
 {% block scripts %}
