@@ -148,6 +148,8 @@ def add_missing_columns(db):
     activity_columns = [row["name"] for row in db.execute("PRAGMA table_info(activities)")]
     if "max_attempts" not in activity_columns:
         db.execute("ALTER TABLE activities ADD COLUMN max_attempts INTEGER DEFAULT 1")
+    if "deleted_at" not in activity_columns:
+        db.execute("ALTER TABLE activities ADD COLUMN deleted_at TEXT")
     if "published" not in activity_columns:
         db.execute("ALTER TABLE activities ADD COLUMN published INTEGER NOT NULL DEFAULT 0")
         # Sheets already given to students stay visible: only new sheets start unpublished. This

@@ -28,15 +28,17 @@ class ActivityService(Service):
             "locked": self.activities.has_submissions(row["id"]),
             # Students see an assigned sheet only while it is published
             "published": bool(row["published"]),
+            "deleted_at": row["deleted_at"],  # set while the sheet is deleted (archived)
             # How many classes it is given to (0 = a draft)
             "assigned": self.activities.count_assigned(row["id"]),
             "created_at": row["created_at"],
             "updated_at": row["updated_at"],
         }
 
-    def list(self):
+    def list(self, deleted=False):
+        """The teacher's sheets, or with deleted=True the ones they deleted (archived)."""
         return [{**self.activity_json(row), "sections": row["sections"], "questions": row["questions"]}
-                for row in self.activities.list_for_teacher(self.user["id"])]
+                for row in self.activities.list_for_teacher(self.user["id"], deleted)]
 
     def create(self, data):
         """Start a sheet (a draft) with its title and subject; sections come in the editor."""
@@ -113,12 +115,26 @@ class ActivityService(Service):
         return self.activity_json(self.require(activity_id))
 
     def delete(self, activity_id):
-        """Delete a sheet that no class has been given yet."""
+        """Delete a sheet. One nobody has been given is really deleted; an assigned one is archived:
+        hidden from the teacher's list and from students, with every assignment and answer kept so
+        it can be restored. Returns True when it was archived."""
         self.require(activity_id)
         if self.activities.count_assigned(activity_id):
-            raise ValidationError("This activity was already given to a class, so it can't be deleted.")
+            self.activities.archive(activity_id)
+            self.commit()
+            return True
         self.activities.delete(activity_id)
         self.commit()
+        return False
+
+    def restore(self, activity_id):
+        """Bring a deleted sheet back, unpublished, with its assignments and student work."""
+        row = self.activities.get_for_teacher(activity_id, self.user["id"], include_deleted=True)
+        if row is None or row["deleted_at"] is None:
+            raise NotFoundError("Activity not found.")
+        self.activities.restore(activity_id)
+        self.commit()
+        return self.activity_json(self.require(activity_id))
 
     def update_settings(self, activity_id, data):
         """Settings that may change anytime, even after students submitted: max_attempts

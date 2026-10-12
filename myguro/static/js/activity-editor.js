@@ -799,19 +799,20 @@ titleInput.addEventListener("change", saveTitleSubject);
 subjectInput.addEventListener("change", saveTitleSubject);
 
 // After a student submits, the questions can't change: show the sheet read-only. Assign, publish,
-// the tries allowed, and the title and subject still work.
+// delete (it is archived), the tries allowed, and the title and subject still work.
 function lockEditor() {
   sheetLocked = true;
   document.getElementById("locked-notice").classList.remove("d-none");
   const editorArea = document.querySelector("main");
   editorArea.querySelectorAll("input, textarea, select").forEach((field) => (field.disabled = true));
   editorArea.querySelectorAll("button").forEach((button) => {
-    if (!["assign-button", "copy-button", "publish-button"].includes(button.id)) button.disabled = true;
+    if (!["assign-button", "copy-button", "publish-button", "delete-button", "delete-no", "delete-yes"]
+      .includes(button.id)) button.disabled = true;
   });
   maxAttemptsSelect.disabled = false; // more tries can still be given
   titleInput.disabled = false;
   subjectInput.disabled = false;
-  editorArea.querySelectorAll("#add-text-button, #add-activity-button, #delete-button")
+  editorArea.querySelectorAll("#add-text-button, #add-activity-button")
     .forEach((button) => button.classList.add("d-none"));
   saveButton.classList.add("d-none");
   saveStatus.textContent = "Locked";
@@ -983,7 +984,14 @@ copyButton.addEventListener("click", async () => {
 // --- Delete --------------------------------------------------------------------------
 
 const deleteConfirm = document.getElementById("delete-confirm");
-document.getElementById("delete-button").addEventListener("click", () => deleteConfirm.classList.remove("d-none"));
+document.getElementById("delete-button").addEventListener("click", () => {
+  // An assigned sheet is archived, not erased: say what happens to the students.
+  const given = assignClasses.some((item) => item.assignment) || assignDirect !== null;
+  document.getElementById("delete-message").textContent = given
+    ? "Delete this activity? Students will lose access. You can restore it from Deleted on the Activities page."
+    : "Delete this activity with all its sections and questions? This can't be undone.";
+  deleteConfirm.classList.remove("d-none");
+});
 document.getElementById("delete-no").addEventListener("click", () => deleteConfirm.classList.add("d-none"));
 document.getElementById("delete-yes").addEventListener("click", async (event) => {
   const stopLoading = startLoading(event.currentTarget);

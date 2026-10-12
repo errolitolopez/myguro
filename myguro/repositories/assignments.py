@@ -6,7 +6,7 @@ DIRECT_CLASS_NAME = "Individual students"
 # A student sees an assignment when they are in its class and it is for everyone, or they are one
 # of its chosen students. A direct assignment (class_id NULL) is seen only by its chosen students.
 # A student the teacher excluded (for example absent) does not see it until added back.
-# A sheet the teacher has not published is seen by nobody.
+# A sheet the teacher has not published, or has deleted, is seen by nobody.
 VISIBLE_TO_STUDENT = """
     (
         (
@@ -19,6 +19,7 @@ VISIBLE_TO_STUDENT = """
         AND NOT EXISTS (SELECT 1 FROM assignment_exclusions x
                         WHERE x.assignment_id = asg.id AND x.student_id = :student)
         AND a.published = 1
+        AND a.deleted_at IS NULL
     )
 """
 
@@ -93,7 +94,7 @@ class AssignmentRepository(Repository):
             SELECT asg.*, a.title, a.subject,
                    (SELECT COUNT(*) FROM assignment_students s WHERE s.assignment_id = asg.id) AS selected
             FROM assignments asg JOIN activities a ON a.id = asg.activity_id
-            WHERE asg.class_id = ?
+            WHERE asg.class_id = ? AND a.deleted_at IS NULL
             ORDER BY asg.assigned_at DESC, asg.id DESC
             """,
             (class_id,),
@@ -108,7 +109,7 @@ class AssignmentRepository(Repository):
             FROM assignments asg
             JOIN activities a ON a.id = asg.activity_id
             LEFT JOIN classes c ON c.id = asg.class_id
-            WHERE asg.id = ? AND a.teacher_id = ?
+            WHERE asg.id = ? AND a.teacher_id = ? AND a.deleted_at IS NULL
             """,
             (assignment_id, teacher_id),
         )

@@ -48,6 +48,9 @@ CREATE TABLE IF NOT EXISTS activities (
     subject TEXT NOT NULL DEFAULT '',
     max_attempts INTEGER DEFAULT 1,  -- how many times a student may submit; NULL = unlimited
     published INTEGER NOT NULL DEFAULT 0,  -- 0 = students don't see it even when assigned; 1 = they do
+    -- Set when the teacher deletes a sheet that was given to students: it is hidden from the teacher's
+    -- list and from students, with its assignments and answers kept, so it can be restored.
+    deleted_at TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );

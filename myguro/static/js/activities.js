@@ -74,6 +74,63 @@ function render() {
   }
 }
 
+// --- Deleted sheets ----------------------------------------------------------------------
+
+const deletedToggle = document.getElementById("deleted-toggle");
+const deletedList = document.getElementById("deleted-list");
+let deletedActivities = [];
+
+// One deleted sheet with a Restore button. A restored sheet comes back unpublished.
+function deletedItem(activity) {
+  const row = document.createElement("div");
+  row.className = "list-group-item d-flex justify-content-between align-items-center gap-2";
+  const left = document.createElement("div");
+  const title = document.createElement("div");
+  title.className = "fw-semibold";
+  title.textContent = activity.title;
+  const details = document.createElement("div");
+  details.className = "small text-body-secondary";
+  details.textContent = [activity.subject, `deleted ${formatDate(activity.deleted_at)}`].filter(Boolean).join(" · ");
+  left.append(title, details);
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "btn btn-sm btn-outline-primary text-nowrap bi bi-arrow-counterclockwise";
+  button.textContent = "Restore";
+  button.addEventListener("click", async () => {
+    const stopLoading = startLoading(button);
+    if (!stopLoading) return;
+    hideError("activities-error");
+    try {
+      const response = await apiFetch(`/api/activities/${activity.id}/restore`, { method: "POST" });
+      if (!response) return;
+      if (!response.ok) {
+        showError("activities-error", (await response.json()).error || "Could not restore the activity.");
+        return;
+      }
+      await loadActivities();
+    } catch {
+      showError("activities-error", "Cannot reach the server. Check your connection.");
+    } finally {
+      stopLoading();
+    }
+  });
+  row.append(left, button);
+  return row;
+}
+
+function renderDeleted() {
+  deletedToggle.classList.toggle("d-none", deletedActivities.length === 0);
+  deletedToggle.textContent = `Deleted (${deletedActivities.length})`;
+  if (deletedActivities.length === 0) deletedList.classList.add("d-none");
+  deletedList.replaceChildren(...deletedActivities.map(deletedItem));
+}
+
+deletedToggle.addEventListener("click", () => {
+  const open = deletedList.classList.toggle("d-none") === false;
+  deletedToggle.setAttribute("aria-expanded", String(open));
+});
+
 async function loadActivities() {
   try {
     const response = await apiFetch("/api/activities");
@@ -86,6 +143,11 @@ async function loadActivities() {
     activities = (await response.json()).activities;
     fillSubjectFilter(subjectFilter, activities);
     render();
+    const deleted = await apiFetch("/api/activities?deleted=1");
+    if (deleted && deleted.ok) {
+      deletedActivities = (await deleted.json()).activities;
+      renderDeleted();
+    }
   } catch {
     showError("activities-error", "Cannot reach the server. Check your connection.");
   }

@@ -53,7 +53,8 @@ def editor_page(activity_id):
 @bp.get("/api/activities")
 @role_required_api("teacher")
 def api_list():
-    return jsonify(activities=service().list())
+    """?deleted=1 lists the sheets the teacher deleted (they can be restored)."""
+    return jsonify(activities=service().list(deleted=request.args.get("deleted") == "1"))
 
 
 @bp.post("/api/activities")
@@ -92,8 +93,14 @@ def api_save(activity_id):
 @bp.delete("/api/activities/<int:activity_id>")
 @role_required_api("teacher")
 def api_delete(activity_id):
-    service().delete(activity_id)
-    return jsonify(ok=True)
+    """A sheet nobody has been given is deleted; an assigned one is archived (archived: true)."""
+    return jsonify(ok=True, archived=service().delete(activity_id))
+
+
+@bp.post("/api/activities/<int:activity_id>/restore")
+@role_required_api("teacher")
+def api_restore(activity_id):
+    return jsonify(activity=service().restore(activity_id))
 
 
 @bp.post("/api/activities/<int:activity_id>/duplicate")

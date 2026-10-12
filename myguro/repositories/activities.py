@@ -15,19 +15,21 @@ def question_json(row):
 
 
 class ActivityRepository(Repository):
-    def get_for_teacher(self, activity_id, teacher_id):
-        """The teacher's sheet, or None if it doesn't exist or isn't theirs."""
-        return self.one("SELECT * FROM activities WHERE id = ? AND teacher_id = ?", (activity_id, teacher_id))
+    def get_for_teacher(self, activity_id, teacher_id, include_deleted=False):
+        """The teacher's sheet, or None if it doesn't exist, isn't theirs, or was deleted (archived)."""
+        return self.one("SELECT * FROM activities WHERE id = ? AND teacher_id = ?"
+                        + ("" if include_deleted else " AND deleted_at IS NULL"), (activity_id, teacher_id))
 
-    def list_for_teacher(self, teacher_id):
-        """The teacher's sheets, last edited first, with how many sections and questions."""
+    def list_for_teacher(self, teacher_id, deleted=False):
+        """The teacher's sheets (or, with deleted=True, their deleted ones), last edited first,
+        with how many sections and questions."""
         return self.all(
-            """
+            f"""
             SELECT a.*,
                    (SELECT COUNT(*) FROM activity_sections s WHERE s.activity_id = a.id) AS sections,
                    (SELECT COUNT(*) FROM questions q WHERE q.activity_id = a.id) AS questions
             FROM activities a
-            WHERE a.teacher_id = ?
+            WHERE a.teacher_id = ? AND a.deleted_at IS {"NOT NULL" if deleted else "NULL"}
             ORDER BY a.updated_at DESC, a.id DESC
             """,
             (teacher_id,),
@@ -65,6 +67,15 @@ class ActivityRepository(Repository):
 
     def set_max_attempts(self, activity_id, max_attempts):
         self.execute("UPDATE activities SET max_attempts = ? WHERE id = ?", (max_attempts, activity_id))
+
+    def archive(self, activity_id):
+        """Hide a sheet from the teacher and the students, keeping every assignment and answer."""
+        self.execute("UPDATE activities SET deleted_at = datetime('now'), published = 0 WHERE id = ?",
+                     (activity_id,))
+
+    def restore(self, activity_id):
+        """Bring an archived sheet back (unpublished: archiving unpublished it)."""
+        self.execute("UPDATE activities SET deleted_at = NULL WHERE id = ?", (activity_id,))
 
     def set_published(self, activity_id, published):
         self.execute("UPDATE activities SET published = ? WHERE id = ?", (int(published), activity_id))
@@ -154,9 +165,10 @@ class ActivityRepository(Repository):
         return self.value("SELECT COUNT(*) FROM assignments WHERE activity_id = ?", (activity_id,))
 
     def count_all(self):
-        return self.value("SELECT COUNT(*) FROM activities")
+        return self.value("SELECT COUNT(*) FROM activities WHERE deleted_at IS NULL")
 
     def count_for_teacher(self, teacher_id, published):
         """The teacher's sheets that are published (published=True) or not (False)."""
-        return self.value("SELECT COUNT(*) FROM activities WHERE teacher_id = ? AND published = ?",
+        return self.value("SELECT COUNT(*) FROM activities "
+                          "WHERE teacher_id = ? AND published = ? AND deleted_at IS NULL",
                           (teacher_id, int(published)))

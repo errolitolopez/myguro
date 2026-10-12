@@ -49,8 +49,9 @@ def test_class_page_lists_assignment_and_unassign(teacher):
     assignment_id = assign(teacher, activity_id, class_id, due_date="2026-10-15")
     activities = teacher.get(f"/api/classes/{class_id}").get_json()["activities"]
     assert activities[0]["id"] == assignment_id and activities[0]["due_date"] == "2026-10-15"
-    assert error(teacher.delete(f"/api/activities/{activity_id}")) == \
-        "This activity was already given to a class, so it can't be deleted."
+    # Deleting an assigned sheet archives it (students lose access, work is kept)
+    assert teacher.delete(f"/api/activities/{activity_id}").get_json()["archived"] is True
+    assert teacher.post(f"/api/activities/{activity_id}/restore").status_code == 200
     assert teacher.put(f"/api/activities/{activity_id}/assignments", json={"assignments": []}).status_code == 200
     assert teacher.get("/api/activities").get_json()["activities"][0]["assigned"] == 0
 

@@ -29,7 +29,7 @@ class SubmissionRepository(Repository):
             SELECT sub.*, asg.activity_id FROM submissions sub
             JOIN assignments asg ON asg.id = sub.assignment_id
             JOIN activities a ON a.id = asg.activity_id
-            WHERE sub.id = ? AND a.teacher_id = ?
+            WHERE sub.id = ? AND a.teacher_id = ? AND a.deleted_at IS NULL
             """,
             (submission_id, teacher_id),
         )

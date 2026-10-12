@@ -12,7 +12,9 @@ class ClassRepository(Repository):
             """
             SELECT c.id, c.name, c.subject,
                    (SELECT COUNT(*) FROM class_students cs WHERE cs.class_id = c.id) AS students,
-                   (SELECT COUNT(*) FROM assignments asg WHERE asg.class_id = c.id) AS activities
+                   (SELECT COUNT(*) FROM assignments asg
+                    WHERE asg.class_id = c.id AND EXISTS (
+                        SELECT 1 FROM activities a WHERE a.id = asg.activity_id AND a.deleted_at IS NULL)) AS activities
             FROM classes c
             WHERE c.teacher_id = ?
             ORDER BY c.name COLLATE NOCASE, c.subject COLLATE NOCASE
@@ -97,7 +99,8 @@ class ClassRepository(Repository):
                       AND NOT EXISTS (SELECT 1 FROM assignment_exclusions x
                                       WHERE x.assignment_id = asg.id AND x.student_id = cs.student_id)
                       AND EXISTS (SELECT 1 FROM activities a
-                                  WHERE a.id = asg.activity_id AND a.published = 1)) AS activities
+                                  WHERE a.id = asg.activity_id AND a.published = 1
+                                    AND a.deleted_at IS NULL)) AS activities
             FROM class_students cs
             JOIN classes c ON c.id = cs.class_id
             JOIN users t ON t.id = c.teacher_id
