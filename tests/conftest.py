@@ -111,12 +111,14 @@ SAMPLE_SECTIONS = [
 ]
 
 
-def make_activity(teacher, title="Early Eastern Philosophy", sections=None):
-    """An activity with sections. Returns (activity id, question ids in order)."""
+def make_activity(teacher, title="Early Eastern Philosophy", sections=None, published=True):
+    """An activity with sections, published unless published=False. Returns (activity id, question ids in order)."""
     activity_id = teacher.post("/api/activities", json={"title": title}).get_json()["activity"]["id"]
     response = teacher.put(f"/api/activities/{activity_id}",
                            json={"title": title, "sections": sections or SAMPLE_SECTIONS})
     assert response.status_code == 200, response.get_json()
+    if published:
+        assert teacher.put(f"/api/activities/{activity_id}/published", json={"published": True}).status_code == 200
     questions = [question["id"] for section in response.get_json()["activity"]["sections"]
                  for question in section["questions"]]
     return activity_id, questions

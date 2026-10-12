@@ -26,6 +26,8 @@ class ActivityService(Service):
             "max_attempts": row["max_attempts"],  # None = unlimited
             # True once a student submitted it: then it can't be edited
             "locked": self.activities.has_submissions(row["id"]),
+            # Students see an assigned sheet only while it is published
+            "published": bool(row["published"]),
             # How many classes it is given to (0 = a draft)
             "assigned": self.activities.count_assigned(row["id"]),
             "created_at": row["created_at"],
@@ -97,6 +99,18 @@ class ActivityService(Service):
         new_id = self.activities.copy(activity_id, title)
         self.commit()
         return self.activity_json(self.require(new_id))
+
+    def set_published(self, activity_id, published):
+        """Show the sheet to the students it is given to, or hide it again. Hiding is always
+        allowed (even after submissions); nothing is deleted, so publishing again restores it all."""
+        self.require(activity_id)
+        if not isinstance(published, bool):
+            raise ValidationError("Choose whether to publish the activity.")
+        if published and not self.activities.has_sections(activity_id):
+            raise ValidationError("Add at least one section before publishing.")
+        self.activities.set_published(activity_id, published)
+        self.commit()
+        return self.activity_json(self.require(activity_id))
 
     def delete(self, activity_id):
         """Delete a sheet that no class has been given yet."""

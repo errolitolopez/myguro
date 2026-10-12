@@ -6,6 +6,7 @@ DIRECT_CLASS_NAME = "Individual students"
 # A student sees an assignment when they are in its class and it is for everyone, or they are one
 # of its chosen students. A direct assignment (class_id NULL) is seen only by its chosen students.
 # A student the teacher excluded (for example absent) does not see it until added back.
+# A sheet the teacher has not published is seen by nobody.
 VISIBLE_TO_STUDENT = """
     (
         (
@@ -17,6 +18,7 @@ VISIBLE_TO_STUDENT = """
         )
         AND NOT EXISTS (SELECT 1 FROM assignment_exclusions x
                         WHERE x.assignment_id = asg.id AND x.student_id = :student)
+        AND a.published = 1
     )
 """
 

@@ -29,8 +29,8 @@ class DashboardService(Service):
             "role": "teacher",
             "classes": ClassService(self.db, self.user).list(),
             "students": self.classes.count_students_of_teacher(teacher_id),
-            "published": self.activities.count_for_teacher(teacher_id, assigned=True),
-            "drafts": self.activities.count_for_teacher(teacher_id, assigned=False),
+            "published": self.activities.count_for_teacher(teacher_id, published=True),
+            "drafts": self.activities.count_for_teacher(teacher_id, published=False),
             # Students who submitted (each student once per assignment, however many attempts)
             "submissions": self.submissions.count_submitted_for_teacher(teacher_id),
         }

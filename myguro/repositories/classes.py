@@ -95,7 +95,9 @@ class ClassRepository(Repository):
                         SELECT 1 FROM assignment_students s
                         WHERE s.assignment_id = asg.id AND s.student_id = cs.student_id))
                       AND NOT EXISTS (SELECT 1 FROM assignment_exclusions x
-                                      WHERE x.assignment_id = asg.id AND x.student_id = cs.student_id)) AS activities
+                                      WHERE x.assignment_id = asg.id AND x.student_id = cs.student_id)
+                      AND EXISTS (SELECT 1 FROM activities a
+                                  WHERE a.id = asg.activity_id AND a.published = 1)) AS activities
             FROM class_students cs
             JOIN classes c ON c.id = cs.class_id
             JOIN users t ON t.id = c.teacher_id

@@ -66,6 +66,9 @@ class ActivityRepository(Repository):
     def set_max_attempts(self, activity_id, max_attempts):
         self.execute("UPDATE activities SET max_attempts = ? WHERE id = ?", (max_attempts, activity_id))
 
+    def set_published(self, activity_id, published):
+        self.execute("UPDATE activities SET published = ? WHERE id = ?", (int(published), activity_id))
+
     def delete(self, activity_id):
         self.execute("DELETE FROM questions WHERE activity_id = ?", (activity_id,))
         self.execute("DELETE FROM activity_sections WHERE activity_id = ?", (activity_id,))
@@ -153,10 +156,7 @@ class ActivityRepository(Repository):
     def count_all(self):
         return self.value("SELECT COUNT(*) FROM activities")
 
-    def count_for_teacher(self, teacher_id, assigned):
-        """The teacher's sheets given to a class (assigned=True) or still drafts (False)."""
-        return self.value(
-            "SELECT COUNT(*) FROM activities a WHERE teacher_id = ? AND "
-            + ("" if assigned else "NOT ") + "EXISTS (SELECT 1 FROM assignments WHERE activity_id = a.id)",
-            (teacher_id,),
-        )
+    def count_for_teacher(self, teacher_id, published):
+        """The teacher's sheets that are published (published=True) or not (False)."""
+        return self.value("SELECT COUNT(*) FROM activities WHERE teacher_id = ? AND published = ?",
+                          (teacher_id, int(published)))
