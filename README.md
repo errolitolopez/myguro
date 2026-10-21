@@ -46,6 +46,7 @@ Log in with `admin` / `admin` and set a new password.
 
 ```bash
 .venv/bin/flask --app app seed
+.venv/bin/flask --app app seed-demo   # optional: a sample class with answers, scores and remarks (needs seed first)
 ```
 
 Adds 6 sample teachers (e.g. `ecruz`) and 48 sample students: Grades 9 to 12, two sections each, 6 students per section (e.g. `jdelacruz01`, Grade 9 - Rizal). All sample accounts use the password `1234`. They can log in right away. Safe to run again: existing usernames are skipped.
@@ -62,6 +63,7 @@ myguro/
   migrations.py         upgrading databases made by older versions
   schema.sql            the tables
   seed.py               flask --app app seed (sample accounts)
+  seed_demo.py          flask --app app seed-demo (sample class, answers, remarks)
   exports.py            results to Excel / PDF
   imports.py            reading students from an Excel file, and its template
   docx_files.py         reading an activity sheet from a Word file into lines, and the Word template

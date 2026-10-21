@@ -11,7 +11,7 @@ from datetime import date
 
 from flask import Flask, redirect, session, url_for
 
-from myguro import config, database, seed
+from myguro import config, database, seed, seed_demo
 from myguro.database import get_db
 from myguro.domain.support import popup_due
 from myguro.errors import register_error_handlers
@@ -26,6 +26,7 @@ def create_app(test_config=None):
 
     database.init_app(app)
     app.cli.add_command(seed.seed_command)
+    app.cli.add_command(seed_demo.seed_demo_command)
     app.extensions["login_throttle"] = LoginThrottle()
 
     register_error_handlers(app)
