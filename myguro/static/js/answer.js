@@ -262,7 +262,17 @@ function sectionBlock(section, locked) {
     body.append(text);
   }
   const list = el("ol", "mb-0 ps-3");
-  section.questions.forEach((question) => list.append(questionItem(question, locked)));
+  section.questions.forEach((question) => {
+    const item = questionItem(question, locked);
+    // The teacher's remark on this question (sent only after the scores are released).
+    const remark = locked && activity.feedback && activity.feedback[question.id];
+    if (remark) {
+      const box = el("div", "alert alert-info py-2 px-3 mt-2 mb-0 small preserve-lines");
+      box.append(el("strong", "", "Teacher's remark: "), remark);
+      item.append(box);
+    }
+    list.append(item);
+  });
   body.append(list);
   card.append(body);
   return card;

@@ -1,5 +1,5 @@
 from myguro.domain import scoring
-from myguro.domain.grading import teacher_points
+from myguro.domain.grading import clean_feedback, teacher_points
 from myguro.domain.work import clean_paper_score
 from myguro.errors import NotFoundError, ValidationError
 from myguro.services.base import Service
@@ -127,6 +127,7 @@ class ResultsService(Service):
                 question["given"] = given.get(question["id"]) if row else None
                 question["is_correct"] = None if row is None or row["is_correct"] is None else bool(row["is_correct"])
                 question["earned"] = row["points"] if row else None
+                question["feedback"] = row["feedback"] if row else ""
         return {
             "id": submission["id"],
             "attempt": submission["attempt"],
@@ -167,15 +168,18 @@ class ResultsService(Service):
             "possible": self.activities.total_points(assignment["activity_id"]),
         }
 
-    def set_points(self, submission_id, posted):
+    def set_points(self, submission_id, posted, remarks=None):
         """The teacher scores a submitted attempt: {question id: points}. For short answers, and
-        to change any auto-checked score (e.g. accept a different spelling)."""
+        to change any auto-checked score (e.g. accept a different spelling). `remarks` is
+        {question id: text}: the teacher's feedback on an answer ('' removes it)."""
         submission = self.require_submission(submission_id)
         if not submission["submitted_at"]:
             raise ValidationError("The student hasn't submitted this attempt yet.")
         if submission["paper"]:
             raise ValidationError("This is a paper score: change its total instead.")
-        if not isinstance(posted, dict):
+        posted = {} if posted is None else posted
+        remarks = {} if remarks is None else remarks
+        if not isinstance(posted, dict) or not isinstance(remarks, dict):
             raise ValidationError("Points are not valid.")
         questions = {str(question["id"]): question for question in self.activities.questions(submission["activity_id"])}
         for key, points in posted.items():
@@ -185,6 +189,11 @@ class ResultsService(Service):
             value = teacher_points(question, points)
             self.submissions.set_teacher_points(submission_id, question["id"],
                                                 None if value is None else int(value == question["points"]), value)
+        for key, text in remarks.items():
+            question = questions.get(str(key))
+            if question is None:
+                raise ValidationError("Question not found.")
+            self.submissions.set_feedback(submission_id, question["id"], clean_feedback(text))
         self.commit()
         return self.attempt_detail(self.require_submission(submission_id), submission["activity_id"])
 

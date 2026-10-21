@@ -6,6 +6,7 @@ from myguro.domain.text import clean_description, normalize
 from myguro.errors import ValidationError
 
 MAX_SHORT_ANSWER_LENGTH = 5000
+MAX_FEEDBACK_LENGTH = 1000
 
 
 def question_for_student(question):
@@ -86,3 +87,15 @@ def teacher_points(question, points):
     if isinstance(points, int) and not isinstance(points, bool) and 0 <= points <= question["points"]:
         return points
     raise ValidationError(f"Points must be a whole number from 0 to {question['points']}.")
+
+
+def clean_feedback(value):
+    """The teacher's remark on one answer, trimmed ('' = none)."""
+    if value is None:
+        return ""
+    if not isinstance(value, str):
+        raise ValidationError("A remark is not valid.")
+    value = value.strip()
+    if len(value) > MAX_FEEDBACK_LENGTH:
+        raise ValidationError(f"A remark is too long (at most {MAX_FEEDBACK_LENGTH} characters).")
+    return value

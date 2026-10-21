@@ -7,6 +7,7 @@ const assignmentId = document.querySelector("main").dataset.assignmentId;
 const studentId = Number(document.querySelector("main").dataset.studentId);
 let detail = null; // the attempt shown
 let changedPoints = {}; // question id -> new points, not saved yet
+let changedFeedback = {}; // question id -> new remark, not saved yet
 let neighbours = { previous: null, next: null }; // student ids to check before and after this one
 
 // The results page's search and filter, so "Next student" follows the list the teacher came from.
@@ -123,6 +124,11 @@ function keyText(question) {
   return question.answer; // short answer: the guide (may be empty)
 }
 
+// true when a score or a remark was typed and not saved yet
+function hasUnsaved() {
+  return Object.keys(changedPoints).length > 0 || Object.keys(changedFeedback).length > 0;
+}
+
 function questionReview(question, number, editable) {
   const item = el("div", "border rounded p-2 mb-2");
   const top = el("div", "d-flex justify-content-between align-items-start gap-2");
@@ -170,6 +176,24 @@ function questionReview(question, number, editable) {
     keyRow.append(question.type === "short_answer" ? "Guide: " : "Key: ", el("span", "preserve-lines", key));
     item.append(keyRow);
   }
+
+  // The teacher's remark on this answer. The student sees it once the scores are released.
+  if (editable) {
+    const remark = el("textarea", "form-control form-control-sm mt-2");
+    remark.rows = 2;
+    remark.maxLength = 1000;
+    remark.value = question.feedback || "";
+    remark.placeholder = "Remark for the student (optional)";
+    remark.setAttribute("aria-label", `Remark for question ${number}`);
+    remark.addEventListener("input", () => {
+      changedFeedback[question.id] = remark.value;
+      savePointsButton.disabled = false;
+      document.getElementById("points-status").textContent = "Unsaved scores";
+    });
+    item.append(remark);
+  } else if (question.feedback) {
+    item.append(el("div", "small mt-2 preserve-lines", `Remark: ${question.feedback}`));
+  }
   return item;
 }
 
@@ -179,6 +203,7 @@ function renderStudent(data) {
   possiblePoints = data.possible;
   hidePaperForm();
   changedPoints = {};
+  changedFeedback = {};
   savePointsButton.disabled = true;
   document.getElementById("points-status").textContent = "";
   document.getElementById("student-title").textContent = student.name;
@@ -273,7 +298,7 @@ async function loadStudent(attempt) {
 
 // Another attempt of the same student: ask first when there are unsaved scores.
 function openAttempt(attempt) {
-  if (Object.keys(changedPoints).length) {
+  if (hasUnsaved()) {
     document.getElementById("points-status").textContent = "Save the scores first.";
     return;
   }
@@ -282,12 +307,12 @@ function openAttempt(attempt) {
 
 // Leaving the page drops unsaved scores: let the browser ask first.
 window.addEventListener("beforeunload", (event) => {
-  if (Object.keys(changedPoints).length) event.preventDefault();
+  if (hasUnsaved()) event.preventDefault();
 });
 
 // Saves the typed scores. Returns true when they are saved (or there was nothing to save).
 async function savePoints() {
-  if (!Object.keys(changedPoints).length) return true;
+  if (!hasUnsaved()) return true;
   hideError("student-error");
   savePointsButton.disabled = true;
   document.getElementById("points-status").textContent = "Saving...";
@@ -295,7 +320,7 @@ async function savePoints() {
     const response = await apiFetch(`/api/submissions/${detail.id}/points`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ points: changedPoints }),
+      body: JSON.stringify({ points: changedPoints, feedback: changedFeedback }),
     });
     if (!response) return false;
     const data = await response.json();
@@ -306,6 +331,7 @@ async function savePoints() {
       return false;
     }
     changedPoints = {};
+    changedFeedback = {};
     await loadStudent(data.detail.attempt);
     document.getElementById("points-status").textContent = "Scores saved";
     loadOrder();

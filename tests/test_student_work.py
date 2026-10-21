@@ -125,3 +125,37 @@ def test_score_hidden_until_teacher_releases(teacher, other_teacher):
     assert shown["score"]["total"]["earned"] == 3 and shown["scores_released"] is True
     teacher.put(f"/api/assignments/{assignment_id}/release", json={"released": False})
     assert student.get(f"/api/my-activities/{assignment_id}").get_json()["activity"]["score"] is None
+
+
+def test_teacher_remarks_reach_the_student_after_release(teacher, other_teacher):
+    assignment_id, _, q, students = setup(teacher, release=False)
+    student = login(students[0]["username"])
+    student.post(f"/api/my-activities/{assignment_id}/submit", json={"answers": {str(q[0]): 1, str(q[4]): "Because"}})
+    submission_id = teacher.get(f"/api/assignments/{assignment_id}/students/{students[0]['id']}").get_json()[
+        "detail"]["id"]
+
+    # Remarks only: no points are sent. Spaces are trimmed; an empty remark removes it.
+    saved = teacher.put(f"/api/submissions/{submission_id}/points",
+                        json={"feedback": {str(q[0]): "  Good job!  ", str(q[4]): "Explain more."}}).get_json()["detail"]
+    remarks = {question["id"]: question["feedback"] for section in saved["sections"]
+               for question in section["questions"]}
+    assert remarks[q[0]] == "Good job!" and remarks[q[4]] == "Explain more." and remarks[q[1]] == ""
+    assert teacher.put(f"/api/submissions/{submission_id}/points",
+                       json={"feedback": {str(q[4]): ""}}).status_code == 200
+    teacher.put(f"/api/submissions/{submission_id}/points", json={"feedback": {str(q[4]): "Explain more."}})
+
+    # Hidden until the scores are released
+    assert student.get(f"/api/my-activities/{assignment_id}").get_json()["activity"]["feedback"] == {}
+    teacher.put(f"/api/assignments/{assignment_id}/release", json={"released": True})
+    shown = student.get(f"/api/my-activities/{assignment_id}").get_json()["activity"]["feedback"]
+    assert shown == {str(q[0]): "Good job!", str(q[4]): "Explain more."}
+
+    # Saving remarks does not change points; bad input is refused; other teachers are refused
+    assert error(teacher.put(f"/api/submissions/{submission_id}/points", json={"feedback": {"99999": "x"}})) == \
+        "Question not found."
+    assert error(teacher.put(f"/api/submissions/{submission_id}/points", json={"feedback": {str(q[0]): "x" * 1001}})) \
+        == "A remark is too long (at most 1000 characters)."
+    assert error(teacher.put(f"/api/submissions/{submission_id}/points", json={"feedback": {str(q[0]): 5}})) == \
+        "A remark is not valid."
+    assert other_teacher.put(f"/api/submissions/{submission_id}/points",
+                             json={"feedback": {str(q[0]): "x"}}).status_code == 404

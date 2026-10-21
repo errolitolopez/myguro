@@ -85,6 +85,9 @@ class StudentWorkService(Service):
             "scores_released": bool(assignment["scores_released"]),
             "score": self.score(last_submitted["id"], assignment["activity_id"])
             if last_submitted and assignment["scores_released"] else None,
+            # The teacher's remarks, only on the submitted sheet and once the scores are released.
+            "feedback": self.submissions.feedback(last_submitted["id"])
+            if last_submitted and assignment["scores_released"] and submission["submitted_at"] else {},
             "late": bool(last_submitted and last_submitted["late"]),
             "paper": bool(last_submitted and last_submitted["paper"]),
             "note": last_submitted["note"] if last_submitted and assignment["scores_released"] else "",

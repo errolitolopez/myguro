@@ -166,6 +166,10 @@ def add_missing_columns(db):
         db.execute("ALTER TABLE submissions ADD COLUMN paper_score INTEGER")
         db.execute("ALTER TABLE submissions ADD COLUMN note TEXT NOT NULL DEFAULT ''")
 
+    answer_columns = [row["name"] for row in db.execute("PRAGMA table_info(submission_answers)")]
+    if "feedback" not in answer_columns:
+        db.execute("ALTER TABLE submission_answers ADD COLUMN feedback TEXT NOT NULL DEFAULT ''")
+
     section_columns = [row["name"] for row in db.execute("PRAGMA table_info(activity_sections)")]
     if "kind" not in section_columns:
         db.execute(

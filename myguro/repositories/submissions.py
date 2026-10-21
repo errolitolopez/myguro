@@ -99,6 +99,22 @@ class SubmissionRepository(Repository):
             (submission_id, question_id, is_correct, points),
         )
 
+    def set_feedback(self, submission_id, question_id, feedback):
+        """Save the teacher's remark on one answer ('' removes it). An unanswered question gets an
+        empty answer row, like set_teacher_points."""
+        self.execute(
+            "INSERT INTO submission_answers (submission_id, question_id, answer, feedback) "
+            "VALUES (?, ?, 'null', ?) "
+            "ON CONFLICT (submission_id, question_id) DO UPDATE SET feedback = excluded.feedback",
+            (submission_id, question_id, feedback),
+        )
+
+    def feedback(self, submission_id):
+        """{question id: remark} of the answers that have one."""
+        return {row["question_id"]: row["feedback"] for row in self.all(
+            "SELECT question_id, feedback FROM submission_answers WHERE submission_id = ? AND feedback != ''",
+            (submission_id,))}
+
     def mark_submitted(self, submission_id, late):
         self.execute("UPDATE submissions SET submitted_at = datetime('now'), updated_at = datetime('now'), late = ? "
                      "WHERE id = ?", (int(late), submission_id))

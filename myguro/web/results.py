@@ -76,7 +76,8 @@ def api_student(assignment_id, student_id):
 @bp.put("/api/submissions/<int:submission_id>/points")
 @role_required_api("teacher")
 def api_points(submission_id):
-    return jsonify(detail=service().set_points(submission_id, json_body().get("points")))
+    body = json_body()
+    return jsonify(detail=service().set_points(submission_id, body.get("points"), body.get("feedback")))
 
 
 @bp.put("/api/assignments/<int:assignment_id>/release")

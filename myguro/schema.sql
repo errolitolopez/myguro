@@ -149,13 +149,14 @@ CREATE TABLE IF NOT EXISTS submissions (
 -- One answer per question. answer is JSON, like the question's answer key: a choice index,
 -- true/false, text, or a list of texts (one per blank).
 -- is_correct and points are set when submitted; both stay NULL for a short answer until
--- the teacher scores it.
+-- the teacher scores it. feedback is the teacher's remark on this answer (empty = none).
 CREATE TABLE IF NOT EXISTS submission_answers (
     submission_id INTEGER NOT NULL REFERENCES submissions (id),
     question_id INTEGER NOT NULL REFERENCES questions (id),
     answer TEXT NOT NULL,
     is_correct INTEGER,
     points INTEGER,
+    feedback TEXT NOT NULL DEFAULT '',
     PRIMARY KEY (submission_id, question_id)
 );
 
