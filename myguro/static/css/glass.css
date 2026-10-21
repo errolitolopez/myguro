@@ -63,7 +63,6 @@ footer {
 /* Frosted panels */
 .card,
 .modal-content,
-.dropdown-menu,
 .toast {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
@@ -84,7 +83,14 @@ footer {
   --bs-modal-border-radius: 1rem;
   --bs-modal-inner-border-radius: calc(1rem - var(--bs-modal-border-width));
 }
-.dropdown-menu { --bs-dropdown-border-radius: 0.75rem; }
+/* Dropdown menus are plain and opaque, not glass: they open over busy content (cards, tables), where
+   see-through text is hard to read. */
+.dropdown-menu {
+  --bs-dropdown-border-radius: 0.75rem;
+  --bs-dropdown-bg: var(--glass-solid);
+  --bs-dropdown-border-color: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
 
 .modal-content { background: var(--glass-bg-strong); }
 .modal-backdrop.show { opacity: 0.35; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
@@ -97,6 +103,9 @@ footer {
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
   box-shadow: var(--glass-shadow);
+  /* backdrop-filter makes the bar its own layer, so without a z-index the frosted cards below it
+     paint over its dropdown menu. 1000 = Bootstrap's dropdown level; modals (1055) stay above. */
+  z-index: 1000;
 }
 .navbar .nav-underline { --bs-nav-underline-link-active-color: var(--bs-emphasis-color); }
 .navbar .nav-link.active { border-bottom-color: var(--bs-emphasis-color); }
@@ -158,6 +167,118 @@ footer {
 }
 .btn.bi:empty::before { margin-right: 0; }
 
+/* Small buttons on every screen size (copied from mymotoworks). About 28-32px high on phones is
+   still easy to tap. Bootstrap's own variables, not new selectors. btn-lg is only a little bigger
+   than btn-sm, so big Save buttons do not dominate the page. */
+.btn {
+  --bs-btn-padding-y: 0.2rem;
+  --bs-btn-padding-x: 0.55rem;
+  --bs-btn-font-size: 0.75rem;
+  --bs-btn-border-radius: 0.5rem;
+}
+
+.btn-sm {
+  --bs-btn-padding-y: 0.12rem;
+  --bs-btn-padding-x: 0.4rem;
+  --bs-btn-font-size: 0.6875rem;
+}
+
+.btn-lg {
+  --bs-btn-padding-y: 0.3rem;
+  --bs-btn-padding-x: 0.7rem;
+  --bs-btn-font-size: 0.8125rem;
+  --bs-btn-border-radius: 0.5rem;
+}
+
+/* ---- Mobile first: the phone layout is the base; wider screens add to it ---- */
+@media (max-width: 767.98px) {
+  /* A minimum height keeps tiny buttons and inputs tappable with a thumb. */
+  .btn { min-height: 1.75rem; }
+  .btn-sm { min-height: 1.5rem; }
+  .btn-lg { min-height: 2rem; }
+
+  .form-control,
+  .form-select {
+    min-height: 2.25rem;
+    font-size: 0.875rem;
+  }
+
+  .form-control-lg {
+    min-height: 2.5rem;
+    font-size: 1rem;
+  }
+
+  .dropdown-item {
+    padding-top: 0.45rem;
+    padding-bottom: 0.45rem;
+  }
+
+  .form-check-input {
+    width: 1.2em;
+    height: 1.2em;
+  }
+
+  .form-switch .form-check-input { width: 2.1em; }
+}
+
+@media (max-width: 575.98px) {
+  /* Full-screen forms use the visible height, so Save is not hidden under the browser bar. */
+  .modal-fullscreen-sm-down { height: 100dvh; }
+}
+
+@media (max-width: 767.98px) {
+  .modal-fullscreen-md-down { height: 100dvh; }
+}
+
+/* The bottom tab bar on phones (copied from mymotoworks). Opaque, so page content never shows through
+   it. d-md-none (Bootstrap) hides it from 768px up. */
+.tabbar {
+  position: fixed;
+  inset: auto 0 0 0;
+  /* Above page content, but below Bootstrap's dropdown menus (1000) and modals (1055). */
+  z-index: 900;
+  display: flex;
+  background-color: var(--glass-solid);
+  border-top: 1px solid var(--glass-border);
+  /* The iPhone home bar area. Needs viewport-fit=cover in base.html. */
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.tab-link {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  min-height: 3rem;
+  color: var(--bs-secondary-color);
+  text-decoration: none;
+  font-size: 0.7rem;
+}
+
+.tab-link .bi {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.tab-link.active {
+  color: var(--bs-primary);
+  font-weight: 600;
+}
+
+@media (max-width: 767.98px) {
+  /* Room for the bar, so the last row of a page is never hidden behind it. */
+  body:has(.tabbar) {
+    padding-bottom: calc(3rem + env(safe-area-inset-bottom));
+  }
+
+  /* The editor and answer bars sit on top of the tab bar, not under it. */
+  body:has(.tabbar) .position-fixed.bottom-0 {
+    bottom: calc(3rem + env(safe-area-inset-bottom)) !important; /* !important beats Bootstrap's bottom-0 */
+  }
+}
+
 /* Slim scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb { background-color: var(--scroll-thumb); border-radius: 8px; }
@@ -181,12 +302,12 @@ body:has(.position-fixed.bottom-0) > footer { padding-bottom: 5rem !important; }
 
 /* No blur support, or the person asked for less transparency: plain opaque panels */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .card, .modal-content, .dropdown-menu, .toast { background: var(--glass-solid); }
+  .card, .modal-content, .toast { background: var(--glass-solid); }
   .navbar.bg-success { background-color: var(--glass-solid) !important; }
   .list-group { --bs-list-group-bg: var(--glass-solid); }
 }
 @media (prefers-reduced-transparency: reduce) {
-  .card, .modal-content, .dropdown-menu, .toast {
+  .card, .modal-content, .toast {
     background: var(--glass-solid); -webkit-backdrop-filter: none; backdrop-filter: none;
   }
   .navbar.bg-success {

@@ -1,52 +1,61 @@
+{# One list of pages, used by the desktop tabs and by the phone tab bar. #}
+{% if user.role == "admin" %}
+  {% set tabs = [("dashboard.page", ("dashboard.page",), "Dashboard", "bi-house"),
+                 ("accounts.teachers_page", ("accounts.teachers_page",), "Teachers", "bi-person-workspace"),
+                 ("accounts.students_page", ("accounts.students_page",), "Students", "bi-people")] %}
+{% elif user.role == "teacher" %}
+  {% set tabs = [("dashboard.page", ("dashboard.page",), "Dashboard", "bi-house"),
+                 ("activities.list_page", ("activities.list_page", "activities.editor_page"), "Activities", "bi-journal-text"),
+                 ("classes.list_page", ("classes.list_page", "classes.detail_page"), "Classes", "bi-mortarboard")] %}
+{% else %}
+  {% set tabs = [("dashboard.page", ("dashboard.page",), "Dashboard", "bi-house"),
+                 ("student.activities_page", ("student.activities_page", "student.answer_page"), "Activities", "bi-journal-text")] %}
+{% endif %}
+
 <nav class="navbar bg-success">
   <div class="container">
     <span class="navbar-brand fw-bold d-flex align-items-center gap-2">
       {% with size=28 %}{% include "_logo.html" %}{% endwith %}myguro
     </span>
-    <div class="d-flex align-items-center gap-2">
-      <span class="navbar-text small d-none d-sm-inline">{{ user.name }} ({{ user.role }})</span>
-      <a class="btn btn-outline-secondary btn-sm bi bi-key" href="{{ url_for('auth.change_password_page') }}">Password</a>
-      <button id="logout-button" class="btn btn-outline-secondary btn-sm bi bi-box-arrow-right">Logout</button>
+    <!-- One account menu for every screen size: Settings (admin), Password and Logout. -->
+    <div class="dropdown">
+      <button class="btn btn-outline-secondary bi bi-person-circle dropdown-toggle" type="button"
+              data-bs-toggle="dropdown" aria-expanded="false" aria-label="Account menu">
+        <span class="d-none d-sm-inline"> {{ user.name }}</span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><h6 class="dropdown-header">{{ user.name }} ({{ user.role }})</h6></li>
+        {% if user.role == "admin" %}
+        <li><a class="dropdown-item bi bi-gear {{ 'active' if request.endpoint == 'settings.page' }}" href="{{ url_for('settings.page') }}"> Settings</a></li>
+        {% endif %}
+        <li><a class="dropdown-item bi bi-key" href="{{ url_for('auth.change_password_page') }}"> Password</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><button id="logout-button" class="dropdown-item bi bi-box-arrow-right" type="button"> Logout</button></li>
+      </ul>
     </div>
   </div>
-  <div class="container">
+  <!-- Wider screens (768px and up): the pages as tabs under the brand. -->
+  <div class="container d-none d-md-block">
     <ul class="nav nav-underline">
+      {% for endpoint, actives, label, icon in tabs %}
       <li class="nav-item">
-        <a class="nav-link {{ 'active' if request.endpoint == 'dashboard.page' }}"
-           href="{{ url_for('dashboard.page') }}">Dashboard</a>
+        <a class="nav-link {{ 'active' if request.endpoint in actives }}"
+           href="{{ url_for(endpoint) }}">{{ label }}</a>
       </li>
-      {% if user.role == "admin" %}
-      <li class="nav-item">
-        <a class="nav-link {{ 'active' if request.endpoint == 'accounts.teachers_page' }}"
-           href="{{ url_for('accounts.teachers_page') }}">Teachers</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link {{ 'active' if request.endpoint == 'accounts.students_page' }}"
-           href="{{ url_for('accounts.students_page') }}">Students</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link {{ 'active' if request.endpoint == 'settings.page' }}"
-           href="{{ url_for('settings.page') }}">Settings</a>
-      </li>
-      {% endif %}
-      {% if user.role == "student" %}
-      <li class="nav-item">
-        <a class="nav-link {{ 'active' if request.endpoint in ('student.activities_page', 'student.answer_page') }}"
-           href="{{ url_for('student.activities_page') }}">Activities</a>
-      </li>
-      {% endif %}
-      {% if user.role == "teacher" %}
-      <li class="nav-item">
-        <a class="nav-link {{ 'active' if request.endpoint in ('activities.list_page', 'activities.editor_page') }}"
-           href="{{ url_for('activities.list_page') }}">Activities</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link {{ 'active' if request.endpoint in ('classes.list_page', 'classes.detail_page') }}"
-           href="{{ url_for('classes.list_page') }}">Classes</a>
-      </li>
-      {% endif %}
+      {% endfor %}
     </ul>
   </div>
+</nav>
+
+<!-- Phones: the same pages as a bar at the bottom, within reach of the thumb. -->
+<nav class="tabbar d-md-none" aria-label="Main">
+  {% for endpoint, actives, label, icon in tabs %}
+  <a class="tab-link {{ 'active' if request.endpoint in actives }}" href="{{ url_for(endpoint) }}"
+     {% if request.endpoint in actives %}aria-current="page"{% endif %}>
+    <i class="bi {{ icon }}" aria-hidden="true"></i>
+    <span class="tab-label">{{ label }}</span>
+  </a>
+  {% endfor %}
 </nav>
 {# A closable tip, filled in by tips.js. Not on the answer page, so nobody is interrupted mid-activity. #}
 {% if user.role in ("teacher", "student") and request.endpoint != "student.answer_page" %}
