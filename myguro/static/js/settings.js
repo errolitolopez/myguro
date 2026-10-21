@@ -172,3 +172,90 @@ document.getElementById("tip-preview").addEventListener("click", () => {
 
 showTips();
 loadSettings();
+
+
+// --- School years ----------------------------------------------------------------------
+
+const yearList = document.getElementById("year-list");
+const yearForm = document.getElementById("year-form");
+const yearName = document.getElementById("year-name");
+const yearStart = document.getElementById("year-start");
+let confirmingYear = false; // the second tap on "Start new school year" confirms
+
+// Every year, newest first, the current one marked.
+function showYears(years) {
+  yearList.replaceChildren(...years.map((year) => {
+    const item = document.createElement("li");
+    item.className = "list-group-item d-flex justify-content-between align-items-center";
+    const name = document.createElement("span");
+    name.textContent = year.name;
+    item.append(name);
+    if (year.current) {
+      const badge = document.createElement("span");
+      badge.className = "badge text-bg-success";
+      badge.textContent = "Current";
+      item.append(badge);
+    }
+    return item;
+  }));
+  // Suggest the year after the newest one: "2026-2027" -> "2027-2028"
+  const start = Number(years[0].name.slice(0, 4)) + 1;
+  yearName.placeholder = `${start}-${start + 1}`;
+}
+
+async function loadYears() {
+  try {
+    const response = await apiFetch("/api/school-years");
+    if (!response) return;
+    showYears((await response.json()).years);
+  } catch {
+    showError("year-error", "Cannot reach the server. Check your connection.");
+  }
+}
+
+yearName.addEventListener("input", () => {
+  confirmingYear = false;
+  yearStart.textContent = "Start new school year";
+  yearStart.classList.replace("btn-danger", "btn-success");
+});
+
+yearForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  hideError("year-error");
+  // Starting a year cannot be undone, so the first tap asks and the second one does it.
+  if (!confirmingYear) {
+    confirmingYear = true;
+    yearStart.textContent = "Tap again: last year becomes read-only";
+    yearStart.classList.replace("btn-success", "btn-danger");
+    return;
+  }
+  const stopLoading = startLoading(yearStart);
+  if (!stopLoading) return;
+  try {
+    const response = await apiFetch("/api/school-years", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: yearName.value || yearName.placeholder,
+        copy_classes: document.getElementById("year-copy").checked }),
+    });
+    if (!response) return;
+    const data = await response.json();
+    if (!response.ok) {
+      showError("year-error", data.error || "Could not start the school year.");
+      return;
+    }
+    yearName.value = "";
+    document.getElementById("year-status").textContent = "New school year started.";
+    // Reload so the account menu and every page use the new current year.
+    window.location.reload();
+  } catch {
+    showError("year-error", "Cannot reach the server. Check your connection.");
+  } finally {
+    stopLoading();
+    confirmingYear = false;
+    yearStart.textContent = "Start new school year";
+    yearStart.classList.replace("btn-danger", "btn-success");
+  }
+});
+
+loadYears();

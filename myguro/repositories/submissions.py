@@ -26,7 +26,7 @@ class SubmissionRepository(Repository):
         """A submission of the teacher's sheet, with its activity id."""
         return self.one(
             """
-            SELECT sub.*, asg.activity_id FROM submissions sub
+            SELECT sub.*, asg.activity_id, asg.school_year_id FROM submissions sub
             JOIN assignments asg ON asg.id = sub.assignment_id
             JOIN activities a ON a.id = asg.activity_id
             WHERE sub.id = ? AND a.teacher_id = ? AND a.deleted_at IS NULL
@@ -146,17 +146,18 @@ class SubmissionRepository(Repository):
         self.execute("DELETE FROM submission_answers WHERE submission_id = ?", (submission_id,))
         self.execute("DELETE FROM submissions WHERE id = ?", (submission_id,))
 
-    def count_submitted_by_student(self, student_id):
-        """How many assignments the student submitted (however many attempts)."""
+    def count_submitted_by_student(self, student_id, year_id):
+        """How many assignments of one school year the student submitted (however many attempts)."""
         return self.value("SELECT COUNT(DISTINCT assignment_id) FROM submissions "
-                          "WHERE student_id = ? AND submitted_at IS NOT NULL", (student_id,))
+                          "WHERE student_id = ? AND submitted_at IS NOT NULL AND assignment_id IN "
+                          "(SELECT id FROM assignments WHERE school_year_id = ?)", (student_id, year_id))
 
-    def count_submitted_for_teacher(self, teacher_id):
-        """Students who submitted the teacher's sheets (each once per assignment)."""
+    def count_submitted_for_teacher(self, teacher_id, year_id):
+        """Students who submitted the teacher's sheets in one school year (each once per assignment)."""
         return self.value(
             "SELECT COUNT(*) FROM (SELECT DISTINCT assignment_id, student_id FROM submissions "
             "WHERE submitted_at IS NOT NULL AND assignment_id IN "
             "(SELECT asg.id FROM assignments asg JOIN activities a ON a.id = asg.activity_id "
-            "WHERE a.teacher_id = ?))",
-            (teacher_id,),
+            "WHERE a.teacher_id = ? AND asg.school_year_id = ?))",
+            (teacher_id, year_id),
         )

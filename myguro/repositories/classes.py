@@ -6,8 +6,8 @@ class ClassRepository(Repository):
         """The class, or None if it doesn't exist or belongs to another teacher."""
         return self.one("SELECT * FROM classes WHERE id = ? AND teacher_id = ?", (class_id, teacher_id))
 
-    def list_for_teacher(self, teacher_id):
-        """The teacher's classes with how many students and activities each has."""
+    def list_for_teacher(self, teacher_id, year_id):
+        """The teacher's classes of one school year with how many students and activities each has."""
         return self.all(
             """
             SELECT c.id, c.name, c.subject,
@@ -16,22 +16,32 @@ class ClassRepository(Repository):
                     WHERE asg.class_id = c.id AND EXISTS (
                         SELECT 1 FROM activities a WHERE a.id = asg.activity_id AND a.deleted_at IS NULL)) AS activities
             FROM classes c
-            WHERE c.teacher_id = ?
+            WHERE c.teacher_id = ? AND c.school_year_id = ?
             ORDER BY c.name COLLATE NOCASE, c.subject COLLATE NOCASE
             """,
-            (teacher_id,),
+            (teacher_id, year_id),
         )
 
-    def find_same(self, teacher_id, name, subject):
-        """The teacher's class with this name and subject (any capitals), or None."""
+    def copy_to_year(self, from_year_id, to_year_id):
+        """Make the same classes (teacher, name, subject; no students, no activities) in another
+        school year. Returns how many were made."""
+        return self.execute(
+            "INSERT INTO classes (teacher_id, name, subject, school_year_id) "
+            "SELECT teacher_id, name, subject, ? FROM classes WHERE school_year_id = ?",
+            (to_year_id, from_year_id),
+        ).rowcount
+
+    def find_same(self, teacher_id, name, subject, year_id):
+        """The teacher's class of that school year with this name and subject (any capitals), or None."""
         return self.one(
-            "SELECT id FROM classes WHERE teacher_id = ? AND name = ? COLLATE NOCASE AND subject = ? COLLATE NOCASE",
-            (teacher_id, name, subject),
+            "SELECT id FROM classes WHERE teacher_id = ? AND name = ? COLLATE NOCASE AND subject = ? COLLATE NOCASE "
+            "AND school_year_id = ?",
+            (teacher_id, name, subject, year_id),
         )
 
-    def create(self, teacher_id, name, subject):
-        return self.execute("INSERT INTO classes (teacher_id, name, subject) VALUES (?, ?, ?)",
-                            (teacher_id, name, subject)).lastrowid
+    def create(self, teacher_id, name, subject, year_id):
+        return self.execute("INSERT INTO classes (teacher_id, name, subject, school_year_id) VALUES (?, ?, ?, ?)",
+                            (teacher_id, name, subject, year_id)).lastrowid
 
     def update(self, class_id, name, subject):
         self.execute("UPDATE classes SET name = ?, subject = ? WHERE id = ?", (name, subject, class_id))
@@ -87,8 +97,8 @@ class ClassRepository(Repository):
             "AND (grade != '' OR section != '') ORDER BY grade, section COLLATE NOCASE"
         )
 
-    def classes_of_student(self, student_id):
-        """The student's classes with teacher and how many activities the student got in each."""
+    def classes_of_student(self, student_id, year_id):
+        """The student's classes of one school year with teacher and how many activities the student got in each."""
         return self.all(
             """
             SELECT c.id, c.name, c.subject, t.name AS teacher,
@@ -104,18 +114,18 @@ class ClassRepository(Repository):
             FROM class_students cs
             JOIN classes c ON c.id = cs.class_id
             JOIN users t ON t.id = c.teacher_id
-            WHERE cs.student_id = ?
+            WHERE cs.student_id = ? AND c.school_year_id = ?
             ORDER BY c.name COLLATE NOCASE, c.subject COLLATE NOCASE
             """,
-            (student_id,),
+            (student_id, year_id),
         )
 
-    def count_all(self):
-        return self.value("SELECT COUNT(*) FROM classes")
+    def count_all(self, year_id):
+        return self.value("SELECT COUNT(*) FROM classes WHERE school_year_id = ?", (year_id,))
 
-    def count_students_of_teacher(self, teacher_id):
+    def count_students_of_teacher(self, teacher_id, year_id):
         return self.value(
             "SELECT COUNT(DISTINCT student_id) FROM class_students "
-            "WHERE class_id IN (SELECT id FROM classes WHERE teacher_id = ?)",
-            (teacher_id,),
+            "WHERE class_id IN (SELECT id FROM classes WHERE teacher_id = ? AND school_year_id = ?)",
+            (teacher_id, year_id),
         )

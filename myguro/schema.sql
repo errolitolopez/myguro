@@ -20,12 +20,23 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     -- Students only, both optional (an irregular student may have no section): "Grade 6", "Rizal"
     grade TEXT NOT NULL DEFAULT '',
-    section TEXT NOT NULL DEFAULT ''
+    section TEXT NOT NULL DEFAULT '',
+    -- The school year this person is looking at; NULL = the current one (see school_years)
+    view_year_id INTEGER REFERENCES school_years (id)
+);
+
+-- School years, like "2026-2027". Which one is the current year is a setting
+-- (current_school_year). Classes and assignments belong to one year; a past year is read-only.
+CREATE TABLE IF NOT EXISTS school_years (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE COLLATE NOCASE,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE TABLE IF NOT EXISTS classes (
     id INTEGER PRIMARY KEY,
     teacher_id INTEGER NOT NULL REFERENCES users (id),
+    school_year_id INTEGER REFERENCES school_years (id),
     name TEXT NOT NULL,
     subject TEXT NOT NULL DEFAULT '',
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -77,6 +88,8 @@ CREATE TABLE IF NOT EXISTS assignments (
     id INTEGER PRIMARY KEY,
     activity_id INTEGER NOT NULL REFERENCES activities (id),
     class_id INTEGER REFERENCES classes (id),
+    -- The year of the class; for a direct assignment, the year it was given in
+    school_year_id INTEGER REFERENCES school_years (id),
     everyone INTEGER NOT NULL DEFAULT 1,
     due_date TEXT,
     -- 0 = students don't see their scores yet (so answers can't be passed around); the teacher releases them
@@ -85,9 +98,8 @@ CREATE TABLE IF NOT EXISTS assignments (
     UNIQUE (activity_id, class_id)
 );
 
--- UNIQUE treats NULLs as different, so "one direct assignment per activity" needs its own index.
-CREATE UNIQUE INDEX IF NOT EXISTS one_direct_assignment_per_activity
-    ON assignments (activity_id) WHERE class_id IS NULL;
+-- UNIQUE treats NULLs as different, so "one direct assignment per activity and school year"
+-- needs its own index (made in migrations.py, after the school_year_id column exists).
 
 CREATE TABLE IF NOT EXISTS assignment_students (
     assignment_id INTEGER NOT NULL REFERENCES assignments (id),

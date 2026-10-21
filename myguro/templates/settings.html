@@ -24,6 +24,30 @@
 
   <div class="card mt-3">
     <div class="card-body">
+      <h2 class="h6 fw-semibold mb-1">School years</h2>
+      <div class="form-text mb-2">
+        Classes and the work given to them belong to a school year. When you start a new year it
+        becomes the current one: teachers and students begin with no classes, and past years can
+        only be looked at (the year picker is in the account menu).
+      </div>
+      <ul id="year-list" class="list-group mb-3"></ul>
+      <form id="year-form" class="d-flex flex-wrap gap-2 align-items-center" novalidate>
+        <label class="visually-hidden" for="year-name">New school year</label>
+        <input id="year-name" class="form-control w-auto" maxlength="9" placeholder="2027-2028"
+               autocomplete="off" inputmode="numeric">
+        <div class="form-check mb-0">
+          <input id="year-copy" class="form-check-input" type="checkbox" checked>
+          <label class="form-check-label small" for="year-copy">Copy last year's classes (without students)</label>
+        </div>
+        <button id="year-start" type="submit" class="btn btn-success bi bi-plus-lg">Start new school year</button>
+      </form>
+      <div id="year-error" class="alert alert-danger py-2 mt-2 d-none" role="alert"></div>
+      <div id="year-status" class="small text-body-secondary mt-2"></div>
+    </div>
+  </div>
+
+  <div class="card mt-3">
+    <div class="card-body">
       <h2 class="h6 fw-semibold mb-1">Grades in use</h2>
       <div class="form-text mb-2">
         Turn off the grades your school doesn't have. A disabled grade is hidden from the dropdowns

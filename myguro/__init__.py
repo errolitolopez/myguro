@@ -15,7 +15,7 @@ from myguro import config, database, seed, seed_demo
 from myguro.database import get_db
 from myguro.domain.support import popup_due
 from myguro.errors import register_error_handlers
-from myguro.services import LoginThrottle, SettingsService
+from myguro.services import LoginThrottle, SchoolYearService, SettingsService
 from myguro.web import BLUEPRINTS
 from myguro.web.security import current_user
 
@@ -59,6 +59,8 @@ def create_app(test_config=None):
             # The "Support myguro" link in the page footer: admin and teachers only, when turned on
             "SUPPORT": support,
             "SUPPORT_POPUP": popup,
+            # The school years for the picker in the account menu (not on the login page)
+            "SCHOOL_YEARS": SchoolYearService(get_db(), user).overview() if user else None,
         }
 
     return app

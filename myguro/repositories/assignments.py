@@ -28,24 +28,27 @@ class AssignmentRepository(Repository):
     def get(self, activity_id, class_id):
         return self.one("SELECT * FROM assignments WHERE activity_id = ? AND class_id = ?", (activity_id, class_id))
 
-    def get_direct(self, activity_id):
-        """The sheet's direct assignment (given to students with no class), or None."""
-        return self.one("SELECT * FROM assignments WHERE activity_id = ? AND class_id IS NULL", (activity_id,))
+    def get_direct(self, activity_id, year_id):
+        """The sheet's direct assignment of that school year (given to students with no class), or None."""
+        return self.one("SELECT * FROM assignments WHERE activity_id = ? AND class_id IS NULL "
+                        "AND school_year_id = ?", (activity_id, year_id))
 
-    def ids_by_class(self, activity_id):
-        """{class id: assignment id} of a sheet (the direct assignment has no class and is left out)."""
+    def ids_by_class(self, activity_id, year_id):
+        """{class id: assignment id} of a sheet in one school year (the direct assignment has no
+        class and is left out)."""
         return {row["class_id"]: row["id"] for row in self.all(
-            "SELECT id, class_id FROM assignments WHERE activity_id = ? AND class_id IS NOT NULL",
-            (activity_id,))}
+            "SELECT id, class_id FROM assignments WHERE activity_id = ? AND class_id IS NOT NULL "
+            "AND school_year_id = ?", (activity_id, year_id))}
 
     def chosen_students(self, assignment_id):
         return [row["student_id"] for row in self.all(
             "SELECT student_id FROM assignment_students WHERE assignment_id = ?", (assignment_id,))]
 
-    def create(self, activity_id, class_id, everyone, due_date):
+    def create(self, activity_id, class_id, everyone, due_date, year_id):
         return self.execute(
-            "INSERT INTO assignments (everyone, due_date, activity_id, class_id) VALUES (?, ?, ?, ?)",
-            (int(everyone), due_date, activity_id, class_id),
+            "INSERT INTO assignments (everyone, due_date, activity_id, class_id, school_year_id) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (int(everyone), due_date, activity_id, class_id, year_id),
         ).lastrowid
 
     def update(self, assignment_id, everyone, due_date):
@@ -130,8 +133,8 @@ class AssignmentRepository(Repository):
             {"assignment": assignment_id, "student": student_id},
         )
 
-    def list_for_student(self, student_id):
-        """Everything given to a student, soonest due first, with their latest attempt (sub) and
+    def list_for_student(self, student_id, year_id):
+        """Everything given to a student in one school year, soonest due first, with their latest attempt (sub) and
         latest submitted attempt (last: the one that counts)."""
         return self.all(
             f"""
@@ -150,10 +153,10 @@ class AssignmentRepository(Repository):
             LEFT JOIN submissions last ON last.id = (
                 SELECT id FROM submissions WHERE assignment_id = asg.id AND student_id = :student
                 AND submitted_at IS NOT NULL ORDER BY attempt DESC LIMIT 1)
-            WHERE {VISIBLE_TO_STUDENT}
+            WHERE {VISIBLE_TO_STUDENT} AND asg.school_year_id = :year
             ORDER BY asg.due_date IS NULL, asg.due_date, asg.assigned_at DESC
             """,
-            {"student": student_id},
+            {"student": student_id, "year": year_id},
         )
 
     def students(self, assignment):

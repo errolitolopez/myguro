@@ -55,10 +55,13 @@ def test_migration_makes_class_optional_and_keeps_rows(app, teacher):
                           (assignment_id,)).fetchone()[0] == 1
         assert db.execute("SELECT COUNT(*) FROM submissions WHERE assignment_id = ? AND submitted_at IS NOT NULL",
                           (assignment_id,)).fetchone()[0] == 1
-        # A direct assignment (no class) can now be stored, but only one per activity.
-        db.execute("INSERT INTO assignments (activity_id, class_id) VALUES (?, NULL)", (activity_id,))
+        # A direct assignment (no class) can now be stored, but only one per activity and school year.
+        year_id = db.execute("SELECT id FROM school_years").fetchone()[0]
+        db.execute("INSERT INTO assignments (activity_id, class_id, school_year_id) VALUES (?, NULL, ?)",
+                   (activity_id, year_id))
         try:
-            db.execute("INSERT INTO assignments (activity_id, class_id) VALUES (?, NULL)", (activity_id,))
+            db.execute("INSERT INTO assignments (activity_id, class_id, school_year_id) VALUES (?, NULL, ?)",
+                       (activity_id, year_id))
         except Exception as problem:
             assert "UNIQUE" in str(problem)
         else:

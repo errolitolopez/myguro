@@ -4,6 +4,8 @@ CREATE TABLE IF NOT EXISTS (schema.sql) skips tables that already exist, so chan
 are handled here: upgrade_old_tables() runs before schema.sql, add_missing_columns() after.
 """
 
+from datetime import date
+
 from myguro.domain.accounts import display_name, guess_name_parts
 
 # Tables from before students became accounts (when they joined with a class code + PIN).
@@ -166,6 +168,8 @@ def add_missing_columns(db):
         db.execute("ALTER TABLE submissions ADD COLUMN paper_score INTEGER")
         db.execute("ALTER TABLE submissions ADD COLUMN note TEXT NOT NULL DEFAULT ''")
 
+    add_school_years(db)
+
     answer_columns = [row["name"] for row in db.execute("PRAGMA table_info(submission_answers)")]
     if "feedback" not in answer_columns:
         db.execute("ALTER TABLE submission_answers ADD COLUMN feedback TEXT NOT NULL DEFAULT ''")
@@ -182,6 +186,38 @@ def add_missing_columns(db):
             "CHECK (description_format IN ('plain', 'rich'))"
         )
     db.commit()
+
+
+def default_year_name(today):
+    """The school year a day falls in (the year starts in June): 2026-10-21 -> "2026-2027"."""
+    start = today.year if today.month >= 6 else today.year - 1
+    return f"{start}-{start + 1}"
+
+
+def add_school_years(db):
+    """School years: the columns, the first year for data made before years existed, and the
+    one-direct-assignment-per-sheet-and-year index. Safe to run again."""
+    for table, column in (("classes", "school_year_id"), ("assignments", "school_year_id"),
+                          ("users", "view_year_id")):
+        if column not in [row["name"] for row in db.execute(f"PRAGMA table_info({table})")]:
+            db.execute(f"ALTER TABLE {table} ADD COLUMN {column} INTEGER REFERENCES school_years (id)")
+
+    if db.execute("SELECT 1 FROM school_years").fetchone() is None:
+        db.execute("INSERT INTO school_years (name) VALUES (?)", (default_year_name(date.today()),))
+    current = db.execute("SELECT value FROM settings WHERE key = 'current_school_year'").fetchone()
+    if current is None:
+        first = db.execute("SELECT id FROM school_years ORDER BY id LIMIT 1").fetchone()["id"]
+        db.execute("INSERT INTO settings (key, value) VALUES ('current_school_year', ?)", (str(first),))
+        current_id = first
+    else:
+        current_id = int(current["value"])
+    # Everything made before school years existed belongs to the first year.
+    db.execute("UPDATE classes SET school_year_id = ? WHERE school_year_id IS NULL", (current_id,))
+    db.execute("UPDATE assignments SET school_year_id = ? WHERE school_year_id IS NULL", (current_id,))
+
+    db.execute("DROP INDEX IF EXISTS one_direct_assignment_per_activity")
+    db.execute("CREATE UNIQUE INDEX IF NOT EXISTS one_direct_assignment_per_activity_year "
+               "ON assignments (activity_id, school_year_id) WHERE class_id IS NULL")
 
 
 def split_old_names(db):

@@ -31,7 +31,7 @@ class AssignmentService(Service):
                 }
             classes.append({"id": item["id"], "name": item["name"], "subject": item["subject"],
                             "students": class_service.students(item["id"]), "assignment": assignment})
-        direct_row = self.assignments.get_direct(activity_id)
+        direct_row = self.assignments.get_direct(activity_id, self.year_id())
         direct = None
         if direct_row:
             students = [user_json(self.users.get_student(student_id))
@@ -50,7 +50,7 @@ class AssignmentService(Service):
         if not isinstance(posted, dict):
             raise ValidationError("An assignment is not valid.")
         class_row = self.classes.get_for_teacher(posted.get("class_id"), self.user["id"])
-        if class_row is None:
+        if class_row is None or class_row["school_year_id"] != self.year_id():
             raise ValidationError("Class not found.")
         label = class_title(class_row["name"], class_row["subject"])
         due_date = clean_due_date(posted.get("due_date"), label)
@@ -101,7 +101,7 @@ class AssignmentService(Service):
 
     def save_direct(self, activity_id, direct):
         """Make, change or (direct None) take back the sheet's assignment to individual students."""
-        existing = self.assignments.get_direct(activity_id)
+        existing = self.assignments.get_direct(activity_id, self.year_id())
         if direct is None:
             if existing is None:
                 return
@@ -114,7 +114,7 @@ class AssignmentService(Service):
             assignment_id = existing["id"]
             self.assignments.update(assignment_id, True, direct["due_date"])
         else:
-            assignment_id = self.assignments.create(activity_id, None, True, direct["due_date"])
+            assignment_id = self.assignments.create(activity_id, None, True, direct["due_date"], self.year_id())
         self.assignments.set_chosen_students(assignment_id, direct["student_ids"])
 
     def save(self, activity_id, data):
@@ -123,6 +123,8 @@ class AssignmentService(Service):
         A "direct" key (individual students, or null to take it back) is optional: leaving it
         out keeps it as it is."""
         ActivityService(self.db, self.user).require(activity_id)
+        year_id = self.year_id()
+        self.require_open_year(year_id)
         posted = data.get("assignments")
         if not isinstance(posted, list):
             raise ValidationError("Assignments must be a list.")
@@ -137,14 +139,14 @@ class AssignmentService(Service):
                 raise ValidationError("A class is listed twice.")
             cleaned.append(assignment)
 
-        old = self.assignments.ids_by_class(activity_id)
+        old = self.assignments.ids_by_class(activity_id, year_id)
         for assignment in cleaned:
             if assignment["class_id"] in old:
                 assignment_id = old.pop(assignment["class_id"])
                 self.assignments.update(assignment_id, assignment["everyone"], assignment["due_date"])
             else:
                 assignment_id = self.assignments.create(activity_id, assignment["class_id"], assignment["everyone"],
-                                                        assignment["due_date"])
+                                                        assignment["due_date"], year_id)
             self.assignments.set_chosen_students(assignment_id, assignment["student_ids"])
         for class_id, assignment_id in old.items():  # classes no longer listed
             if self.assignments.has_submitted_work(assignment_id):

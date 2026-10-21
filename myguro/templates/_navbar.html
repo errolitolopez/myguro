@@ -25,6 +25,19 @@
       </button>
       <ul class="dropdown-menu dropdown-menu-end">
         <li><h6 class="dropdown-header">{{ user.name }} ({{ user.role }})</h6></li>
+        {% if SCHOOL_YEARS %}
+        <li class="px-3 pb-2">
+          <label class="form-label small text-body-secondary mb-1" for="year-select">School year</label>
+          <select id="year-select" class="form-select form-select-sm">
+            {% for year in SCHOOL_YEARS.years %}
+            <option value="{{ year.id }}" {{ 'selected' if year.id == SCHOOL_YEARS.viewing_id }}>
+              {{ year.name }}{{ ' (current)' if year.current }}
+            </option>
+            {% endfor %}
+          </select>
+        </li>
+        <li><hr class="dropdown-divider"></li>
+        {% endif %}
         {% if user.role == "admin" %}
         <li><a class="dropdown-item bi bi-gear {{ 'active' if request.endpoint == 'settings.page' }}" href="{{ url_for('settings.page') }}"> Settings</a></li>
         {% endif %}
@@ -57,6 +70,17 @@
   </a>
   {% endfor %}
 </nav>
+{# A past school year can only be looked at: say so on every page. #}
+{% if SCHOOL_YEARS and SCHOOL_YEARS.viewing_id != SCHOOL_YEARS.current_id %}
+<div class="container mt-2">
+  <div class="alert alert-warning py-2 mb-0 small" role="alert">
+    <i class="bi bi-clock-history" aria-hidden="true"></i>
+    You are looking at the school year
+    {% for year in SCHOOL_YEARS.years if year.id == SCHOOL_YEARS.viewing_id %}<strong>{{ year.name }}</strong>{% endfor %}.
+    It is over, so nothing can be changed.
+  </div>
+</div>
+{% endif %}
 {# A closable tip, filled in by tips.js. Not on the answer page, so nobody is interrupted mid-activity. #}
 {% if user.role in ("teacher", "student") and request.endpoint != "student.answer_page" %}
 <div id="tip-box" class="container d-none" data-role="{{ user.role }}"></div>

@@ -1,7 +1,8 @@
 from myguro.domain import scoring
+from myguro.errors import ValidationError
 from myguro.repositories import (
-    ActivityRepository, AssignmentRepository, ClassRepository, SettingsRepository, SubmissionRepository,
-    UserRepository,
+    ActivityRepository, AssignmentRepository, ClassRepository, SchoolYearRepository, SettingsRepository,
+    SubmissionRepository, UserRepository,
 )
 
 
@@ -19,6 +20,17 @@ class Service:
         self.assignments = AssignmentRepository(db)
         self.submissions = SubmissionRepository(db)
         self.settings = SettingsRepository(db)
+        self.years = SchoolYearRepository(db)
+
+    def year_id(self):
+        """The school year this person is looking at: the one they picked, else the current year."""
+        picked = self.user["view_year_id"] if self.user is not None else None
+        return picked if picked and self.years.get(picked) else self.years.current_id()
+
+    def require_open_year(self, year_id):
+        """A past school year can only be looked at: refuse changes to it."""
+        if year_id != self.years.current_id():
+            raise ValidationError("This school year is over. You can only look at it.")
 
     def commit(self):
         self.db.commit()

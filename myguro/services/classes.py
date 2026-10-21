@@ -18,30 +18,38 @@ class ClassService(Service):
             raise NotFoundError("Class not found.")
         return row
 
+    def require_open(self, class_id):
+        """The teacher's class, if it belongs to the current school year (a past year is read-only)."""
+        row = self.require(class_id)
+        self.require_open_year(row["school_year_id"])
+        return row
+
     def exists(self, class_id):
         return self.classes.get_for_teacher(class_id, self.user["id"]) is not None
 
     def list(self):
-        return [dict(row) for row in self.classes.list_for_teacher(self.user["id"])]
+        return [dict(row) for row in self.classes.list_for_teacher(self.user["id"], self.year_id())]
 
-    def clean_fields(self, data, class_id=None):
+    def clean_fields(self, data, year_id, class_id=None):
         name = check_name(clean_name(data.get("name")), "Class name")
         subject = clean_name(data.get("subject"))
         if len(subject) > MAX_NAME_LENGTH:
             raise ValidationError("Subject can be at most 100 characters.")
-        same = self.classes.find_same(self.user["id"], name, subject)
+        same = self.classes.find_same(self.user["id"], name, subject, year_id)
         if same and same["id"] != class_id:
             raise ValidationError("You already have a class with this name and subject.")
         return name, subject
 
     def create(self, data):
-        class_id = self.classes.create(self.user["id"], *self.clean_fields(data))
+        year_id = self.year_id()
+        self.require_open_year(year_id)
+        class_id = self.classes.create(self.user["id"], *self.clean_fields(data, year_id), year_id)
         self.commit()
         return class_json(self.require(class_id))
 
     def update(self, class_id, data):
-        self.require(class_id)
-        self.classes.update(class_id, *self.clean_fields(data, class_id))
+        row = self.require_open(class_id)
+        self.classes.update(class_id, *self.clean_fields(data, row["school_year_id"], class_id))
         self.commit()
         return class_json(self.require(class_id))
 
@@ -79,7 +87,7 @@ class ClassService(Service):
     def add_students(self, class_id, data):
         """Put students in the class: student_ids (e.g. a whole section) or student_id.
         Students already in it are skipped. Returns the ones added."""
-        self.require(class_id)
+        self.require_open(class_id)
         ids = data.get("student_ids", [data.get("student_id")])
         if not isinstance(ids, list) or not ids:
             raise ValidationError("No students to add.")
@@ -100,13 +108,14 @@ class ClassService(Service):
         """Take a student out of the class. Their account and other classes are kept."""
         if not self.exists(class_id) or not self.classes.has_student(class_id, student_id):
             raise NotFoundError("Student not found in this class.")
+        self.require_open(class_id)
         self.classes.remove_student(class_id, student_id)
         self.commit()
 
     def remove_students(self, class_id, data):
         """Take several students out of the class: student_ids. Ids not in the class are skipped.
         Returns how many were removed."""
-        self.require(class_id)
+        self.require_open(class_id)
         ids = data.get("student_ids")
         if not isinstance(ids, list) or not ids:
             raise ValidationError("Choose at least one student.")

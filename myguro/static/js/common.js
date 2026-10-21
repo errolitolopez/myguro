@@ -137,6 +137,28 @@ if (logoutButton) {
   });
 }
 
+// The school year picker in the account menu: remember the choice, then reload so every list
+// shows that year.
+const yearSelect = document.getElementById("year-select");
+if (yearSelect) {
+  yearSelect.addEventListener("change", async () => {
+    yearSelect.disabled = true;
+    try {
+      const response = await apiFetch("/api/school-year", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: Number(yearSelect.value) }),
+      });
+      if (!response) return;
+    } catch {
+      yearSelect.disabled = false;
+      return;
+    }
+    // A page about one class or one assignment may not exist in the other year: go to its list.
+    window.location.href = window.location.pathname.split("/").length > 2 ? "/" : window.location.pathname;
+  });
+}
+
 // "Rian Joshua" + "Altamerano" -> "raltamerano" (first letter of the first name + the last name).
 function suggestUsername(firstName, lastName) {
   const plain = (text) => text

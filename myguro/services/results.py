@@ -16,6 +16,12 @@ class ResultsService(Service):
             raise NotFoundError("Not found.")
         return assignment
 
+    def require_open(self, assignment_id):
+        """Like require(), but only while its school year is the current one (past years are read-only)."""
+        assignment = self.require(assignment_id)
+        self.require_open_year(assignment["school_year_id"])
+        return assignment
+
     def exists(self, assignment_id):
         return self.assignments.get_for_teacher(assignment_id, self.user["id"]) is not None
 
@@ -27,7 +33,7 @@ class ResultsService(Service):
     def set_excluded(self, assignment_id, student_id, excluded):
         """Exclude a student from this assignment (for example absent) or add them back. Saved
         answers are kept. A student who already submitted can't be excluded."""
-        assignment = self.require(assignment_id)
+        assignment = self.require_open(assignment_id)
         if not isinstance(excluded, bool):
             raise ValidationError("Choose whether to exclude the student.")
         if student_id not in {row["id"] for row in self.assignments.students(assignment)}:
@@ -173,6 +179,7 @@ class ResultsService(Service):
         to change any auto-checked score (e.g. accept a different spelling). `remarks` is
         {question id: text}: the teacher's feedback on an answer ('' removes it)."""
         submission = self.require_submission(submission_id)
+        self.require_open_year(submission["school_year_id"])
         if not submission["submitted_at"]:
             raise ValidationError("The student hasn't submitted this attempt yet.")
         if submission["paper"]:
@@ -199,7 +206,7 @@ class ResultsService(Service):
 
     def set_released(self, assignment_id, released):
         """Show (or hide again) the students' scores of this assignment to the students."""
-        self.require(assignment_id)
+        self.require_open(assignment_id)
         if not isinstance(released, bool):
             raise ValidationError("Choose whether to release the scores.")
         self.assignments.set_scores_released(assignment_id, released)
@@ -209,7 +216,7 @@ class ResultsService(Service):
     def reopen(self, assignment_id, student_id):
         """Give one student another try, even past the activity's limit: a new attempt starting
         from their last answers. Their counted score stays until they submit it."""
-        self.require(assignment_id)
+        self.require_open(assignment_id)
         self.require_included(assignment_id, student_id)
         attempts = self.submissions.attempts(assignment_id, student_id)
         if not attempts:
@@ -225,7 +232,7 @@ class ResultsService(Service):
     def add_paper(self, assignment_id, student_id, data):
         """The student answered on paper: save the total score as a new attempt (the latest
         submission counts). {score, late, note}"""
-        assignment = self.require(assignment_id)
+        assignment = self.require_open(assignment_id)
         if student_id not in {row["id"] for row in self.assignments.students(assignment)}:
             raise NotFoundError("This student doesn't have this activity.")
         self.require_included(assignment_id, student_id)
@@ -243,6 +250,7 @@ class ResultsService(Service):
         submission = self.require_submission(submission_id, "Paper score not found.")
         if not submission["paper"]:
             raise NotFoundError("Paper score not found.")
+        self.require_open_year(submission["school_year_id"])
         return submission
 
     def edit_paper(self, submission_id, data):

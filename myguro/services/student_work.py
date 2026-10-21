@@ -16,6 +16,12 @@ class StudentWorkService(Service):
             raise NotFoundError("Activity not found.")
         return assignment
 
+    def require_open(self, assignment_id):
+        """Like require(), but only while its school year is the current one (past years are read-only)."""
+        assignment = self.require(assignment_id)
+        self.require_open_year(assignment["school_year_id"])
+        return assignment
+
     def exists(self, assignment_id):
         return self.assignments.get_for_student(assignment_id, self.user["id"]) is not None
 
@@ -23,7 +29,7 @@ class StudentWorkService(Service):
         """Everything given to the student, with how far they are: for My activities."""
         today = school_today().isoformat()
         result = []
-        for row in self.assignments.list_for_student(self.user["id"]):
+        for row in self.assignments.list_for_student(self.user["id"], self.year_id()):
             if row["submitted_at"]:
                 status = "submitted"
             elif row["submission_id"]:
@@ -123,14 +129,14 @@ class StudentWorkService(Service):
 
     def save(self, assignment_id, posted):
         """Save answers while working (called automatically as the student types)."""
-        assignment = self.require(assignment_id)
+        assignment = self.require_open(assignment_id)
         submission = self.current_attempt(assignment_id)
         self.save_answers(submission, self.activities.questions(assignment["activity_id"]), posted)
         self.commit()
 
     def submit(self, assignment_id, posted):
         """Save the last answers, check them, and submit. Late when after the due date."""
-        assignment = self.require(assignment_id)
+        assignment = self.require_open(assignment_id)
         submission = self.current_attempt(assignment_id)
         questions = self.activities.questions(assignment["activity_id"])
         self.save_answers(submission, questions, posted)
@@ -158,7 +164,7 @@ class StudentWorkService(Service):
     def retry(self, assignment_id):
         """Start the next attempt, if the activity allows more. It starts with the answers of the
         last attempt so the student only changes what they want."""
-        assignment = self.require(assignment_id)
+        assignment = self.require_open(assignment_id)
         submission = self.submissions.latest(assignment_id, self.user["id"])
         if submission is None or not submission["submitted_at"]:
             raise ValidationError("Submit this activity first.")
