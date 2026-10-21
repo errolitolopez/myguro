@@ -63,31 +63,53 @@ function groupBySubject(items) {
     (a.key === "") - (b.key === "") || a.label.localeCompare(b.label));
 }
 
-// One collapsible block per subject, each a list of buildItem(item) rows.
-function subjectGroupElements(items, buildItem) {
-  return groupBySubject(items).map((group) => {
-    const block = document.createElement("details");
-    block.className = "mb-3";
-    block.open = true;
-    const heading = document.createElement("summary");
-    heading.className = "fw-semibold mb-2";
-    heading.textContent = `${group.label} (${group.items.length})`;
-    const rows = document.createElement("div");
-    rows.className = "list-group";
-    rows.append(...group.items.map(buildItem));
-    block.append(heading, rows);
-    return block;
-  });
+// The subject in the address (?subject=science), or null when the page shows the list of subjects.
+// An empty one (?subject=) is the "No subject" group.
+function chosenSubject() {
+  const value = new URLSearchParams(window.location.search).get("subject");
+  return value === null ? null : subjectKey(value);
 }
 
-// Fills the subject filter from all items; keeps the choice when it still exists.
-function fillSubjectFilter(select, items) {
-  const chosen = select.value;
-  const groups = groupBySubject(items);
-  select.replaceChildren(new Option("All subjects", ""));
-  groups.forEach((group) => select.append(new Option(`${group.label} (${group.items.length})`, group.key)));
-  select.value = groups.some((group) => group.key === chosen) ? chosen : "";
-  select.classList.toggle("d-none", groups.length < 2);
+// The list of subjects: one row each with how many items it has. Tapping a row opens this same
+// page for that subject (?subject=...). extraQuery keeps other choices, e.g. "&show=done".
+//   subjectListElement(groupBySubject(items), "") -> <div class="list-group">...</div>
+function subjectListElement(groups, extraQuery = "") {
+  const box = document.createElement("div");
+  box.className = "list-group";
+  groups.forEach((group) => {
+    const row = document.createElement("a");
+    row.href = `?subject=${encodeURIComponent(group.key)}${extraQuery}`;
+    row.className = "list-group-item list-group-item-action d-flex justify-content-between align-items-center gap-2";
+    const name = document.createElement("span");
+    name.className = "fw-semibold";
+    name.textContent = group.label;
+    const right = document.createElement("span");
+    right.className = "text-body-secondary text-nowrap";
+    right.textContent = `${group.items.length} `;
+    const arrow = document.createElement("i");
+    arrow.className = "bi bi-chevron-right";
+    arrow.setAttribute("aria-hidden", "true");
+    right.append(arrow);
+    row.append(name, right);
+    box.append(row);
+  });
+  return box;
+}
+
+// The top of a subject's page: a link back to all subjects, then the subject's name.
+//   subjectHeaderElement("Science", "") -> "‹ All subjects" + "Science"
+function subjectHeaderElement(label, extraQuery = "") {
+  const header = document.createElement("div");
+  header.className = "mb-2";
+  const back = document.createElement("a");
+  back.href = extraQuery ? `?${extraQuery.slice(1)}` : window.location.pathname;
+  back.className = "small bi bi-chevron-left text-decoration-none";
+  back.textContent = "All subjects";
+  const title = document.createElement("h2");
+  title.className = "h5 mt-1 mb-0";
+  title.textContent = label;
+  header.append(back, title);
+  return header;
 }
 
 async function apiFetch(url, options) {

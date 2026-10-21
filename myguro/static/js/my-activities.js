@@ -1,12 +1,11 @@
 // Student: the activities given to them. "To do" (never submitted, soonest due first) and
-// "Submitted" (with the score that counts: the latest submission), grouped by subject.
-// Tapping one opens it.
+// "Submitted" (with the score that counts: the latest submission). First the subjects; tap one
+// to open its page with the activities of that subject. Tapping an activity opens it.
 
 let activities = [];
 let today = "";
 
 const list = document.getElementById("activity-list");
-const subjectFilter = document.getElementById("subject-filter");
 
 // The badge on the right: due date / overdue, or the score once submitted.
 function statusBadges(activity) {
@@ -59,17 +58,24 @@ function activityItem(activity) {
   return row;
 }
 
+// The subject's name as the first activity wrote it ("No subject" when it has none).
+function subjectLabel(key) {
+  return groupBySubject(activities).find((group) => group.key === key)?.label || "No subject";
+}
+
 function render() {
   const showDone = document.getElementById("show-done").checked;
   // Once submitted it stays under Submitted, even while trying again.
-  const subject = subjectFilter.value;
-  const inSubject = activities.filter((activity) => !subject || subjectKey(activity.subject) === subject);
+  const subject = chosenSubject(); // null = the list of subjects
+  const inSubject = activities.filter((activity) => subject === null || subjectKey(activity.subject) === subject);
   const todo = inSubject.filter((activity) => !activity.done);
   const done = inSubject.filter((activity) => activity.done);
   document.getElementById("count-todo").textContent = `(${todo.length})`;
   document.getElementById("count-done").textContent = `(${done.length})`;
 
   const shown = showDone ? done : todo;
+  // The page address keeps the To do / Submitted choice when a subject is opened or closed.
+  const extraQuery = showDone ? "&show=done" : "";
   if (shown.length === 0) {
     const box = document.createElement("div");
     box.className = "list-group";
@@ -77,9 +83,14 @@ function render() {
     empty.className = "list-group-item text-body-secondary";
     empty.textContent = showDone ? "Nothing submitted yet." : "Nothing to do. Great job!";
     box.append(empty);
-    list.replaceChildren(box);
+    list.replaceChildren(...(subject === null ? [] : [subjectHeaderElement(subjectLabel(subject), extraQuery)]), box);
+  } else if (subject === null) {
+    list.replaceChildren(subjectListElement(groupBySubject(shown), extraQuery));
   } else {
-    list.replaceChildren(...subjectGroupElements(shown, activityItem));
+    const rows = document.createElement("div");
+    rows.className = "list-group";
+    rows.append(...shown.map(activityItem));
+    list.replaceChildren(subjectHeaderElement(subjectLabel(subject), extraQuery), rows);
   }
 }
 
@@ -95,14 +106,21 @@ async function loadActivities() {
     const data = await response.json();
     activities = data.activities;
     today = data.today;
-    fillSubjectFilter(subjectFilter, activities);
     render();
   } catch {
     showError("list-error", "Cannot reach the server. Check your connection.");
   }
 }
 
-subjectFilter.addEventListener("change", render);
-document.querySelectorAll('input[name="show"]').forEach((radio) => radio.addEventListener("change", render));
+// Keep the To do / Submitted choice in the address, so the back link and reload remember it.
+document.querySelectorAll('input[name="show"]').forEach((radio) => radio.addEventListener("change", () => {
+  const params = new URLSearchParams(window.location.search);
+  if (document.getElementById("show-done").checked) params.set("show", "done");
+  else params.delete("show");
+  history.replaceState(null, "", params.toString() ? `?${params}` : window.location.pathname);
+  render();
+}));
+document.getElementById("show-done").checked = new URLSearchParams(window.location.search).get("show") === "done";
+document.getElementById("show-todo").checked = !document.getElementById("show-done").checked;
 
 loadActivities();

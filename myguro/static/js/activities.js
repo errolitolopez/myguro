@@ -1,10 +1,10 @@
-// Teacher's learning activity sheets: list them by subject (tap to edit) and start new ones.
+// Teacher's learning activity sheets: first the subjects, tap one to open its page with the
+// activities of that subject (tap one to edit), and start new ones.
 
 let activities = []; // all of the teacher's sheets; the search filters them here
 
 const list = document.getElementById("activity-list");
 const searchInput = document.getElementById("search");
-const subjectFilter = document.getElementById("subject-filter");
 const modalElement = document.getElementById("new-activity-modal");
 const form = document.getElementById("new-activity-form");
 const titleInput = document.getElementById("new-title");
@@ -57,20 +57,33 @@ function messageItem(text) {
   return box;
 }
 
+// A plain list of activity rows.
+function activityListElement(items) {
+  const box = document.createElement("div");
+  box.className = "list-group";
+  box.append(...items.map(activityItem));
+  return box;
+}
+
 function render() {
   const query = searchInput.value.trim().toLowerCase();
-  const subject = subjectFilter.value;
-  const shown = activities.filter(
-    (activity) =>
-      (!subject || subjectKey(activity.subject) === subject) &&
-      (activity.title.toLowerCase().includes(query) || activity.subject.toLowerCase().includes(query)),
+  const subject = chosenSubject(); // null = the list of subjects
+  const matches = activities.filter(
+    (activity) => activity.title.toLowerCase().includes(query) || activity.subject.toLowerCase().includes(query),
   );
   if (activities.length === 0) {
     list.replaceChildren(messageItem("No activities yet. Tap + New activity to write your first one."));
-  } else if (shown.length === 0) {
-    list.replaceChildren(messageItem("No activity matches your search."));
+  } else if (subject !== null) {
+    // One subject's page: its activities (the search narrows them)
+    const inSubject = matches.filter((activity) => subjectKey(activity.subject) === subject);
+    const label = groupBySubject(activities).find((group) => group.key === subject)?.label || "No subject";
+    list.replaceChildren(subjectHeaderElement(label),
+      inSubject.length ? activityListElement(inSubject) : messageItem("No activity matches your search."));
+  } else if (query) {
+    // Searching on the subjects page lists the matches from every subject
+    list.replaceChildren(matches.length ? activityListElement(matches) : messageItem("No activity matches your search."));
   } else {
-    list.replaceChildren(...subjectGroupElements(shown, activityItem));
+    list.replaceChildren(subjectListElement(groupBySubject(activities)));
   }
 }
 
@@ -141,7 +154,6 @@ async function loadActivities() {
     }
     hideError("activities-error");
     activities = (await response.json()).activities;
-    fillSubjectFilter(subjectFilter, activities);
     render();
     const deleted = await apiFetch("/api/activities?deleted=1");
     if (deleted && deleted.ok) {
@@ -154,7 +166,6 @@ async function loadActivities() {
 }
 
 searchInput.addEventListener("input", render);
-subjectFilter.addEventListener("change", render);
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
