@@ -14,9 +14,12 @@
       <h1 class="h4 mb-0" id="class-name-heading">Loading...</h1>
       <div class="text-body-secondary" id="class-subject-heading"></div>
     </div>
-    <button class="btn btn-sm btn-outline-secondary bi bi-pencil" data-bs-toggle="modal" data-bs-target="#class-modal">
-      Edit
-    </button>
+    <div class="d-flex gap-2">
+      <a class="btn btn-sm btn-outline-primary bi bi-table" href="{{ url_for('classes.gradebook_page', class_id=class_id) }}">Gradebook</a>
+      <button class="btn btn-sm btn-outline-secondary bi bi-pencil" data-bs-toggle="modal" data-bs-target="#class-modal">
+        Edit
+      </button>
+    </div>
   </div>
 
   <div class="card mb-4">

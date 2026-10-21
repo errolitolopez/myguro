@@ -1,12 +1,24 @@
 """Teacher: classes and the students in them."""
 
-from flask import Blueprint, jsonify, redirect, render_template, request, url_for
+import io
+import re
 
+from flask import Blueprint, jsonify, redirect, render_template, request, send_file, url_for
+
+from myguro.config import SCHOOL_TIMEZONE, school_now_text
 from myguro.database import get_db
-from myguro.services import ClassService
+from myguro.exports import gradebook_pdf_bytes, gradebook_xlsx_bytes
+from myguro.services import ClassService, GradebookService
+from myguro.services.presenters import class_title
 from myguro.web.security import current_user, json_body, role_required_api, role_required_page
 
 bp = Blueprint("classes", __name__)
+
+
+GRADEBOOK_EXPORTS = {
+    "xlsx": (gradebook_xlsx_bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+    "pdf": (gradebook_pdf_bytes, "application/pdf"),
+}
 
 
 def service():
@@ -25,6 +37,35 @@ def detail_page(class_id):
     if not service().exists(class_id):
         return redirect(url_for("classes.list_page"))
     return render_template("class.html", user=current_user(), class_id=class_id)
+
+
+@bp.get("/classes/<int:class_id>/gradebook")
+@role_required_page("teacher")
+def gradebook_page(class_id):
+    if not service().exists(class_id):
+        return redirect(url_for("classes.list_page"))
+    return render_template("gradebook.html", user=current_user(), class_id=class_id)
+
+
+@bp.get("/classes/<int:class_id>/gradebook.<kind>")
+@role_required_page("teacher")
+def gradebook_export(class_id, kind):
+    """Download the class gradebook as Excel (.xlsx) or PDF."""
+    if kind not in GRADEBOOK_EXPORTS or not service().exists(class_id):
+        return redirect(url_for("classes.list_page"))
+    data = GradebookService(get_db(), current_user()).gradebook(class_id)
+    make, mimetype = GRADEBOOK_EXPORTS[kind]
+    content = make(data, current_user()["name"], school_now_text(), SCHOOL_TIMEZONE)
+    # Characters files can't have become "-": "Gradebook - Grade 9 - Rizal - Science"
+    name = re.sub(r'\s*[\\/:*?"<>|]+\s*', " - ", f"Gradebook - {class_title(data['class']['name'], data['class']['subject'])}")
+    name = " ".join(name.replace(" · ", " - ").split())
+    return send_file(io.BytesIO(content), as_attachment=True, download_name=f"{name}.{kind}", mimetype=mimetype)
+
+
+@bp.get("/api/classes/<int:class_id>/gradebook")
+@role_required_api("teacher")
+def api_gradebook(class_id):
+    return jsonify(GradebookService(get_db(), current_user()).gradebook(class_id))
 
 
 @bp.get("/api/classes")

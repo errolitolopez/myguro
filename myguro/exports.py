@@ -216,3 +216,126 @@ def results_pdf_bytes(data, teacher, exported_at, timezone_info):
         pdf.text_style(7.5, grey=True)
         pdf.cell(0, 4, "* Has short answers the teacher hasn't checked yet.", new_x="LMARGIN", new_y="NEXT")
     return bytes(pdf.output())
+
+
+# --- Class gradebook ----------------------------------------------------------------
+# One row per student, one column per activity given to the class (GradebookService.gradebook).
+
+def gradebook_cell_text(cell):
+    """What a gradebook cell says: "8/10" ("8/10*" when short answers are still unchecked),
+    "Answering", "Excluded", or "" (not started, or not given to this student)."""
+    if cell is None or cell["status"] == "not_started":
+        return ""
+    if cell["status"] == "excluded":
+        return "Excluded"
+    if cell["earned"] is None:
+        return "Answering"
+    return f"{cell['earned']}/{cell['possible']}" + ("*" if cell["pending"] else "")
+
+
+def gradebook_lines(data, teacher, exported_at):
+    return [
+        " · ".join(filter(None, [data["class"]["name"], data["class"]["subject"], f"Teacher: {teacher}"])),
+        f"{len(data['students'])} students · {len(data['activities'])} activities · Exported: {exported_at}",
+    ]
+
+
+def gradebook_xlsx_bytes(data, teacher, exported_at, timezone_info):
+    """The gradebook as an .xlsx file (bytes). Scores are numbers (points earned), so teachers can
+    compute their own grades; the last columns are how many were submitted and the average %."""
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = "Gradebook"
+    sheet.append(["Gradebook"])
+    sheet["A1"].font = Font(bold=True, size=14)
+    for line in gradebook_lines(data, teacher, exported_at):
+        sheet.append([line])
+    sheet.append([])
+
+    activities = data["activities"]
+    headers = ["No.", "Student", "Username", "Grade", "Section"]
+    headers += [f"{activity['title']} ({activity['total_points']})" for activity in activities]
+    headers += ["Submitted", "Average %"]
+    sheet.append(headers)
+    header_row = sheet.max_row
+    for cell in sheet[header_row]:
+        cell.font = Font(bold=True)
+        cell.fill = PatternFill("solid", fgColor="E9ECEF")
+        cell.alignment = Alignment(wrap_text=True, vertical="top")
+
+    for number, student in enumerate(data["students"], start=1):
+        row = [number, student["name"], student["username"], student["grade"], student["section"]]
+        for cell in student["cells"]:
+            if cell is not None and cell["earned"] is not None:
+                row.append(cell["earned"])
+            else:
+                row.append(gradebook_cell_text(cell))
+        row += [f"{student['submitted']} of {len([c for c in student['cells'] if c is not None])}",
+                student["average"] if student["average"] is not None else ""]
+        sheet.append(row)
+
+    sheet.append(["", "Class average %", "", "", ""]
+                 + [activity["average"] if activity["average"] is not None else "" for activity in activities])
+    for cell in sheet[sheet.max_row]:
+        cell.font = Font(bold=True)
+
+    widths = [5, 28, 16, 10, 12] + [14] * len(activities) + [11, 11]
+    for index, width in enumerate(widths, start=1):
+        sheet.column_dimensions[get_column_letter(index)].width = width
+    sheet.freeze_panes = sheet.cell(row=header_row + 1, column=3)  # keep headers and names visible
+
+    output = io.BytesIO()
+    workbook.save(output)
+    return output.getvalue()
+
+
+def gradebook_pdf_bytes(data, teacher, exported_at, timezone_info):
+    """The gradebook as a PDF (bytes), A4 landscape. The activity columns share the width that
+    is left after the student, submitted and average columns."""
+    activities = data["activities"]
+    pdf = ResultsPDF()
+    pdf.set_title(f"Gradebook - {data['class']['name']}")
+    pdf.add_page()
+
+    pdf.text_style(14, bold=True)
+    pdf.multi_cell(0, 7, "Gradebook", new_x="LMARGIN", new_y="NEXT")
+    pdf.text_style(8.5, grey=True)
+    for line in gradebook_lines(data, teacher, exported_at):
+        pdf.cell(0, 4.5, line, new_x="LMARGIN", new_y="NEXT")
+    pdf.ln(3)
+
+    fixed_start = [("No.", 9, "R"), ("Student", 52, "L"), ("Grade & section", 32, "L")]
+    fixed_end = [("Done", 14, "C"), ("Avg %", 13, "R")]
+    left = pdf.epw - sum(width for _, width, _ in fixed_start + fixed_end)
+    column = max(left / len(activities), 12) if activities else 0
+    if not activities:
+        fixed_start[1] = ("Student", 52 + left, "L")
+    header = (fixed_start
+              + [(f"{activity['title']} ({activity['total_points']})", column, "C") for activity in activities]
+              + fixed_end)
+    pdf.header_cells = header
+    pdf.table_row([(title, width, "L" if align == "L" else "C") for title, width, align in header],
+                  bold=True, fill=True)
+
+    for number, student in enumerate(data["students"], start=1):
+        place = " - ".join(filter(None, [student["grade"], student["section"]]))
+        given = len([cell for cell in student["cells"] if cell is not None])
+        row = [(number, fixed_start[0][1], "R"), (student["name"], fixed_start[1][1], "L"),
+               (place, fixed_start[2][1], "L")]
+        row += [(gradebook_cell_text(cell), column, "C") for cell in student["cells"]]
+        row += [(f"{student['submitted']}/{given}", fixed_end[0][1], "C"),
+                ("" if student["average"] is None else student["average"], fixed_end[1][1], "R")]
+        pdf.table_row(row)
+
+    average_row = [("", fixed_start[0][1], "R"), ("Class average %", fixed_start[1][1], "L"),
+                   ("", fixed_start[2][1], "L")]
+    average_row += [("" if activity["average"] is None else activity["average"], column, "C")
+                    for activity in activities]
+    average_row += [("", fixed_end[0][1], "C"), ("", fixed_end[1][1], "R")]
+    pdf.table_row(average_row, bold=True, fill=True)
+
+    if any(cell and cell["pending"] for student in data["students"] for cell in student["cells"]):
+        pdf.ln(2)
+        pdf.text_style(7.5, grey=True)
+        pdf.cell(0, 4, "* Has short answers the teacher hasn't checked yet.", new_x="LMARGIN", new_y="NEXT")
+    return bytes(pdf.output())

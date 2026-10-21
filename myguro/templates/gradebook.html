@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Gradebook · myguro{% endblock %}
+
+{% block head %}
+<style>
+  /* The student's name stays in view while the activity columns scroll sideways on a phone. */
+  #gradebook-table th:first-child, #gradebook-table td:first-child {
+    position: sticky;
+    left: 0;
+    background-color: var(--glass-solid);
+    z-index: 1;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "_navbar.html" %}
+
+<main class="container py-3" data-class-id="{{ class_id }}">
+  <a id="back-link" href="{{ url_for('classes.detail_page', class_id=class_id) }}" class="small">‹ Class</a>
+  <div id="gradebook-error" class="alert alert-danger mt-2 d-none" role="alert"></div>
+
+  <header class="d-flex justify-content-between align-items-start gap-2 mt-2 mb-3">
+    <div>
+      <h1 class="h4 mb-1">Gradebook</h1>
+      <div class="small text-body-secondary" id="gradebook-details">Loading...</div>
+    </div>
+    <div class="d-flex flex-wrap justify-content-end gap-2">
+      <a class="btn btn-sm btn-outline-success text-nowrap bi bi-file-earmark-excel"
+         href="{{ url_for('classes.gradebook_export', class_id=class_id, kind='xlsx') }}">Export Excel</a>
+      <a class="btn btn-sm btn-outline-danger text-nowrap bi bi-file-earmark-pdf"
+         href="{{ url_for('classes.gradebook_export', class_id=class_id, kind='pdf') }}">Export PDF</a>
+    </div>
+  </header>
+
+  <input id="search" type="search" class="form-control mb-3" placeholder="Search name, username or section"
+         aria-label="Search students" autocomplete="off">
+
+  <div class="table-responsive">
+    <table class="table align-middle bg-body" id="gradebook-table">
+      <thead><tr id="gradebook-head"></tr></thead>
+      <tbody id="gradebook-body"><tr><td class="text-body-secondary">Loading...</td></tr></tbody>
+      <tfoot id="gradebook-foot"></tfoot>
+    </table>
+  </div>
+  <p class="small text-body-secondary">
+    Scores are points earned out of the activity's total. * means short answers are not checked yet.
+    Tap a score to check that student's answers, or an activity name to see all its results.
+  </p>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/gradebook.js') }}"></script>
+{% endblock %}
