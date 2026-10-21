@@ -1,6 +1,7 @@
 // Student answer page: shows the sheet section by section, saves answers automatically
 // while the student works, and submits. After submitting, the questions are shown read-only
-// and blank (the student's answers are not shown back), with the score (short answers wait
+// and blank (the student's answers are not shown back, except on a question the teacher left a
+// remark on: that one shows the student's answer and the remark), with the score (short answers wait
 // for the teacher). If the activity allows more submissions, Try again starts the next
 // attempt with the same answers; the latest counts.
 
@@ -26,6 +27,20 @@ function el(tag, className = "", text = "") {
   if (className) element.className = className;
   if (text) element.textContent = text;
   return element;
+}
+
+// The student's own answer written out, for the review next to a remark:
+// "B. Hinduism", "True", "1) India   2) China", "Item → B. Choice" (one line per matching item)
+function answerText(question, value) {
+  if (value === null || value === undefined) return "No answer";
+  if (question.type === "multiple_choice") return `${LETTERS[value]}. ${question.choices[value]}`;
+  if (question.type === "true_false") return value ? "True" : "False";
+  if (question.type === "fill_blank") return value.map((item, index) => `${index + 1}) ${item || "—"}`).join("   ");
+  if (question.type === "matching") {
+    return value.map((pick, index) =>
+      `${question.items[index]} → ${pick === null ? "—" : `${LETTERS[pick]}. ${question.choices[pick]}`}`).join("\n");
+  }
+  return value;
 }
 
 function isAnswered(value) {
@@ -267,6 +282,10 @@ function sectionBlock(section, locked) {
     // The teacher's remark on this question (sent only after the scores are released).
     const remark = locked && activity.feedback && activity.feedback[question.id];
     if (remark) {
+      const own = el("div", "small mt-2 preserve-lines");
+      own.append(el("span", "text-body-secondary", "Your answer: "),
+        el("span", "fw-semibold", answerText(question, activity.feedback_answers[question.id])));
+      item.append(own);
       const box = el("div", "alert alert-info py-2 px-3 mt-2 mb-0 small preserve-lines");
       box.append(el("strong", "", "Teacher's remark: "), remark);
       item.append(box);

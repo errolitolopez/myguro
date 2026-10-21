@@ -145,10 +145,15 @@ def test_teacher_remarks_reach_the_student_after_release(teacher, other_teacher)
     teacher.put(f"/api/submissions/{submission_id}/points", json={"feedback": {str(q[4]): "Explain more."}})
 
     # Hidden until the scores are released
-    assert student.get(f"/api/my-activities/{assignment_id}").get_json()["activity"]["feedback"] == {}
+    hidden = student.get(f"/api/my-activities/{assignment_id}").get_json()["activity"]
+    assert hidden["feedback"] == {} and hidden["feedback_answers"] == {}
     teacher.put(f"/api/assignments/{assignment_id}/release", json={"released": True})
     shown = student.get(f"/api/my-activities/{assignment_id}").get_json()["activity"]["feedback"]
     assert shown == {str(q[0]): "Good job!", str(q[4]): "Explain more."}
+    # The student's own answer comes back only for the questions with a remark
+    activity = student.get(f"/api/my-activities/{assignment_id}").get_json()["activity"]
+    assert activity["feedback_answers"] == {str(q[0]): 1, str(q[4]): "Because"}
+    assert activity["answers"] == {}
 
     # Saving remarks does not change points; bad input is refused; other teachers are refused
     assert error(teacher.put(f"/api/submissions/{submission_id}/points", json={"feedback": {"99999": "x"}})) == \

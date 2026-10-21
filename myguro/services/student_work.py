@@ -63,6 +63,8 @@ class StudentWorkService(Service):
         sections = self.activities.sections(assignment["activity_id"])
         for section in sections:
             section["questions"] = [question_for_student(question) for question in section["questions"]]
+        feedback = self.submissions.feedback(last_submitted["id"]) \
+            if last_submitted and assignment["scores_released"] and submission["submitted_at"] else {}
         return {
             "id": assignment_id,
             "title": assignment["title"],
@@ -86,8 +88,12 @@ class StudentWorkService(Service):
             "score": self.score(last_submitted["id"], assignment["activity_id"])
             if last_submitted and assignment["scores_released"] else None,
             # The teacher's remarks, only on the submitted sheet and once the scores are released.
-            "feedback": self.submissions.feedback(last_submitted["id"])
-            if last_submitted and assignment["scores_released"] and submission["submitted_at"] else {},
+            "feedback": feedback,
+            # The student's own answer, only for the questions that have a remark (so a released
+            # sheet does not hand out every answer to be passed around).
+            "feedback_answers": {question_id: answer for question_id, answer in
+                                 self.submissions.answers(last_submitted["id"]).items() if question_id in feedback}
+            if feedback else {},
             "late": bool(last_submitted and last_submitted["late"]),
             "paper": bool(last_submitted and last_submitted["paper"]),
             "note": last_submitted["note"] if last_submitted and assignment["scores_released"] else "",
