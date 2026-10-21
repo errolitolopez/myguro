@@ -1,4 +1,4 @@
-"""myguro: learning activity sheets for teachers and students.
+"""myguro: a Learning Management System for teachers and students.
 
 Layers (each only uses the ones below it):
   web/           Flask blueprints: pages and JSON API, login/role checks

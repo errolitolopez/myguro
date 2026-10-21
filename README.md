@@ -1,6 +1,6 @@
 # myguro
 
-A learning activity sheet web app: teachers write learning activities with questions, students read them and answer online.
+A Learning Management System (LMS) web app: teachers write learning activities with questions, students read them and answer online.
 
 Built with Python (Flask), SQLite, vanilla JavaScript and Bootstrap 5.
 
