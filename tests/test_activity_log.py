@@ -34,12 +34,14 @@ def test_read_requires_supervisor_or_admin(admin, supervisor, teacher):
 def test_entries_newest_first_with_paging(app, supervisor):
     add_entries(app, [{"action": "a.b", "category": "classes", "summary": f"Entry {number}",
                        "at": f"2026-10-01 00:{number:02d}:00"} for number in range(25)])
-    first = entries(supervisor, "?per_page=10")
+    # (the supervisor's own login entries are from today, so the test day is picked out by date)
+    day = "&from=2026-10-01&to=2026-10-01"
+    first = entries(supervisor, "?per_page=10" + day)
     assert first["total"] == 25 and first["pages"] == 3 and first["page"] == 1
     assert first["entries"][0]["summary"] == "Entry 24"
-    third = entries(supervisor, "?per_page=10&page=3")
+    third = entries(supervisor, "?per_page=10&page=3" + day)
     assert [item["summary"] for item in third["entries"]] == [f"Entry {n}" for n in (4, 3, 2, 1, 0)]
-    assert entries(supervisor, "?per_page=10&page=99")["page"] == 3  # past the end shows the last page
+    assert entries(supervisor, "?per_page=10&page=99" + day)["page"] == 3  # past the end shows the last page
     entry = first["entries"][0]
     assert entry["actor"] == {"id": 7, "name": "Santos, Maria", "username": "msantos", "role": "teacher"}
     assert entry["category"] == "classes" and entry["action"] == "a.b" and entry["target"]["name"] == ""
@@ -59,7 +61,8 @@ def test_filters(app, supervisor):
     assert entries(supervisor, "?role=student")["total"] == 1
     assert entries(supervisor, "?category=classes")["total"] == 1
     assert entries(supervisor, "?user_id=9")["entries"][0]["summary"] == "Submitted Quiz 1."
-    assert entries(supervisor, "?from=2026-10-02")["total"] == 1
+    assert entries(supervisor, "?from=2026-10-02&to=2026-10-02")["total"] == 1
+    assert entries(supervisor, "?from=2026-10-01&to=2026-10-02")["total"] == 2
     assert entries(supervisor, "?to=2026-10-01")["total"] == 1
     assert entries(supervisor, "?q=zzz")["total"] == 0
 
@@ -72,7 +75,8 @@ def test_date_to_is_inclusive_in_school_time(app, supervisor):
     ])
     on_first = entries(supervisor, "?from=2026-10-01&to=2026-10-01")
     assert [item["summary"] for item in on_first["entries"]] == ["Late on the first"]
-    assert [item["summary"] for item in entries(supervisor, "?from=2026-10-02")["entries"]] == ["Early on the second"]
+    assert [item["summary"] for item in entries(supervisor, "?from=2026-10-02&to=2026-10-02")["entries"]] == [
+        "Early on the second"]
 
 
 @pytest.mark.parametrize("query", ["?from=2026-13-01", "?to=nope", "?role=boss", "?category=fun"])
@@ -124,3 +128,80 @@ def test_supervisor_navbar_has_only_log(supervisor):
     assert "/log" in page and "Log" in page
     for link in ("/dashboard", "/teachers", "/activities", "/classes", "year-select", "tip-box"):
         assert link not in page, link
+
+
+# --- Sign-in entries -----------------------------------------------------------------------
+
+def log_of(admin, **filters):
+    """Entries of the admin's view of the log, oldest first, for the given filters."""
+    from urllib.parse import urlencode
+    data = admin.get("/api/log?" + urlencode({"per_page": 100, **filters})).get_json()
+    return list(reversed(data["entries"]))
+
+
+def test_login_logout_and_password_change_are_logged(app, admin):
+    client = app.test_client()
+    assert client.post("/api/login", json={"username": "ecruz", "password": "1234"}).status_code == 200
+    assert client.post("/api/change-password",
+                       json={"current_password": "1234", "new_password": "newpass99"}).status_code == 200
+    assert client.post("/api/logout").status_code == 200
+    mine = [(item["action"], item["category"], item["address"], item["actor"]["username"], item["actor"]["role"])
+            for item in log_of(admin, q="ecruz")]
+    assert mine == [("auth.login", "sign-in", "127.0.0.1", "ecruz", "teacher"),
+                    ("auth.password_changed", "sign-in", "", "ecruz", "teacher"),
+                    ("auth.logout", "sign-in", "", "ecruz", "teacher")]
+
+
+def test_wrong_password_is_logged_for_known_and_unknown_usernames(app, admin):
+    client = app.test_client()
+    known = client.post("/api/login", json={"username": "ecruz", "password": "nope"})
+    unknown = client.post("/api/login", json={"username": "nobody", "password": "nope"})
+    assert known.status_code == unknown.status_code == 401
+    assert known.get_json() == unknown.get_json()  # the login page does not tell them apart
+    failed = log_of(admin, q="ecruz") + log_of(admin, q="nobody")
+    by_user = {item["actor"]["username"]: item for item in failed if item["action"] == "auth.login_failed"}
+    assert by_user["ecruz"]["actor"]["id"] is not None and by_user["ecruz"]["actor"]["role"] == "teacher"
+    assert by_user["nobody"]["actor"] == {"id": None, "name": "nobody", "username": "nobody", "role": ""}
+    assert by_user["nobody"]["address"] == "127.0.0.1"
+
+
+def test_lockout_is_logged_once(app, admin):
+    client = app.test_client()
+    for _ in range(5):
+        client.post("/api/login", json={"username": "lmanalo", "password": "bad"})
+    assert client.post("/api/login", json={"username": "lmanalo", "password": "1234"}).status_code == 429
+    actions = [item["action"] for item in log_of(admin, q="lmanalo")]
+    assert actions.count("auth.login_failed") == 5 and actions.count("auth.locked") == 1
+    assert "auth.login" not in actions  # the blocked try is not a login
+
+
+def test_deactivated_account_login_is_logged(app, admin):
+    teacher_id = next(u["id"] for u in admin.get("/api/users?role=teacher").get_json()["users"]
+                      if u["username"] == "ecruz")
+    assert admin.put(f"/api/users/{teacher_id}", json={"active": False}).status_code == 200
+    assert app.test_client().post("/api/login", json={"username": "ecruz", "password": "1234"}).status_code == 403
+    entry = log_of(admin, q="ecruz")[-1]
+    assert entry["action"] == "auth.login_failed" and "deactivated" in entry["summary"]
+
+
+def test_no_password_text_in_any_entry(app, admin):
+    import sqlite3
+    import os
+    client = app.test_client()
+    client.post("/api/login", json={"username": "ecruz", "password": "wrong-secret-77"})
+    client.post("/api/login", json={"username": "ecruz", "password": "1234"})
+    client.post("/api/change-password", json={"current_password": "1234", "new_password": "brand-new-secret-88"})
+    admin.put("/api/users/2", json={"reset_password": True, "password": "reset-secret-99"})
+    rows = sqlite3.connect(os.environ["MYGURO_DATABASE"]).execute("SELECT * FROM activity_log").fetchall()
+    text = " ".join(str(cell) for row in rows for cell in row)
+    for secret in ("wrong-secret-77", "brand-new-secret-88", "reset-secret-99", "pbkdf2", "scrypt"):
+        assert secret not in text
+
+
+def test_old_entries_keep_names_after_rename_and_delete(app, admin):
+    app.test_client().post("/api/login", json={"username": "ecruz", "password": "1234"})
+    teacher_id = next(u["id"] for u in admin.get("/api/users?role=teacher").get_json()["users"]
+                      if u["username"] == "ecruz")
+    before = log_of(admin, q="ecruz")[0]
+    admin.put(f"/api/users/{teacher_id}", json={"first_name": "Renamed"})
+    assert log_of(admin, q="ecruz")[0] == before

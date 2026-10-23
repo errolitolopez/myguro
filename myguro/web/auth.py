@@ -41,6 +41,9 @@ def api_login():
 
 @bp.post("/api/logout")
 def api_logout():
+    user = current_user()
+    if user is not None:
+        AuthService(get_db(), user).logout()
     session.clear()
     return jsonify(ok=True)
 

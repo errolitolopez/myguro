@@ -8,8 +8,74 @@
 <main class="container py-3">
   <h1 class="h4 mb-3">Activity log</h1>
   <div id="log-error" class="alert alert-danger d-none" role="alert"></div>
+
+  <div class="d-flex flex-wrap gap-2 mb-3">
+    <input id="search" type="search" class="form-control flex-grow-1" style="min-width: 12rem; width: auto;"
+           placeholder="Search person or action" aria-label="Search the log" autocomplete="off">
+    <button id="filter-toggle" type="button" class="btn btn-outline-secondary text-nowrap bi bi-funnel"
+            data-bs-toggle="collapse" data-bs-target="#advanced-filter" aria-expanded="false"
+            aria-controls="advanced-filter">
+      Filters<span id="filter-count" class="badge text-bg-success ms-1 d-none"></span>
+    </button>
+  </div>
+
+  <!-- Filters together narrow the list; changing one goes back to page 1 -->
+  <div id="advanced-filter" class="collapse">
+    <div class="card card-body mb-3">
+      <div class="row g-2 align-items-end">
+        <div class="col-6 col-md-3">
+          <label for="role-filter" class="form-label small mb-1">Role</label>
+          <select id="role-filter" class="form-select">
+            <option value="">All roles</option>
+            {% for role in roles %}<option value="{{ role }}">{{ role|capitalize }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-6 col-md-3">
+          <label for="category-filter" class="form-label small mb-1">Category</label>
+          <select id="category-filter" class="form-select">
+            <option value="">All categories</option>
+            {% for category in categories %}<option value="{{ category }}">{{ category|capitalize }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-6 col-md-2">
+          <label for="from-filter" class="form-label small mb-1">From</label>
+          <input id="from-filter" type="date" class="form-control">
+        </div>
+        <div class="col-6 col-md-2">
+          <label for="to-filter" class="form-label small mb-1">To</label>
+          <input id="to-filter" type="date" class="form-control">
+        </div>
+        <div class="col-12 col-md-2">
+          <button id="filter-clear" type="button" class="btn btn-outline-secondary w-100 bi bi-x-circle">Clear filters</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Showing one person's entries (tap a name to get here) -->
+  <div id="person-chip" class="d-none mb-2">
+    <span class="badge text-bg-secondary fs-6 fw-normal">
+      <span id="person-chip-name"></span>
+      <button id="person-chip-clear" type="button" class="btn-close btn-close-white ms-1" style="font-size: 0.6rem;"
+              aria-label="Show everyone"></button>
+    </span>
+  </div>
+
+  <div id="log-summary" class="small text-body-secondary mb-2"></div>
   <div id="log-list" class="list-group">
     <div class="list-group-item text-body-secondary">Loading...</div>
   </div>
+
+  <!-- Page controls (hidden when everything fits on one page) -->
+  <nav id="pager" class="d-flex justify-content-between align-items-center mt-3 d-none" aria-label="Pages">
+    <button id="prev-page" type="button" class="btn btn-outline-success btn-sm">‹ Prev</button>
+    <span id="page-info" class="small text-body-secondary"></span>
+    <button id="next-page" type="button" class="btn btn-outline-success btn-sm">Next ›</button>
+  </nav>
 </main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/log.js') }}"></script>
 {% endblock %}
