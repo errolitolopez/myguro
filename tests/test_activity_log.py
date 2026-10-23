@@ -205,3 +205,9 @@ def test_old_entries_keep_names_after_rename_and_delete(app, admin):
     before = log_of(admin, q="ecruz")[0]
     admin.put(f"/api/users/{teacher_id}", json={"first_name": "Renamed"})
     assert log_of(admin, q="ecruz")[0] == before
+
+
+def test_admin_navbar_links_to_the_log(admin):
+    page = admin.get("/dashboard").get_data(as_text=True)
+    assert 'href="/log"' in page
+    assert "Activity log" in admin.get("/log").get_data(as_text=True)

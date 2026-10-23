@@ -3,7 +3,8 @@
   {% set tabs = [("dashboard.page", ("dashboard.page",), "Dashboard", "bi-house"),
                  ("accounts.teachers_page", ("accounts.teachers_page",), "Teachers", "bi-person-workspace"),
                  ("accounts.students_page", ("accounts.students_page",), "Students", "bi-people"),
-                 ("accounts.supervisors_page", ("accounts.supervisors_page",), "Supervisors", "bi-eye")] %}
+                 ("accounts.supervisors_page", ("accounts.supervisors_page",), "Supervisors", "bi-eye"),
+                 ("log.page", ("log.page",), "Log", "bi-clipboard-data")] %}
 {% elif user.role == "supervisor" %}
   {% set tabs = [("log.page", ("log.page",), "Log", "bi-clipboard-data")] %}
 {% elif user.role == "teacher" %}
