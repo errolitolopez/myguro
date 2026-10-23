@@ -394,3 +394,8 @@ document.getElementById("confirm-yes").addEventListener("click", async (event) =
 });
 
 loadUsers();
+
+// The Role filter: each role has its own list and tools, so the page loads again with that role.
+document.getElementById("role-select").addEventListener("change", (event) => {
+  window.location.href = `/users?role=${event.target.value}`;
+});

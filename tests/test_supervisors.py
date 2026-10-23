@@ -74,3 +74,17 @@ def test_migration_adds_supervisor_and_keeps_users(app):
 
 def _login_response(username, password=PASSWORD):
     return flask_app.test_client().post("/api/login", json={"username": username, "password": password})
+
+
+def test_one_users_tab_with_a_role_filter(admin):
+    dashboard = admin.get("/dashboard").get_data(as_text=True)
+    assert 'href="/users"' in dashboard
+    tabs = dashboard.split('class="nav nav-underline"')[1].split("</ul>")[0]  # the top tabs
+    assert "Users" in tabs and "Log" in tabs
+    assert "Teachers" not in tabs and "Students" not in tabs and "Supervisors" not in tabs
+    for role, noun in (("teacher", "Teachers"), ("student", "Students"), ("supervisor", "Supervisors")):
+        page = admin.get(f"/users?role={role}").get_data(as_text=True)
+        assert f'data-role="{role}"' in page and f"<title>{noun} · myguro</title>" in page
+        assert f'<option value="{role}" selected>' in page
+    assert 'data-role="student"' in admin.get("/users").get_data(as_text=True)  # the default
+    assert 'data-role="student"' in admin.get("/users?role=boss").get_data(as_text=True)

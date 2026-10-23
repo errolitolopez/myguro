@@ -5,6 +5,7 @@ import io
 from flask import Blueprint, jsonify, render_template, request, send_file
 
 from myguro.database import get_db
+from myguro.domain.accounts import ACCOUNT_ROLES
 from myguro.errors import ValidationError
 from myguro.imports import read_student_rows, template_xlsx_bytes
 from myguro.services import AccountService
@@ -17,6 +18,15 @@ def service():
     return AccountService(get_db(), current_user())
 
 
+@bp.get("/users")
+@role_required_page("admin")
+def users_page():
+    """The one Users page: ?role=teacher, student (the default) or supervisor picks the list."""
+    role = request.args.get("role", "student")
+    return render_template("users.html", user=current_user(), role=role if role in ACCOUNT_ROLES else "student")
+
+
+# The old addresses still work (bookmarks, links on the dashboard): the same page, one role each.
 @bp.get("/teachers")
 @role_required_page("admin")
 def teachers_page():
