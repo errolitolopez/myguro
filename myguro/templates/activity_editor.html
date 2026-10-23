@@ -48,6 +48,24 @@
       <div class="d-flex flex-column flex-sm-row gap-2 mt-3 pt-3 border-top">
         <button id="publish-button" type="button" class="btn btn-lg flex-fill btn-success text-nowrap bi bi-eye">Publish</button>
         <button id="assign-button" type="button" class="btn btn-lg flex-fill btn-primary text-nowrap bi bi-people">Assign</button>
+        <!-- Print: opens the saved sheet as a PDF in a new tab (Print or Download from there) -->
+        <div class="dropdown flex-fill d-grid">
+          <button id="print-button" type="button" class="btn btn-lg btn-outline-secondary text-nowrap bi bi-printer dropdown-toggle"
+                  data-bs-toggle="dropdown" aria-expanded="false"> Print</button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" target="_blank" rel="noopener"
+                   href="{{ url_for('activities.print_pdf', activity_id=activity_id) }}">Student copy</a></li>
+            <li><a class="dropdown-item" target="_blank" rel="noopener"
+                   href="{{ url_for('activities.print_pdf', activity_id=activity_id, key=1) }}">Answer key</a></li>
+            <!-- Teacher's copy to keep or edit: the same format the import reads -->
+            <li><hr class="dropdown-divider"></li>
+            <li><h3 class="dropdown-header">Download with answers (can be imported again)</h3></li>
+            <li><a class="dropdown-item bi bi-file-earmark-word"
+                   href="{{ url_for('activities.export', activity_id=activity_id, kind='docx') }}"> Word (.docx)</a></li>
+            <li><a class="dropdown-item bi bi-file-earmark-excel"
+                   href="{{ url_for('activities.export', activity_id=activity_id, kind='xlsx') }}"> Excel (.xlsx)</a></li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>

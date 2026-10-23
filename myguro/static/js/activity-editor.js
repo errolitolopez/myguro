@@ -806,7 +806,7 @@ function lockEditor() {
   const editorArea = document.querySelector("main");
   editorArea.querySelectorAll("input, textarea, select").forEach((field) => (field.disabled = true));
   editorArea.querySelectorAll("button").forEach((button) => {
-    if (!["assign-button", "copy-button", "publish-button", "delete-button", "delete-no", "delete-yes"]
+    if (!["assign-button", "print-button", "copy-button", "publish-button", "delete-button", "delete-no", "delete-yes"]
       .includes(button.id)) button.disabled = true;
   });
   maxAttemptsSelect.disabled = false; // more tries can still be given

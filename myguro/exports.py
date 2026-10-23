@@ -13,6 +13,8 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
+from myguro.domain.richtext import rich_to_text
+
 FONTS_DIR = os.path.join(os.path.dirname(__file__), "fonts")
 
 STATUS = {"not_started": "Not started", "in_progress": "Answering", "submitted": "Submitted",
@@ -338,4 +340,118 @@ def gradebook_pdf_bytes(data, teacher, exported_at, timezone_info):
         pdf.ln(2)
         pdf.text_style(7.5, grey=True)
         pdf.cell(0, 4, "* Has short answers the teacher hasn't checked yet.", new_x="LMARGIN", new_y="NEXT")
+    return bytes(pdf.output())
+
+
+# --- Printable activity sheet ---------------------------------------------------------
+# The sheet on paper: A4 portrait, either the student copy (blank answer lines) or the
+# teacher's copy with the answer key. Built from ActivityService.get (saved version).
+
+LETTERS = "ABCDEFGHIJKL"
+WRITE_LINES = 3  # ruled lines under a short answer
+
+
+class SheetPDF(FPDF):
+    def __init__(self):
+        super().__init__(orientation="portrait", unit="mm", format="A4")
+        self.set_margins(15, 15, 15)
+        self.set_auto_page_break(auto=True, margin=15)
+        self.add_font("DejaVu", "", os.path.join(FONTS_DIR, "DejaVuSans.ttf"))
+        self.add_font("DejaVu", "B", os.path.join(FONTS_DIR, "DejaVuSans-Bold.ttf"))
+
+    def text_style(self, size=10, bold=False, grey=False):
+        self.set_font("DejaVu", "B" if bold else "", size)
+        self.set_text_color(*(GREY if grey else BLACK))
+
+    def paragraph(self, text, size=10, bold=False, grey=False, indent=0):
+        """A wrapped paragraph; indent moves it right (mm) from the left margin."""
+        self.text_style(size, bold, grey)
+        self.set_x(self.l_margin + indent)
+        self.multi_cell(0, size * 0.5, text, new_x="LMARGIN", new_y="NEXT")
+
+    def footer(self):
+        self.set_y(-10)
+        self.text_style(8, grey=True)
+        self.cell(0, 4, f"Page {self.page_no()}", align="R")
+
+
+def question_key_text(question):
+    """The right answer of a question as one line for the answer key."""
+    answer, choices = question["answer"], question["choices"]
+    kind = question["type"]
+    if kind == "multiple_choice":
+        return f"{LETTERS[answer]}. {choices[answer]}"
+    if kind == "true_false":
+        return "TRUE" if answer else "FALSE"
+    if kind == "identification":
+        return " / ".join(answer)
+    if kind == "fill_blank":
+        return "; ".join(" / ".join(blank) for blank in answer)
+    if kind == "matching":
+        return "; ".join(f"{number}. {LETTERS[pair['match']]}" for number, pair in enumerate(answer, start=1))
+    return answer or ""  # short answer: the guide for checking, if any
+
+
+def print_question(pdf, number, question, with_key):
+    """One question: its prompt, the choices or a place to write, and (answer key) the answer."""
+    kind = question["type"]
+    points = f" ({question['points']} {'pt' if question['points'] == 1 else 'pts'})"
+    if pdf.will_page_break(30):
+        pdf.add_page()  # keep a question together with its first lines when it is near the page end
+    if kind == "matching":
+        pdf.paragraph(f"{number}. {question['prompt']}{points}")
+        pdf.paragraph("Column A", bold=True, indent=6)
+        for item_number, pair in enumerate(question["answer"], start=1):
+            pdf.paragraph(f"____ {item_number}. {pair['item']}", indent=6)
+        pdf.paragraph("Column B", bold=True, indent=6)
+        for letter, choice in zip(LETTERS, question["choices"]):
+            pdf.paragraph(f"{letter}. {choice}", indent=6)
+    else:
+        blank_prefix = "_______ " if kind == "true_false" else ""
+        pdf.paragraph(f"{number}. {blank_prefix}{question['prompt']}{points}")
+        if kind == "multiple_choice":
+            for letter, choice in zip(LETTERS, question["choices"]):
+                pdf.paragraph(f"{letter}. {choice}", indent=8)
+        elif kind == "identification":
+            pdf.paragraph("Answer: ______________________________", indent=8)
+        elif kind == "short_answer":
+            for _ in range(WRITE_LINES):
+                pdf.ln(8)  # room for handwriting
+                pdf.line(pdf.l_margin + 8, pdf.get_y(), pdf.w - pdf.r_margin, pdf.get_y())
+            pdf.ln(2)
+    if with_key:
+        answer = question_key_text(question)
+        if answer:
+            pdf.paragraph(f"Answer: {answer}", size=9, bold=True, indent=8)
+    pdf.ln(2)
+
+
+def sheet_pdf_bytes(activity, teacher, with_key):
+    """The activity sheet as a PDF to print (bytes). with_key adds each answer and "ANSWER KEY"."""
+    pdf = SheetPDF()
+    pdf.set_title(activity["title"])
+    pdf.add_page()
+
+    pdf.text_style(15, bold=True)
+    pdf.multi_cell(0, 8, activity["title"], new_x="LMARGIN", new_y="NEXT")
+    total = sum(question["points"] for section in activity["sections"] for question in section["questions"])
+    pdf.paragraph("  ·  ".join(filter(None, [activity["subject"], teacher, f"{total} points"])), size=9, grey=True)
+    if with_key:
+        pdf.paragraph("ANSWER KEY (teacher's copy)", size=10, bold=True)
+    else:
+        pdf.ln(2)
+        pdf.paragraph(f"Name: {'_' * 36}   Date: {'_' * 16}   Score: ______ / {total}")
+    pdf.ln(3)
+
+    for section in activity["sections"]:
+        if section["title"]:
+            pdf.paragraph(section["title"], size=12, bold=True)
+        if section["description"]:
+            text = rich_to_text(section["description"]) if section["description_format"] == "rich" \
+                else section["description"]
+            pdf.paragraph(text, grey=section["kind"] == "activity")
+        pdf.ln(2)
+        for number, question in enumerate(section["questions"], start=1):
+            print_question(pdf, number, question, with_key)
+        pdf.ln(2)
     return bytes(pdf.output())

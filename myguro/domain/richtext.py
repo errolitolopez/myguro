@@ -70,3 +70,48 @@ def rich_text_length(html):
     cleaner.feed(html)
     cleaner.close()
     return len(cleaner.result()[1])
+
+
+class _PlainText(HTMLParser):
+    """Formatted text -> plain lines for print: one line per paragraph, list items as "• " or "1. "."""
+
+    BLOCKS = {"p", "div", "ul", "ol", "li"}
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.text = ""
+        self.lists = []  # per open list: the next number, or None for bullets
+
+    def newline(self):
+        if self.text and not self.text.endswith("\n"):
+            self.text += "\n"
+
+    def handle_starttag(self, tag, attrs):
+        if tag in self.BLOCKS:
+            self.newline()
+        if tag in ("ul", "ol"):
+            self.lists.append(1 if tag == "ol" else None)
+        elif tag == "li":
+            number = self.lists[-1] if self.lists else None
+            self.text += "• " if number is None else f"{number}. "
+            if self.lists and number is not None:
+                self.lists[-1] = number + 1
+        elif tag == "br":
+            self.text += "\n"
+
+    def handle_endtag(self, tag):
+        if tag in ("ul", "ol") and self.lists:
+            self.lists.pop()
+        if tag in self.BLOCKS:
+            self.newline()
+
+    def handle_data(self, data):
+        self.text += data
+
+
+def rich_to_text(html):
+    """Saved rich text -> plain text with line breaks, for the printed sheet."""
+    parser = _PlainText()
+    parser.feed(str(html or ""))
+    parser.close()
+    return parser.text.strip()

@@ -151,3 +151,106 @@ def sheet_template_docx_bytes():
     output = io.BytesIO()
     document.save(output)
     return output.getvalue()
+
+
+TYPE_NAMES = {"multiple_choice": "Multiple Choice", "true_false": "True or False", "identification": "Identification",
+              "fill_blank": "Fill in the Blank", "matching": "Matching", "short_answer": "Short Answer"}
+LETTERS = "ABCDEFGHIJKL"
+
+
+def question_blocks(questions):
+    """The questions split into runs of one type: a Word section has one Type, and a matching
+    question is a section of its own. [[question, ...], ...]"""
+    blocks = []
+    for question in questions:
+        if blocks and question["type"] == blocks[-1][0]["type"] != "matching":
+            blocks[-1].append(question)
+        else:
+            blocks.append([question])
+    return blocks
+
+
+def key_line(question):
+    """The answer-key text of a question, as docx_import reads it."""
+    answer, choices = question["answer"], question["choices"]
+    kind = question["type"]
+    if kind == "multiple_choice":
+        return f"{LETTERS[answer]} ({choices[answer]})"
+    if kind == "true_false":
+        return "TRUE" if answer else "FALSE"
+    if kind == "identification":
+        return " / ".join(answer)
+    if kind == "fill_blank":
+        return "; ".join(" / ".join(blank) for blank in answer)
+    return answer or ""  # short answer: the guide for checking
+
+
+def sheet_docx_lines(activity):
+    """[(kind, text)] of an activity in the import template format (see EXAMPLE): sections, then
+    the ANSWER KEY. A section that mixes question types becomes one Word section per run of the
+    same type ("Title", "Title (part 2)"), and every heading is made unique, because the answer
+    key finds a section by its heading."""
+    from myguro.domain.richtext import rich_to_text
+
+    lines, key, used = [], [], set()
+
+    def heading(title):
+        name, count = title, 1
+        while name.casefold() in used:
+            count += 1
+            name = f"{title} ({count})"
+        used.add(name.casefold())
+        return name
+
+    for number, section in enumerate(activity["sections"], start=1):
+        description = rich_to_text(section["description"]) if section["description_format"] == "rich" \
+            else section["description"]
+        title = section["title"] or f"Section {number}"
+        if section["kind"] == "text":
+            lines.append(("h1", heading(title)))
+            lines.extend(("p", line) for line in description.splitlines() if line.strip())
+            continue
+        for part, block in enumerate(question_blocks(section["questions"]), start=1):
+            name = heading(title if part == 1 else f"{title} (part {part})")
+            kind = block[0]["type"]
+            points = max((question["points"] for question in block), key=[q["points"] for q in block].count)
+            lines += [("h1", name), ("p", f"Type: {TYPE_NAMES[kind]}"), ("p", f"Points: {points}")]
+            key.append(("h2", name))
+            directions = block[0]["prompt"] if kind == "matching" else description if part == 1 else ""
+            for index, line in enumerate(directions.splitlines()):
+                if line.strip():
+                    lines.append(("p", f"Directions: {line}" if index == 0 else line))
+            if kind == "matching":
+                question = block[0]
+                lines += [("p", f"{item}. {pair['item']}") for item, pair in enumerate(question["answer"], start=1)]
+                lines += [("p", f"{LETTERS[index]}. {choice}") for index, choice in enumerate(question["choices"])]
+                key += [("p", f"{item}. {LETTERS[pair['match']]}") for item, pair in enumerate(question["answer"], start=1)]
+                continue
+            for item, question in enumerate(block, start=1):
+                lines.append(("p", f"{item}. {question['prompt']}"))
+                lines += [("p", f"{LETTERS[index]}. {choice}") for index, choice in enumerate(question["choices"] or [])]
+                answer = key_line(question)
+                if answer:
+                    key.append(("p", f"{item}. {answer}"))
+    return lines + [("h1", "ANSWER KEY")] + key
+
+
+def sheet_docx_bytes(activity, teacher):
+    """An activity as a Word file in the import template format, with its ANSWER KEY: the teacher's
+    copy to keep or edit, which can also be imported as a new activity."""
+    document = Document()
+    document.add_heading(activity["title"], level=0)
+    document.add_paragraph("  ·  ".join(filter(None, [activity["subject"], teacher])))
+    document.add_paragraph("Teacher's copy with the answer key. To use it again in myguro: Activities → "
+                           "Import from Excel / Word. Keep the headings and the Type, Points and "
+                           "Directions lines as they are. (This part is not imported.)")
+    for kind, text in sheet_docx_lines(activity):
+        if kind == "h1":
+            document.add_heading(text, level=1)
+        elif kind == "h2":
+            document.add_heading(text, level=2)
+        else:
+            document.add_paragraph(text)
+    output = io.BytesIO()
+    document.save(output)
+    return output.getvalue()

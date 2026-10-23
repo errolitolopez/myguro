@@ -12,7 +12,7 @@ import io
 import zipfile
 
 from openpyxl import Workbook, load_workbook
-from openpyxl.styles import Font, PatternFill
+from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.worksheet.datavalidation import DataValidation
 
 from myguro.domain.accounts import GRADES
@@ -236,3 +236,55 @@ def sheet_template_xlsx_bytes():
     output = io.BytesIO()
     workbook.save(output)
     return output.getvalue()
+
+
+def sheet_xlsx_bytes(activity):
+    """An activity as an Excel file in the import format (one row per section or question), so the
+    teacher can keep it, edit it, or import it as a new activity. activity is ActivityService.get."""
+    from myguro.domain.richtext import rich_to_text
+
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = "Activity"
+    sheet.append(SHEET_COLUMNS)
+    for cell in sheet[1]:
+        cell.font = Font(bold=True)
+        cell.fill = PatternFill("solid", fgColor="E9ECEF")
+    for letter, width in zip("ABCDEFGHIJKL", (12, 28, 60, 20, 16, 16, 16, 16, 16, 16, 28, 9)):
+        sheet.column_dimensions[letter].width = width
+    sheet.freeze_panes = "A2"
+    wrap = Alignment(wrap_text=True, vertical="top")
+
+    for section in activity["sections"]:
+        description = rich_to_text(section["description"]) if section["description_format"] == "rich" \
+            else section["description"]
+        sheet.append([section["kind"], section["title"], description])
+        for question in section["questions"]:
+            choices, answer = question_cells(question)
+            choices = choices + [""] * (len(CHOICE_FIELDS) - len(choices))  # keeps Answer in its column
+            sheet.append(["question", "", question["prompt"], question["type"], *choices, answer, question["points"]])
+    for row in sheet.iter_rows(min_row=2):
+        for cell in row:
+            cell.alignment = wrap
+    output = io.BytesIO()
+    workbook.save(output)
+    return output.getvalue()
+
+
+def question_cells(question):
+    """([Choice A to F], the Answer cell) of a question, as the importer reads them."""
+    kind, answer, choices = question["type"], question["answer"], question["choices"] or []
+    if kind == "multiple_choice":
+        return choices, "ABCDEF"[answer]
+    if kind == "true_false":
+        return [], "True" if answer else "False"
+    if kind == "identification":
+        return [], " / ".join(answer)
+    if kind == "fill_blank":
+        return [], " ; ".join(" / ".join(blank) for blank in answer)
+    if kind == "matching":
+        # Column B comes back sorted from the matches, so only the unused choices are listed
+        used = {pair["match"] for pair in answer}
+        extras = [choice for index, choice in enumerate(choices) if index not in used][:len(CHOICE_FIELDS)]
+        return extras, " ; ".join(f"{pair['item']} = {choices[pair['match']]}" for pair in answer)
+    return [], answer or ""  # short answer: the guide for checking

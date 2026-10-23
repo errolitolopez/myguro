@@ -107,6 +107,9 @@ footer {
      paint over its dropdown menu. 1000 = Bootstrap's dropdown level; modals (1055) stay above. */
   z-index: 1000;
 }
+/* Same problem for a dropdown inside a card (the Print menu): each frosted card is its own layer,
+   so the next card would paint over the open menu. Lift only the card that has one open. */
+.card:has(.dropdown-menu.show) { position: relative; z-index: 2; }
 .navbar .nav-underline { --bs-nav-underline-link-active-color: var(--bs-emphasis-color); }
 .navbar .nav-link.active { border-bottom-color: var(--bs-emphasis-color); }
 
