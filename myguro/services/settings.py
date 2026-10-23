@@ -103,5 +103,9 @@ class SettingsService(Service):
             cleaned = clean_support(data["support"])
             for name, value in zip(SUPPORT_KEYS, cleaned):
                 self.settings.set(SUPPORT_KEYS[name], ("1" if value else "0") if name == "enabled" else value)
+        changed = [label for key, label in (("grades_high_to_low", "grade order"), ("disabled_grades", "grades in use"),
+                                            ("support", "the support link")) if key in data]
+        if changed:
+            self.log("settings.changed", "settings", f"Changed settings: {', '.join(changed)}.")
         self.commit()
         return self.get()

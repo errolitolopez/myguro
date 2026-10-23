@@ -5,7 +5,7 @@ from myguro.domain.accounts import (
     clean_person_name, clean_username, display_name, grade_from_text, make_temp_password, name_from_request,
     split_full_name, suggest_username,
 )
-from myguro.domain.text import clean_name, like_pattern
+from myguro.domain.text import clean_name, like_pattern, plural
 from myguro.errors import NotFoundError, ValidationError
 from myguro.services.base import Service
 from myguro.services.presenters import user_json
@@ -78,8 +78,11 @@ class AccountService(Service):
         # A new student starts disabled: the admin enables the account first.
         user_id = self.users.create(names, username, generate_password_hash(password), role, grade, section,
                                     active=role != "student")
+        created = self.users.get(user_id)
+        self.log("account.created", "accounts", f"Created {role} account {created['name']}.",
+                 ("user", user_id, created["name"]))
         self.commit()
-        return self.account_json(self.users.get(user_id)), password
+        return self.account_json(created), password
 
     def update(self, user_id, data):
         """Edit a teacher or student: last_name / first_name / middle_initial (or name), grade +
@@ -102,8 +105,25 @@ class AccountService(Service):
             self.users.set_active(user_id, bool(data["active"]))
         if new_password:
             self.set_temp_password(user_id, new_password)
+        self.log_changes(account, self.users.get_account(user_id), new_password is not None)
         self.commit()
         return self.account_json(self.users.get_account(user_id)), new_password
+
+    def log_changes(self, before, after, password_reset):
+        """One activity log entry for each kind of change an edit made (nothing if it changed nothing).
+        The new password is never written down."""
+        target = ("user", after["id"], after["name"])
+        if before["name"] != after["name"]:
+            self.log("account.renamed", "accounts", f"Renamed {before['name']} to {after['name']}.", target)
+        if (before["grade"], before["section"]) != (after["grade"], after["section"]):
+            self.log("account.edited", "accounts", f"Changed the grade and section of {after['name']} to "
+                     f"{' - '.join(filter(None, [after['grade'], after['section']])) or 'none'}.", target)
+        if bool(before["active"]) != bool(after["active"]):
+            enabled = bool(after["active"])
+            self.log("account.activated" if enabled else "account.deactivated", "accounts",
+                     f"{'Enabled' if enabled else 'Deactivated'} the account of {after['name']}.", target)
+        if password_reset:
+            self.log("account.password_reset", "accounts", f"Reset the password of {after['name']}.", target)
 
     def batch_update(self, data):
         """Change grade and/or section of many students at once. Students are user_ids, or
@@ -126,6 +146,8 @@ class AccountService(Service):
             self.users.set_grade_many(ids, grade)
         if section is not None:
             self.users.set_section_many(ids, section)
+        self.log("account.batch_edited", "accounts", f"Changed the grade or section of {plural(len(ids), 'student')}.",
+                 ("user", None, ""))
         self.commit()
         return len(ids)
 
@@ -136,6 +158,8 @@ class AccountService(Service):
         inactive = self.users.inactive_ids(ids)
         if inactive:
             self.users.activate_many(inactive)
+            self.log("account.batch_activated", "accounts", f"Enabled {plural(len(inactive), 'student')}.",
+                     ("user", None, ""))
             self.commit()
         return {"activated": len(inactive), "skipped": len(ids) - len(inactive)}
 
@@ -147,6 +171,8 @@ class AccountService(Service):
         fresh = self.users.fresh_student_ids(ids)
         if fresh:
             self.users.delete_students(fresh)
+            self.log("account.batch_deleted", "accounts", f"Deleted {plural(len(fresh), 'student')}.",
+                     ("user", None, ""))
             self.commit()
         return {"deleted": len(fresh), "skipped": len(ids) - len(fresh)}
 
@@ -236,6 +262,8 @@ class AccountService(Service):
                                         "student", student["grade"], student["section"], active=False)
             created.append({key: student[key] for key in IMPORT_FIELDS}
                            | {"id": user_id, "password": password, "password_given": bool(student["password"])})
+        self.log("account.imported", "accounts", f"Imported {plural(len(created), 'student')} from a file.",
+                 ("user", None, ""))
         self.commit()
         return {"imported": True, "errors": [], "existing": skipped, "students": created}
 

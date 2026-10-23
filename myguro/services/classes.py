@@ -1,5 +1,5 @@
 from myguro.domain.accounts import MAX_NAME_LENGTH, check_name
-from myguro.domain.text import clean_name, like_pattern
+from myguro.domain.text import clean_name, like_pattern, plural
 from myguro.errors import NotFoundError, ValidationError
 from myguro.services.base import Service
 from myguro.services.presenters import class_json, user_json
@@ -44,14 +44,20 @@ class ClassService(Service):
         year_id = self.year_id()
         self.require_open_year(year_id)
         class_id = self.classes.create(self.user["id"], *self.clean_fields(data, year_id), year_id)
+        created = self.require(class_id)
+        self.log("class.created", "classes", f"Created the class {created['name']}.", ("class", class_id, created["name"]))
         self.commit()
-        return class_json(self.require(class_id))
+        return class_json(created)
 
     def update(self, class_id, data):
         row = self.require_open(class_id)
         self.classes.update(class_id, *self.clean_fields(data, row["school_year_id"], class_id))
+        updated = self.require(class_id)
+        if (row["name"], row["subject"]) != (updated["name"], updated["subject"]):
+            self.log("class.edited", "classes", f"Changed the class {row['name']} to {updated['name']}"
+                     + (f" ({updated['subject']})." if updated["subject"] else "."), ("class", class_id, updated["name"]))
         self.commit()
-        return class_json(self.require(class_id))
+        return class_json(updated)
 
     def students(self, class_id):
         return [user_json(row) for row in self.classes.students(class_id)]
@@ -87,7 +93,7 @@ class ClassService(Service):
     def add_students(self, class_id, data):
         """Put students in the class: student_ids (e.g. a whole section) or student_id.
         Students already in it are skipped. Returns the ones added."""
-        self.require_open(class_id)
+        class_row = self.require_open(class_id)
         ids = data.get("student_ids", [data.get("student_id")])
         if not isinstance(ids, list) or not ids:
             raise ValidationError("No students to add.")
@@ -99,6 +105,9 @@ class ClassService(Service):
             if not self.classes.has_student(class_id, student["id"]):
                 self.classes.add_student(class_id, student["id"])
                 added.append(user_json(student))
+        if added:
+            self.log("class.student_added", "classes", f"Added {plural(len(added), 'student')} to {class_row['name']}.",
+                     ("class", class_id, class_row["name"]))
         self.commit()
         if not added and len(ids) == 1:
             raise ValidationError("This student is already in the class.")
@@ -108,14 +117,16 @@ class ClassService(Service):
         """Take a student out of the class. Their account and other classes are kept."""
         if not self.exists(class_id) or not self.classes.has_student(class_id, student_id):
             raise NotFoundError("Student not found in this class.")
-        self.require_open(class_id)
+        class_row = self.require_open(class_id)
         self.classes.remove_student(class_id, student_id)
+        self.log("class.student_removed", "classes", f"Removed 1 student from {class_row['name']}.",
+                 ("class", class_id, class_row["name"]))
         self.commit()
 
     def remove_students(self, class_id, data):
         """Take several students out of the class: student_ids. Ids not in the class are skipped.
         Returns how many were removed."""
-        self.require_open(class_id)
+        class_row = self.require_open(class_id)
         ids = data.get("student_ids")
         if not isinstance(ids, list) or not ids:
             raise ValidationError("Choose at least one student.")
@@ -124,5 +135,8 @@ class ClassService(Service):
             if isinstance(student_id, int) and self.classes.has_student(class_id, student_id):
                 self.classes.remove_student(class_id, student_id)
                 removed += 1
+        if removed:
+            self.log("class.student_removed", "classes", f"Removed {plural(removed, 'student')} from {class_row['name']}.",
+                     ("class", class_id, class_row["name"]))
         self.commit()
         return removed

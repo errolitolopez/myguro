@@ -26,3 +26,8 @@ def like_pattern(text):
 def whole_number(value, low, high):
     """True when value is an int (not True/False) from low to high."""
     return isinstance(value, int) and not isinstance(value, bool) and low <= value <= high
+
+
+def plural(count, one, many=None):
+    """plural(1, "student") -> "1 student", plural(3, "student") -> "3 students"."""
+    return f"{count} {one if count == 1 else many or one + 's'}"

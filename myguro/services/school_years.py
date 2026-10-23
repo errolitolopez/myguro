@@ -40,5 +40,7 @@ class SchoolYearService(Service):
         self.years.set_current(year_id)
         # Teachers start the year with last year's classes (empty: they add the students again).
         copied = ClassRepository(self.db).copy_to_year(last_year_id, year_id) if copy_classes else 0
+        self.log("year.started", "settings", f"Started the school year {name}"
+                 + (f" and copied {copied} classes from last year." if copy_classes else "."), ("school_year", year_id, name))
         self.commit()
         return {**self.overview(), "copied_classes": copied}
