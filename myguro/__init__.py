@@ -60,7 +60,7 @@ def create_app(test_config=None):
             "SUPPORT": support,
             "SUPPORT_POPUP": popup,
             # The school years for the picker in the account menu (not on the login page)
-            "SCHOOL_YEARS": SchoolYearService(get_db(), user).overview() if user else None,
+            "SCHOOL_YEARS": SchoolYearService(get_db(), user).overview() if user and user["role"] != "supervisor" else None,
         }
 
     return app

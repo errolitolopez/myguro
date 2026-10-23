@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Activity log · myguro{% endblock %}
+
+{% block content %}
+{% include "_navbar.html" %}
+
+<main class="container py-3">
+  <h1 class="h4 mb-3">Activity log</h1>
+  <div id="log-error" class="alert alert-danger d-none" role="alert"></div>
+  <div id="log-list" class="list-group">
+    <div class="list-group-item text-body-secondary">Loading...</div>
+  </div>
+</main>
+{% endblock %}

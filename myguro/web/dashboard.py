@@ -1,8 +1,8 @@
-from flask import Blueprint, jsonify, render_template
+from flask import Blueprint, jsonify, redirect, render_template, url_for
 
 from myguro.database import get_db
 from myguro.services import DashboardService
-from myguro.web.security import current_user, login_required_api, login_required_page
+from myguro.web.security import current_user, login_required_page, role_required_api
 
 bp = Blueprint("dashboard", __name__)
 
@@ -10,10 +10,12 @@ bp = Blueprint("dashboard", __name__)
 @bp.get("/dashboard")
 @login_required_page
 def page():
+    if current_user()["role"] == "supervisor":  # a supervisor's only page is the activity log
+        return redirect(url_for("log.page"))
     return render_template("dashboard.html", user=current_user())
 
 
 @bp.get("/api/dashboard")
-@login_required_api
+@role_required_api("admin", "teacher", "student")
 def api_dashboard():
     return jsonify(DashboardService(get_db(), current_user()).data())

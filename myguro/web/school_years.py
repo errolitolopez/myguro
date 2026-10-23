@@ -4,7 +4,7 @@ from flask import Blueprint, jsonify
 
 from myguro.database import get_db
 from myguro.services import SchoolYearService
-from myguro.web.security import current_user, json_body, login_required_api, role_required_api
+from myguro.web.security import current_user, json_body, role_required_api
 
 bp = Blueprint("school_years", __name__)
 
@@ -14,13 +14,13 @@ def service():
 
 
 @bp.get("/api/school-years")
-@login_required_api
+@role_required_api("admin", "teacher", "student")
 def api_list():
     return jsonify(service().overview())
 
 
 @bp.put("/api/school-year")
-@login_required_api
+@role_required_api("admin", "teacher", "student")
 def api_view():
     return jsonify(service().view(json_body().get("id")))
 

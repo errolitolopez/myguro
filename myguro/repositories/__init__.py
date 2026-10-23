@@ -4,10 +4,11 @@ none of them commits (the service decides when the work is done)."""
 from myguro.repositories.activities import ActivityRepository
 from myguro.repositories.assignments import AssignmentRepository
 from myguro.repositories.classes import ClassRepository
+from myguro.repositories.log import LogRepository
 from myguro.repositories.school_years import SchoolYearRepository
 from myguro.repositories.settings import SettingsRepository
 from myguro.repositories.submissions import SubmissionRepository
 from myguro.repositories.users import UserRepository
 
-__all__ = ["ActivityRepository", "AssignmentRepository", "ClassRepository", "SchoolYearRepository",
+__all__ = ["ActivityRepository", "AssignmentRepository", "ClassRepository", "LogRepository", "SchoolYearRepository",
            "SettingsRepository", "SubmissionRepository", "UserRepository"]

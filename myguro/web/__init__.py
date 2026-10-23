@@ -2,8 +2,8 @@
 request, calls a service, and returns JSON or a page; errors from services become JSON answers
 (myguro.errors)."""
 
-from myguro.web import (accounts, activities, auth, classes, dashboard, results, school_years, settings,
+from myguro.web import (accounts, activities, auth, classes, dashboard, log, results, school_years, settings,
                         student)
 
 BLUEPRINTS = [auth.bp, dashboard.bp, accounts.bp, classes.bp, activities.bp, student.bp, results.bp,
-              settings.bp, school_years.bp]
+              settings.bp, school_years.bp, log.bp]

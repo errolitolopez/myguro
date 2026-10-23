@@ -75,6 +75,18 @@ def admin():
 
 
 @pytest.fixture
+def supervisor(admin):
+    """A supervisor (read-only, sees only the activity log), already past the forced password change."""
+    response = admin.post("/api/users", json={"role": "supervisor", "last_name": "Garcia", "first_name": "Sam",
+                                              "username": "sgarcia", "password": "123qwe"})
+    assert response.status_code == 201, response.get_json()
+    client = login("sgarcia", "123qwe")
+    assert client.post("/api/change-password",
+                       json={"current_password": "123qwe", "new_password": "supervisor1"}).status_code == 200
+    return client
+
+
+@pytest.fixture
 def teacher():
     return login("ecruz")
 

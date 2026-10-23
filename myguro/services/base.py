@@ -1,8 +1,9 @@
 from myguro.domain import scoring
+from myguro.domain.log import CATEGORIES, clean_summary
 from myguro.errors import ValidationError
 from myguro.repositories import (
-    ActivityRepository, AssignmentRepository, ClassRepository, SchoolYearRepository, SettingsRepository,
-    SubmissionRepository, UserRepository,
+    ActivityRepository, AssignmentRepository, ClassRepository, LogRepository, SchoolYearRepository,
+    SettingsRepository, SubmissionRepository, UserRepository,
 )
 
 
@@ -21,6 +22,7 @@ class Service:
         self.submissions = SubmissionRepository(db)
         self.settings = SettingsRepository(db)
         self.years = SchoolYearRepository(db)
+        self.logs = LogRepository(db)
 
     def year_id(self):
         """The school year this person is looking at: the one they picked, else the current year."""
@@ -31,6 +33,15 @@ class Service:
         """A past school year can only be looked at: refuse changes to it."""
         if year_id != self.years.current_id():
             raise ValidationError("This school year is over. You can only look at it.")
+
+    def log(self, action, category, summary, target=("", None, ""), actor=None, address=""):
+        """Add an activity log entry for what this service call did. Call it right before commit(), so
+        the entry and the change are saved together (a failed change leaves no entry). actor is the
+        logged-in user unless given; target = (type, id, name). Never put a password in the summary."""
+        assert category in CATEGORIES, category
+        who = actor if actor is not None else self.user
+        self.logs.add({"id": who["id"], "name": who["name"], "username": who["username"], "role": who["role"]},
+                      action, category, clean_summary(summary), *target, address=address)
 
     def commit(self):
         self.db.commit()

@@ -179,3 +179,25 @@ CREATE TABLE IF NOT EXISTS settings (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
 );
+
+-- The activity log: who did what, newest last. Append-only (nothing edits or deletes a row).
+-- The names are copied in as they were at that time, and there are no foreign keys, so renaming
+-- or deleting a person or an activity later never changes or loses its history.
+CREATE TABLE IF NOT EXISTS activity_log (
+    id INTEGER PRIMARY KEY,
+    at TEXT NOT NULL DEFAULT (datetime('now')),
+    actor_id INTEGER,                  -- NULL for a failed login with a username nobody has
+    actor_name TEXT NOT NULL,
+    actor_username TEXT NOT NULL,
+    actor_role TEXT NOT NULL,          -- "" for a failed login with an unknown username
+    action TEXT NOT NULL,              -- a code, like 'activity.published'
+    category TEXT NOT NULL,            -- see domain/log.py CATEGORIES
+    target_type TEXT NOT NULL DEFAULT '',
+    target_id INTEGER,
+    target_name TEXT NOT NULL DEFAULT '',
+    summary TEXT NOT NULL,             -- one short sentence for people to read
+    address TEXT NOT NULL DEFAULT ''   -- device address, sign-in actions only
+);
+CREATE INDEX IF NOT EXISTS activity_log_at ON activity_log (at);
+CREATE INDEX IF NOT EXISTS activity_log_actor ON activity_log (actor_id, at);
+CREATE INDEX IF NOT EXISTS activity_log_category ON activity_log (category, at);

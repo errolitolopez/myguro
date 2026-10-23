@@ -4,7 +4,7 @@ from flask import Blueprint, jsonify, render_template
 
 from myguro.database import get_db
 from myguro.services import SettingsService
-from myguro.web.security import current_user, json_body, login_required_api, role_required_api, role_required_page
+from myguro.web.security import current_user, json_body, role_required_api, role_required_page
 
 bp = Blueprint("settings", __name__)
 
@@ -20,7 +20,7 @@ def page():
 
 
 @bp.get("/api/settings")
-@login_required_api
+@role_required_api("admin", "teacher", "student")
 def api_get():
     return jsonify(settings=service().get())
 
