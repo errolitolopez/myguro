@@ -127,8 +127,6 @@ def check_password_change(username, current_password, new_password):
     """Rules for a new password chosen by the user (the current one is already checked)."""
     if len(new_password) < MIN_PASSWORD_LENGTH:
         raise ValidationError(f"New password must be at least {MIN_PASSWORD_LENGTH} characters.")
-    if new_password == current_password:
-        raise ValidationError("New password must be different from the current one.")
     if new_password.lower() == username.lower():
         raise ValidationError("New password can't be the same as your username.")
 
