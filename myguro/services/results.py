@@ -3,6 +3,7 @@ from myguro.domain.grading import clean_feedback, teacher_points
 from myguro.domain.work import clean_paper_score
 from myguro.errors import NotFoundError, ValidationError
 from myguro.services.base import Service
+from myguro.domain.text import plural
 from myguro.services.presenters import class_title, user_json
 
 
@@ -40,9 +41,28 @@ class ResultsService(Service):
             raise NotFoundError("This student doesn't have this activity.")
         if excluded and self.submissions.latest(assignment_id, student_id, submitted_only=True):
             raise ValidationError("This student already submitted, so they can't be excluded.")
+        was_excluded = student_id in self.assignments.excluded_ids(assignment_id)
         self.assignments.set_excluded(assignment_id, student_id, excluded)
+        if was_excluded != excluded:
+            self.log_giving("assignment.excluded" if excluded else "assignment.included",
+                            f"{'Excluded' if excluded else 'Added back'} {self.student_name(student_id)} "
+                            f"{'from' if excluded else 'to'} {assignment['title']} ({assignment['class_name']}).", assignment)
         self.commit()
         return {"excluded": excluded}
+
+    def student_name(self, student_id):
+        return self.users.get(student_id)["name"]
+
+    def log_giving(self, action, summary, assignment):
+        """An activity log entry about an assignment (the row from assignments.get_for_teacher)."""
+        self.log(action, "giving", summary, ("assignment", assignment["id"],
+                                             f"{assignment['title']} - {class_title(assignment['class_name'], assignment['class_subject'])}"))
+
+    def log_checking(self, action, summary, assignment_id, student_id):
+        """An activity log entry about checking one student's work on an assignment."""
+        assignment = self.assignments.get_for_teacher(assignment_id, self.user["id"])
+        self.log(action, "checking", summary, ("assignment", assignment_id,
+                                               f"{assignment['title']} - {self.student_name(student_id)}"))
 
     def require_submission(self, submission_id, message="Not found."):
         submission = self.submissions.get_for_teacher(submission_id, self.user["id"])
@@ -211,6 +231,8 @@ class ResultsService(Service):
         if not isinstance(posted, dict) or not isinstance(remarks, dict):
             raise ValidationError("Points are not valid.")
         questions = {str(question["id"]): question for question in self.activities.questions(submission["activity_id"])}
+        numbers = {str(question["id"]): number for number, question in enumerate(questions.values(), start=1)}
+        before = self.submissions.answer_rows(submission_id)
         for key, points in posted.items():
             question = questions.get(str(key))
             if question is None:
@@ -223,15 +245,40 @@ class ResultsService(Service):
             if question is None:
                 raise ValidationError("Question not found.")
             self.submissions.set_feedback(submission_id, question["id"], clean_feedback(text))
+        self.log_scoring(submission, numbers, before, self.submissions.answer_rows(submission_id))
         self.commit()
         return self.attempt_detail(self.require_submission(submission_id), submission["activity_id"])
 
+    def log_scoring(self, submission, numbers, before, after):
+        """Log the points that changed ("question 3: 0 to 2") and, separately, the remarks written."""
+        points, remarks = [], []
+        for key, number in numbers.items():
+            old, new = before.get(int(key)), after.get(int(key))
+            old_points = old["points"] if old else None
+            new_points = new["points"] if new else None
+            if old_points != new_points:
+                points.append(f"question {number}: {'unchecked' if old_points is None else old_points} to "
+                              f"{'unchecked' if new_points is None else new_points}")
+            if (old["feedback"] if old else "") != (new["feedback"] if new else ""):
+                remarks.append(str(number))
+        who = self.student_name(submission["student_id"])
+        if points:
+            self.log_checking("checking.points", f"Changed points of {who}: {'; '.join(points)}.",
+                              submission["assignment_id"], submission["student_id"])
+        if remarks:
+            self.log_checking("checking.remark", f"Wrote or changed remarks for {who} on question "
+                              f"{', '.join(remarks)}.", submission["assignment_id"], submission["student_id"])
+
     def set_released(self, assignment_id, released):
         """Show (or hide again) the students' scores of this assignment to the students."""
-        self.require_open(assignment_id)
+        assignment = self.require_open(assignment_id)
         if not isinstance(released, bool):
             raise ValidationError("Choose whether to release the scores.")
         self.assignments.set_scores_released(assignment_id, released)
+        if bool(assignment["scores_released"]) != released:
+            self.log_giving("assignment.released" if released else "assignment.hidden",
+                            f"{'Released' if released else 'Hid'} the scores of {assignment['title']} "
+                            f"({assignment['class_name']}) {'to' if released else 'from'} the students.", assignment)
         self.commit()
         return {"scores_released": released}
 
@@ -248,6 +295,8 @@ class ResultsService(Service):
             raise ValidationError("The student is already answering (not submitted yet).")
         new_id = self.submissions.create_attempt(assignment_id, student_id, last["attempt"] + 1)
         self.submissions.copy_answers(last["id"], new_id)
+        self.log_checking("checking.retry_given", f"Gave {self.student_name(student_id)} another try "
+                          f"(attempt {last['attempt'] + 1}).", assignment_id, student_id)
         self.commit()
         return self.student_result(assignment_id, student_id)
 
@@ -265,6 +314,8 @@ class ResultsService(Service):
         attempts = self.submissions.attempts(assignment_id, student_id)
         self.submissions.add_paper(assignment_id, student_id, (attempts[-1]["attempt"] + 1) if attempts else 1,
                                    score, late, note)
+        self.log_checking("checking.paper_set", f"Entered a paper score of {score} for {self.student_name(student_id)}.",
+                          assignment_id, student_id)
         self.commit()
         return self.student_result(assignment_id, student_id)
 
@@ -279,6 +330,8 @@ class ResultsService(Service):
         submission = self.require_paper(submission_id)
         score, late, note = clean_paper_score(data, self.activities.total_points(submission["activity_id"]))
         self.submissions.update_paper(submission_id, score, late, note)
+        self.log_checking("checking.paper_changed", f"Changed the paper score of {self.student_name(submission['student_id'])} "
+                          f"to {score}.", submission["assignment_id"], submission["student_id"])
         self.commit()
         return self.student_result(submission["assignment_id"], submission["student_id"])
 
@@ -286,5 +339,7 @@ class ResultsService(Service):
         """Remove a paper score (e.g. typed for the wrong student). The attempt before it counts again."""
         submission = self.require_paper(submission_id)
         self.submissions.delete(submission_id)
+        self.log_checking("checking.paper_removed", f"Removed the paper score of {self.student_name(submission['student_id'])}.",
+                          submission["assignment_id"], submission["student_id"])
         self.commit()
         return self.student_result(submission["assignment_id"], submission["student_id"])

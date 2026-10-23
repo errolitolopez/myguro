@@ -43,8 +43,14 @@ class ActivityService(Service):
     def create(self, data):
         """Start a sheet (a draft) with its title and subject; sections come in the editor."""
         activity_id = self.activities.create(self.user["id"], *clean_title_subject(data))
+        created = self.require(activity_id)
+        self.log_activity("activity.created", f"Created the activity {created['title']}.", created)
         self.commit()
-        return self.activity_json(self.require(activity_id))
+        return self.activity_json(created)
+
+    def log_activity(self, action, summary, row):
+        """An activity log entry about one sheet (row: the sheet, with id and title)."""
+        self.log(action, "activities", summary, ("activity", row["id"], row["title"]))
 
     def import_sheet(self, rows, data, dry_run):
         """Make a new draft sheet from spreadsheet rows [(row number, record)] (see
@@ -72,6 +78,7 @@ class ActivityService(Service):
             return {"imported": False, "activity": None, "sections": preview, "errors": []}
         activity_id = self.activities.create(self.user["id"], title, subject)
         self.activities.save_sections(activity_id, sections)
+        self.log_activity("activity.imported", f"Imported the activity {title} from a file.", self.require(activity_id))
         self.commit()
         return {"imported": True, "activity": self.activity_json(self.require(activity_id)),
                 "sections": preview, "errors": []}
@@ -89,6 +96,7 @@ class ActivityService(Service):
                                   "anymore (their scores must stay fair).")
         self.activities.update_title(activity_id, title, subject)
         self.activities.save_sections(activity_id, sections)
+        self.log_activity("activity.saved", f"Saved the activity {title}.", self.require(activity_id))
         self.commit()
         return self.get(activity_id)
 
@@ -99,6 +107,7 @@ class ActivityService(Service):
         suffix = " (copy)"
         title = source["title"][:MAX_TITLE_LENGTH - len(suffix)] + suffix
         new_id = self.activities.copy(activity_id, title)
+        self.log_activity("activity.copied", f"Copied {source['title']} as {title}.", self.require(new_id))
         self.commit()
         return self.activity_json(self.require(new_id))
 
@@ -111,6 +120,9 @@ class ActivityService(Service):
         if published and not self.activities.has_sections(activity_id):
             raise ValidationError("Add at least one section before publishing.")
         self.activities.set_published(activity_id, published)
+        row = self.require(activity_id)
+        self.log_activity("activity.published" if published else "activity.unpublished",
+                          f"{'Published' if published else 'Unpublished'} the activity {row['title']}.", row)
         self.commit()
         return self.activity_json(self.require(activity_id))
 
@@ -118,14 +130,16 @@ class ActivityService(Service):
         """Delete a sheet. One nobody has been given is really deleted; an assigned one is archived:
         hidden from the teacher's list and from students, with every assignment and answer kept so
         it can be restored. Returns True when it was archived."""
-        self.require(activity_id)
-        if self.activities.count_assigned(activity_id):
+        row = self.require(activity_id)
+        archived = bool(self.activities.count_assigned(activity_id))
+        if archived:
             self.activities.archive(activity_id)
-            self.commit()
-            return True
-        self.activities.delete(activity_id)
+        else:
+            self.activities.delete(activity_id)
+        self.log_activity("activity.deleted", f"Deleted the activity {row['title']}"
+                          + (" (archived: students lose access, their work is kept)." if archived else "."), row)
         self.commit()
-        return False
+        return archived
 
     def restore(self, activity_id):
         """Bring a deleted sheet back, unpublished, with its assignments and student work."""
@@ -133,16 +147,23 @@ class ActivityService(Service):
         if row is None or row["deleted_at"] is None:
             raise NotFoundError("Activity not found.")
         self.activities.restore(activity_id)
+        self.log_activity("activity.restored", f"Restored the activity {row['title']} (unpublished).", row)
         self.commit()
         return self.activity_json(self.require(activity_id))
 
     def update_settings(self, activity_id, data):
         """Settings that may change anytime, even after students submitted: max_attempts
         (1 to 10, or None = unlimited), and title with subject (they don't affect any score)."""
-        self.require(activity_id)
+        before = self.require(activity_id)
         if "max_attempts" in data:
             self.activities.set_max_attempts(activity_id, clean_max_attempts(data.get("max_attempts")))
         if "title" in data or "subject" in data:
             self.activities.update_title(activity_id, *clean_title_subject(data))
+        row = self.require(activity_id)
+        if row["max_attempts"] != before["max_attempts"]:
+            allowed = row["max_attempts"] or "unlimited"
+            self.log_activity("activity.attempts_changed", f"Changed submissions allowed of {row['title']} to {allowed}.", row)
+        if (row["title"], row["subject"]) != (before["title"], before["subject"]):
+            self.log_activity("activity.saved", f"Renamed the activity {before['title']} to {row['title']}.", row)
         self.commit()
-        return self.activity_json(self.require(activity_id))
+        return self.activity_json(row)

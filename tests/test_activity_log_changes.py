@@ -139,3 +139,132 @@ def test_choosing_the_year_to_look_at_is_not_logged(admin, teacher):
     year = teacher.get("/api/school-years").get_json()["current_id"]
     assert teacher.put("/api/school-year", json={"id": year}).status_code == 200
     assert log_of(admin) == []
+
+
+# --- Activities, giving, checking and the students' own actions ---------------------------------
+
+from conftest import assign, login, make_activity  # noqa: E402
+
+
+def sheet_log(admin, **filters):
+    return [(item["action"], item["summary"]) for item in log_of(admin, **filters)]
+
+
+def test_activity_lifecycle_is_logged(admin, teacher):
+    activity_id = teacher.post("/api/activities", json={"title": "Quiz 1", "subject": "Science"}).get_json()["activity"]["id"]
+    teacher.put(f"/api/activities/{activity_id}", json={"title": "Quiz 1", "subject": "Science", "sections": [
+        {"kind": "text", "title": "Lesson", "description": "Read."}]})
+    teacher.put(f"/api/activities/{activity_id}/published", json={"published": True})
+    teacher.put(f"/api/activities/{activity_id}/published", json={"published": False})
+    teacher.put(f"/api/activities/{activity_id}/settings", json={"max_attempts": 3})
+    copy_id = teacher.post(f"/api/activities/{activity_id}/duplicate").get_json()["activity"]["id"]
+    teacher.delete(f"/api/activities/{copy_id}")  # never given: really deleted
+    xlsx = teacher.get(f"/activities/{activity_id}/export.xlsx").data
+    teacher.post("/api/activities/import", data={"file": (io.BytesIO(xlsx), "s.xlsx"), "title": "Imported",
+                                                 "dry_run": "1"}, content_type="multipart/form-data")  # a check only
+    teacher.post("/api/activities/import", data={"file": (io.BytesIO(xlsx), "s.xlsx"), "title": "Imported",
+                                                 "dry_run": "0"}, content_type="multipart/form-data")
+    actions = [item["action"] for item in log_of(admin, category="activities")]
+    assert actions == ["activity.created", "activity.saved", "activity.published", "activity.unpublished",
+                       "activity.attempts_changed", "activity.copied", "activity.deleted", "activity.imported"]
+    first = log_of(admin, category="activities")[0]
+    assert first["target"] == {"type": "activity", "id": activity_id, "name": "Quiz 1"}
+    assert first["actor"]["username"] == "ecruz"
+
+
+def test_archive_and_restore_are_logged(admin, teacher):
+    class_id, _ = make_class(teacher)
+    activity_id, _ = make_activity(teacher)
+    assign(teacher, activity_id, class_id)
+    teacher.delete(f"/api/activities/{activity_id}")  # given to a class: archived
+    teacher.post(f"/api/activities/{activity_id}/restore")
+    entries = sheet_log(admin, category="activities")[-2:]
+    assert entries[0][0] == "activity.deleted" and "archived" in entries[0][1]
+    assert entries[1][0] == "activity.restored"
+
+
+def test_giving_changing_and_taking_back(admin, teacher):
+    class_id, students = make_class(teacher)
+    activity_id, _ = make_activity(teacher, title="Quiz 2")
+    url = f"/api/activities/{activity_id}/assignments"
+    teacher.put(url, json={"assignments": [{"class_id": class_id, "everyone": True}]})
+    teacher.put(url, json={"assignments": [{"class_id": class_id, "everyone": True}]})  # the same again
+    teacher.put(url, json={"assignments": [{"class_id": class_id, "everyone": True, "due_date": "2030-01-01"}]})
+    teacher.put(url, json={"assignments": [], "direct": {"due_date": None, "student_ids": [students[0]["id"]]}})
+    teacher.put(url, json={"assignments": [], "direct": None})
+    entries = sheet_log(admin, category="giving")
+    assert [action for action, _ in entries] == ["assignment.given", "assignment.updated", "assignment.taken_back",
+                                                 "assignment.given", "assignment.taken_back"]
+    assert "Quiz 2" in entries[0][1] and "Grade 9 - Rizal" in entries[0][1]
+    assert "Individual students" in entries[3][1]
+
+
+def test_release_exclude_and_include(admin, teacher):
+    class_id, students = make_class(teacher)
+    activity_id, _ = make_activity(teacher)
+    assignment_id = assign(teacher, activity_id, class_id)
+    teacher.put(f"/api/assignments/{assignment_id}/release", json={"released": True})
+    teacher.put(f"/api/assignments/{assignment_id}/release", json={"released": False})
+    student_id = students[0]["id"]
+    url = f"/api/assignments/{assignment_id}/students/{student_id}/excluded"
+    teacher.put(url, json={"excluded": True})
+    teacher.put(url, json={"excluded": False})
+    actions = [action for action, _ in sheet_log(admin, category="giving")][1:]  # the first is "given"
+    assert actions == ["assignment.released", "assignment.hidden", "assignment.excluded", "assignment.included"]
+
+
+def test_student_submit_retry_and_autosave(admin, teacher):
+    class_id, students = make_class(teacher)
+    activity_id, q = make_activity(teacher)
+    teacher.put(f"/api/activities/{activity_id}/settings", json={"max_attempts": 3})
+    assignment_id = assign(teacher, activity_id, class_id)
+    student = login(students[0]["username"])
+    for _ in range(3):
+        assert student.put(f"/api/my-activities/{assignment_id}/answers",
+                           json={"answers": {str(q[0]): 1}}).status_code == 200
+    assert log_of(admin, category="students") == []  # autosave is not logged
+    student.post(f"/api/my-activities/{assignment_id}/submit", json={"answers": {str(q[0]): 1}})
+    student.post(f"/api/my-activities/{assignment_id}/retry")
+    entries = log_of(admin, category="students")
+    assert [item["action"] for item in entries] == ["student.submitted", "student.retry"]
+    assert entries[0]["actor"]["username"] == students[0]["username"] and entries[0]["actor"]["role"] == "student"
+    assert "Early Eastern Philosophy" in entries[0]["summary"]
+
+
+def test_checking_points_remarks_paper_and_another_try(admin, teacher):
+    class_id, students = make_class(teacher)
+    activity_id, q = make_activity(teacher)
+    teacher.put(f"/api/activities/{activity_id}/settings", json={"max_attempts": 3})
+    assignment_id = assign(teacher, activity_id, class_id)
+    login(students[0]["username"]).post(f"/api/my-activities/{assignment_id}/submit",
+                                        json={"answers": {str(q[0]): 1, str(q[2]): "Dao", str(q[4]): "Because"}})
+    student_id = students[0]["id"]
+    detail = teacher.get(f"/api/assignments/{assignment_id}/students/{student_id}").get_json()["detail"]
+    points_url = f"/api/submissions/{detail['id']}/points"
+    teacher.put(points_url, json={"points": {str(q[4]): 4, str(q[2]): 2}})
+    teacher.put(points_url, json={"points": {str(q[4]): 4}})  # nothing changed
+    teacher.put(points_url, json={"feedback": {str(q[4]): "Good reasoning"}})
+    teacher.post(f"/api/assignments/{assignment_id}/students/{student_id}/reopen")
+    other = students[1]["id"]
+    paper = teacher.post(f"/api/assignments/{assignment_id}/students/{other}/paper", json={"score": 9}).get_json()
+    teacher.put(f"/api/submissions/{paper['detail']['id']}/paper", json={"score": 10})
+    teacher.delete(f"/api/submissions/{paper['detail']['id']}/paper")
+    entries = sheet_log(admin, category="checking")
+    assert [action for action, _ in entries] == ["checking.points", "checking.remark", "checking.retry_given",
+                                                 "checking.paper_set", "checking.paper_changed",
+                                                 "checking.paper_removed"]
+    points = entries[0][1]
+    assert "0 to 2" in points and "unchecked to 4" in points and students[0]["name"] in points
+
+
+def test_failed_activity_and_checking_actions_write_nothing(admin, teacher, other_teacher):
+    class_id, students = make_class(teacher)
+    activity_id, _ = make_activity(teacher, published=False)
+    empty_id = teacher.post("/api/activities", json={"title": "Empty"}).get_json()["activity"]["id"]
+    before = len(log_of(admin))
+    assert teacher.put(f"/api/activities/{empty_id}/published", json={"published": True}).status_code == 400
+    assert other_teacher.put(f"/api/activities/{activity_id}/assignments",
+                             json={"assignments": [{"class_id": class_id, "everyone": True}]}).status_code == 404
+    assert other_teacher.put("/api/submissions/1/points", json={"points": {}}).status_code == 404
+    assert teacher.post("/api/activities", json={"title": ""}).status_code == 400
+    assert len(log_of(admin)) == before

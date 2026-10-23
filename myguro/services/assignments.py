@@ -1,5 +1,5 @@
 from myguro.config import school_today
-from myguro.domain.text import clean_name, like_pattern
+from myguro.domain.text import clean_name, like_pattern, plural
 from myguro.domain.work import clean_due_date
 from myguro.errors import ValidationError
 from myguro.repositories.assignments import DIRECT_CLASS_NAME
@@ -99,9 +99,19 @@ class AssignmentService(Service):
                 raise ValidationError(f"{DIRECT_CLASS_NAME}: a chosen student was not found or is deactivated.")
         return {"due_date": due_date, "student_ids": sorted(set(student_ids))}
 
+    def log_giving(self, action, summary, title, group, assignment_id):
+        """An activity log entry about giving a sheet to a class (group = its name) or to individual students."""
+        self.log(action, "giving", summary, ("assignment", assignment_id, f"{title} - {group}"))
+
+    def changed(self, existing, everyone, due_date, student_ids):
+        """Whether an existing assignment differs from what was posted (who gets it, or the due date)."""
+        return (bool(existing["everyone"]) != bool(everyone) or existing["due_date"] != due_date
+                or set(self.assignments.chosen_students(existing["id"])) != set(student_ids))
+
     def save_direct(self, activity_id, direct):
         """Make, change or (direct None) take back the sheet's assignment to individual students."""
         existing = self.assignments.get_direct(activity_id, self.year_id())
+        title = self.activities.get_for_teacher(activity_id, self.user["id"])["title"]
         if direct is None:
             if existing is None:
                 return
@@ -109,12 +119,19 @@ class AssignmentService(Service):
                 raise ValidationError("Students you gave it to directly already submitted, "
                                       "so it can't be taken back.")
             self.assignments.delete(existing["id"])  # with answers saved but not submitted yet
+            self.log_giving("assignment.taken_back", f"Took back {title} from {DIRECT_CLASS_NAME}.", title,
+                            DIRECT_CLASS_NAME, existing["id"])
             return
         if existing:
             assignment_id = existing["id"]
+            if self.changed(existing, True, direct["due_date"], direct["student_ids"]):
+                self.log_giving("assignment.updated", f"Changed how {title} is given to {DIRECT_CLASS_NAME}.", title,
+                                DIRECT_CLASS_NAME, assignment_id)
             self.assignments.update(assignment_id, True, direct["due_date"])
         else:
             assignment_id = self.assignments.create(activity_id, None, True, direct["due_date"], self.year_id())
+            self.log_giving("assignment.given", f"Gave {title} to {plural(len(direct['student_ids']), 'student')} "
+                            f"({DIRECT_CLASS_NAME}).", title, DIRECT_CLASS_NAME, assignment_id)
         self.assignments.set_chosen_students(assignment_id, direct["student_ids"])
 
     def save(self, activity_id, data):
@@ -122,7 +139,7 @@ class AssignmentService(Service):
         having the sheet. Changing a class keeps its assignment id (students' work stays linked).
         A "direct" key (individual students, or null to take it back) is optional: leaving it
         out keeps it as it is."""
-        ActivityService(self.db, self.user).require(activity_id)
+        title = ActivityService(self.db, self.user).require(activity_id)["title"]
         year_id = self.year_id()
         self.require_open_year(year_id)
         posted = data.get("assignments")
@@ -141,18 +158,27 @@ class AssignmentService(Service):
 
         old = self.assignments.ids_by_class(activity_id, year_id)
         for assignment in cleaned:
+            class_name = self.classes.get_for_teacher(assignment["class_id"], self.user["id"])["name"]
             if assignment["class_id"] in old:
                 assignment_id = old.pop(assignment["class_id"])
+                existing = self.assignments.get(activity_id, assignment["class_id"])
+                if self.changed(existing, assignment["everyone"], assignment["due_date"], assignment["student_ids"]):
+                    self.log_giving("assignment.updated", f"Changed how {title} is given to {class_name}.", title,
+                                    class_name, assignment_id)
                 self.assignments.update(assignment_id, assignment["everyone"], assignment["due_date"])
             else:
                 assignment_id = self.assignments.create(activity_id, assignment["class_id"], assignment["everyone"],
                                                         assignment["due_date"], year_id)
+                self.log_giving("assignment.given", f"Gave {title} to {class_name}"
+                                + (f", due {assignment['due_date']}." if assignment["due_date"] else "."), title,
+                                class_name, assignment_id)
             self.assignments.set_chosen_students(assignment_id, assignment["student_ids"])
         for class_id, assignment_id in old.items():  # classes no longer listed
+            name = self.classes.get_for_teacher(class_id, self.user["id"])["name"]
             if self.assignments.has_submitted_work(assignment_id):
-                name = self.classes.get_for_teacher(class_id, self.user["id"])["name"]
                 raise ValidationError(f"Students in {name} already submitted, so it can't be taken back.")
             self.assignments.delete(assignment_id)  # with answers saved but not submitted yet
+            self.log_giving("assignment.taken_back", f"Took back {title} from {name}.", title, name, assignment_id)
         if change_direct:
             self.save_direct(activity_id, direct)
         self.commit()

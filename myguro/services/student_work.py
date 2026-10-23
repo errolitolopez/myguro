@@ -158,6 +158,8 @@ class StudentWorkService(Service):
             self.submissions.set_check(submission["id"], question["id"],
                                        is_correct if answered else False, points if answered else 0, answered)
         self.submissions.mark_submitted(submission["id"], is_late(assignment["due_date"], school_today()))
+        self.log("student.submitted", "students", f"Submitted {assignment['title']} ({assignment['class_name']}), "
+                 f"attempt {submission['attempt']}.", ("assignment", assignment_id, assignment["title"]))
         self.commit()
         return self.detail(assignment_id)
 
@@ -174,5 +176,7 @@ class StudentWorkService(Service):
             raise ValidationError("You have used all your tries for this activity.")
         new_id = self.submissions.create_attempt(assignment_id, self.user["id"], submission["attempt"] + 1)
         self.submissions.copy_answers(submission["id"], new_id)
+        self.log("student.retry", "students", f"Started another try of {assignment['title']} "
+                 f"({assignment['class_name']}).", ("assignment", assignment_id, assignment["title"]))
         self.commit()
         return self.detail(assignment_id)
