@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% set noun = role %}
-{% set nouns = "Teachers" if role == "teacher" else "Students" %}
+{% set nouns = {"teacher": "Teachers", "student": "Students", "supervisor": "Supervisors"}[role] %}
 
 {% block title %}{{ nouns }} · myguro{% endblock %}
 

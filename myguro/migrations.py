@@ -76,10 +76,11 @@ def upgrade_old_tables(db):
             db.execute("DROP TABLE submissions")
             db.commit()
 
-    # users allowed only admin and teacher. SQLite can't change a CHECK, so the table is rebuilt.
+    # users allowed only admin and teacher, then admin, teacher and student; now supervisor too.
+    # SQLite can't change a CHECK, so the table is rebuilt (rows are copied back by init_db).
     rebuilt = []
     users = db.execute("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'users'").fetchone()
-    if users and "'student'" not in users["sql"]:
+    if users and "'supervisor'" not in users["sql"]:
         rename_for_rebuild(db, "users")
         rebuilt.append("users")
 

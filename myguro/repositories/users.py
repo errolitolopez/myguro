@@ -23,8 +23,9 @@ class UserRepository(Repository):
         return self.by_username(username) is not None
 
     def get_account(self, user_id):
-        """A teacher or student account (never the admin)."""
-        return self.one("SELECT * FROM users WHERE id = ? AND role IN ('teacher', 'student')", (user_id,))
+        """A teacher, student or supervisor account (never the admin)."""
+        return self.one("SELECT * FROM users WHERE id = ? AND role IN ('teacher', 'student', 'supervisor')",
+                        (user_id,))
 
     def get_student(self, student_id, active_only=False):
         return self.one("SELECT * FROM users WHERE id = ? AND role = 'student'"
@@ -81,7 +82,9 @@ class UserRepository(Repository):
         self.db.executemany("UPDATE users SET section = ? WHERE id = ?", [(section, user_id) for user_id in user_ids])
 
     def count_classes(self, user):
-        """How many classes the teacher teaches or the student is in."""
+        """How many classes the teacher teaches or the student is in (a supervisor has none)."""
+        if user["role"] == "supervisor":
+            return 0
         if user["role"] == "teacher":
             return self.value("SELECT COUNT(*) FROM classes WHERE teacher_id = ?", (user["id"],))
         return self.value("SELECT COUNT(*) FROM class_students WHERE student_id = ?", (user["id"],))

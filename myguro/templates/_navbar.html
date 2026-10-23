@@ -2,7 +2,8 @@
 {% if user.role == "admin" %}
   {% set tabs = [("dashboard.page", ("dashboard.page",), "Dashboard", "bi-house"),
                  ("accounts.teachers_page", ("accounts.teachers_page",), "Teachers", "bi-person-workspace"),
-                 ("accounts.students_page", ("accounts.students_page",), "Students", "bi-people")] %}
+                 ("accounts.students_page", ("accounts.students_page",), "Students", "bi-people"),
+                 ("accounts.supervisors_page", ("accounts.supervisors_page",), "Supervisors", "bi-eye")] %}
 {% elif user.role == "teacher" %}
   {% set tabs = [("dashboard.page", ("dashboard.page",), "Dashboard", "bi-house"),
                  ("activities.list_page", ("activities.list_page", "activities.editor_page"), "Activities", "bi-journal-text"),

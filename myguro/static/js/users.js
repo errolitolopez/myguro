@@ -1,7 +1,7 @@
 // Teachers and Students pages (admin only, same page): list the accounts, add new ones,
 // rename, reset password, deactivate / activate.
 
-const role = document.querySelector("main").dataset.role; // "teacher" or "student"
+const role = document.querySelector("main").dataset.role; // "teacher", "student" or "supervisor"
 const noun = role; // "teacher" / "student", used in messages
 // One page at a time; search and filters are done on the server.
 let page = 1; // the page shown
@@ -373,7 +373,8 @@ activeButton.addEventListener("click", () => {
   }
   askConfirm(
     `Deactivate ${editing.name}? They won't be able to log in. ` +
-      (role === "teacher" ? "Their classes and activities are kept." : "Their classes and answers are kept."),
+      (role === "teacher" ? "Their classes and activities are kept."
+        : role === "supervisor" ? "They can be enabled again later." : "Their classes and answers are kept."),
     "Deactivate",
     async () => {
       if (await updateUser({ active: false })) editModal.hide();

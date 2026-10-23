@@ -7,8 +7,8 @@ import unicodedata
 from myguro.domain.text import clean_name
 from myguro.errors import ValidationError
 
-ROLES = ("admin", "teacher", "student")
-ACCOUNT_ROLES = ("teacher", "student")  # the ones the admin manages
+ROLES = ("admin", "teacher", "student", "supervisor")
+ACCOUNT_ROLES = ("teacher", "student", "supervisor")  # the ones the admin manages
 
 USERNAME_PATTERN = re.compile(r"[a-z0-9._-]{3,30}")
 MIN_PASSWORD_LENGTH = 6

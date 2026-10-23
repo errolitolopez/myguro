@@ -29,6 +29,12 @@ def students_page():
     return render_template("users.html", user=current_user(), role="student")
 
 
+@bp.get("/supervisors")
+@role_required_page("admin")
+def supervisors_page():
+    return render_template("users.html", user=current_user(), role="supervisor")
+
+
 @bp.get("/api/users")
 @role_required_api("admin")
 def api_list():

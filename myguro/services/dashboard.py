@@ -16,6 +16,7 @@ class DashboardService(Service):
                 "active_teachers": self.users.count("teacher", active_only=True),
                 "classes": self.classes.count_all(year_id),
                 "students": self.users.count("student"),
+                "supervisors": self.users.count("supervisor"),
                 "activities": self.activities.count_all(),
             }
         if role == "student":

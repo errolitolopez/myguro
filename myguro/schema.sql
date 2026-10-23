@@ -1,6 +1,7 @@
 -- myguro tables. Safe to run again: existing tables and data are kept.
 
--- All accounts. There is no sign-up: the admin creates teachers, teachers create students.
+-- All accounts. There is no sign-up: the admin creates teachers, students and supervisors
+-- (a supervisor can only read the activity log).
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY,
     -- Shown and sorted as "Last, First M." (built from the three parts below; the admin
@@ -11,7 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
     middle_initial TEXT NOT NULL DEFAULT '',
     username TEXT NOT NULL UNIQUE COLLATE NOCASE,
     password_hash TEXT NOT NULL,
-    role TEXT NOT NULL CHECK (role IN ('admin', 'teacher', 'student')),
+    role TEXT NOT NULL CHECK (role IN ('admin', 'teacher', 'student', 'supervisor')),
     must_change_password INTEGER NOT NULL DEFAULT 1,
     active INTEGER NOT NULL DEFAULT 1,
     -- 0 = never enabled (a fresh student: can still be deleted); set to 1 the first time
