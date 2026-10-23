@@ -3,7 +3,7 @@
 from flask import Blueprint, jsonify, render_template, request
 
 from myguro.database import get_db
-from myguro.domain.log import CATEGORIES, LOG_ROLES
+from myguro.domain.log import CATEGORIES, LOG_ROLES, MAX_LOG_ENTRIES
 from myguro.services import LogService
 from myguro.web.security import current_user, role_required_api, role_required_page
 
@@ -17,7 +17,8 @@ def service():
 @bp.get("/log")
 @role_required_page("supervisor", "admin")
 def page():
-    return render_template("log.html", user=current_user(), categories=CATEGORIES, roles=LOG_ROLES)
+    return render_template("log.html", user=current_user(), categories=CATEGORIES, roles=LOG_ROLES,
+                           max_entries=MAX_LOG_ENTRIES)
 
 
 @bp.get("/api/log")

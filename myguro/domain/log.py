@@ -7,6 +7,9 @@ from myguro.errors import ValidationError
 CATEGORIES = ("sign-in", "accounts", "classes", "activities", "giving", "checking", "students", "settings")
 LOG_ROLES = ("admin", "teacher", "student", "supervisor")
 MAX_SUMMARY_LENGTH = 300  # a summary is one short sentence; longer text is cut
+# The log keeps only the newest entries; the oldest are removed first (FIFO), so it cannot grow without
+# end. About 300 bytes each, so this is a few megabytes of the database.
+MAX_LOG_ENTRIES = 20000
 
 
 def day_bounds(day, timezone_info):

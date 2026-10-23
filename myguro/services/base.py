@@ -1,4 +1,5 @@
 from myguro.domain import scoring
+from myguro.domain import log as log_rules
 from myguro.domain.log import CATEGORIES, clean_summary
 from myguro.errors import ValidationError
 from myguro.repositories import (
@@ -42,6 +43,7 @@ class Service:
         who = actor if actor is not None else self.user
         self.logs.add({"id": who["id"], "name": who["name"], "username": who["username"], "role": who["role"]},
                       action, category, clean_summary(summary), *target, address=address)
+        self.logs.trim(log_rules.MAX_LOG_ENTRIES)  # keeps the log from growing without end
 
     def commit(self):
         self.db.commit()

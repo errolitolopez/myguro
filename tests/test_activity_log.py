@@ -102,7 +102,7 @@ WRITE_ROUTES = [
 ]
 READ_ROUTES = ["/api/dashboard", "/api/school-years", "/api/settings", "/api/users", "/api/classes",
                "/api/activities", "/api/my-activities", "/api/assignments/1/results"]
-OTHER_PAGES = ["/teachers", "/students", "/supervisors", "/settings", "/activities", "/classes",
+OTHER_PAGES = ["/users", "/teachers", "/students", "/supervisors", "/settings", "/activities", "/classes",
                "/my-activities", "/results/1", "/classes/1/gradebook"]
 
 
@@ -126,7 +126,7 @@ def test_supervisor_is_read_only_everywhere(supervisor):
 def test_supervisor_navbar_has_only_log(supervisor):
     page = supervisor.get("/log").get_data(as_text=True)
     assert "/log" in page and "Log" in page
-    for link in ("/dashboard", "/teachers", "/activities", "/classes", "year-select", "tip-box"):
+    for link in ("/dashboard", "/users", "/teachers", "/activities", "/classes", "year-select", "tip-box"):
         assert link not in page, link
 
 
@@ -211,3 +211,22 @@ def test_admin_navbar_links_to_the_log(admin):
     page = admin.get("/dashboard").get_data(as_text=True)
     assert 'href="/log"' in page
     assert "Activity log" in admin.get("/log").get_data(as_text=True)
+
+
+def test_log_keeps_only_the_newest_entries(app, admin, monkeypatch):
+    from myguro.domain import log as log_rules
+    monkeypatch.setattr(log_rules, "MAX_LOG_ENTRIES", 5)  # a small cap to try the trim
+    client = app.test_client()
+    for _ in range(4):  # a login and a logout each: eight new entries
+        client.post("/api/login", json={"username": "ecruz", "password": "1234"})
+        client.post("/api/logout")
+    data = admin.get("/api/log?per_page=100").get_json()
+    assert data["total"] == 5
+    assert data["entries"][0]["summary"] == "Logged out."  # the newest is kept
+    ids = [item["id"] for item in data["entries"]]
+    assert ids == sorted(ids, reverse=True) and ids[0] - ids[-1] == 4  # the five newest, in a row
+
+
+def test_log_page_says_how_many_entries_are_kept(supervisor):
+    from myguro.domain.log import MAX_LOG_ENTRIES
+    assert f"{MAX_LOG_ENTRIES:,}" in supervisor.get("/log").get_data(as_text=True)

@@ -2,8 +2,8 @@ from myguro.repositories.base import Repository
 
 
 class LogRepository(Repository):
-    """The activity log table. Entries are only ever added and read: nothing here updates or
-    deletes a row."""
+    """The activity log table. Entries are only ever added and read; the one deletion is trim(),
+    which removes the oldest when the log is over its size limit. Nothing updates a row."""
 
     def add(self, actor, action, category, summary, target_type="", target_id=None, target_name="",
             address="", at=None):
@@ -18,6 +18,12 @@ class LogRepository(Repository):
             values.append(at)
         marks = ", ".join("?" for _ in columns)
         return self.execute(f"INSERT INTO activity_log ({', '.join(columns)}) VALUES ({marks})", values).lastrowid
+
+    def trim(self, keep):
+        """Remove the oldest entries so about the newest `keep` stay (FIFO). Ids only grow, so one
+        indexed DELETE does it, without counting rows. This is the only place an entry is deleted.
+        Does not commit."""
+        self.execute("DELETE FROM activity_log WHERE id <= (SELECT MAX(id) FROM activity_log) - ?", (keep,))
 
     @staticmethod
     def _where(filters):

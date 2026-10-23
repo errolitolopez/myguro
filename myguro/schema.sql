@@ -180,7 +180,8 @@ CREATE TABLE IF NOT EXISTS settings (
     value TEXT NOT NULL
 );
 
--- The activity log: who did what, newest last. Append-only (nothing edits or deletes a row).
+-- The activity log: who did what, newest last. Nothing edits a row; the oldest are deleted when the
+-- log passes MAX_LOG_ENTRIES (domain/log.py), so it cannot grow without end.
 -- The names are copied in as they were at that time, and there are no foreign keys, so renaming
 -- or deleting a person or an activity later never changes or loses its history.
 CREATE TABLE IF NOT EXISTS activity_log (
