@@ -103,6 +103,19 @@ class AssignmentRepository(Repository):
             (class_id,),
         )
 
+    def ids_for_teacher(self, teacher_id, year_id):
+        """The ids of the teacher's assignments in one school year (not of deleted sheets), newest first."""
+        rows = self.all(
+            """
+            SELECT asg.id
+            FROM assignments asg JOIN activities a ON a.id = asg.activity_id
+            WHERE a.teacher_id = ? AND asg.school_year_id = ? AND a.deleted_at IS NULL
+            ORDER BY asg.assigned_at DESC, asg.id DESC
+            """,
+            (teacher_id, year_id),
+        )
+        return [row["id"] for row in rows]
+
     def get_for_teacher(self, assignment_id, teacher_id):
         """An assignment of the teacher's sheet, with the sheet and class details."""
         return self.one(

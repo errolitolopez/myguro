@@ -703,8 +703,8 @@ function showStatusBadge(published) {
   const button = document.getElementById("publish-button");
   button.textContent = published ? "Unpublish" : "Publish";
   button.className = published
-    ? "btn btn-sm btn-outline-secondary text-nowrap bi bi-eye-slash"
-    : "btn btn-sm btn-success text-nowrap bi bi-eye";
+    ? "btn btn-lg flex-fill btn-outline-secondary text-nowrap bi bi-eye-slash"
+    : "btn btn-lg flex-fill btn-success text-nowrap bi bi-eye";
 }
 
 function showActivity(activity) {

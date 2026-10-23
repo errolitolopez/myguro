@@ -44,16 +44,19 @@
         <span id="max-attempts-status" class="small text-body-secondary"></span>
       </div>
       <div class="form-text mt-1">How many times a student may submit. Their latest submission counts.</div>
-      <div class="d-flex justify-content-between align-items-start gap-2 mt-3 pt-3 border-top">
-        <div class="small">
-          <div class="fw-semibold">Given to</div>
-          <div id="assigned-summary" class="text-body-secondary">Loading...</div>
-        </div>
-        <div class="d-flex gap-2">
-          <button id="publish-button" type="button" class="btn btn-sm btn-success text-nowrap bi bi-eye">Publish</button>
-          <button id="assign-button" type="button" class="btn btn-sm btn-primary text-nowrap bi bi-people">Assign</button>
-        </div>
+      <!-- Big buttons side by side (stacked on a phone): these are the two steps that reach students -->
+      <div class="d-flex flex-column flex-sm-row gap-2 mt-3 pt-3 border-top">
+        <button id="publish-button" type="button" class="btn btn-lg flex-fill btn-success text-nowrap bi bi-eye">Publish</button>
+        <button id="assign-button" type="button" class="btn btn-lg flex-fill btn-primary text-nowrap bi bi-people">Assign</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Check results: every class or group the sheet is given to, points to check first -->
+  <div id="check-card" class="card mb-4">
+    <div class="card-header fw-semibold bi bi-clipboard-check"> Check results</div>
+    <div id="check-list" class="list-group list-group-flush">
+      <div class="list-group-item small text-body-secondary">Loading...</div>
     </div>
   </div>
 

@@ -121,6 +121,28 @@ class ResultsService(Service):
             "summary": summary,
         }
 
+    def to_check(self, activity_id=None):
+        """The cards for checking results: every assignment of the school year the teacher is
+        looking at (of one sheet, if activity_id is given), the ones with points still to check first."""
+        cards = []
+        for assignment_id in self.assignments.ids_for_teacher(self.user["id"], self.year_id()):
+            data = self.results(assignment_id)
+            summary = data["summary"]
+            if activity_id and data["assignment"]["activity_id"] != activity_id:
+                continue
+            cards.append({
+                "id": assignment_id,
+                "title": data["assignment"]["title"],
+                "class_name": data["assignment"]["class_name"],
+                "students": summary["students"],
+                "submitted": summary["submitted"],
+                "to_check": summary["to_check"],
+                "average": summary["average"],  # None until something is checked
+                "due_date": data["assignment"]["due_date"],
+            })
+        # sorted() is stable, so assignments with the same to-check state stay newest first
+        return sorted(cards, key=lambda card: card["to_check"] == 0)
+
     def attempt_detail(self, submission, activity_id):
         """One attempt: every section and question with the answer key, the student's answer,
         whether it is right, and the points."""

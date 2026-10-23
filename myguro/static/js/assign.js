@@ -14,33 +14,40 @@ const assignModal = bootstrap.Modal.getOrCreateInstance(document.getElementById(
 const assignList = document.getElementById("assign-classes");
 const assignSaveButton = document.getElementById("assign-save-button");
 
-// "Grade 9 - Rizal · Science (due Oct 15, 2026), Individual students (3 students)"
-function showAssignedSummary() {
-  const given = assignClasses.filter((item) => item.assignment);
-  const summary = document.getElementById("assigned-summary");
-  if (given.length === 0 && !assignDirect) {
-    summary.replaceChildren("Not given to any class or student yet.");
-    return;
+// One class or group the sheet is given to: "Grade 12 – Luna" / "3 of 3 submitted · average 67% · due Oct 15, 2026".
+// Opens its results.
+function checkItem(item) {
+  const row = el("a", "list-group-item list-group-item-action d-flex justify-content-between align-items-center gap-2");
+  row.href = `/results/${item.id}`;
+  const left = el("div");
+  const details = [`${item.submitted} of ${item.students} submitted`];
+  if (item.average !== null) details.push(`average ${item.average}%`);
+  if (item.due_date) details.push(`due ${formatDay(item.due_date)}`);
+  left.append(el("div", "fw-semibold", item.class_name), el("div", "small text-body-secondary", details.join(" · ")));
+  // Points still to check (short answers) stand out; "Checked" only once someone has submitted
+  const badge = !item.to_check && !item.submitted ? el("span", "badge text-bg-secondary", "No answers yet")
+    : el("span", item.to_check ? "badge text-bg-warning" : "badge text-bg-success",
+      item.to_check ? `${plural(item.to_check, "point")} to check` : "Checked");
+  row.append(left, badge);
+  return row;
+}
+
+// The card replaces the old "Given to" line: every class or group the sheet is given to.
+async function loadCheckCard() {
+  const list = document.getElementById("check-list");
+  const message = (text) => el("div", "list-group-item small text-body-secondary", text);
+  try {
+    const response = await apiFetch(`/api/results/to-check?activity_id=${activityId}`);
+    if (!response) return;
+    if (!response.ok) {
+      list.replaceChildren(message("Could not load the results."));
+      return;
+    }
+    const items = (await response.json()).assignments;
+    list.replaceChildren(...(items.length ? items.map(checkItem) : [message("Not given to any class or student yet.")]));
+  } catch {
+    list.replaceChildren(message("Cannot reach the server."));
   }
-  // One line per class or group, each with a link to its results.
-  const lines = given.map((item) => {
-    const details = [];
-    if (!item.assignment.everyone) details.push(plural(item.assignment.student_ids.length, "student"));
-    if (item.assignment.due_date) details.push(`due ${formatDay(item.assignment.due_date)}`);
-    return [classTitle(item), details, item.assignment.id];
-  });
-  if (assignDirect) {
-    const details = [plural(assignDirect.student_ids.length, "student")];
-    if (assignDirect.due_date) details.push(`due ${formatDay(assignDirect.due_date)}`);
-    lines.push([DIRECT_TITLE, details, assignDirect.id]);
-  }
-  summary.replaceChildren(...lines.map(([title, details, assignmentId]) => {
-    const line = el("div", "", title + (details.length ? ` (${details.join(", ")})` : "") + " · ");
-    const link = el("a", "", "Results");
-    link.href = `/results/${assignmentId}`;
-    line.append(link);
-    return line;
-  }));
 }
 
 async function loadAssignments() {
@@ -48,15 +55,14 @@ async function loadAssignments() {
     const response = await apiFetch(`/api/activities/${activityId}/assignments`);
     if (!response) return;
     if (!response.ok) {
-      document.getElementById("assigned-summary").textContent = "Could not load the classes.";
+      showEditorError("Could not load the classes.");
       return;
     }
     const data = await response.json();
     assignClasses = data.classes;
     assignDirect = data.direct;
-    showAssignedSummary();
   } catch {
-    document.getElementById("assigned-summary").textContent = "Cannot reach the server.";
+    showEditorError("Cannot reach the server.");
   }
 }
 
@@ -376,7 +382,7 @@ assignSaveButton.addEventListener("click", async () => {
     }
     assignClasses = data.classes;
     assignDirect = data.direct;
-    showAssignedSummary();
+    loadCheckCard();
     assignModal.hide();
   } catch {
     showError("assign-error", "Cannot reach the server. Check your connection.");
@@ -386,3 +392,4 @@ assignSaveButton.addEventListener("click", async () => {
 });
 
 loadAssignments();
+loadCheckCard();

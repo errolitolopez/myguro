@@ -99,3 +99,14 @@ def test_exports(teacher, other_teacher):
     assert pdf.status_code == 200 and pdf.data.startswith(b"%PDF")
     assert other_teacher.get(f"/results/{assignment_id}/export.pdf").status_code == 302
     assert teacher.get(f"/results/{assignment_id}/export.doc").status_code == 302
+
+
+def test_check_card_lists_every_class_the_sheet_is_given_to(teacher, other_teacher):
+    assignment_id, activity_id, q, students = setup(teacher)
+    card = teacher.get(f"/api/results/to-check?activity_id={activity_id}").get_json()["assignments"][0]
+    assert card["id"] == assignment_id and card["submitted"] == 0 and card["average"] is None  # nobody yet
+    submit(students[0]["username"], assignment_id, {q[0]: 1, q[2]: "Daoism", q[4]: "Because"})
+    card = teacher.get(f"/api/results/to-check?activity_id={activity_id}").get_json()["assignments"][0]
+    assert card["submitted"] == 1 and card["to_check"] == 5 and card["due_date"] == "2020-01-01"
+    assert teacher.get("/api/results/to-check?activity_id=99999").get_json() == {"assignments": []}
+    assert other_teacher.get("/api/results/to-check").get_json() == {"assignments": []}

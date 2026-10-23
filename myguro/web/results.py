@@ -60,6 +60,12 @@ def export(assignment_id, kind):
     return send_file(io.BytesIO(content), as_attachment=True, download_name=f"{name}.{kind}", mimetype=mimetype)
 
 
+@bp.get("/api/results/to-check")
+@role_required_api("teacher")
+def api_to_check():
+    return jsonify({"assignments": service().to_check(request.args.get("activity_id", type=int))})
+
+
 @bp.get("/api/assignments/<int:assignment_id>/results")
 @role_required_api("teacher")
 def api_results(assignment_id):
