@@ -11,17 +11,38 @@
     background-color: var(--glass-solid);
     z-index: 1;
   }
+  /* Student names are cut short on a phone (the full name is in the tooltip). Activity titles
+     are never cut: they wrap onto two lines in a column of a fixed width, and the table scrolls. */
+  .gb-name { max-width: 8rem; }
+  .gb-title { width: 6.5rem; white-space: normal; }
+  /* With many activities (15 or more) the table scrolls inside its own box, sideways and up and
+     down, so its scrollbar stays on screen instead of at the bottom of a long page. The column
+     names stay on top and the student names stay on the left. Activity columns keep a minimum
+     width so they scroll instead of squeezing. */
+  .gb-scroll { max-height: 75vh; overflow: auto; scrollbar-width: thin; }
+  #gradebook-table thead th {
+    position: sticky;
+    top: 0;
+    background-color: var(--glass-solid);
+    z-index: 2;
+  }
+  #gradebook-table thead th:first-child { left: 0; z-index: 3; } /* the corner stays above both */
+  #gradebook-table th:not(:first-child), #gradebook-table td:not(:first-child) { min-width: 5rem; }
+  @media (min-width: 576px) {
+    .gb-name { max-width: 16rem; }
+    .gb-title { width: 8rem; }
+  }
 </style>
 {% endblock %}
 
 {% block content %}
 {% include "_navbar.html" %}
 
-<main class="container py-3" data-class-id="{{ class_id }}">
+<main class="container px-2 px-sm-3 py-2 py-sm-3" data-class-id="{{ class_id }}">
   <a id="back-link" href="{{ url_for('classes.detail_page', class_id=class_id) }}" class="small">‹ Class</a>
   <div id="gradebook-error" class="alert alert-danger mt-2 d-none" role="alert"></div>
 
-  <header class="d-flex justify-content-between align-items-start gap-2 mt-2 mb-3">
+  <header class="d-flex justify-content-between align-items-start gap-2 mt-2 mb-2">
     <div>
       <h1 class="h4 mb-1">Gradebook</h1>
       <div class="small text-body-secondary" id="gradebook-details">Loading...</div>
@@ -34,11 +55,11 @@
     </div>
   </header>
 
-  <input id="search" type="search" class="form-control mb-3" placeholder="Search name, username or section"
+  <input id="search" type="search" class="form-control form-control-sm mb-2" placeholder="Search name, username or section"
          aria-label="Search students" autocomplete="off">
 
-  <div class="table-responsive">
-    <table class="table align-middle bg-body" id="gradebook-table">
+  <div class="gb-scroll border rounded mb-2">
+    <table class="table table-sm mb-0 align-middle bg-body small" id="gradebook-table">
       <thead><tr id="gradebook-head"></tr></thead>
       <tbody id="gradebook-body"><tr><td class="text-body-secondary">Loading...</td></tr></tbody>
       <tfoot id="gradebook-foot"></tfoot>
@@ -46,6 +67,7 @@
   </div>
   <p class="small text-body-secondary">
     Scores are points earned out of the activity's total. * means short answers are not checked yet.
+    L = late, … = still answering, – = not started, · = not given to this student.
     Tap a score to check that student's answers, or an activity name to see all its results.
   </p>
 </main>

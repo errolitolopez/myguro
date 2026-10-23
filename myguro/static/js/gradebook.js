@@ -36,11 +36,20 @@ function scoreCell(student, cell, activity) {
   const link = el("a", "text-decoration-none text-reset");
   link.href = `/results/${activity.assignment_id}/students/${student.id}`;
   if (cell.earned === null) {
-    link.append(el("span", "badge text-bg-info", "Answering"));
+    const answering = el("span", "badge text-bg-info", "…");
+    answering.title = "Answering";
+    answering.setAttribute("aria-label", "Answering");
+    link.append(answering);
   } else {
-    link.append(el("span", "fw-semibold", `${cell.earned} / ${cell.possible}${cell.pending ? "*" : ""}`));
-    if (cell.percent !== null) link.append(el("div", "small text-body-secondary", `${cell.percent}%`));
-    if (cell.late) link.append(el("span", "badge text-bg-warning ms-1", "Late"));
+    // One line: "8/10" (the percent beside it from a tablet up, to keep phone columns narrow)
+    link.append(el("span", "fw-semibold", `${cell.earned}/${cell.possible}${cell.pending ? "*" : ""}`));
+    if (cell.percent !== null) link.append(el("span", "d-none d-sm-inline small text-body-secondary ms-1", `${cell.percent}%`));
+    if (cell.late) {
+      const late = el("span", "badge text-bg-warning ms-1", "L");
+      late.title = "Late";
+      late.setAttribute("aria-label", "Late");
+      link.append(late);
+    }
   }
   td.append(link);
   return td;
@@ -54,12 +63,13 @@ function render() {
   head.replaceChildren(el("th", "", "Student"));
   book.activities.forEach((activity) => {
     const th = el("th", "text-center");
-    const link = el("a", "text-decoration-none", activity.title);
+    const link = el("a", "text-decoration-none d-inline-block gb-title", activity.title);
     link.href = `/results/${activity.assignment_id}`;
-    th.append(link, el("div", "small fw-normal text-body-secondary", `${activity.total_points} pts`));
+    th.append(link, el("div", "fw-normal text-body-secondary", `${activity.total_points} pts`));
     head.append(th);
   });
-  head.append(el("th", "text-center", "Done"), el("th", "text-center", "Average"));
+  // "Done" is left out on a phone: the average is what the teacher looks for
+  head.append(el("th", "text-center d-none d-sm-table-cell", "Done"), el("th", "text-center", "Avg"));
 
   if (!book.activities.length) {
     body.replaceChildren(rowMessage("No activity has been given to this class yet.", 1));
@@ -76,21 +86,24 @@ function render() {
   body.replaceChildren(...students.map((student) => {
     const row = el("tr");
     const name = el("td", "text-nowrap");
-    name.append(el("div", "fw-semibold", student.name),
-      el("div", "small text-body-secondary", [student.grade, student.section].filter(Boolean).join(" - ")));
+    const nameText = el("div", "fw-semibold text-truncate gb-name", student.name);
+    nameText.title = student.name;
+    name.append(nameText);
+    const place = [student.grade, student.section].filter(Boolean).join(" - ");
+    if (place) name.append(el("div", "d-none d-sm-block text-body-secondary", place));
     row.append(name);
     student.cells.forEach((cell, index) => row.append(scoreCell(student, cell, book.activities[index])));
     const given = student.cells.filter((cell) => cell !== null).length;
-    row.append(el("td", "text-center", `${student.submitted}/${given}`),
+    row.append(el("td", "text-center d-none d-sm-table-cell", `${student.submitted}/${given}`),
       el("td", "text-center fw-semibold", student.average === null ? "–" : `${student.average}%`));
     return row;
   }));
 
   const total = el("tr", "fw-semibold");
-  total.append(el("td", "", "Class average"));
+  total.append(el("td", "", "Class avg"));
   book.activities.forEach((activity) =>
     total.append(el("td", "text-center", activity.average === null ? "–" : `${activity.average}%`)));
-  total.append(el("td"), el("td"));
+  total.append(el("td", "d-none d-sm-table-cell"), el("td"));
   foot.replaceChildren(total);
 }
 
