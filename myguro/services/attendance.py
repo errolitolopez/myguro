@@ -1,5 +1,5 @@
 from myguro.config import school_today
-from myguro.domain.attendance import STATUSES, clean_day, clean_marks
+from myguro.domain.attendance import STATUSES, clean_day, clean_marks, clean_range
 from myguro.errors import ValidationError
 from myguro.repositories import AttendanceRepository
 from myguro.services.base import Service
@@ -29,13 +29,18 @@ class AttendanceService(Service):
         return {"class": class_json(class_row), "day": day, "statuses": list(STATUSES),
                 "students": students, "recorded_days": self.attendance.recorded_days(class_id)}
 
-    def record(self, class_id):
-        """The whole record for the exports: the days with marks (oldest first) and, for every
-        student of the class, their mark on each day ({day: status}) and their totals."""
+    def record(self, class_id, start=None, end=None):
+        """The record for the exports: the days with marks (oldest first) and, for every student
+        of the class, their mark on each day ({day: status}) and their totals. start and end
+        ("YYYY-MM-DD", both included, empty = no limit) keep only the days in between; the
+        totals count only those days. "range" says which were asked for."""
         class_row = ClassService(self.db, self.user).require(class_id)
+        start, end = clean_range(start, end)
         marks = {}  # student id -> {day: status}
         days = set()
         for row in self.attendance.all_marks(class_id):
+            if (start and row["day"] < start) or (end and row["day"] > end):
+                continue
             marks.setdefault(row["student_id"], {})[row["day"]] = row["status"]
             days.add(row["day"])
         students = []
@@ -43,7 +48,8 @@ class AttendanceService(Service):
             own = marks.get(student["id"], {})
             students.append({**user_json(student), "marks": own,
                              "totals": {status: list(own.values()).count(status) for status in STATUSES}})
-        return {"class": class_json(class_row), "days": sorted(days), "students": students}
+        return {"class": class_json(class_row), "days": sorted(days), "students": students,
+                "range": {"from": start, "to": end}}
 
     def save(self, class_id, data):
         """Save the marks of one day: {day, marks: {student id: status, or null to clear}}. Only

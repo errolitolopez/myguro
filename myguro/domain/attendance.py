@@ -22,6 +22,24 @@ def clean_day(value, today):
     return day.isoformat()
 
 
+def clean_range(start, end):
+    """(first day, last day) as "YYYY-MM-DD" or None for "no limit". Both days are included."""
+    days = []
+    for value in (start, end):
+        if value in (None, ""):
+            days.append(None)
+            continue
+        try:
+            days.append(date.fromisoformat(value).isoformat() if isinstance(value, str) and len(value) == 10 else None)
+        except ValueError:
+            days.append(None)
+        if days[-1] is None:
+            raise ValidationError("Choose a valid date.")
+    if days[0] and days[1] and days[0] > days[1]:
+        raise ValidationError("The first day must not be after the last day.")
+    return tuple(days)
+
+
 def clean_marks(marks):
     """{student id: status, or None to clear} with the ids as numbers. Refuses anything else."""
     if not isinstance(marks, dict):

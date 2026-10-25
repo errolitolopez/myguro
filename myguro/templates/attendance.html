@@ -15,14 +15,32 @@
       <h1 class="h4 mb-1">Attendance</h1>
       <div class="small text-body-secondary" id="attendance-details">Loading...</div>
     </div>
-    <!-- The whole record of the class: every day with a mark -->
     <div class="d-flex flex-wrap justify-content-end gap-2">
-      <a class="btn btn-sm btn-outline-success text-nowrap bi bi-file-earmark-excel"
-         href="{{ url_for('classes.attendance_export', class_id=class_id, kind='xlsx') }}">Export Excel</a>
-      <a class="btn btn-sm btn-outline-danger text-nowrap bi bi-file-earmark-pdf"
-         href="{{ url_for('classes.attendance_export', class_id=class_id, kind='pdf') }}">Export PDF</a>
+      <button class="btn btn-sm btn-outline-secondary text-nowrap bi bi-download" data-bs-toggle="collapse"
+              data-bs-target="#export-panel" aria-expanded="false" aria-controls="export-panel">Export</button>
     </div>
   </header>
+
+  <!-- Export the record: leave both days empty for every day with a mark -->
+  <div id="export-panel" class="collapse">
+    <div class="card card-body mb-3">
+      <div class="d-flex flex-wrap align-items-end gap-2">
+        <div>
+          <label for="export-from" class="form-label small mb-1">From</label>
+          <input id="export-from" type="date" class="form-control form-control-sm">
+        </div>
+        <div>
+          <label for="export-to" class="form-label small mb-1">To</label>
+          <input id="export-to" type="date" class="form-control form-control-sm">
+        </div>
+        <a id="export-xlsx" class="btn btn-sm btn-outline-success text-nowrap bi bi-file-earmark-excel"
+           href="{{ url_for('classes.attendance_export', class_id=class_id, kind='xlsx') }}">Excel</a>
+        <a id="export-pdf" class="btn btn-sm btn-outline-danger text-nowrap bi bi-file-earmark-pdf"
+           href="{{ url_for('classes.attendance_export', class_id=class_id, kind='pdf') }}">PDF</a>
+      </div>
+      <div class="form-text">Both days are included. Leave them empty to export every day.</div>
+    </div>
+  </div>
 
   <!-- The day being recorded. Type in the marks from your paper record, then Save. -->
   <div class="d-flex flex-wrap align-items-center gap-2 mb-3">

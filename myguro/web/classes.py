@@ -8,7 +8,7 @@ from flask import Blueprint, jsonify, redirect, render_template, request, send_f
 from myguro.config import SCHOOL_TIMEZONE, school_now_text
 from myguro.database import get_db
 from myguro.exports import (attendance_pdf_bytes, attendance_xlsx_bytes, gradebook_pdf_bytes,
-                            gradebook_xlsx_bytes)
+                            gradebook_xlsx_bytes, range_text)
 from myguro.services import AttendanceService, ClassService, GradebookService
 from myguro.services.presenters import class_title
 from myguro.web.security import current_user, json_body, role_required_api, role_required_page
@@ -83,10 +83,12 @@ def attendance_export(class_id, kind):
     """Download the class's whole attendance record as Excel (.xlsx) or PDF."""
     if kind not in ATTENDANCE_EXPORTS or not service().exists(class_id):
         return redirect(url_for("classes.list_page"))
-    data = AttendanceService(get_db(), current_user()).record(class_id)
+    # ?from= and ?to= (YYYY-MM-DD, both days included) keep only the days in between
+    data = AttendanceService(get_db(), current_user()).record(class_id, request.args.get("from"), request.args.get("to"))
     make, mimetype = ATTENDANCE_EXPORTS[kind]
     content = make(data, current_user()["name"], school_now_text(), SCHOOL_TIMEZONE)
-    name = re.sub(r'\s*[\\/:*?"<>|]+\s*', " - ", f"Attendance - {class_title(data['class']['name'], data['class']['subject'])}")
+    name = re.sub(r'\s*[\\/:*?"<>|]+\s*', " - ", f"Attendance - {class_title(data['class']['name'], data['class']['subject'])}"
+                  + (f" {range_text(data['range'])}" if data["range"]["from"] or data["range"]["to"] else ""))
     name = " ".join(name.replace(" · ", " - ").split())
     return send_file(io.BytesIO(content), as_attachment=True, download_name=f"{name}.{kind}", mimetype=mimetype)
 

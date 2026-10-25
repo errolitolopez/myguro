@@ -148,4 +148,19 @@ saveButton.addEventListener("click", async () => {
   }
 });
 
+// The export links carry the chosen days: /classes/1/attendance.xlsx?from=2026-10-01&to=2026-10-31
+const exportFrom = document.getElementById("export-from");
+const exportTo = document.getElementById("export-to");
+const exportLinks = [document.getElementById("export-xlsx"), document.getElementById("export-pdf")];
+const exportBase = exportLinks.map((link) => link.getAttribute("href"));
+
+function updateExportLinks() {
+  const query = new URLSearchParams();
+  if (exportFrom.value) query.set("from", exportFrom.value);
+  if (exportTo.value) query.set("to", exportTo.value);
+  exportLinks.forEach((link, index) => link.setAttribute("href", exportBase[index] + (query.toString() ? `?${query}` : "")));
+}
+exportFrom.addEventListener("input", updateExportLinks);
+exportTo.addEventListener("input", updateExportLinks);
+
 loadDay(todayText());

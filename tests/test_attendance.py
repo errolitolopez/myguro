@@ -85,3 +85,27 @@ def test_the_record_downloads_as_excel_and_pdf(teacher, other_teacher):
     assert pdf.status_code == 200 and pdf.data.startswith(b"%PDF")
     # Another teacher's class is not downloadable
     assert other_teacher.get(f"/classes/{class_id}/attendance.xlsx").status_code == 302
+
+
+def test_the_export_can_be_limited_to_a_range_of_days(teacher):
+    import io
+
+    from openpyxl import load_workbook
+
+    class_id, students = make_class(teacher)
+    first = str(students[0]["id"])
+    days = [(date.today() - timedelta(days=n)).isoformat() for n in (1, 2, 3)]
+    for day, status in zip(days, ("present", "absent", "late")):
+        teacher.put(f"/api/classes/{class_id}/attendance", json={"day": day, "marks": {first: status}})
+
+    # Both ends are included, and the totals count only the days in the range
+    excel = teacher.get(f"/classes/{class_id}/attendance.xlsx?from={days[2]}&to={days[1]}")
+    rows = list(load_workbook(io.BytesIO(excel.data)).active.iter_rows(values_only=True))
+    header = next(row for row in rows if row[0] == "No.")
+    assert header[5:7] == (days[2], days[1]) and header[7] == "Present"
+    student_row = next(row for row in rows if row[1] == students[0]["name"])
+    assert student_row[-4:] == (0, 1, 1, 0)
+
+    assert teacher.get(f"/classes/{class_id}/attendance.pdf?from={days[2]}").status_code == 200
+    assert teacher.get(f"/classes/{class_id}/attendance.xlsx?from=oops").status_code == 400
+    assert teacher.get(f"/classes/{class_id}/attendance.xlsx?from={days[0]}&to={days[2]}").status_code == 400

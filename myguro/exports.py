@@ -396,7 +396,14 @@ def attendance_lines(data, teacher, exported_at):
     return [
         " · ".join(filter(None, [data["class"]["name"], data["class"]["subject"], f"Teacher: {teacher}"])),
         f"{len(data['students'])} students · {len(data['days'])} days recorded · Exported: {exported_at}",
-    ]
+    ] + ([f"Days: {range_text(data['range'])}"] if data.get("range") and (data["range"]["from"] or data["range"]["to"]) else [])
+
+
+def range_text(days):
+    """{"from": "2026-10-01", "to": None} -> "from 2026-10-01"; both -> "2026-10-01 to 2026-10-31"."""
+    if days["from"] and days["to"]:
+        return f"{days['from']} to {days['to']}"
+    return f"from {days['from']}" if days["from"] else f"until {days['to']}"
 
 
 def short_day(isoday):
