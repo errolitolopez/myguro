@@ -111,6 +111,18 @@ sheetConfirmButton.addEventListener("click", async () => {
   }
 });
 
+// Copy the prompt for a generative AI tool.
+const copyPromptButton = document.getElementById("import-sheet-copy-prompt");
+copyPromptButton.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(document.getElementById("import-sheet-prompt").value);
+    copyPromptButton.textContent = "Copied!";
+  } catch {
+    copyPromptButton.textContent = "Can't copy: select the text and copy it";
+  }
+  setTimeout(() => (copyPromptButton.textContent = "Copy prompt"), 2000);
+});
+
 // Each time the popup opens: start again.
 sheetModalElement.addEventListener("show.bs.modal", () => {
   sheetFile.value = "";

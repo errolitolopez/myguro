@@ -15,6 +15,33 @@
           <li>Choose the file and press <strong>Check file</strong>. Nothing is saved until you press Import.</li>
           <li>The new activity is a draft: open it in the editor to review it and give it to your classes.</li>
         </ol>
+        <!-- Help for teachers who already have a LAS file: a prompt to give a generative AI tool with the
+             template and the LAS, so it writes the import file. No JS needed to open it. -->
+        <details class="border rounded p-2 mb-3">
+          <summary class="fw-semibold bi bi-stars"> Have a LAS file? Let an AI tool prepare the import file</summary>
+          <p class="small mt-2 mb-2">
+            Open a generative AI tool that accepts files (for example ChatGPT, Claude or Gemini). Attach the
+            <a href="{{ url_for('activities.import_template_docx') }}">Word template</a> and your LAS file, then
+            paste this prompt. Download the .docx it makes and choose it below.
+            AI can make mistakes, so read the result and press <strong>Check file</strong> before importing.
+          </p>
+          <textarea id="import-sheet-prompt" class="form-control form-control-sm font-monospace" rows="10" readonly
+                    aria-label="Prompt for a generative AI tool">I am a teacher using MyGURO. I attached two files:
+1. The MyGURO activity template (a Word .docx file).
+2. My learning activity sheet (LAS) file.
+
+Task: turn my LAS into a new Word (.docx) file that follows the MyGURO template exactly, so I can import it into MyGURO. Use the template file as the base so its styles stay.
+
+Rules:
+- Each section of my LAS is a Heading 1. A section with no questions (lesson, objectives, reading) has no Type line: write its text under the heading.
+- A section with questions has "Type: ..." as its first line. Allowed types: Multiple Choice, True or False, Identification, Fill in the Blank, Matching, Short Answer. Optional lines after it: "Points: n" and "Directions: ...".
+- Number the questions 1. 2. 3. Multiple choice choices are lines A. B. C. under the question. Fill in the blank uses ___ for each blank. A Matching section is one question: numbered lines are Column A, lettered lines (A. B. C.) are Column B.
+- End with a Heading 1 "ANSWER KEY". For each activity section repeat its heading as Heading 2, then one line per question: 1. B, 2. TRUE, 3. Taoism / Daoism, 4. India; China. For Matching, give the Column B letter of each number. For Short Answer, an optional guide for checking.
+- Keep my wording, questions and answers as they are. Do not invent questions or answers. If my LAS has no answer for a question, write NO ANSWER FOUND in the key and list those questions in your reply.
+- Remove the instructions page and the example from the template. Keep only my content.
+- Give me the finished .docx file to download. If you cannot make files, give me the text in the same layout and tell me which lines are headings.</textarea>
+          <button id="import-sheet-copy-prompt" type="button" class="btn btn-sm btn-outline-secondary bi bi-clipboard mt-2">Copy prompt</button>
+        </details>
         <div class="row g-2 mb-2">
           <div class="col-md-8">
             <label for="import-sheet-title-input" class="form-label">Title</label>
