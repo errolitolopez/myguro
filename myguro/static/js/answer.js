@@ -282,10 +282,6 @@ function sectionBlock(section, locked) {
     // The teacher's remark on this question (sent only after the scores are released).
     const remark = locked && activity.feedback && activity.feedback[question.id];
     if (remark) {
-      const own = el("div", "small mt-2 preserve-lines");
-      own.append(el("span", "text-body-secondary", "Your answer: "),
-        el("span", "fw-semibold", answerText(question, activity.feedback_answers[question.id])));
-      item.append(own);
       const box = el("div", "alert alert-info py-2 px-3 mt-2 mb-0 small preserve-lines");
       box.append(el("strong", "", "Teacher's remark: "), remark);
       item.append(box);
@@ -356,7 +352,9 @@ function render() {
   const sectionsArea = document.getElementById("sections");
   sectionsArea.replaceChildren(...activity.sections.map((section) => sectionBlock(section, locked)));
   sectionsArea.classList.toggle("d-none", locked && activity.paper);
-  document.getElementById("answers-hidden-note").classList.toggle("d-none", !locked || activity.paper);
+  // Answers come back only after the teacher releases the scores.
+  document.getElementById("answers-hidden-note").classList.toggle(
+    "d-none", !locked || activity.paper || activity.scores_released);
   document.querySelectorAll("#sections textarea").forEach((textarea) => {
     textarea.style.height = "auto";
     textarea.style.height = `${Math.max(textarea.scrollHeight + 2, 100)}px`;

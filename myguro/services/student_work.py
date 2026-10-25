@@ -79,8 +79,9 @@ class StudentWorkService(Service):
             "teacher": assignment["teacher"],
             "due_date": assignment["due_date"],
             "sections": sections,
-            # A submitted attempt shows the blank sheet: the student's answers are not shown back.
-            "answers": {} if submission and submission["submitted_at"]
+            # A submitted attempt shows the blank sheet until the teacher releases the scores, so
+            # answers can't be passed around; after that the student sees their own answers.
+            "answers": {} if submission and submission["submitted_at"] and not assignment["scores_released"]
             else self.submissions.answers(submission["id"] if submission else None),
             "submitted_at": submission["submitted_at"] if submission else None,
             "attempt": submission["attempt"] if submission else 1,
@@ -95,11 +96,6 @@ class StudentWorkService(Service):
             if last_submitted and assignment["scores_released"] else None,
             # The teacher's remarks, only on the submitted sheet and once the scores are released.
             "feedback": feedback,
-            # The student's own answer, only for the questions that have a remark (so a released
-            # sheet does not hand out every answer to be passed around).
-            "feedback_answers": {question_id: answer for question_id, answer in
-                                 self.submissions.answers(last_submitted["id"]).items() if question_id in feedback}
-            if feedback else {},
             "late": bool(last_submitted and last_submitted["late"]),
             "paper": bool(last_submitted and last_submitted["paper"]),
             "note": last_submitted["note"] if last_submitted and assignment["scores_released"] else "",

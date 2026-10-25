@@ -47,9 +47,9 @@ def test_submit_checks_answers(teacher):
     # MC 1 + identification 2 + 1 of 2 blanks = 1; short answer (5) waits for the teacher
     assert activity["score"]["total"] == {"earned": 4, "pending": 5, "possible": 11}
     assert activity["late"] is False and activity["can_retry"] is False
-    # The submitted sheet is shown blank: questions stay, the student's answers are not sent back
-    assert activity["answers"] == {} and activity["sections"][1]["questions"]
-    assert student.get(f"/api/my-activities/{assignment_id}").get_json()["activity"]["answers"] == {}
+    # Scores are released here, so the student gets their own answers back with the questions
+    assert activity["answers"][str(q[2])] == "DAOISM" and activity["sections"][1]["questions"]
+    assert student.get(f"/api/my-activities/{assignment_id}").get_json()["activity"]["answers"] == activity["answers"]
     assert error(student.post(f"/api/my-activities/{assignment_id}/submit", json={"answers": {}})) == \
         "You already submitted this activity."
     assert student.get("/api/dashboard").get_json()["submitted"] == 1
@@ -105,6 +105,7 @@ def test_score_hidden_until_teacher_releases(teacher, other_teacher):
     submitted = student.post(f"/api/my-activities/{assignment_id}/submit",
                             json={"answers": {str(q[0]): 1, str(q[2]): "Daoism"}}).get_json()["activity"]
     assert submitted["submitted_at"] and submitted["score"] is None and submitted["scores_released"] is False
+    assert submitted["answers"] == {}  # answers stay hidden too until the scores are released
     listed = student.get("/api/my-activities").get_json()["activities"][0]
     assert listed["done"] is True and listed["score"] is None
     assert student.get("/api/dashboard").get_json()["to_do"] == 0
@@ -146,14 +147,13 @@ def test_teacher_remarks_reach_the_student_after_release(teacher, other_teacher)
 
     # Hidden until the scores are released
     hidden = student.get(f"/api/my-activities/{assignment_id}").get_json()["activity"]
-    assert hidden["feedback"] == {} and hidden["feedback_answers"] == {}
+    assert hidden["feedback"] == {} and hidden["answers"] == {}
     teacher.put(f"/api/assignments/{assignment_id}/release", json={"released": True})
     shown = student.get(f"/api/my-activities/{assignment_id}").get_json()["activity"]["feedback"]
     assert shown == {str(q[0]): "Good job!", str(q[4]): "Explain more."}
-    # The student's own answer comes back only for the questions with a remark
+    # Once released, the student sees their own answers (not the answer key)
     activity = student.get(f"/api/my-activities/{assignment_id}").get_json()["activity"]
-    assert activity["feedback_answers"] == {str(q[0]): 1, str(q[4]): "Because"}
-    assert activity["answers"] == {}
+    assert activity["answers"][str(q[0])] == 1 and activity["answers"][str(q[4])] == "Because"
 
     # Saving remarks does not change points; bad input is refused; other teachers are refused
     assert error(teacher.put(f"/api/submissions/{submission_id}/points", json={"feedback": {"99999": "x"}})) == \
