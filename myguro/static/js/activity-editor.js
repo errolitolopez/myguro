@@ -632,7 +632,7 @@ function questionCard(section, question, index) {
 
 function sectionCard(section, index) {
   const activity = section.kind === "activity";
-  const card = el("div", `card ${activity ? "border-primary-subtle" : ""}`);
+  const card = el("div", "card");
 
   const header = el("div", "card-header d-flex justify-content-between align-items-center py-1");
   const label = el("span", "small fw-semibold text-body-secondary", `Section ${index + 1} · `);
