@@ -161,6 +161,19 @@ class ActivityRepository(Repository):
         """How many classes the sheet is given to (0 = a draft)."""
         return self.value("SELECT COUNT(*) FROM assignments WHERE activity_id = ?", (activity_id,))
 
+    def given_to(self, activity_id, year_id):
+        """Where the sheet is given in one school year: a row per class (its name) or per direct
+        assignment (class_name NULL), with the assignment's status, oldest first."""
+        return self.all(
+            """
+            SELECT asg.id, asg.status, c.name AS class_name
+            FROM assignments asg LEFT JOIN classes c ON c.id = asg.class_id
+            WHERE asg.activity_id = ? AND asg.school_year_id = ?
+            ORDER BY asg.assigned_at, asg.id
+            """,
+            (activity_id, year_id),
+        )
+
     def count_all(self):
         return self.value("SELECT COUNT(*) FROM activities WHERE deleted_at IS NULL")
 

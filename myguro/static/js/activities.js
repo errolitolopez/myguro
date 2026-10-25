@@ -18,6 +18,16 @@ function formatDate(value) {
   });
 }
 
+const STATUS_LABELS = { not_started: "not started", open: "open", closed: "closed" };
+
+// statusBadge("Rizal · open", "open") -> a green badge; closed is dark, not started is grey
+function statusBadge(text, status) {
+  const badge = document.createElement("span");
+  badge.className = `badge ${status === "open" ? "text-bg-success" : status === "closed" ? "text-bg-dark" : "text-bg-secondary"}`;
+  badge.textContent = text;
+  return badge;
+}
+
 function activityItem(activity) {
   const row = document.createElement("a");
   row.href = `/activities/${activity.id}`;
@@ -37,23 +47,18 @@ function activityItem(activity) {
   ].filter(Boolean).join(" · ");
   left.append(title, details);
 
-  // "Not given yet", or the statuses of the classes it is given to: "1 open · 2 closed · 1 not started"
-  const badge = document.createElement("span");
-  const counts = activity.statuses;
-  if (!activity.assigned) {
-    badge.className = "badge text-bg-secondary";
-    badge.textContent = "Not given yet";
+  // Under the details: where the sheet is given, a badge per class or group with its status, or
+  // "Not given yet". Only the school year being viewed is listed.
+  const givenTo = document.createElement("div");
+  givenTo.className = "d-flex flex-wrap gap-1 mt-1";
+  if (activity.given_to.length === 0) {
+    givenTo.append(statusBadge("Not given yet", "not_started"));
   } else {
-    badge.className = counts.open ? "badge text-bg-success"
-      : counts.closed ? "badge text-bg-dark" : "badge text-bg-secondary";
-    badge.textContent = [
-      counts.open && `${counts.open} open`,
-      counts.closed && `${counts.closed} closed`,
-      counts.not_started && `${counts.not_started} not started`,
-    ].filter(Boolean).join(" · ");
+    givenTo.append(...activity.given_to.map((given) => statusBadge(`${given.name} · ${STATUS_LABELS[given.status]}`, given.status)));
   }
+  left.append(givenTo);
 
-  row.append(left, badge);
+  row.append(left);
   return row;
 }
 

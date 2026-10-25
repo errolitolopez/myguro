@@ -35,7 +35,12 @@ class ActivityService(Service):
 
     def list(self, deleted=False):
         """The teacher's sheets, or with deleted=True the ones they deleted (archived)."""
-        return [{**self.activity_json(row), "sections": row["sections"], "questions": row["questions"]}
+        year_id = self.year_id()
+        return [{**self.activity_json(row), "sections": row["sections"], "questions": row["questions"],
+                 # Where it is given in the school year being viewed: a class name, or "Individual students"
+                 "given_to": [{"assignment_id": given["id"], "status": given["status"],
+                               "name": given["class_name"] or "Individual students"}
+                              for given in self.activities.given_to(row["id"], year_id)]}
                 for row in self.activities.list_for_teacher(self.user["id"], deleted)]
 
     def create(self, data):

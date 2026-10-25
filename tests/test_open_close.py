@@ -23,6 +23,9 @@ def test_a_new_assignment_starts_not_started_and_copies_are_not_given_to_anyone(
     assert status_of(teacher, assignment_id) == "not_started"
     listed = teacher.get("/api/activities").get_json()["activities"][0]
     assert listed["assigned"] == 1 and listed["statuses"] == {"not_started": 1, "open": 0, "closed": 0}
+    # The list says where it is given: one entry per class or group, with its status
+    assert [(g["name"], g["status"]) for g in listed["given_to"]] == [(listed["given_to"][0]["name"], "not_started")]
+    assert listed["given_to"][0]["name"] != "Individual students"
     copy = teacher.post(f"/api/activities/{activity_id}/duplicate").get_json()["activity"]
     assert copy["assigned"] == 0 and copy["statuses"] == {"not_started": 0, "open": 0, "closed": 0}
 
