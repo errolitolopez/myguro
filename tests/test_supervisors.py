@@ -84,7 +84,7 @@ def test_one_users_tab_with_a_role_filter(admin):
     assert "Teachers" not in tabs and "Students" not in tabs and "Supervisors" not in tabs
     for role, noun in (("teacher", "Teachers"), ("student", "Students"), ("supervisor", "Supervisors")):
         page = admin.get(f"/users?role={role}").get_data(as_text=True)
-        assert f'data-role="{role}"' in page and f"<title>{noun} · myguro</title>" in page
+        assert f'data-role="{role}"' in page and f"<title>{noun} · MyGURO</title>" in page
         assert f'<option value="{role}" selected>' in page
     assert 'data-role="student"' in admin.get("/users").get_data(as_text=True)  # the default
     assert 'data-role="student"' in admin.get("/users?role=boss").get_data(as_text=True)

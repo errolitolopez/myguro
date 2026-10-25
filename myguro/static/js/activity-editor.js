@@ -708,7 +708,7 @@ function showStatusBadge(published) {
 }
 
 function showActivity(activity) {
-  document.title = `${activity.title} · myguro`;
+  document.title = `${activity.title} · MyGURO`;
   titleInput.value = activity.title;
   subjectInput.value = activity.subject;
   showStatusBadge(activity.published);
@@ -789,7 +789,7 @@ async function saveTitleSubject() {
       saveStatus.textContent = data.error || "Could not save.";
       return;
     }
-    document.title = `${data.activity.title} · myguro`;
+    document.title = `${data.activity.title} · MyGURO`;
     saveStatus.textContent = "Locked · title and subject saved";
   } catch {
     saveStatus.textContent = "Cannot reach the server.";

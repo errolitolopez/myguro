@@ -229,7 +229,7 @@ const copyDetailsButton = document.getElementById("copy-details-button");
 if (copyDetailsButton) {
   copyDetailsButton.addEventListener("click", async () => {
     const text =
-      `myguro login\n` +
+      `MyGURO login\n` +
       `Username: ${document.getElementById("details-username").textContent}\n` +
       `Password: ${document.getElementById("details-password").textContent}`;
     try {

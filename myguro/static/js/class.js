@@ -22,7 +22,7 @@ let currentClass = null;
 
 function showClass(item) {
   currentClass = item;
-  document.title = `${classTitle(item)} · myguro`;
+  document.title = `${classTitle(item)} · MyGURO`;
   document.getElementById("class-name-heading").textContent = item.name;
   document.getElementById("class-subject-heading").textContent = item.subject;
 }

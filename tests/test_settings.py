@@ -120,7 +120,7 @@ def test_support_link_checked(admin):
     assert put(label="x" * 31) == "Button text can be at most 30 characters."
     # empty text uses the defaults
     saved = admin.put("/api/settings", json={"support": {**SUPPORT, "message": "", "label": ""}}).get_json()
-    assert saved["settings"]["support"]["label"] == "Support myguro"
+    assert saved["settings"]["support"]["label"] == "Support MyGURO"
 
 
 def test_gcash_number_shown_to_staff(admin, teacher):

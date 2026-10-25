@@ -344,7 +344,7 @@ function showResult() {
 
 function render() {
   const locked = Boolean(activity.submitted_at);
-  document.title = `${activity.title} · myguro`;
+  document.title = `${activity.title} · MyGURO`;
   document.getElementById("activity-title").textContent = activity.title;
   document.getElementById("activity-details").textContent =
     [activity.subject, activity.class_name, activity.teacher].filter(Boolean).join(" · ");

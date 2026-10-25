@@ -136,7 +136,7 @@ document.getElementById("import-download").addEventListener("click", () => {
   const file = new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(file);
-  link.download = `myguro login details ${new Date().toISOString().slice(0, 10)}.csv`;
+  link.download = `MyGURO login details ${new Date().toISOString().slice(0, 10)}.csv`;
   document.body.append(link);
   link.click();
   link.remove();

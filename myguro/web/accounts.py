@@ -107,7 +107,7 @@ def api_update(user_id):
 def import_template():
     """The Excel file to fill in for importing students."""
     return send_file(io.BytesIO(template_xlsx_bytes()), as_attachment=True,
-                     download_name="myguro students template.xlsx",
+                     download_name="MyGURO students template.xlsx",
                      mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 
