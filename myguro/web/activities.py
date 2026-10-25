@@ -9,7 +9,6 @@ from myguro.database import get_db
 from myguro.errors import ValidationError
 from myguro.exports import sheet_pdf_bytes
 from myguro.docx_files import read_docx_lines, sheet_docx_bytes, sheet_template_docx_bytes
-from myguro.imports import sheet_xlsx_bytes
 from myguro.services import ActivityService, AssignmentService
 from myguro.web.security import current_user, json_body, role_required_api, role_required_page
 
@@ -17,7 +16,6 @@ bp = Blueprint("activities", __name__)
 
 
 DOCX_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-XLSX_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 def service():
@@ -55,17 +53,14 @@ def print_pdf(activity_id):
 @role_required_page("teacher")
 def export(activity_id, kind):
     """Download the sheet with its answer key as Word (.docx), which the import reads so it can be
-    imported again as a new activity, or as Excel (.xlsx)."""
+    imported again as a new activity."""
     activities = service()
-    if kind not in ("docx", "xlsx") or not activities.exists(activity_id):
+    if kind != "docx" or not activities.exists(activity_id):
         return redirect(url_for("activities.list_page"))
     activity = activities.get(activity_id)
-    if kind == "docx":
-        content, mimetype = sheet_docx_bytes(activity, current_user()["name"]), DOCX_TYPE
-    else:
-        content, mimetype = sheet_xlsx_bytes(activity), XLSX_TYPE
-    return send_file(io.BytesIO(content), as_attachment=True, download_name=f"{file_name(activity['title'])}.{kind}",
-                     mimetype=mimetype)
+    content = sheet_docx_bytes(activity, current_user()["name"])
+    return send_file(io.BytesIO(content), as_attachment=True, download_name=f"{file_name(activity['title'])}.docx",
+                     mimetype=DOCX_TYPE)
 
 
 @bp.get("/activities/import-template.docx")

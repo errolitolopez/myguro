@@ -1,8 +1,6 @@
-"""Teacher: download a sheet with its answers as Word or Excel, and import the Word file again as a new activity."""
+"""Teacher: download a sheet with its answers as Word, and import the Word file again as a new activity."""
 
 import io
-
-from openpyxl import load_workbook
 
 from conftest import make_activity
 
@@ -64,14 +62,6 @@ def test_download_then_import_gives_the_same_questions(teacher):
     assert "Plants make food." in again["sections"][0]["description"]
 
 
-def test_excel_keeps_points_per_question(teacher):
-    activity_id, _ = make_activity(teacher, sections=SECTIONS)
-    download = teacher.get(f"/activities/{activity_id}/export.xlsx")
-    assert download.status_code == 200
-    rows = list(load_workbook(io.BytesIO(download.data)).worksheets[0].iter_rows(min_row=2, values_only=True))
-    assert [row[11] for row in rows if row[0] == "question"] == [2, 2, 1, 1, 2, 3, 5, 1]
-
-
 def test_word_splits_a_mixed_section_and_keeps_headings_unique(teacher):
     activity_id, _ = make_activity(teacher, sections=SECTIONS)
     again, _ = round_trip(teacher, activity_id, "docx")
@@ -84,3 +74,4 @@ def test_export_is_only_for_the_owner_and_known_formats(teacher, other_teacher):
     activity_id, _ = make_activity(teacher)
     assert other_teacher.get(f"/activities/{activity_id}/export.docx").status_code == 302
     assert teacher.get(f"/activities/{activity_id}/export.pdf").status_code == 302
+    assert teacher.get(f"/activities/{activity_id}/export.xlsx").status_code == 302  # Excel is not offered
