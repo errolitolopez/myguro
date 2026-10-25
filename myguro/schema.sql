@@ -51,6 +51,16 @@ CREATE TABLE IF NOT EXISTS class_students (
     PRIMARY KEY (class_id, student_id)
 );
 
+-- Attendance the teacher types in from the paper record: one mark per student per class per day
+-- (day is "YYYY-MM-DD", school time). No row = not marked.
+CREATE TABLE IF NOT EXISTS attendance (
+    class_id INTEGER NOT NULL REFERENCES classes (id),
+    student_id INTEGER NOT NULL REFERENCES users (id),
+    day TEXT NOT NULL,
+    status TEXT NOT NULL CHECK (status IN ('present', 'late', 'absent', 'excused')),
+    PRIMARY KEY (class_id, student_id, day)
+);
+
 -- A learning activity sheet. It belongs to the teacher who wrote it, so the same sheet
 -- can be given to several classes (assignments). A sheet with no assignments is a draft.
 CREATE TABLE IF NOT EXISTS activities (

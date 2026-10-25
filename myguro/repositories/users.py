@@ -133,6 +133,7 @@ class UserRepository(Repository):
         """Removes these students and their class, assignment and exclusion memberships."""
         rows = [(user_id,) for user_id in user_ids]
         self.db.executemany("DELETE FROM class_students WHERE student_id = ?", rows)
+        self.db.executemany("DELETE FROM attendance WHERE student_id = ?", rows)
         self.db.executemany("DELETE FROM assignment_students WHERE student_id = ?", rows)
         self.db.executemany("DELETE FROM assignment_exclusions WHERE student_id = ?", rows)
         self.db.executemany("DELETE FROM users WHERE id = ? AND role = 'student'", rows)

@@ -8,7 +8,7 @@ from flask import Blueprint, jsonify, redirect, render_template, request, send_f
 from myguro.config import SCHOOL_TIMEZONE, school_now_text
 from myguro.database import get_db
 from myguro.exports import gradebook_pdf_bytes, gradebook_xlsx_bytes
-from myguro.services import ClassService, GradebookService
+from myguro.services import AttendanceService, ClassService, GradebookService
 from myguro.services.presenters import class_title
 from myguro.web.security import current_user, json_body, role_required_api, role_required_page
 
@@ -60,6 +60,28 @@ def gradebook_export(class_id, kind):
     name = re.sub(r'\s*[\\/:*?"<>|]+\s*', " - ", f"Gradebook - {class_title(data['class']['name'], data['class']['subject'])}")
     name = " ".join(name.replace(" · ", " - ").split())
     return send_file(io.BytesIO(content), as_attachment=True, download_name=f"{name}.{kind}", mimetype=mimetype)
+
+
+@bp.get("/classes/<int:class_id>/attendance")
+@role_required_page("teacher")
+def attendance_page(class_id):
+    if not service().exists(class_id):
+        return redirect(url_for("classes.list_page"))
+    return render_template("attendance.html", user=current_user(), class_id=class_id)
+
+
+@bp.get("/api/classes/<int:class_id>/attendance")
+@role_required_api("teacher")
+def api_attendance(class_id):
+    """?date=YYYY-MM-DD (default today): the class's students with their mark for that day."""
+    return jsonify(AttendanceService(get_db(), current_user()).sheet(class_id, request.args.get("date")))
+
+
+@bp.put("/api/classes/<int:class_id>/attendance")
+@role_required_api("teacher")
+def api_save_attendance(class_id):
+    """{day, marks: {student id: "present" | "late" | "absent" | "excused" | null}}"""
+    return jsonify(AttendanceService(get_db(), current_user()).save(class_id, json_body()))
 
 
 @bp.get("/api/classes/<int:class_id>/gradebook")
