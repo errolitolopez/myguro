@@ -84,6 +84,14 @@ def api_batch_activate():
     return jsonify(service().batch_activate(json_body()))
 
 
+@bp.post("/api/users/batch-reset-passwords")
+@role_required_api("admin")
+def api_batch_reset_passwords():
+    """New temporary passwords for students: {user_ids or match: {q, grade, name, section, status}}.
+    Returns {students: [{id, name, username, grade, section, password}]}, shown once."""
+    return jsonify(service().batch_reset_passwords(json_body()))
+
+
 @bp.post("/api/users/batch-delete")
 @role_required_api("admin")
 def api_batch_delete():

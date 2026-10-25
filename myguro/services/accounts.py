@@ -176,6 +176,25 @@ class AccountService(Service):
             self.commit()
         return {"deleted": len(fresh), "skipped": len(ids) - len(fresh)}
 
+    def batch_reset_passwords(self, data):
+        """Make a new temporary password for many students at once (same selection as batch_update), for
+        when the first ones were not downloaded. Their old passwords stop working and each student must
+        choose their own at the next login. Returns {students: [{id, name, username, grade, section,
+        password}]}: the passwords are shown once, so they are never written to the log."""
+        ids = self.batch_ids(data, "regenerate")
+        students = []
+        for user_id in ids:
+            account = self.users.get_account(user_id)
+            password = make_temp_password()
+            self.set_temp_password(user_id, password)
+            students.append({"id": user_id, "name": account["name"], "username": account["username"],
+                             "grade": account["grade"], "section": account["section"], "password": password})
+        students.sort(key=lambda student: student["name"].lower())
+        self.log("account.batch_passwords_reset", "accounts",
+                 f"Made new passwords for {plural(len(students), 'student')}.", ("user", None, ""))
+        self.commit()
+        return {"students": students}
+
     def batch_ids(self, data, verb):
         """The students a batch request is about: user_ids, or match = {q, grade, name, section, status}
         for every student matching that search (all pages)."""

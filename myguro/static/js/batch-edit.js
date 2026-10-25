@@ -259,3 +259,71 @@ document.getElementById("batch-activate").addEventListener("click", async (event
     stopLoading();
   }
 });
+
+// --- New passwords ----------------------------------------------------------------
+
+const passwordModal = document.getElementById("password-modal");
+const passwordConfirmButton = document.getElementById("password-confirm");
+let newPasswords = []; // the students and their new passwords, kept only while the popup is open
+
+// Each time it opens: ask first.
+passwordModal.addEventListener("show.bs.modal", () => {
+  hideError("password-error");
+  newPasswords = [];
+  document.getElementById("password-confirm-part").classList.remove("d-none");
+  document.getElementById("password-done-part").classList.add("d-none");
+  passwordConfirmButton.classList.remove("d-none");
+  document.getElementById("password-who").textContent = allMatching
+    ? `Make new passwords for all ${plural(allMatching.total, "student")} matching the search?`
+    : `Make new passwords for ${plural(selected.size, "selected student")}?`;
+});
+
+passwordConfirmButton.addEventListener("click", async () => {
+  hideError("password-error");
+  const body = allMatching ? { match: {
+    q: allMatching.q, grade: allMatching.grade, name: allMatching.name, section: allMatching.section,
+    status: allMatching.status,
+  } } : { user_ids: [...selected] };
+  const stopLoading = startLoading(passwordConfirmButton);
+  if (!stopLoading) return;
+  try {
+    const response = await apiFetch("/api/users/batch-reset-passwords", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!response) return;
+    const data = await response.json();
+    if (!response.ok) {
+      showError("password-error", data.error || "Could not make new passwords.");
+      return;
+    }
+    newPasswords = data.students;
+    document.getElementById("password-done-text").textContent =
+      `${plural(newPasswords.length, "new password")} made.`;
+    document.getElementById("password-done-rows").replaceChildren(...newPasswords.map((student) => {
+      const row = document.createElement("tr");
+      for (const value of [student.name, student.username, student.password, student.grade, student.section]) {
+        const cell = document.createElement("td");
+        cell.textContent = value;
+        row.append(cell);
+      }
+      return row;
+    }));
+    document.getElementById("password-confirm-part").classList.add("d-none");
+    document.getElementById("password-done-part").classList.remove("d-none");
+    passwordConfirmButton.classList.add("d-none");
+  } catch {
+    showError("password-error", "Cannot reach the server. Check your connection.");
+  } finally {
+    stopLoading();
+  }
+});
+
+document.getElementById("password-download").addEventListener("click", () => downloadLoginDetails(newPasswords));
+
+// The passwords are gone once the popup closes (the server never keeps them).
+passwordModal.addEventListener("hidden.bs.modal", () => {
+  newPasswords = [];
+  document.getElementById("password-done-rows").replaceChildren();
+});
