@@ -514,4 +514,11 @@ body::before {
   background-image: url("../img/logo-white.png");
   opacity: 0.06;
 }
+/* On a wide screen the logo stays where it was; only the phone layout moves it up and right. */
+@media (min-width: 768px) {
+  body::before {
+    right: 2rem;
+    bottom: 2rem;
+  }
+}
 @media print { body::before { display: none; } }
