@@ -492,15 +492,15 @@ body::before {
   position: fixed;
   right: 2rem;
   bottom: 2rem;
-  width: min(400px, 60vw);
-  height: min(400px, 60vw);
+  width: min(520px, 80vw);
+  aspect-ratio: 916 / 460; /* the shape of logo-black.png and logo-white.png */
   z-index: -1;
-  background: url("../img/mark-black.png") no-repeat bottom right / contain;
+  background: url("../img/logo-black.png") no-repeat bottom right / contain;
   opacity: 0.05;
   pointer-events: none;
 }
 [data-bs-theme="dark"] body::before {
-  background-image: url("../img/mark-white.png");
+  background-image: url("../img/logo-white.png");
   opacity: 0.06;
 }
 @media print { body::before { display: none; } }
