@@ -22,6 +22,12 @@
   --page-base: #f3f4f6;
   --page-gradient: radial-gradient(circle at top left, hsl(220 13% 95%), hsl(220 13% 91%));
   --scroll-thumb: rgba(100, 116, 139, 0.5);
+  /* Links use the text colour (underlined), like the navbar tabs, not Bootstrap's blue. Bootstrap
+     reads the rgb variables, and its dark mode sets them too, so they are set here for all themes. */
+  --bs-link-color: var(--bs-body-color);
+  --bs-link-color-rgb: var(--bs-body-color-rgb);
+  --bs-link-hover-color: var(--bs-emphasis-color);
+  --bs-link-hover-color-rgb: var(--bs-emphasis-color-rgb);
   --confirm-bg: #0d6efd;
   --confirm-hover: #0b5ed7;
   --confirm-active: #0a58ca;
@@ -71,10 +77,6 @@
   --bs-tertiary-bg: #313335;
   --bs-tertiary-bg-rgb: 49, 51, 53;
   --bs-border-color: #515151;
-  --bs-link-color: #589df6;
-  --bs-link-color-rgb: 88, 157, 246;
-  --bs-link-hover-color: #7ab3ff;
-  --bs-link-hover-color-rgb: 122, 179, 255;
   --glass-bg: rgba(60, 63, 65, 0.7);
   --glass-bg-strong: rgba(60, 63, 65, 0.94);
   --glass-border: rgba(81, 81, 81, 0.9);
@@ -99,10 +101,6 @@
   --bs-tertiary-bg: #f5eedb;
   --bs-tertiary-bg-rgb: 245, 238, 219;
   --bs-border-color: #ddd6c1;
-  --bs-link-color: #268bd2;
-  --bs-link-color-rgb: 38, 139, 210;
-  --bs-link-hover-color: #1d6fa8;
-  --bs-link-hover-color-rgb: 29, 111, 168;
   --glass-bg: rgba(238, 232, 213, 0.65);
   --glass-bg-strong: rgba(238, 232, 213, 0.94);
   --glass-border: rgba(211, 203, 183, 0.9);
