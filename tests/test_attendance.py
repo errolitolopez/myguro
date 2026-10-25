@@ -77,9 +77,11 @@ def test_the_record_downloads_as_excel_and_pdf(teacher, other_teacher):
     assert excel.status_code == 200 and "Attendance" in excel.headers["Content-Disposition"]
     rows = list(load_workbook(io.BytesIO(excel.data)).active.iter_rows(values_only=True))
     header = next(row for row in rows if row[0] == "No.")
-    assert header[5:7] == tuple(sorted([DAY, (date.today() - timedelta(days=2)).isoformat()]))
+    # A column for every calendar day from the first mark to the last (the day number), marks as letters
+    first_day = date.today() - timedelta(days=2)
+    assert header[5:7] == (first_day.day, (first_day + timedelta(days=1)).day) and header[7] == "Present"
     student_row = next(row for row in rows if row[1] == students[0]["name"])
-    assert sorted(student_row[5:7]) == ["A", "P"] and student_row[-4:] == (1, 0, 1, 0)
+    assert student_row[5:7] == ("A", "P") and student_row[-4:] == (1, 0, 1, 0)
 
     pdf = teacher.get(f"/classes/{class_id}/attendance.pdf")
     assert pdf.status_code == 200 and pdf.data.startswith(b"%PDF")
@@ -102,10 +104,25 @@ def test_the_export_can_be_limited_to_a_range_of_days(teacher):
     excel = teacher.get(f"/classes/{class_id}/attendance.xlsx?from={days[2]}&to={days[1]}")
     rows = list(load_workbook(io.BytesIO(excel.data)).active.iter_rows(values_only=True))
     header = next(row for row in rows if row[0] == "No.")
-    assert header[5:7] == (days[2], days[1]) and header[7] == "Present"
+    last_two = (date.fromisoformat(days[2]).day, date.fromisoformat(days[1]).day)
+    assert header[5:7] == last_two and header[7] == "Present"
     student_row = next(row for row in rows if row[1] == students[0]["name"])
     assert student_row[-4:] == (0, 1, 1, 0)
 
     assert teacher.get(f"/classes/{class_id}/attendance.pdf?from={days[2]}").status_code == 200
     assert teacher.get(f"/classes/{class_id}/attendance.xlsx?from=oops").status_code == 400
     assert teacher.get(f"/classes/{class_id}/attendance.xlsx?from={days[0]}&to={days[2]}").status_code == 400
+
+
+def test_the_excel_has_a_column_for_every_day_of_the_range(teacher):
+    import io
+
+    from openpyxl import load_workbook
+
+    class_id, students = make_class(teacher)
+    teacher.put(f"/api/classes/{class_id}/attendance", json={"day": DAY, "marks": {str(students[0]["id"]): "late"}})
+    excel = teacher.get(f"/classes/{class_id}/attendance.xlsx?from=2026-10-01&to=2026-10-31")
+    rows = list(load_workbook(io.BytesIO(excel.data)).active.iter_rows(values_only=True))
+    header = next(row for row in rows if row[0] == "No.")
+    assert header[5:36] == tuple(range(1, 32)) and header[36] == "Present"
+    assert next(row for row in rows if row[5] == "Oct 2026")  # the month named above the 1st

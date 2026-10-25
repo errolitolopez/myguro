@@ -6,7 +6,7 @@ as numbers so teachers can compute grades; the PDF is an A4 landscape page to pr
 
 import io
 import os
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 
 from fpdf import FPDF
 from openpyxl import Workbook
@@ -411,9 +411,21 @@ def short_day(isoday):
     return isoday[5:]
 
 
+def calendar_days(data):
+    """Every calendar day of the export, as dates, even days with no marks: the asked range, else
+    from the first to the last day that has a mark (none = no days)."""
+    first = data["range"]["from"] or (data["days"][0] if data["days"] else None)
+    last = data["range"]["to"] or (data["days"][-1] if data["days"] else None)
+    if not first or not last:
+        return []
+    first, last = date.fromisoformat(first), date.fromisoformat(last)
+    return [first + timedelta(days=n) for n in range((last - first).days + 1)]
+
+
 def attendance_xlsx_bytes(data, teacher, exported_at, timezone_info):
-    """The attendance record as an .xlsx file (bytes): a column per recorded day with P (present),
-    L (late), A (absent) or E (excused), then the totals as numbers."""
+    """The attendance record as an .xlsx file (bytes), like a paper register: a column for every
+    calendar day (the number of the day, the month named above its first day), P (present),
+    L (late), A (absent) or E (excused) in the cells, weekends shaded, then the totals as numbers."""
     workbook = Workbook()
     sheet = workbook.active
     sheet.title = "Attendance"
@@ -424,23 +436,36 @@ def attendance_xlsx_bytes(data, teacher, exported_at, timezone_info):
     sheet.append(["P = present, L = late, A = absent, E = excused"])
     sheet.append([])
 
-    sheet.append(["No.", "Student", "Username", "Grade", "Section"] + data["days"]
+    days = calendar_days(data)
+    # The month name sits above the first column of each month (and of the sheet)
+    month_row = ["", "", "", "", ""] + [
+        day.strftime("%b %Y") if index == 0 or day.day == 1 else "" for index, day in enumerate(days)]
+    sheet.append(month_row)
+    sheet.append(["No.", "Student", "Username", "Grade", "Section"] + [day.day for day in days]
                  + ["Present", "Late", "Absent", "Excused"])
     header_row = sheet.max_row
-    for cell in sheet[header_row]:
-        cell.font = Font(bold=True)
-        cell.fill = PatternFill("solid", fgColor="E9ECEF")
-        cell.alignment = Alignment(horizontal="center", vertical="top")
+    weekend = PatternFill("solid", fgColor="F1F3F5")
+    for row in (header_row - 1, header_row):
+        for cell in sheet[row]:
+            cell.font = Font(bold=True)
+            cell.alignment = Alignment(horizontal="center", vertical="top")
+            if row == header_row:
+                cell.fill = PatternFill("solid", fgColor="E9ECEF")
+    for index, day in enumerate(days):
+        sheet.cell(row=header_row - 1, column=6 + index).alignment = Alignment(horizontal="left")
 
     for number, student in enumerate(data["students"], start=1):
         row = [number, student["name"], student["username"], student["grade"], student["section"]]
-        row += [ATTENDANCE_LETTERS.get(student["marks"].get(day), "") for day in data["days"]]
+        row += [ATTENDANCE_LETTERS.get(student["marks"].get(day.isoformat()), "") for day in days]
         row += [student["totals"][status] for status in ATTENDANCE_LETTERS]
         sheet.append(row)
-        for cell in sheet[sheet.max_row][5:5 + len(data["days"])]:
+        for index, day in enumerate(days):
+            cell = sheet.cell(row=sheet.max_row, column=6 + index)
             cell.alignment = Alignment(horizontal="center")
+            if day.weekday() >= 5:
+                cell.fill = weekend
 
-    widths = [5, 28, 16, 10, 12] + [11] * len(data["days"]) + [9] * 4
+    widths = [5, 28, 16, 10, 12] + [4.5] * len(days) + [9] * 4
     for index, width in enumerate(widths, start=1):
         sheet.column_dimensions[get_column_letter(index)].width = width
     sheet.freeze_panes = sheet.cell(row=header_row + 1, column=3)  # keep headers and names visible
