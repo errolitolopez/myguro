@@ -42,6 +42,65 @@
   --scroll-thumb: rgba(148, 163, 184, 0.3);
 }
 
+/* Named themes. Each one sits on Bootstrap's dark (Darcula) or light (Solarized) mode and only
+   changes colours, so the Bootstrap variables below are set here as well as the glass ones. */
+[data-myguro-theme="darcula"] {
+  --bs-body-bg: #2b2b2b;
+  --bs-body-bg-rgb: 43, 43, 43;
+  --bs-body-color: #a9b7c6;
+  --bs-body-color-rgb: 169, 183, 198;
+  --bs-emphasis-color: #d4dde8;
+  --bs-emphasis-color-rgb: 212, 221, 232;
+  --bs-secondary-color: rgba(169, 183, 198, 0.7);
+  --bs-secondary-bg: #3c3f41;
+  --bs-secondary-bg-rgb: 60, 63, 65;
+  --bs-tertiary-bg: #313335;
+  --bs-tertiary-bg-rgb: 49, 51, 53;
+  --bs-border-color: #515151;
+  --bs-link-color: #589df6;
+  --bs-link-color-rgb: 88, 157, 246;
+  --bs-link-hover-color: #7ab3ff;
+  --bs-link-hover-color-rgb: 122, 179, 255;
+  --glass-bg: rgba(60, 63, 65, 0.7);
+  --glass-bg-strong: rgba(60, 63, 65, 0.94);
+  --glass-border: rgba(81, 81, 81, 0.9);
+  --glass-hover: rgba(78, 82, 84, 0.85);
+  --glass-input-focus: rgba(43, 43, 43, 0.6);
+  --glass-input-border: rgba(94, 96, 98, 0.9);
+  --glass-solid: #3c3f41;
+  --navbar-bg: rgba(60, 63, 65, 0.8);
+  --page-base: #2b2b2b;
+  --page-gradient: radial-gradient(circle at top left, #313335, #262626);
+}
+[data-myguro-theme="solarized"] {
+  --bs-body-bg: #fdf6e3;
+  --bs-body-bg-rgb: 253, 246, 227;
+  --bs-body-color: #586e75;
+  --bs-body-color-rgb: 88, 110, 117;
+  --bs-emphasis-color: #073642;
+  --bs-emphasis-color-rgb: 7, 54, 66;
+  --bs-secondary-color: rgba(88, 110, 117, 0.75);
+  --bs-secondary-bg: #eee8d5;
+  --bs-secondary-bg-rgb: 238, 232, 213;
+  --bs-tertiary-bg: #f5eedb;
+  --bs-tertiary-bg-rgb: 245, 238, 219;
+  --bs-border-color: #ddd6c1;
+  --bs-link-color: #268bd2;
+  --bs-link-color-rgb: 38, 139, 210;
+  --bs-link-hover-color: #1d6fa8;
+  --bs-link-hover-color-rgb: 29, 111, 168;
+  --glass-bg: rgba(238, 232, 213, 0.65);
+  --glass-bg-strong: rgba(238, 232, 213, 0.94);
+  --glass-border: rgba(211, 203, 183, 0.9);
+  --glass-hover: rgba(245, 238, 219, 0.9);
+  --glass-input-focus: rgba(253, 246, 227, 0.7);
+  --glass-input-border: rgba(196, 188, 165, 0.9);
+  --glass-solid: #fdf6e3;
+  --navbar-bg: rgba(238, 232, 213, 0.8);
+  --page-base: #fdf6e3;
+  --page-gradient: radial-gradient(circle at top left, #fdf6e3, #eee8d5);
+}
+
 body {
   background-color: var(--page-base);
   background-image: var(--page-gradient);
