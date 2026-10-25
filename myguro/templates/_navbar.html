@@ -17,9 +17,10 @@
 
 <nav class="navbar bg-success">
   <div class="container">
-    <span class="navbar-brand d-flex align-items-center">
+    <!-- The logo goes to the first page of the role (the dashboard; a supervisor only has the log). -->
+    <a class="navbar-brand d-flex align-items-center" href="{{ url_for(tabs[0][0]) }}" aria-label="MyGURO home">
       {% with height=30 %}{% include "_logo.html" %}{% endwith %}
-    </span>
+    </a>
     <!-- One account menu for every screen size: Settings (admin), Password and Logout. -->
     <div class="dropdown">
       <button class="btn btn-outline-secondary bi bi-person-circle dropdown-toggle" type="button"
