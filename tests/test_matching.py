@@ -41,7 +41,7 @@ def test_save_and_reload(teacher):
 def test_rules(teacher, change, message):
     activity_id, _ = make_activity(teacher, sections=SECTIONS)
     question = {**MATCHING, **change}
-    response = teacher.put(f"/api/activities/{activity_id}", json={"title": "T", "sections": [
+    response = teacher.put(f"/api/activities/{activity_id}", json={"title": "T", "subject": "Philosophy", "sections": [
         {"kind": "activity", "title": "A", "questions": [question]}]})
     assert response.status_code == 400 and message in error(response)
 

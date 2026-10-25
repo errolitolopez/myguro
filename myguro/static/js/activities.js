@@ -186,6 +186,11 @@ form.addEventListener("submit", async (event) => {
     titleInput.focus();
     return;
   }
+  if (!subjectInput.value.trim()) {
+    showError("new-activity-error", "Subject is required.");
+    subjectInput.focus();
+    return;
+  }
 
   const stopLoading = startLoading(createButton);
   if (!stopLoading) return;

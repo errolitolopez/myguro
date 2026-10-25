@@ -99,7 +99,7 @@ def add_demo(app):
 
     activity_id = check(teacher.post("/api/activities", json={"title": ACTIVITY_TITLE, "subject": "Philosophy"}),
                         "activity")["activity"]["id"]
-    saved = check(teacher.put(f"/api/activities/{activity_id}", json={"title": ACTIVITY_TITLE, "sections": SECTIONS}),
+    saved = check(teacher.put(f"/api/activities/{activity_id}", json={"title": ACTIVITY_TITLE, "subject": "Philosophy", "sections": SECTIONS}),
                   "sections")
     question_ids = [q["id"] for section in saved["activity"]["sections"] for q in section["questions"]]
     check(teacher.put(f"/api/activities/{activity_id}/settings", json={"max_attempts": 2}), "tries")

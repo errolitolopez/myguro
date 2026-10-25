@@ -189,7 +189,7 @@ def test_cannot_take_back_direct_after_a_submission(teacher, other_teacher):
 def test_direct_assignment_rules(teacher, other_teacher, admin):
     outside = outside_students(other_teacher)
     activity_id, _ = make_activity(teacher)
-    empty_id = teacher.post("/api/activities", json={"title": "Empty"}).get_json()["activity"]["id"]  # no sections
+    empty_id = teacher.post("/api/activities", json={"title": "Empty", "subject": "Philosophy"}).get_json()["activity"]["id"]  # no sections
     put = lambda target, direct: teacher.put(f"/api/activities/{target}/assignments",
                                              json={"assignments": [], "direct": direct})
     assert error(put(activity_id, "everyone")) == "Individual students are not valid."

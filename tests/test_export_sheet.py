@@ -45,7 +45,7 @@ def round_trip(teacher, activity_id, kind):
     assert download.status_code == 200
     assert download.headers["Content-Disposition"].startswith("attachment")
     response = teacher.post("/api/activities/import", data={
-        "file": (io.BytesIO(download.data), f"sheet.{kind}"), "title": "Again", "dry_run": "0"},
+        "file": (io.BytesIO(download.data), f"sheet.{kind}"), "title": "Again", "subject": "Science", "dry_run": "0"},
         content_type="multipart/form-data")
     assert response.status_code == 200 and response.get_json()["imported"], response.get_json()
     new_id = response.get_json()["activity"]["id"]

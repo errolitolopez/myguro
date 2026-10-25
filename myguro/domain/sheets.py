@@ -55,13 +55,15 @@ class Section:
 
 
 def clean_title_subject(data):
-    """(title, subject) of a sheet."""
+    """(title, subject) of a sheet. Both are required."""
     title = clean_name(data.get("title"))
     subject = clean_name(data.get("subject"))
     if not title:
         raise ValidationError("Title is required.")
     if len(title) > MAX_TITLE_LENGTH:
         raise ValidationError(f"Title can be at most {MAX_TITLE_LENGTH} characters.")
+    if not subject:
+        raise ValidationError("Subject is required.")
     if len(subject) > MAX_NAME_LENGTH:
         raise ValidationError(f"Subject can be at most {MAX_NAME_LENGTH} characters.")
     return title, subject

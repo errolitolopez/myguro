@@ -731,6 +731,11 @@ async function saveTitleSubject() {
     titleInput.focus();
     return;
   }
+  if (!subjectInput.value.trim()) {
+    saveStatus.textContent = "Subject is required.";
+    subjectInput.focus();
+    return;
+  }
   saveStatus.textContent = "Saving...";
   try {
     const response = await apiFetch(`/api/activities/${activityId}/settings`, {
@@ -797,6 +802,11 @@ async function save() {
   if (!titleInput.value.trim()) {
     showEditorError("Title is required.");
     titleInput.focus();
+    return;
+  }
+  if (!subjectInput.value.trim()) {
+    showEditorError("Subject is required.");
+    subjectInput.focus();
     return;
   }
 
