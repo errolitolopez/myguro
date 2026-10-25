@@ -160,6 +160,18 @@ function updateExportLinks() {
   if (exportTo.value) query.set("to", exportTo.value);
   exportLinks.forEach((link, index) => link.setAttribute("href", exportBase[index] + (query.toString() ? `?${query}` : "")));
 }
+// The days start as the current month ("2026-10-01" to "2026-10-31"); clear them to export every day.
+// monthBounds() -> ["2026-10-01", "2026-10-31"]
+const monthBounds = () => {
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  const last = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const month = `${now.getFullYear()}-${pad(now.getMonth() + 1)}`;
+  return [`${month}-01`, `${month}-${pad(last)}`];
+};
+[exportFrom.value, exportTo.value] = monthBounds();
+updateExportLinks();
+
 exportFrom.addEventListener("input", updateExportLinks);
 exportTo.addEventListener("input", updateExportLinks);
 

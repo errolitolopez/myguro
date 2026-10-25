@@ -21,7 +21,7 @@
     </div>
   </header>
 
-  <!-- Export the record: leave both days empty for every day with a mark -->
+  <!-- Export the record: the current month by default; clear both days for every day with a mark -->
   <div id="export-panel" class="collapse">
     <div class="card card-body mb-3">
       <div class="d-flex flex-wrap align-items-end gap-2">
@@ -38,7 +38,7 @@
         <a id="export-pdf" class="btn btn-sm btn-outline-danger text-nowrap bi bi-file-earmark-pdf"
            href="{{ url_for('classes.attendance_export', class_id=class_id, kind='pdf') }}">PDF</a>
       </div>
-      <div class="form-text">Both days are included. Leave them empty to export every day.</div>
+      <div class="form-text">Both days are included. Clear them to export every day.</div>
     </div>
   </div>
 
