@@ -121,6 +121,15 @@ def test_bad_answers_and_stray_lines(teacher):
     assert ("II. Quiz, item 9", "The ANSWER KEY has this item but the activity does not.") in messages
 
 
+def test_a_shortened_key_heading_gets_one_clear_problem(teacher):
+    lines = [(kind, "II. Pre-test (5 Minutes)" if text == "II. Pre-test" and kind == "h1" else text)
+             for kind, text in GOOD]  # the section says "(5 Minutes)", its answer key heading does not
+    data = upload(teacher, docx_bytes(lines)).get_json()
+    assert [e["where"] for e in data["errors"]] == ["II. Pre-test (5 Minutes)"]  # one problem, not one per item
+    assert data["errors"][0]["message"].startswith('The ANSWER KEY has no heading "II. Pre-test (5 Minutes)".')
+    assert "including numbers and anything in brackets" in data["errors"][0]["message"]
+
+
 def test_not_a_docx_and_wrong_extension(teacher):
     response = upload(teacher, b"not a zip")
     assert response.status_code == 400

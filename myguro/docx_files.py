@@ -128,7 +128,8 @@ INSTRUCTIONS = [
     "5. Number every question: 1. 2. 3. Multiple choice choices are A. B. C. lines under the question. "
     "Fill in the blank uses ___ for each blank. A Matching section is one question: numbered lines are "
     "Column A, lettered lines (A. B. C.) are Column B.",
-    "6. The last section is Heading 1 ANSWER KEY. Repeat each activity's heading (Heading 2), then one line "
+    "6. The last section is Heading 1 ANSWER KEY. Repeat each activity's heading (Heading 2) exactly as it is "
+    "written above, including numbers and anything in brackets, then one line "
     "per question: 1. B  |  2. TRUE  |  3. Taoism / Daoism  |  4. India; China. Matching: the Column B "
     "letter for each Column A number. Short Answer: an optional guide for checking. Put spaces around the "
     "slash between accepted answers (Taoism / Daoism); a slash without spaces, like 1/2, is part of the answer.",

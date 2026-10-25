@@ -149,6 +149,11 @@ def activity_section(heading, body, key, has_key):
     if not items:
         fail(None, "No numbered questions found. Start each question with its number, like 1.")
         return raw, problems
+    if has_key and key is None and kind != "short_answer":
+        # One clear problem instead of "No answer" for every item: the usual cause is a shortened heading.
+        fail(None, f'The ANSWER KEY has no heading "{heading}". Repeat the section heading exactly as written '
+                   'above, letter for letter, including numbers and anything in brackets like (5 Minutes).')
+        return raw, problems
     if kind == "matching":
         found = matching_question(heading, items, directions, key, has_key, fail)
         raw["questions"] = [found] if found else []
