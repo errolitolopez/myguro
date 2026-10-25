@@ -5,6 +5,7 @@
 
 :root {
   /* Bootstrap reads its text font from this variable. The system fonts are the fallback while Roboto loads. */
+  --bs-body-font-size: 0.9375rem;
   --bs-body-font-family: Roboto, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --glass-bg: rgba(255, 255, 255, 0.6);
   --glass-bg-strong: rgba(255, 255, 255, 0.88);
@@ -316,6 +317,22 @@ footer {
   vertical-align: -0.125em;
 }
 .btn.bi:empty::before { margin-right: 0; }
+
+/* Calmer text sizes. Bootstrap's headings and big numbers are too large next to the small
+   buttons, so they are scaled down. The fs-* rules need !important because Bootstrap's own
+   utility classes use it. */
+h1, .h1 { font-size: 1.5rem; }
+h2, .h2 { font-size: 1.35rem; }
+h3, .h3 { font-size: 1.2rem; }
+h4, .h4 { font-size: 1.1rem; }
+h5, .h5 { font-size: 1rem; }
+h6, .h6 { font-size: 0.9375rem; }
+.fs-1 { font-size: 1.6rem !important; }
+.fs-2 { font-size: 1.4rem !important; }
+.fs-3 { font-size: 1.25rem !important; }
+.fs-4 { font-size: 1.1rem !important; }
+.fs-5 { font-size: 1rem !important; }
+.fs-6 { font-size: 0.875rem !important; }
 
 /* Small buttons on every screen size (copied from mymotoworks). About 28-32px high on phones is
    still easy to tap. Bootstrap's own variables, not new selectors. btn-lg is only a little bigger
