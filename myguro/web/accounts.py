@@ -7,6 +7,7 @@ from flask import Blueprint, jsonify, render_template, request, send_file
 from myguro.database import get_db
 from myguro.domain.accounts import ACCOUNT_ROLES
 from myguro.errors import ValidationError
+from myguro.exports import login_details_xlsx_bytes
 from myguro.imports import read_student_rows, template_xlsx_bytes
 from myguro.services import AccountService
 from myguro.web.security import current_user, json_body, role_required_api, role_required_page
@@ -90,6 +91,17 @@ def api_batch_reset_passwords():
     """New temporary passwords for students: {user_ids or match: {q, grade, name, section, status}}.
     Returns {students: [{id, name, username, grade, section, password}]}, shown once."""
     return jsonify(service().batch_reset_passwords(json_body()))
+
+
+@bp.post("/api/users/login-details")
+@role_required_api("admin")
+def api_login_details():
+    """The Excel file of login details for the posted students ({students: [{name, username, password, grade,
+    section}]}), made right after an import or new passwords, while the passwords are still known."""
+    students = service().clean_login_details(json_body())
+    return send_file(io.BytesIO(login_details_xlsx_bytes(students)), as_attachment=True,
+                     download_name="MyGURO login details.xlsx",
+                     mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 
 @bp.post("/api/users/batch-delete")

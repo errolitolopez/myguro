@@ -195,6 +195,21 @@ class AccountService(Service):
         self.commit()
         return {"students": students}
 
+    def clean_login_details(self, data):
+        """The students posted for the login details file: [{name, username, password, grade, section}] as
+        text. Nothing is read from or written to the database, and the passwords are not kept."""
+        students = data.get("students")
+        if not isinstance(students, list) or not students:
+            raise ValidationError("There are no login details to download.")
+        if len(students) > MAX_BATCH:
+            raise ValidationError(f"Download at most {MAX_BATCH} students at a time.")
+        cleaned = []
+        for student in students:
+            if not isinstance(student, dict):
+                raise ValidationError("The login details are not valid.")
+            cleaned.append({key: str(student.get(key) or "") for key in ("name", "username", "password", "grade", "section")})
+        return cleaned
+
     def batch_ids(self, data, verb):
         """The students a batch request is about: user_ids, or match = {q, grade, name, section, status}
         for every student matching that search (all pages)."""

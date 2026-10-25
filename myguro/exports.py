@@ -66,6 +66,36 @@ def add_generated_by(sheet):
     sheet.oddFooter.center.text = GENERATED_BY
 
 
+LOGIN_DETAILS_COLUMNS = ["Name", "Username", "Password", "Grade", "Section"]
+
+
+def login_details_xlsx_bytes(students):
+    """The students' login details as an .xlsx file (bytes), to give out or print. Each student is a
+    dict with name, username, password, grade and section. Everything is text, so a password like
+    000123 keeps its zeros."""
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = "Login details"
+    sheet.append(LOGIN_DETAILS_COLUMNS)
+    for cell in sheet[1]:
+        cell.font = Font(bold=True)
+        cell.fill = PatternFill("solid", fgColor="E9ECEF")
+    for student in students:
+        sheet.append([student["name"], student["username"], student["password"], student["grade"],
+                      student["section"]])
+    for row in sheet.iter_rows(min_row=2):
+        for cell in row:
+            cell.number_format = "@"
+            cell.data_type = "s"
+    for index, width in enumerate((30, 18, 16, 12, 14), start=1):
+        sheet.column_dimensions[get_column_letter(index)].width = width
+    sheet.freeze_panes = "A2"
+    add_generated_by(sheet)
+    output = io.BytesIO()
+    workbook.save(output)
+    return output.getvalue()
+
+
 def results_xlsx_bytes(data, teacher, exported_at, timezone_info):
     """The results as an .xlsx file (bytes): a title block, then one row per student."""
     assignment = data["assignment"]

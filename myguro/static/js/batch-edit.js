@@ -320,7 +320,8 @@ passwordConfirmButton.addEventListener("click", async () => {
   }
 });
 
-document.getElementById("password-download").addEventListener("click", () => downloadLoginDetails(newPasswords));
+document.getElementById("password-download").addEventListener("click", (event) =>
+  downloadLoginDetails(newPasswords, event.currentTarget, "password-error"));
 
 // The passwords are gone once the popup closes (the server never keeps them).
 passwordModal.addEventListener("hidden.bs.modal", () => {

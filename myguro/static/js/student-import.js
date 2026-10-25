@@ -126,8 +126,9 @@ confirmButton.addEventListener("click", async () => {
   }
 });
 
-// Login details as a CSV file that opens in Excel (with ñ and other letters kept).
-document.getElementById("import-download").addEventListener("click", () => downloadLoginDetails(createdStudents));
+// Login details as an Excel file (made by the server, see downloadLoginDetails in common.js).
+document.getElementById("import-download").addEventListener("click", (event) =>
+  downloadLoginDetails(createdStudents, event.currentTarget, "import-error"));
 
 // Each time the popup opens: start again at choosing a file.
 importModalElement.addEventListener("show.bs.modal", () => {
