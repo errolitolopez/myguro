@@ -501,8 +501,8 @@ body:has(.position-fixed.bottom-0) > footer { padding-bottom: 5rem !important; }
 body::before {
   content: "";
   position: fixed;
-  right: 2rem;
-  bottom: 2rem;
+  right: 0.5rem;
+  bottom: 6.5rem;
   width: min(520px, 80vw);
   aspect-ratio: 916 / 460; /* the shape of logo-black.png and logo-white.png */
   z-index: -1;
