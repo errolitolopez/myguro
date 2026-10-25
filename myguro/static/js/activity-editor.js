@@ -198,7 +198,7 @@ function descriptionField(section, id, activity) {
   label.htmlFor = `${id}-description`;
   const toggle = el("div", "btn-group btn-group-sm");
   for (const [format, name] of [["plain", "Plain text"], ["rich", "Formatted"]]) {
-    const button = el("button", `btn btn-outline-secondary ${format === section.descriptionFormat ? "active" : ""}`, name);
+    const button = el("button", `btn btn-toggle ${format === section.descriptionFormat ? "active" : ""}`, name);
     button.type = "button";
     button.title = format === "rich" ? "Bold, italic, lists" : "Typed text only";
     button.addEventListener("click", () => {
@@ -518,7 +518,7 @@ function trueFalseFields(question) {
       question.answer = value;
       markUnsaved();
     });
-    const button = el("label", "btn btn-sm btn-outline-success", label);
+    const button = el("label", "btn btn-sm btn-toggle", label);
     button.htmlFor = radio.id;
     group.append(radio, button);
   }

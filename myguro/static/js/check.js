@@ -215,7 +215,7 @@ function renderStudent(data) {
   buttons.replaceChildren(...data.attempts.map((attempt) => {
     const label = `Attempt ${attempt.attempt}` + (attempt.paper ? " · paper" : "") + (attempt.counts ? " · counts" : "")
       + (attempt.submitted_at ? (attempt.late ? " · late" : "") : " · answering");
-    const button = el("button", `btn ${detail && detail.attempt === attempt.attempt ? "btn-secondary" : "btn-outline-secondary"}`, label);
+    const button = el("button", `btn ${detail && detail.attempt === attempt.attempt ? "btn-toggle active" : "btn-toggle"}`, label);
     button.type = "button";
     button.addEventListener("click", () => openAttempt(attempt.attempt));
     return button;

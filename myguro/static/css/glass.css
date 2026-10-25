@@ -306,11 +306,22 @@ footer {
   --bs-btn-disabled-border-color: var(--warn-bg);
   --bs-btn-focus-shadow-rgb: 217, 164, 6;
 }
-/* A toggle button that is switched on (To do / Submitted, attempts) is all solid like the rest,
-   so a white ring tells it apart from the ones that are off. */
-.btn-check:checked + .btn,
-.btn.active {
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.75);
+/* Toggle buttons (To do / Submitted, True / False, Plain text / Formatted, attempts) are a
+   segmented control: the ones that are off are calm glass with the text colour, the one that is
+   on is solid blue. They come after the solid rules above so they win. */
+.btn-toggle {
+  --bs-btn-color: var(--bs-body-color);
+  --bs-btn-bg: var(--glass-bg);
+  --bs-btn-border-color: var(--glass-input-border);
+  --bs-btn-hover-color: var(--bs-emphasis-color);
+  --bs-btn-hover-bg: var(--glass-hover);
+  --bs-btn-hover-border-color: var(--glass-input-border);
+  --bs-btn-active-color: var(--confirm-text);
+  --bs-btn-active-bg: var(--confirm-bg);
+  --bs-btn-active-border-color: var(--confirm-bg);
+  --bs-btn-disabled-color: var(--bs-secondary-color);
+  --bs-btn-disabled-bg: var(--glass-bg);
+  --bs-btn-disabled-border-color: var(--glass-input-border);
 }
 .btn.bi::before {
   margin-right: 0.45em;
