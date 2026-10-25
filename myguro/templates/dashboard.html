@@ -11,36 +11,35 @@
 
   {% if user.role == "admin" %}
   <div class="row g-3">
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-md-4">
       <a class="card h-100 text-decoration-none" href="{{ url_for('accounts.teachers_page') }}"><div class="card-body">
         <div class="text-body-secondary small">Teachers</div>
         <div class="fs-3 fw-semibold" id="stat-teachers">–</div>
-        <div class="text-body-secondary small" id="stat-active-teachers"></div>
       </div></a>
     </div>
-    <div class="col-6 col-md-3">
-      <div class="card h-100"><div class="card-body">
-        <div class="text-body-secondary small">Classes</div>
-        <div class="fs-3 fw-semibold" id="stat-classes">–</div>
-      </div></div>
-    </div>
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-md-4">
       <a class="card h-100 text-decoration-none" href="{{ url_for('accounts.students_page') }}"><div class="card-body">
         <div class="text-body-secondary small">Students</div>
         <div class="fs-3 fw-semibold" id="stat-students">–</div>
       </div></a>
     </div>
-    <div class="col-6 col-md-3">
-      <div class="card h-100"><div class="card-body">
-        <div class="text-body-secondary small">Activities</div>
-        <div class="fs-3 fw-semibold" id="stat-activities">–</div>
-      </div></div>
-    </div>
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-md-4">
       <a class="card h-100 text-decoration-none" href="{{ url_for('accounts.supervisors_page') }}"><div class="card-body">
         <div class="text-body-secondary small">Supervisors</div>
         <div class="fs-3 fw-semibold" id="stat-supervisors">–</div>
       </div></a>
+    </div>
+    <div class="col-6 col-md-4">
+      <div class="card h-100"><div class="card-body">
+        <div class="text-body-secondary small">Classes</div>
+        <div class="fs-3 fw-semibold" id="stat-classes">–</div>
+      </div></div>
+    </div>
+    <div class="col-6 col-md-4">
+      <div class="card h-100"><div class="card-body">
+        <div class="text-body-secondary small">Activities</div>
+        <div class="fs-3 fw-semibold" id="stat-activities">–</div>
+      </div></div>
     </div>
   </div>
   {% elif user.role == "student" %}
