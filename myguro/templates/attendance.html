@@ -8,7 +8,6 @@
 <main class="container py-3" data-class-id="{{ class_id }}">
   <a href="{{ url_for('classes.detail_page', class_id=class_id) }}" class="small">‹ Class</a>
   <div id="attendance-error" class="alert alert-danger mt-2 d-none" role="alert"></div>
-  <div id="attendance-saved" class="alert alert-success mt-2 d-none" role="status">Attendance saved.</div>
 
   <header class="d-flex justify-content-between align-items-start gap-2 mt-2 mb-3">
     <div>
@@ -60,10 +59,11 @@
     </div>
   </div>
 
-  <button id="save-button" type="button" class="btn btn-success bi bi-check-lg">Save attendance</button>
-  <p class="small text-body-secondary mt-3 mb-0">
-    The numbers under each name are the days that student was present, late, absent or excused in this class.
-    Tap a mark again to clear it.
+  <!-- Every tap is saved by itself a moment later; this line says where it stands -->
+  <div id="save-status" class="small" role="status" aria-live="polite"></div>
+  <p class="small text-body-secondary mt-2 mb-0">
+    Marks are saved as you tap. The numbers under each name are the days that student was present, late,
+    absent or excused in this class. Tap a mark again to clear it.
   </p>
 </main>
 {% endblock %}

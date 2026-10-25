@@ -126,3 +126,20 @@ def test_the_excel_has_a_column_for_every_day_of_the_range(teacher):
     header = next(row for row in rows if row[0] == "No.")
     assert header[5:36] == tuple(range(1, 32)) and header[36] == "Present"
     assert next(row for row in rows if row[5] == "Oct 2026")  # the month named above the 1st
+
+
+def test_saving_one_tap_keeps_the_other_marks_and_logs_the_day_once(teacher):
+    class_id, students = make_class(teacher)
+    first, second = str(students[0]["id"]), str(students[1]["id"])
+    put = lambda marks: teacher.put(f"/api/classes/{class_id}/attendance", json={"day": DAY, "marks": marks})
+    # The page saves after every tap: only the student tapped is sent
+    put({first: "present"})
+    put({second: "absent"})
+    put({first: "late"})
+    by_id = {row["id"]: row["status"] for row in sheet(teacher, class_id)["students"]}
+    assert by_id[students[0]["id"]] == "late" and by_id[students[1]["id"]] == "absent"
+
+    admin = login("admin", "admin")
+    admin.post("/api/change-password", json={"current_password": "admin", "new_password": "adminpass1"})
+    entries = admin.get("/api/log?q=attendance").get_json()["entries"]
+    assert len([entry for entry in entries if entry["action"] == "attendance.saved"]) == 1

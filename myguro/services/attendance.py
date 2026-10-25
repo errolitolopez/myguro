@@ -53,16 +53,20 @@ class AttendanceService(Service):
 
     def save(self, class_id, data):
         """Save the marks of one day: {day, marks: {student id: status, or null to clear}}. Only
-        students of the class; a past school year can only be looked at."""
+        the students sent are changed, so the page can save just the last tap. Only students of
+        the class; a past school year can only be looked at."""
         class_row = ClassService(self.db, self.user).require_open(class_id)
         day = clean_day(data.get("day"), school_today())
         marks = clean_marks(data.get("marks"))
         for student_id in marks:
             if not self.classes.has_student(class_id, student_id):
                 raise ValidationError("One of the students is not in this class.")
+        # The page saves after every tap, so only the first save of a day is logged (one entry per day)
+        first_save = not self.attendance.for_day(class_id, day)
         for student_id, status in marks.items():
             self.attendance.set(class_id, student_id, day, status)
-        self.log("attendance.saved", "classes", f"Saved the attendance of {class_row['name']} for {day}.",
-                 ("class", class_id, class_row["name"]))
+        if first_save:
+            self.log("attendance.saved", "classes", f"Started the attendance of {class_row['name']} for {day}.",
+                     ("class", class_id, class_row["name"]))
         self.commit()
         return self.sheet(class_id, day)

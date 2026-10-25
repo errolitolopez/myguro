@@ -1,4 +1,5 @@
-// Attendance (teacher): pick a day, tap a mark for each student from the paper record, Save.
+// Attendance (teacher): pick a day and tap a mark for each student from the paper record. Every tap
+// is saved by itself a moment later, so a lost connection or a closed tab never loses a whole class.
 
 const classId = document.querySelector("main").dataset.classId;
 const STATUS_LABELS = { present: "Present", late: "Late", absent: "Absent", excused: "Excused" };
@@ -7,10 +8,13 @@ const STATUS_COLORS = { present: "success", late: "warning", absent: "danger", e
 
 let sheet = null; // from /api/classes/<id>/attendance
 let marks = {}; // student id -> status or null, what is on screen (saved or not)
+let pending = {}; // student id -> status or null, taps not saved yet
+let running = null; // the save in progress, so only one runs at a time
+let saveTimer = null;
 
 const dayInput = document.getElementById("day");
 const list = document.getElementById("student-list");
-const saveButton = document.getElementById("save-button");
+const saveStatus = document.getElementById("save-status");
 
 // todayText() -> "2026-10-26" (this computer's day; the server checks it against the school's day)
 const todayText = () => {
@@ -50,10 +54,7 @@ function studentRow(student) {
     const chosen = marks[student.id] === status;
     button.classList.add(chosen ? `btn-${STATUS_COLORS[status]}` : "btn-outline-secondary");
     button.setAttribute("aria-pressed", String(chosen));
-    button.addEventListener("click", () => {
-      marks[student.id] = chosen ? null : status;
-      render();
-    });
+    button.addEventListener("click", () => setMark(student.id, chosen ? null : status));
     group.append(button);
   });
   row.append(name, details, group);
@@ -90,61 +91,105 @@ async function loadDay(day) {
     hideError("attendance-error");
     sheet = data;
     marks = Object.fromEntries(sheet.students.map((student) => [student.id, student.status]));
+    pending = {};
+    showSaveStatus("");
     document.getElementById("attendance-details").textContent = [
       sheet.class.name, sheet.class.subject, plural(sheet.recorded_days.length, "day") + " recorded",
     ].filter(Boolean).join(" · ");
-    document.getElementById("attendance-saved").classList.add("d-none");
     render();
   } catch {
     showError("attendance-error", "Cannot reach the server. Check your connection.");
   }
 }
 
-// Changing the day drops marks that were not saved, so ask first.
-function unsaved() {
-  return sheet.students.some((student) => marks[student.id] !== student.status);
+// showSaveStatus("Saved", "success") -> the line under the list
+function showSaveStatus(text, color = "body-secondary") {
+  saveStatus.textContent = text;
+  saveStatus.className = `small text-${color}`;
 }
 
-function changeDay(day) {
-  if (unsaved() && !window.confirm("You have marks that are not saved. Change the day anyway?")) {
+// A tap: show it now, save it in half a second (more taps in that time go in the same save)
+function setMark(studentId, status) {
+  marks[studentId] = status;
+  pending[studentId] = status;
+  render();
+  showSaveStatus("Saving...");
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(flush, 500);
+}
+
+// Send the taps that are not saved yet. Resolves true when nothing is left unsaved.
+function flush() {
+  clearTimeout(saveTimer);
+  if (!running) running = sendPending().finally(() => { running = null; });
+  return running;
+}
+
+async function sendPending() {
+  while (Object.keys(pending).length) {
+    const sent = { ...pending };
+    try {
+      const response = await apiFetch(`/api/classes/${classId}/attendance`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ day: sheet.day, marks: sent }),
+      });
+      if (!response) return false;
+      const data = await response.json();
+      if (!response.ok) {
+        if (response.status >= 500) throw new Error("server");
+        // The server refused (for example a past school year): show why and go back to what is saved
+        showError("attendance-error", data.error || "Could not save the attendance.");
+        showSaveStatus("Not saved", "danger");
+        await loadDay(sheet.day);
+        showSaveStatus("Not saved", "danger");
+        return false;
+      }
+      hideError("attendance-error");
+      // Forget the taps that were saved (a newer tap on the same student stays pending)
+      Object.keys(sent).forEach((id) => { if (pending[id] === sent[id]) delete pending[id]; });
+      data.students.forEach((student) => {
+        const own = sheet.students.find((item) => item.id === student.id);
+        if (own) { own.status = student.status; own.totals = student.totals; }
+      });
+      sheet.recorded_days = data.recorded_days;
+      render();
+    } catch {
+      // No connection: keep the taps and try again soon
+      showSaveStatus("Not saved yet. Trying again...", "danger");
+      saveTimer = setTimeout(flush, 3000);
+      return false;
+    }
+  }
+  showSaveStatus("All changes saved", "success");
+  return true;
+}
+
+// Save what is waiting before showing another day; if that fails, ask before dropping it.
+async function changeDay(day) {
+  if (Object.keys(pending).length && !(await flush())
+      && !window.confirm("Some marks could not be saved. Change the day anyway?")) {
     dayInput.value = sheet.day;
     return;
   }
   loadDay(day);
 }
 
+window.addEventListener("beforeunload", (event) => {
+  if (Object.keys(pending).length) event.preventDefault(); // the browser asks before leaving
+});
+
 dayInput.addEventListener("change", () => dayInput.value && changeDay(dayInput.value));
 document.getElementById("day-previous").addEventListener("click", () => changeDay(shiftDay(sheet.day, -1)));
 document.getElementById("day-next").addEventListener("click", () => changeDay(shiftDay(sheet.day, 1)));
 document.getElementById("mark-all-present").addEventListener("click", () => {
-  sheet.students.forEach((student) => { if (!marks[student.id]) marks[student.id] = "present"; });
+  const unmarked = sheet.students.filter((student) => !marks[student.id]);
+  unmarked.forEach((student) => { marks[student.id] = "present"; pending[student.id] = "present"; });
   render();
-});
-
-saveButton.addEventListener("click", async () => {
-  const stopLoading = startLoading(saveButton);
-  if (!stopLoading) return;
-  hideError("attendance-error");
-  try {
-    const response = await apiFetch(`/api/classes/${classId}/attendance`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ day: sheet.day, marks }),
-    });
-    if (!response) return;
-    const data = await response.json();
-    if (!response.ok) {
-      showError("attendance-error", data.error || "Could not save the attendance.");
-      return;
-    }
-    sheet = data;
-    marks = Object.fromEntries(sheet.students.map((student) => [student.id, student.status]));
-    render();
-    document.getElementById("attendance-saved").classList.remove("d-none");
-  } catch {
-    showError("attendance-error", "Cannot reach the server. Check your connection.");
-  } finally {
-    stopLoading();
+  if (unmarked.length) {
+    showSaveStatus("Saving...");
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(flush, 500);
   }
 });
 
