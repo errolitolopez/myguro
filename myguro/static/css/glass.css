@@ -4,6 +4,8 @@
    person asked for less transparency, panels are plain and opaque. */
 
 :root {
+  /* Bootstrap reads its text font from this variable. The system fonts are the fallback while Roboto loads. */
+  --bs-body-font-family: Roboto, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --glass-bg: rgba(255, 255, 255, 0.6);
   --glass-bg-strong: rgba(255, 255, 255, 0.88);
   --glass-border: rgba(226, 232, 240, 0.8);
