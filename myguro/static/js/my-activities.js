@@ -18,6 +18,7 @@ function statusBadges(activity) {
     badges.append(badge);
   };
 
+  if (activity.closed) add("text-bg-dark", "Closed");
   if (activity.done) {
     const score = activity.score;
     if (score) {

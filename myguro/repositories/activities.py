@@ -164,6 +164,10 @@ class ActivityRepository(Repository):
     def count_all(self):
         return self.value("SELECT COUNT(*) FROM activities WHERE deleted_at IS NULL")
 
-    def count_open(self, activity_id):
-        """How many of the sheet's assignments are open to students."""
-        return self.value("SELECT COUNT(*) FROM assignments WHERE activity_id = ? AND is_open = 1", (activity_id,))
+    def count_by_status(self, activity_id):
+        """{status: how many of the sheet's assignments have it}, for not_started, open and closed."""
+        counts = {"not_started": 0, "open": 0, "closed": 0}
+        for row in self.all("SELECT status, COUNT(*) AS n FROM assignments WHERE activity_id = ? GROUP BY status",
+                            (activity_id,)):
+            counts[row["status"]] = row["n"]
+        return counts

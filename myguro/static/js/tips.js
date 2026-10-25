@@ -9,7 +9,7 @@
   const TIPS = {
     teacher: [
       "Tap Save in the activity editor often. It warns you if you leave with unsaved changes.",
-      "When you give an activity to a class, it starts closed. Tap Open on the Check results card when it is ready for that class.",
+      "An activity you give to a class starts as Not started. Tap Open on the Check results card when students may answer. Close it to submit all work and keep it for review.",
       "An activity students already submitted is locked. Use Make a copy in the editor to change it.",
       "Scores stay hidden from students until you tap Release scores on the results page.",
       "You can import a whole activity from Word on the Activities page.",

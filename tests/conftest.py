@@ -134,14 +134,19 @@ def make_activity(teacher, title="Early Eastern Philosophy", sections=None):
     return activity_id, questions
 
 
-def open_assignment(teacher, assignment_id, opened=True):
-    """Open an assignment to its students (or close it with opened=False); returns the response."""
-    return teacher.put(f"/api/assignments/{assignment_id}/open", json={"open": opened})
+def set_status(teacher, assignment_id, status):
+    """Change an assignment to "open" or "closed" (a close submits all work); returns the response."""
+    return teacher.put(f"/api/assignments/{assignment_id}/status", json={"status": status})
+
+
+def open_assignment(teacher, assignment_id):
+    """Open an assignment to its students (also re-opens a closed one); returns the response."""
+    return set_status(teacher, assignment_id, "open")
 
 
 def assign(teacher, activity_id, class_id, opened=True, **options):
-    """Give the sheet to a class and return the assignment id. A new assignment is closed, so most
-    tests open it right away (opened=False keeps it closed)."""
+    """Give the sheet to a class and return the assignment id. A new assignment is not started, so most
+    tests open it right away (opened=False keeps it not started)."""
     response = teacher.put(f"/api/activities/{activity_id}/assignments",
                            json={"assignments": [{"class_id": class_id, **options}]})
     assert response.status_code == 200, response.get_json()

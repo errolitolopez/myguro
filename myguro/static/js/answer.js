@@ -339,7 +339,8 @@ function showResult() {
 }
 
 function render() {
-  const locked = Boolean(activity.submitted_at);
+  // Read-only once submitted, and also when the teacher closed it (even for a student who never started).
+  const locked = Boolean(activity.submitted_at) || activity.closed;
   document.title = `${activity.title} · MyGURO`;
   document.getElementById("activity-title").textContent = activity.title;
   document.getElementById("activity-details").textContent =
@@ -347,6 +348,7 @@ function render() {
   document.getElementById("activity-due").textContent = activity.due_date
     ? `Due ${formatDay(activity.due_date)}` : "";
 
+  document.getElementById("closed-banner").classList.toggle("d-none", !activity.closed);
   showResult();
   // A paper score has no answers here: show the sheet only for reference, collapsed.
   const sectionsArea = document.getElementById("sections");

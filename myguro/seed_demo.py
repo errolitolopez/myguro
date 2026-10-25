@@ -106,7 +106,7 @@ def add_demo(app):
     given = check(teacher.put(f"/api/activities/{activity_id}/assignments", json={"assignments": [
         {"class_id": class_id, "due_date": "2026-12-31"}]}), "assign")
     assignment_id = next(item["assignment"]["id"] for item in given["classes"] if item["id"] == class_id)
-    check(teacher.put(f"/api/assignments/{assignment_id}/open", json={"open": True}), "open")
+    check(teacher.put(f"/api/assignments/{assignment_id}/status", json={"status": "open"}), "open")
 
     # Student 1 right, student 2 with mistakes (both submit), student 3 unfinished, the rest not started.
     plan = [(found[0], GOOD, True), (found[1], MISTAKES, True), (found[2], UNFINISHED, False)]

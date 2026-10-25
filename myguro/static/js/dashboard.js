@@ -59,6 +59,7 @@ async function loadDashboard() {
       showClasses(data.classes, "student");
     } else {
       setText("stat-students", data.students);
+      setText("stat-not-started", data.not_started);
       setText("stat-open", data.open);
       setText("stat-closed", data.closed);
       setText("stat-submissions", data.submissions);

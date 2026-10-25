@@ -92,11 +92,11 @@ def api_release(assignment_id):
     return jsonify(service().set_released(assignment_id, json_body().get("released")))
 
 
-@bp.put("/api/assignments/<int:assignment_id>/open")
+@bp.put("/api/assignments/<int:assignment_id>/status")
 @role_required_api("teacher")
-def api_open(assignment_id):
-    """Open the assignment to its students ({"open": true}) or close it ({"open": false})."""
-    return jsonify(service().set_opened(assignment_id, json_body().get("open")))
+def api_status(assignment_id):
+    """{"status": "open"} opens it (or re-opens a closed one); {"status": "closed"} closes it for good."""
+    return jsonify(service().set_status(assignment_id, json_body().get("status")))
 
 
 @bp.post("/api/assignments/<int:assignment_id>/students/<int:student_id>/reopen")

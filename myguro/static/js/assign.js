@@ -15,7 +15,7 @@ const assignList = document.getElementById("assign-classes");
 const assignSaveButton = document.getElementById("assign-save-button");
 
 // One class or group the sheet is given to: "Grade 12 – Luna" / "3 of 3 submitted · average 67% · due Oct 15, 2026".
-// The text opens its results; the button opens the sheet to that class or group, or closes it again.
+// The text opens its results; the button opens, closes or re-opens it for that class or group.
 function checkItem(item) {
   const row = el("div", "list-group-item d-flex justify-content-between align-items-center gap-2");
   const link = el("a", "flex-grow-1 text-decoration-none text-reset");
@@ -30,27 +30,23 @@ function checkItem(item) {
       item.to_check ? `${plural(item.to_check, "point")} to check` : "Checked");
   badge.classList.add("d-none", "d-sm-inline");  // the buttons matter more on a small phone
 
-  // Students see the sheet only while this is open. Closed is the starting state.
-  const toggle = el("button", item.is_open
-    ? "btn btn-sm btn-outline-secondary text-nowrap bi bi-door-closed"
-    : "btn btn-sm btn-success text-nowrap bi bi-door-open", item.is_open ? " Close" : " Open");
+  // Students answer only while this is open; Close submits everyone's work, Re-open lets them continue.
+  const [badgeClass, badgeText] = STATUS_BADGES[item.status];
+  const action = STATUS_ACTIONS[item.status];
+  const toggle = el("button", `btn btn-sm text-nowrap bi ${action.icon} ${action.className}`, ` ${action.label}`);
   toggle.type = "button";
   toggle.dataset.openToggle = "1";  // lockEditor() leaves it enabled on a locked sheet
-  toggle.setAttribute("aria-label", `${item.is_open ? "Close" : "Open"} for ${item.class_name}`);
-  toggle.addEventListener("click", () => setOpened(item, toggle));
-  row.append(link, badge, toggle);
+  toggle.setAttribute("aria-label", `${action.label} for ${item.class_name}`);
+  toggle.addEventListener("click", () => changeStatus(item, action.next, toggle));
+  row.append(link, el("span", `badge ${badgeClass}`, badgeText), badge, toggle);
   return row;
 }
 
-async function setOpened(item, button) {
+async function changeStatus(item, next, button) {
   const stopLoading = startLoading(button);
   if (!stopLoading) return;
   try {
-    const response = await apiFetch(`/api/assignments/${item.id}/open`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ open: !item.is_open }),
-    });
+    const response = await putStatus(item.id, next, item.class_name);
     if (!response) return;
     if (!response.ok) {
       showEditorError((await response.json()).error || "Could not save.");

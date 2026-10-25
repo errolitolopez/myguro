@@ -37,21 +37,20 @@ function activityItem(activity) {
   ].filter(Boolean).join(" · ");
   left.append(title, details);
 
-  // "Not given yet", "Closed · 2 classes", "Open · 2 classes", "Open for 1 of 2 classes"
+  // "Not given yet", or the statuses of the classes it is given to: "1 open · 2 closed · 1 not started"
   const badge = document.createElement("span");
-  const groups = plural(activity.assigned, "class", "classes");
+  const counts = activity.statuses;
   if (!activity.assigned) {
     badge.className = "badge text-bg-secondary";
     badge.textContent = "Not given yet";
-  } else if (activity.open === activity.assigned) {
-    badge.className = "badge text-bg-success";
-    badge.textContent = `Open · ${groups}`;
-  } else if (activity.open === 0) {
-    badge.className = "badge text-bg-secondary";
-    badge.textContent = `Closed · ${groups}`;
   } else {
-    badge.className = "badge text-bg-info";
-    badge.textContent = `Open for ${activity.open} of ${groups}`;
+    badge.className = counts.open ? "badge text-bg-success"
+      : counts.closed ? "badge text-bg-dark" : "badge text-bg-secondary";
+    badge.textContent = [
+      counts.open && `${counts.open} open`,
+      counts.closed && `${counts.closed} closed`,
+      counts.not_started && `${counts.not_started} not started`,
+    ].filter(Boolean).join(" · ");
   }
 
   row.append(left, badge);
@@ -104,7 +103,7 @@ const deletedToggle = document.getElementById("deleted-toggle");
 const deletedList = document.getElementById("deleted-list");
 let deletedActivities = [];
 
-// One deleted sheet with a Restore button. A restored sheet comes back with its assignments closed.
+// One deleted sheet with a Restore button. A restored sheet comes back with its assignments not started.
 function deletedItem(activity) {
   const row = document.createElement("div");
   row.className = "list-group-item d-flex justify-content-between align-items-center gap-2";

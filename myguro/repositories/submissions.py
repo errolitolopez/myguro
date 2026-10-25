@@ -119,6 +119,36 @@ class SubmissionRepository(Repository):
         self.execute("UPDATE submissions SET submitted_at = datetime('now'), updated_at = datetime('now'), late = ? "
                      "WHERE id = ?", (int(late), submission_id))
 
+    def mark_auto_submitted(self, submission_id):
+        """Submitted by the teacher closing the assignment: never late (the student had no chance to finish)."""
+        self.execute("UPDATE submissions SET submitted_at = datetime('now'), updated_at = datetime('now'), "
+                     "late = 0, auto_submitted = 1 WHERE id = ?", (submission_id,))
+
+    def auto_submitted_latest(self, assignment_id):
+        """The attempts the close submitted that are still each student's latest: [submission row]."""
+        return self.all(
+            """
+            SELECT sub.* FROM submissions sub
+            WHERE sub.assignment_id = ? AND sub.auto_submitted = 1 AND sub.paper = 0
+              AND sub.attempt = (SELECT MAX(attempt) FROM submissions
+                                 WHERE assignment_id = sub.assignment_id AND student_id = sub.student_id)
+            """,
+            (assignment_id,),
+        )
+
+    def back_to_in_progress(self, submission_id):
+        """Undo a close for one attempt: the checks and the empty answers it got on submit go away, the
+        student's real answers stay. Returns False (and deletes the attempt) when nothing real was answered."""
+        self.execute("DELETE FROM submission_answers WHERE submission_id = ? AND answer = 'null'", (submission_id,))
+        if self.value("SELECT COUNT(*) FROM submission_answers WHERE submission_id = ?", (submission_id,)) == 0:
+            self.delete(submission_id)
+            return False
+        self.execute("UPDATE submission_answers SET is_correct = NULL, points = NULL WHERE submission_id = ?",
+                     (submission_id,))
+        self.execute("UPDATE submissions SET submitted_at = NULL, late = 0, auto_submitted = 0, "
+                     "updated_at = datetime('now') WHERE id = ?", (submission_id,))
+        return True
+
     def score_rows(self, submission_id, activity_id):
         """Each question's section, points and the points the submission earned."""
         return self.all(

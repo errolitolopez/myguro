@@ -6,7 +6,8 @@ DIRECT_CLASS_NAME = "Individual students"
 # A student sees an assignment when they are in its class and it is for everyone, or they are one
 # of its chosen students. A direct assignment (class_id NULL) is seen only by its chosen students.
 # A student the teacher excluded (for example absent) does not see it until added back.
-# An assignment the teacher has not opened (or has closed), or of a deleted sheet, is seen by nobody.
+# An assignment the teacher has not started, or of a deleted sheet, is seen by nobody. A closed one is
+# seen (to read the questions again) but can't be answered.
 VISIBLE_TO_STUDENT = """
     (
         (
@@ -18,7 +19,7 @@ VISIBLE_TO_STUDENT = """
         )
         AND NOT EXISTS (SELECT 1 FROM assignment_exclusions x
                         WHERE x.assignment_id = asg.id AND x.student_id = :student)
-        AND asg.is_open = 1
+        AND asg.status IN ('open', 'closed')
         AND a.deleted_at IS NULL
     )
 """
@@ -55,19 +56,19 @@ class AssignmentRepository(Repository):
         self.execute("UPDATE assignments SET everyone = ?, due_date = ? WHERE id = ?",
                      (int(everyone), due_date, assignment_id))
 
-    def set_is_open(self, assignment_id, is_open):
-        self.execute("UPDATE assignments SET is_open = ? WHERE id = ?", (int(is_open), assignment_id))
+    def set_status(self, assignment_id, status):
+        self.execute("UPDATE assignments SET status = ? WHERE id = ?", (status, assignment_id))
 
-    def close_all(self, activity_id):
-        """Close every assignment of a sheet (when the sheet is deleted and archived)."""
-        self.execute("UPDATE assignments SET is_open = 0 WHERE activity_id = ?", (activity_id,))
+    def reset_all(self, activity_id):
+        """Put every assignment of a sheet back to not started (when the sheet is deleted and archived)."""
+        self.execute("UPDATE assignments SET status = 'not_started' WHERE activity_id = ?", (activity_id,))
 
-    def count_for_teacher(self, teacher_id, year_id, is_open):
-        """How many of the teacher's assignments in one school year are open (is_open=True) or closed."""
+    def count_for_teacher(self, teacher_id, year_id, status):
+        """How many of the teacher's assignments in one school year have this status."""
         return self.value(
             "SELECT COUNT(*) FROM assignments asg JOIN activities a ON a.id = asg.activity_id "
-            "WHERE a.teacher_id = ? AND asg.school_year_id = ? AND asg.is_open = ? AND a.deleted_at IS NULL",
-            (teacher_id, year_id, int(is_open)))
+            "WHERE a.teacher_id = ? AND asg.school_year_id = ? AND asg.status = ? AND a.deleted_at IS NULL",
+            (teacher_id, year_id, status))
 
     def set_scores_released(self, assignment_id, released):
         self.execute("UPDATE assignments SET scores_released = ? WHERE id = ?", (int(released), assignment_id))
@@ -165,7 +166,7 @@ class AssignmentRepository(Repository):
         latest submitted attempt (last: the one that counts)."""
         return self.all(
             f"""
-            SELECT asg.id, asg.due_date, asg.scores_released, a.title, a.subject, a.id AS activity_id, a.max_attempts,
+            SELECT asg.id, asg.due_date, asg.scores_released, asg.status AS assignment_status, a.title, a.subject, a.id AS activity_id, a.max_attempts,
                    COALESCE(c.name, '{DIRECT_CLASS_NAME}') AS class_name, COALESCE(c.subject, '') AS class_subject,
                    t.name AS teacher,
                    sub.id AS submission_id, sub.submitted_at, sub.attempt, sub.paper,

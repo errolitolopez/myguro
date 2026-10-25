@@ -2,6 +2,7 @@ from myguro.domain import scoring
 from myguro.domain.grading import clean_feedback, teacher_points
 from myguro.domain.work import clean_paper_score
 from myguro.errors import NotFoundError, ValidationError
+from myguro.services.attempts import grade_attempt
 from myguro.services.base import Service
 from myguro.domain.text import plural
 from myguro.services.presenters import class_title, user_json
@@ -132,7 +133,7 @@ class ResultsService(Service):
                 "class_name": class_title(assignment["class_name"], assignment["class_subject"]),
                 "due_date": assignment["due_date"],
                 "scores_released": bool(assignment["scores_released"]),
-                "is_open": bool(assignment["is_open"]),
+                "status": assignment["status"],
                 "everyone": bool(assignment["everyone"]),
                 "max_attempts": assignment["max_attempts"],
                 "total_points": self.activities.total_points(activity_id),
@@ -160,7 +161,7 @@ class ResultsService(Service):
                 "to_check": summary["to_check"],
                 "average": summary["average"],  # None until something is checked
                 "due_date": data["assignment"]["due_date"],
-                "is_open": data["assignment"]["is_open"],
+                "status": data["assignment"]["status"],
             })
         # sorted() is stable, so assignments with the same to-check state stay newest first
         return sorted(cards, key=lambda card: card["to_check"] == 0)
@@ -284,24 +285,74 @@ class ResultsService(Service):
         self.commit()
         return {"scores_released": released}
 
-    def set_opened(self, assignment_id, opened):
-        """Open the assignment to its students, or close it again. Closing is always allowed (even
-        after submissions); nothing is deleted, so opening again brings back all their answers."""
+    def set_status(self, assignment_id, status):
+        """Open the assignment (from not started, or re-open it after a close) or close it (from open).
+
+        Closing is final for the students: every attempt not submitted yet, and every student who
+        never started, is submitted as it stands (answers saved so far, unanswered = 0 points, never
+        late). Students can still read the activity but not answer it. Re-opening puts those
+        attempts back to in progress with the answers the student really wrote, so they can continue;
+        students who submitted on their own stay submitted.
+        Returns {status, changed: how many attempts the close submitted or the re-open put back}."""
         assignment = self.require_open(assignment_id)
-        if not isinstance(opened, bool):
-            raise ValidationError("Choose whether to open the activity.")
-        self.assignments.set_is_open(assignment_id, opened)
-        if bool(assignment["is_open"]) != opened:
-            self.log_giving("assignment.opened" if opened else "assignment.closed",
-                            f"{'Opened' if opened else 'Closed'} {assignment['title']} "
-                            f"({assignment['class_name']}) {'to' if opened else 'for'} the students.", assignment)
+        before = assignment["status"]
+        if status not in ("open", "closed"):
+            raise ValidationError("Choose open or closed.")
+        if status == "closed" and before != "open":
+            raise ValidationError("Open the activity before closing it.")
+        if status == before:
+            return {"status": status, "changed": 0}
+        changed = 0
+        if status == "closed":
+            changed = self.submit_unfinished(assignment)
+        elif before == "closed":
+            changed = self.put_back_in_progress(assignment)
+        self.assignments.set_status(assignment_id, status)
+        where = f"{assignment['title']} ({assignment['class_name']})"
+        if status == "closed":
+            self.log_giving("assignment.closed", f"Closed {where}; {plural(changed, 'unfinished attempt')} "
+                            "submitted as they were.", assignment)
+        elif before == "closed":
+            self.log_giving("assignment.reopened", f"Re-opened {where}; {plural(changed, 'attempt')} "
+                            "back to in progress.", assignment)
+        else:
+            self.log_giving("assignment.opened", f"Opened {where} to the students.", assignment)
         self.commit()
-        return {"is_open": opened}
+        return {"status": status, "changed": changed}
+
+    def submit_unfinished(self, assignment):
+        """Submit what the students have so far, for the close: attempts being answered, and
+        students who never started (an empty attempt, 0 points). Excluded students are left out."""
+        assignment_id = assignment["id"]
+        questions = self.activities.questions(assignment["activity_id"])
+        excluded = set(self.assignments.excluded_ids(assignment_id))
+        count = 0
+        for student in self.assignments.students(assignment):
+            if student["id"] in excluded:
+                continue
+            latest = self.submissions.latest(assignment_id, student["id"])
+            if latest and latest["submitted_at"]:
+                continue
+            if latest is None:
+                latest = self.submissions.get(self.submissions.create_attempt(assignment_id, student["id"], 1))
+            grade_attempt(self, assignment_id, latest, questions, student["id"])
+            self.submissions.mark_auto_submitted(latest["id"])
+            count += 1
+        return count
+
+    def put_back_in_progress(self, assignment):
+        """Undo the close for the attempts it submitted (see set_status)."""
+        attempts = self.submissions.auto_submitted_latest(assignment["id"])
+        for submission in attempts:
+            self.submissions.back_to_in_progress(submission["id"])  # an empty one is simply removed
+        return len(attempts)
 
     def reopen(self, assignment_id, student_id):
         """Give one student another try, even past the activity's limit: a new attempt starting
         from their last answers. Their counted score stays until they submit it."""
-        self.require_open(assignment_id)
+        assignment = self.require_open(assignment_id)
+        if assignment["status"] != "open":
+            raise ValidationError("Open the activity first: students can't answer while it is closed.")
         self.require_included(assignment_id, student_id)
         attempts = self.submissions.attempts(assignment_id, student_id)
         if not attempts:

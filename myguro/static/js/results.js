@@ -108,15 +108,16 @@ function render() {
   back.textContent = assignment.class_id === null ? "‹ Activities" : `‹ ${assignment.class_name}`;
   document.getElementById("edit-link").href = `/activities/${assignment.activity_id}`;
 
-  // Open / Close: students see and answer the activity only while it is open for this class or group.
-  const opened = assignment.is_open;
-  document.getElementById("open-button").textContent = opened ? "Close" : "Open";
-  document.getElementById("open-button").className = opened
-    ? "btn btn-sm text-nowrap btn-outline-secondary bi bi-door-closed"
-    : "btn btn-sm text-nowrap btn-success bi bi-door-open";
-  document.getElementById("open-note").textContent = opened
-    ? "Open: students can see and answer this activity."
-    : "Closed: students can't see this activity yet. Open it when they may start.";
+  // Not started / Open / Closed: students answer only while it is open for this class or group.
+  const action = STATUS_ACTIONS[assignment.status];
+  document.getElementById("open-button").textContent = action.label;
+  document.getElementById("open-button").className = `btn btn-sm text-nowrap bi ${action.icon} ${action.className}`;
+  document.getElementById("open-note").textContent = {
+    not_started: "Not started: students can't see this activity yet. Open it when they may answer.",
+    open: "Open: students can see and answer this activity.",
+    closed: "Closed: all work was submitted as it was. Students can only read the questions. " +
+      "Re-open it to let unfinished students continue.",
+  }[assignment.status];
 
   const released = assignment.scores_released;
   document.getElementById("release-button").textContent = released ? "Hide scores" : "Release scores";
@@ -207,18 +208,14 @@ document.getElementById("open-button").addEventListener("click", async (event) =
   if (!stopLoading) return;
   hideError("results-error");
   try {
-    const response = await apiFetch(`/api/assignments/${assignmentId}/open`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ open: !results.assignment.is_open }),
-    });
+    const response = await putStatus(assignmentId, STATUS_ACTIONS[results.assignment.status].next,
+      results.assignment.class_name);
     if (!response) return;
     if (!response.ok) {
       showError("results-error", (await response.json()).error || "Could not save.");
       return;
     }
-    results.assignment.is_open = (await response.json()).is_open;
-    render();
+    await loadResults();  // a close or re-open changes the students' rows too
   } catch {
     showError("results-error", "Cannot reach the server. Check your connection.");
   } finally {

@@ -26,9 +26,9 @@ class ActivityService(Service):
             # True once a student submitted it: then it can't be edited
             "locked": self.activities.has_submissions(row["id"]),
             "deleted_at": row["deleted_at"],  # set while the sheet is deleted (archived)
-            # How many classes or groups it is given to (0 = a draft), and how many of them are open
+            # How many classes or groups it is given to (0 = a draft), and how many are not started, open, closed
             "assigned": self.activities.count_assigned(row["id"]),
-            "open": self.activities.count_open(row["id"]),
+            "statuses": self.activities.count_by_status(row["id"]),
             "created_at": row["created_at"],
             "updated_at": row["updated_at"],
         }
@@ -111,7 +111,7 @@ class ActivityService(Service):
         archived = bool(self.activities.count_assigned(activity_id))
         if archived:
             self.activities.archive(activity_id)
-            self.assignments.close_all(activity_id)  # so restoring it does not open it again by itself
+            self.assignments.reset_all(activity_id)  # not started again, so restoring it does not reopen it by itself
         else:
             self.activities.delete(activity_id)
         self.log_activity("activity.deleted", f"Deleted the activity {row['title']}"
@@ -120,12 +120,12 @@ class ActivityService(Service):
         return archived
 
     def restore(self, activity_id):
-        """Bring a deleted sheet back with its assignments (closed) and student work."""
+        """Bring a deleted sheet back with its assignments (not started) and student work."""
         row = self.activities.get_for_teacher(activity_id, self.user["id"], include_deleted=True)
         if row is None or row["deleted_at"] is None:
             raise NotFoundError("Activity not found.")
         self.activities.restore(activity_id)
-        self.log_activity("activity.restored", f"Restored the activity {row['title']} (its assignments are closed).", row)
+        self.log_activity("activity.restored", f"Restored the activity {row['title']} (its assignments are not started).", row)
         self.commit()
         return self.activity_json(self.require(activity_id))
 

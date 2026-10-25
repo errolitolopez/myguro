@@ -110,7 +110,7 @@ class ClassRepository(Repository):
                                       WHERE x.assignment_id = asg.id AND x.student_id = cs.student_id)
                       AND EXISTS (SELECT 1 FROM activities a
                                   WHERE a.id = asg.activity_id AND a.deleted_at IS NULL)
-                      AND asg.is_open = 1) AS activities
+                      AND asg.status IN ('open', 'closed')) AS activities
             FROM class_students cs
             JOIN classes c ON c.id = cs.class_id
             JOIN users t ON t.id = c.teacher_id

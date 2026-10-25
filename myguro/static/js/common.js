@@ -271,3 +271,29 @@ function showDescription(element, section) {
     element.textContent = section.description;
   }
 }
+
+// An assignment is Not started, Open or Closed. What the teacher's button does next, and how the status looks.
+// STATUS_ACTIONS.open -> { next: "closed", label: "Close", ... }
+const STATUS_ACTIONS = {
+  not_started: { next: "open", label: "Open", className: "btn-success", icon: "bi-door-open" },
+  open: { next: "closed", label: "Close", className: "btn-outline-secondary", icon: "bi-door-closed" },
+  closed: { next: "open", label: "Re-open", className: "btn-primary", icon: "bi-arrow-counterclockwise" },
+};
+const STATUS_BADGES = {
+  not_started: ["text-bg-secondary", "Not started"],
+  open: ["text-bg-success", "Open"],
+  closed: ["text-bg-dark", "Closed"],
+};
+
+// Open, close or re-open an assignment. A close asks first: it submits everyone's unfinished work.
+// putStatus(12, "closed", "Grade 9 - Rizal") -> the response, or null when cancelled or signed out
+async function putStatus(assignmentId, next, name) {
+  if (next === "closed" && !window.confirm(
+    `Close this activity for ${name}? Work not submitted yet is submitted as it is, and students can only ` +
+    "read the questions. You can re-open it later.")) return null;
+  return apiFetch(`/api/assignments/${assignmentId}/status`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status: next }),
+  });
+}

@@ -69,25 +69,31 @@
   <p id="no-classes" class="text-body-secondary d-none">You're not in a class yet. Ask your teacher to add you.</p>
   {% else %}
   <div class="row g-3 mb-4">
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-md-4">
       <div class="card h-100"><div class="card-body">
         <div class="text-body-secondary small">Students</div>
         <div class="fs-3 fw-semibold" id="stat-students">–</div>
       </div></div>
     </div>
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-md-4">
+      <a class="card h-100 text-decoration-none" href="{{ url_for('activities.list_page') }}"><div class="card-body">
+        <div class="text-body-secondary small">Not started activities</div>
+        <div class="fs-3 fw-semibold" id="stat-not-started">–</div>
+      </div></a>
+    </div>
+    <div class="col-6 col-md-4">
       <a class="card h-100 text-decoration-none" href="{{ url_for('activities.list_page') }}"><div class="card-body">
         <div class="text-body-secondary small">Open activities</div>
         <div class="fs-3 fw-semibold" id="stat-open">–</div>
       </div></a>
     </div>
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-md-4">
       <a class="card h-100 text-decoration-none" href="{{ url_for('activities.list_page') }}"><div class="card-body">
         <div class="text-body-secondary small">Closed activities</div>
         <div class="fs-3 fw-semibold" id="stat-closed">–</div>
       </div></a>
     </div>
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-md-4">
       <div class="card h-100"><div class="card-body">
         <div class="text-body-secondary small">Answers submitted</div>
         <div class="fs-3 fw-semibold" id="stat-submissions">–</div>

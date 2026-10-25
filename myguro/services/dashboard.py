@@ -31,9 +31,10 @@ class DashboardService(Service):
             "role": "teacher",
             "classes": ClassService(self.db, self.user).list(),
             "students": self.classes.count_students_of_teacher(teacher_id, year_id),
-            # Assignments (a sheet given to a class or group) students can answer now, and the ones not opened yet
-            "open": self.assignments.count_for_teacher(teacher_id, year_id, is_open=True),
-            "closed": self.assignments.count_for_teacher(teacher_id, year_id, is_open=False),
+            # Assignments (a sheet given to a class or group) by status
+            "open": self.assignments.count_for_teacher(teacher_id, year_id, "open"),
+            "not_started": self.assignments.count_for_teacher(teacher_id, year_id, "not_started"),
+            "closed": self.assignments.count_for_teacher(teacher_id, year_id, "closed"),
             # Students who submitted (each student once per assignment, however many attempts)
             "submissions": self.submissions.count_submitted_for_teacher(teacher_id, year_id),
         }

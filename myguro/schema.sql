@@ -94,9 +94,10 @@ CREATE TABLE IF NOT EXISTS assignments (
     due_date TEXT,
     -- 0 = students don't see their scores yet (so answers can't be passed around); the teacher releases them
     scores_released INTEGER NOT NULL DEFAULT 0,
-    -- 0 = closed: students given the sheet don't see it; 1 = open: they can answer it. Each class or group
-    -- is opened on its own, so one sheet can be open for one class and closed for another
-    is_open INTEGER NOT NULL DEFAULT 0,
+    -- not_started: students given the sheet don't see it yet. open: they can answer it. closed: final, every
+    -- unfinished attempt was submitted; students can only read it. The teacher can re-open it. Each class or
+    -- group has its own status, so one sheet can be open for one class and closed for another
+    status TEXT NOT NULL DEFAULT 'not_started' CHECK (status IN ('not_started', 'open', 'closed')),
     assigned_at TEXT NOT NULL DEFAULT (datetime('now')),
     UNIQUE (activity_id, class_id)
 );
@@ -158,6 +159,8 @@ CREATE TABLE IF NOT EXISTS submissions (
     paper INTEGER NOT NULL DEFAULT 0,
     paper_score INTEGER,
     note TEXT NOT NULL DEFAULT '',
+    -- 1 = submitted by the teacher closing the assignment, not by the student; re-opening puts it back to in progress
+    auto_submitted INTEGER NOT NULL DEFAULT 0,
     UNIQUE (assignment_id, student_id, attempt)
 );
 

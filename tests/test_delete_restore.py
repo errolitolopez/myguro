@@ -44,7 +44,7 @@ def test_deleting_an_assigned_sheet_archives_it(teacher):
     assert [item["activities"] for item in classes] == [0]
 
 
-def test_restore_brings_back_closed_with_the_students_work(teacher):
+def test_restore_brings_back_not_started_with_the_students_work(teacher):
     class_id, activity_id, assignment_id, students, questions = assigned_sheet(teacher)
     student = login(students[0]["username"])
     other = login(students[1]["username"])
@@ -54,9 +54,9 @@ def test_restore_brings_back_closed_with_the_students_work(teacher):
 
     assert teacher.delete(f"/api/activities/{activity_id}").get_json()["archived"] is True  # even though submitted
     restored = teacher.post(f"/api/activities/{activity_id}/restore").get_json()["activity"]
-    assert restored["open"] == 0 and restored["id"] == activity_id
+    assert restored["statuses"] == {"not_started": 1, "open": 0, "closed": 0} and restored["id"] == activity_id
     assert listed(teacher) == [activity_id] and listed(teacher, deleted=True) == []
-    assert student.get("/api/my-activities").get_json()["activities"] == []  # still closed
+    assert student.get("/api/my-activities").get_json()["activities"] == []  # not started again
 
     assert open_assignment(teacher, assignment_id).status_code == 200
     seen = student.get("/api/my-activities").get_json()["activities"]

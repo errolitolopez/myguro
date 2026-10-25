@@ -201,9 +201,10 @@ def test_open_release_exclude_and_include(admin, teacher):
     class_id, students = make_class(teacher)
     activity_id, _ = make_activity(teacher)
     assignment_id = assign(teacher, activity_id, class_id)
-    teacher.put(f"/api/assignments/{assignment_id}/open", json={"open": True})  # already open: no entry
-    teacher.put(f"/api/assignments/{assignment_id}/open", json={"open": False})
-    teacher.put(f"/api/assignments/{assignment_id}/open", json={"open": True})
+    status = lambda value: teacher.put(f"/api/assignments/{assignment_id}/status", json={"status": value})
+    status("open")  # already open: no entry
+    status("closed")
+    status("open")  # a re-open
     teacher.put(f"/api/assignments/{assignment_id}/release", json={"released": True})
     teacher.put(f"/api/assignments/{assignment_id}/release", json={"released": False})
     student_id = students[0]["id"]
@@ -211,7 +212,7 @@ def test_open_release_exclude_and_include(admin, teacher):
     teacher.put(url, json={"excluded": True})
     teacher.put(url, json={"excluded": False})
     actions = [action for action, _ in sheet_log(admin, category="giving")][1:]  # the first is "given"
-    assert actions == ["assignment.opened", "assignment.closed", "assignment.opened", "assignment.released",
+    assert actions == ["assignment.opened", "assignment.closed", "assignment.reopened", "assignment.released",
                        "assignment.hidden", "assignment.excluded", "assignment.included"]
 
 
