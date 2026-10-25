@@ -386,6 +386,96 @@ def gradebook_pdf_bytes(data, teacher, exported_at, timezone_info):
     return bytes(pdf.output())
 
 
+# --- Attendance ------------------------------------------------------------------------
+
+ATTENDANCE_LETTERS = {"present": "P", "late": "L", "absent": "A", "excused": "E"}
+ATTENDANCE_DAYS_PER_BLOCK = 20  # day columns on one page width of the PDF; more days continue below
+
+
+def attendance_lines(data, teacher, exported_at):
+    return [
+        " · ".join(filter(None, [data["class"]["name"], data["class"]["subject"], f"Teacher: {teacher}"])),
+        f"{len(data['students'])} students · {len(data['days'])} days recorded · Exported: {exported_at}",
+    ]
+
+
+def short_day(isoday):
+    """"2026-10-26" -> "10-26"."""
+    return isoday[5:]
+
+
+def attendance_xlsx_bytes(data, teacher, exported_at, timezone_info):
+    """The attendance record as an .xlsx file (bytes): a column per recorded day with P (present),
+    L (late), A (absent) or E (excused), then the totals as numbers."""
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = "Attendance"
+    sheet.append(["Attendance"])
+    sheet["A1"].font = Font(bold=True, size=14)
+    for line in attendance_lines(data, teacher, exported_at):
+        sheet.append([line])
+    sheet.append(["P = present, L = late, A = absent, E = excused"])
+    sheet.append([])
+
+    sheet.append(["No.", "Student", "Username", "Grade", "Section"] + data["days"]
+                 + ["Present", "Late", "Absent", "Excused"])
+    header_row = sheet.max_row
+    for cell in sheet[header_row]:
+        cell.font = Font(bold=True)
+        cell.fill = PatternFill("solid", fgColor="E9ECEF")
+        cell.alignment = Alignment(horizontal="center", vertical="top")
+
+    for number, student in enumerate(data["students"], start=1):
+        row = [number, student["name"], student["username"], student["grade"], student["section"]]
+        row += [ATTENDANCE_LETTERS.get(student["marks"].get(day), "") for day in data["days"]]
+        row += [student["totals"][status] for status in ATTENDANCE_LETTERS]
+        sheet.append(row)
+        for cell in sheet[sheet.max_row][5:5 + len(data["days"])]:
+            cell.alignment = Alignment(horizontal="center")
+
+    widths = [5, 28, 16, 10, 12] + [11] * len(data["days"]) + [9] * 4
+    for index, width in enumerate(widths, start=1):
+        sheet.column_dimensions[get_column_letter(index)].width = width
+    sheet.freeze_panes = sheet.cell(row=header_row + 1, column=3)  # keep headers and names visible
+    add_generated_by(sheet)
+
+    output = io.BytesIO()
+    workbook.save(output)
+    return output.getvalue()
+
+
+def attendance_pdf_bytes(data, teacher, exported_at, timezone_info):
+    """The attendance record as a PDF (bytes), A4 landscape. Days run across; when there are more
+    than ATTENDANCE_DAYS_PER_BLOCK they continue in another table below, with the students again."""
+    pdf = ResultsPDF()
+    pdf.set_title(f"Attendance - {data['class']['name']}")
+    pdf.add_page()
+
+    pdf.text_style(14, bold=True)
+    pdf.multi_cell(0, 7, "Attendance", new_x="LMARGIN", new_y="NEXT")
+    pdf.text_style(8.5, grey=True)
+    for line in attendance_lines(data, teacher, exported_at):
+        pdf.cell(0, 4.5, line, new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(0, 4.5, "P = present, L = late, A = absent, E = excused", new_x="LMARGIN", new_y="NEXT")
+
+    start = [("No.", 9, "R"), ("Student", 55, "L")]
+    end = [("Pres.", 11, "C"), ("Late", 11, "C"), ("Abs.", 11, "C"), ("Exc.", 11, "C")]
+    day_width = 8
+    blocks = [data["days"][i:i + ATTENDANCE_DAYS_PER_BLOCK]
+              for i in range(0, len(data["days"]), ATTENDANCE_DAYS_PER_BLOCK)] or [[]]
+    for days in blocks:
+        pdf.ln(3)
+        header = start + [(short_day(day), day_width, "C") for day in days] + end
+        pdf.header_cells = header
+        pdf.table_row(header, bold=True, fill=True)
+        for number, student in enumerate(data["students"], start=1):
+            row = [(number, start[0][1], "R"), (student["name"], start[1][1], "L")]
+            row += [(ATTENDANCE_LETTERS.get(student["marks"].get(day), ""), day_width, "C") for day in days]
+            row += [(student["totals"][status], width, "C") for status, (_, width, _) in zip(ATTENDANCE_LETTERS, end)]
+            pdf.table_row(row)
+    return bytes(pdf.output())
+
+
 # --- Printable activity sheet ---------------------------------------------------------
 # The sheet on paper: A4 portrait, either the student copy (blank answer lines) or the
 # teacher's copy with the answer key. Built from ActivityService.get (saved version).

@@ -10,9 +10,18 @@
   <div id="attendance-error" class="alert alert-danger mt-2 d-none" role="alert"></div>
   <div id="attendance-saved" class="alert alert-success mt-2 d-none" role="status">Attendance saved.</div>
 
-  <header class="mt-2 mb-3">
-    <h1 class="h4 mb-1">Attendance</h1>
-    <div class="small text-body-secondary" id="attendance-details">Loading...</div>
+  <header class="d-flex justify-content-between align-items-start gap-2 mt-2 mb-3">
+    <div>
+      <h1 class="h4 mb-1">Attendance</h1>
+      <div class="small text-body-secondary" id="attendance-details">Loading...</div>
+    </div>
+    <!-- The whole record of the class: every day with a mark -->
+    <div class="d-flex flex-wrap justify-content-end gap-2">
+      <a class="btn btn-sm btn-outline-success text-nowrap bi bi-file-earmark-excel"
+         href="{{ url_for('classes.attendance_export', class_id=class_id, kind='xlsx') }}">Export Excel</a>
+      <a class="btn btn-sm btn-outline-danger text-nowrap bi bi-file-earmark-pdf"
+         href="{{ url_for('classes.attendance_export', class_id=class_id, kind='pdf') }}">Export PDF</a>
+    </div>
   </header>
 
   <!-- The day being recorded. Type in the marks from your paper record, then Save. -->

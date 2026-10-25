@@ -61,3 +61,27 @@ def test_the_page_opens_and_the_save_is_logged(teacher):
     admin.post("/api/change-password", json={"current_password": "admin", "new_password": "adminpass1"})
     entries = admin.get("/api/log?q=attendance").get_json()["entries"]
     assert any(entry["action"] == "attendance.saved" for entry in entries)
+
+
+def test_the_record_downloads_as_excel_and_pdf(teacher, other_teacher):
+    import io
+
+    from openpyxl import load_workbook
+
+    class_id, students = make_class(teacher)
+    first = str(students[0]["id"])
+    for day, status in ((DAY, "present"), ((date.today() - timedelta(days=2)).isoformat(), "absent")):
+        teacher.put(f"/api/classes/{class_id}/attendance", json={"day": day, "marks": {first: status}})
+
+    excel = teacher.get(f"/classes/{class_id}/attendance.xlsx")
+    assert excel.status_code == 200 and "Attendance" in excel.headers["Content-Disposition"]
+    rows = list(load_workbook(io.BytesIO(excel.data)).active.iter_rows(values_only=True))
+    header = next(row for row in rows if row[0] == "No.")
+    assert header[5:7] == tuple(sorted([DAY, (date.today() - timedelta(days=2)).isoformat()]))
+    student_row = next(row for row in rows if row[1] == students[0]["name"])
+    assert sorted(student_row[5:7]) == ["A", "P"] and student_row[-4:] == (1, 0, 1, 0)
+
+    pdf = teacher.get(f"/classes/{class_id}/attendance.pdf")
+    assert pdf.status_code == 200 and pdf.data.startswith(b"%PDF")
+    # Another teacher's class is not downloadable
+    assert other_teacher.get(f"/classes/{class_id}/attendance.xlsx").status_code == 302

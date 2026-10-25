@@ -16,6 +16,11 @@ class AttendanceRepository(Repository):
             totals.setdefault(row["student_id"], {})[row["status"]] = row["days"]
         return totals
 
+    def all_marks(self, class_id):
+        """Every mark of the class: rows of (student_id, day, status), oldest day first."""
+        return self.all("SELECT student_id, day, status FROM attendance WHERE class_id = ? ORDER BY day",
+                        (class_id,))
+
     def recorded_days(self, class_id):
         """The days (newest first) the class has any mark."""
         return [row["day"] for row in self.all(

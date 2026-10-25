@@ -29,6 +29,22 @@ class AttendanceService(Service):
         return {"class": class_json(class_row), "day": day, "statuses": list(STATUSES),
                 "students": students, "recorded_days": self.attendance.recorded_days(class_id)}
 
+    def record(self, class_id):
+        """The whole record for the exports: the days with marks (oldest first) and, for every
+        student of the class, their mark on each day ({day: status}) and their totals."""
+        class_row = ClassService(self.db, self.user).require(class_id)
+        marks = {}  # student id -> {day: status}
+        days = set()
+        for row in self.attendance.all_marks(class_id):
+            marks.setdefault(row["student_id"], {})[row["day"]] = row["status"]
+            days.add(row["day"])
+        students = []
+        for student in self.classes.students(class_id):
+            own = marks.get(student["id"], {})
+            students.append({**user_json(student), "marks": own,
+                             "totals": {status: list(own.values()).count(status) for status in STATUSES}})
+        return {"class": class_json(class_row), "days": sorted(days), "students": students}
+
     def save(self, class_id, data):
         """Save the marks of one day: {day, marks: {student id: status, or null to clear}}. Only
         students of the class; a past school year can only be looked at."""

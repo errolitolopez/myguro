@@ -7,7 +7,8 @@ from flask import Blueprint, jsonify, redirect, render_template, request, send_f
 
 from myguro.config import SCHOOL_TIMEZONE, school_now_text
 from myguro.database import get_db
-from myguro.exports import gradebook_pdf_bytes, gradebook_xlsx_bytes
+from myguro.exports import (attendance_pdf_bytes, attendance_xlsx_bytes, gradebook_pdf_bytes,
+                            gradebook_xlsx_bytes)
 from myguro.services import AttendanceService, ClassService, GradebookService
 from myguro.services.presenters import class_title
 from myguro.web.security import current_user, json_body, role_required_api, role_required_page
@@ -18,6 +19,12 @@ bp = Blueprint("classes", __name__)
 GRADEBOOK_EXPORTS = {
     "xlsx": (gradebook_xlsx_bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
     "pdf": (gradebook_pdf_bytes, "application/pdf"),
+}
+
+
+ATTENDANCE_EXPORTS = {
+    "xlsx": (attendance_xlsx_bytes, GRADEBOOK_EXPORTS["xlsx"][1]),
+    "pdf": (attendance_pdf_bytes, GRADEBOOK_EXPORTS["pdf"][1]),
 }
 
 
@@ -68,6 +75,20 @@ def attendance_page(class_id):
     if not service().exists(class_id):
         return redirect(url_for("classes.list_page"))
     return render_template("attendance.html", user=current_user(), class_id=class_id)
+
+
+@bp.get("/classes/<int:class_id>/attendance.<kind>")
+@role_required_page("teacher")
+def attendance_export(class_id, kind):
+    """Download the class's whole attendance record as Excel (.xlsx) or PDF."""
+    if kind not in ATTENDANCE_EXPORTS or not service().exists(class_id):
+        return redirect(url_for("classes.list_page"))
+    data = AttendanceService(get_db(), current_user()).record(class_id)
+    make, mimetype = ATTENDANCE_EXPORTS[kind]
+    content = make(data, current_user()["name"], school_now_text(), SCHOOL_TIMEZONE)
+    name = re.sub(r'\s*[\\/:*?"<>|]+\s*', " - ", f"Attendance - {class_title(data['class']['name'], data['class']['subject'])}")
+    name = " ".join(name.replace(" · ", " - ").split())
+    return send_file(io.BytesIO(content), as_attachment=True, download_name=f"{name}.{kind}", mimetype=mimetype)
 
 
 @bp.get("/api/classes/<int:class_id>/attendance")
