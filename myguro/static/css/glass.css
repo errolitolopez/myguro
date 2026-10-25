@@ -22,6 +22,20 @@
   --page-base: #f3f4f6;
   --page-gradient: radial-gradient(circle at top left, hsl(220 13% 95%), hsl(220 13% 91%));
   --scroll-thumb: rgba(100, 116, 139, 0.5);
+  --confirm-bg: #0d6efd;
+  --confirm-hover: #0b5ed7;
+  --confirm-active: #0a58ca;
+  --confirm-text: #fff;
+  --danger-bg: #dc3545;
+  --danger-hover: #bb2d3b;
+  --danger-active: #b02a37;
+  --neutral-bg: #6c757d;
+  --neutral-hover: #5c636a;
+  --neutral-active: #565e64;
+  --warn-bg: #ffc107;
+  --warn-hover: #ffca2c;
+  --warn-active: #ffcd39;
+  --warn-text: #000;
 }
 
 [data-bs-theme="dark"] {
@@ -221,10 +235,84 @@ footer {
 .table { --bs-table-bg: transparent; }
 .alert { -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
 
-/* Buttons keep Bootstrap's colours by meaning: green = save / create / confirm, blue = assign
-   and open, red = delete, gray = cancel and secondary. A button with a "bi bi-..." class shows
-   its icon before the text (the icon is drawn by ::before, so changing the button's text from
-   script keeps it). */
+/* Every button is solid, never an outline, and keeps its colour by meaning: blue = save /
+   create / confirm / submit / assign / open (the success and primary classes, outline or not,
+   all look the same), red = delete, gray = cancel and secondary, yellow = warning. The outline
+   classes stay in the markup; only their look changes here. A button with a "bi bi-..." class
+   shows its icon before the text (the icon is drawn by ::before, so changing the button's text
+   from script keeps it). */
+.btn-success,
+.btn-outline-success,
+.btn-primary,
+.btn-outline-primary {
+  --bs-btn-color: var(--confirm-text);
+  --bs-btn-bg: var(--confirm-bg);
+  --bs-btn-border-color: var(--confirm-bg);
+  --bs-btn-hover-color: var(--confirm-text);
+  --bs-btn-hover-bg: var(--confirm-hover);
+  --bs-btn-hover-border-color: var(--confirm-hover);
+  --bs-btn-active-color: var(--confirm-text);
+  --bs-btn-active-bg: var(--confirm-active);
+  --bs-btn-active-border-color: var(--confirm-active);
+  --bs-btn-disabled-color: var(--confirm-text);
+  --bs-btn-disabled-bg: var(--confirm-bg);
+  --bs-btn-disabled-border-color: var(--confirm-bg);
+  --bs-btn-focus-shadow-rgb: 49, 132, 253;
+}
+.btn-danger,
+.btn-outline-danger {
+  --bs-btn-color: var(--confirm-text);
+  --bs-btn-bg: var(--danger-bg);
+  --bs-btn-border-color: var(--danger-bg);
+  --bs-btn-hover-color: var(--confirm-text);
+  --bs-btn-hover-bg: var(--danger-hover);
+  --bs-btn-hover-border-color: var(--danger-hover);
+  --bs-btn-active-color: var(--confirm-text);
+  --bs-btn-active-bg: var(--danger-active);
+  --bs-btn-active-border-color: var(--danger-active);
+  --bs-btn-disabled-color: var(--confirm-text);
+  --bs-btn-disabled-bg: var(--danger-bg);
+  --bs-btn-disabled-border-color: var(--danger-bg);
+  --bs-btn-focus-shadow-rgb: 225, 83, 97;
+}
+.btn-secondary,
+.btn-outline-secondary {
+  --bs-btn-color: var(--confirm-text);
+  --bs-btn-bg: var(--neutral-bg);
+  --bs-btn-border-color: var(--neutral-bg);
+  --bs-btn-hover-color: var(--confirm-text);
+  --bs-btn-hover-bg: var(--neutral-hover);
+  --bs-btn-hover-border-color: var(--neutral-hover);
+  --bs-btn-active-color: var(--confirm-text);
+  --bs-btn-active-bg: var(--neutral-active);
+  --bs-btn-active-border-color: var(--neutral-active);
+  --bs-btn-disabled-color: var(--confirm-text);
+  --bs-btn-disabled-bg: var(--neutral-bg);
+  --bs-btn-disabled-border-color: var(--neutral-bg);
+  --bs-btn-focus-shadow-rgb: 130, 138, 145;
+}
+.btn-warning,
+.btn-outline-warning {
+  --bs-btn-color: var(--warn-text);
+  --bs-btn-bg: var(--warn-bg);
+  --bs-btn-border-color: var(--warn-bg);
+  --bs-btn-hover-color: var(--warn-text);
+  --bs-btn-hover-bg: var(--warn-hover);
+  --bs-btn-hover-border-color: var(--warn-hover);
+  --bs-btn-active-color: var(--warn-text);
+  --bs-btn-active-bg: var(--warn-active);
+  --bs-btn-active-border-color: var(--warn-active);
+  --bs-btn-disabled-color: var(--warn-text);
+  --bs-btn-disabled-bg: var(--warn-bg);
+  --bs-btn-disabled-border-color: var(--warn-bg);
+  --bs-btn-focus-shadow-rgb: 217, 164, 6;
+}
+/* A toggle button that is switched on (To do / Submitted, attempts) is all solid like the rest,
+   so a white ring tells it apart from the ones that are off. */
+.btn-check:checked + .btn,
+.btn.active {
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.75);
+}
 .btn.bi::before {
   margin-right: 0.45em;
   vertical-align: -0.125em;
