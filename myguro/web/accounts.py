@@ -100,7 +100,7 @@ def api_login_details():
     section}]}), made right after an import or new passwords, while the passwords are still known."""
     students = service().clean_login_details(json_body())
     return send_file(io.BytesIO(login_details_xlsx_bytes(students)), as_attachment=True,
-                     download_name="MyGURO login details.xlsx",
+                     download_name="MyGuro login details.xlsx",
                      mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 
@@ -127,7 +127,7 @@ def api_update(user_id):
 def import_template():
     """The Excel file to fill in for importing students."""
     return send_file(io.BytesIO(template_xlsx_bytes()), as_attachment=True,
-                     download_name="MyGURO students template.xlsx",
+                     download_name="MyGuro students template.xlsx",
                      mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 

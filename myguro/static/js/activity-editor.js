@@ -692,7 +692,7 @@ document.getElementById("add-activity-button").addEventListener("click", () => a
 // --- Load and save ---------------------------------------------------------------
 
 function showActivity(activity) {
-  document.title = `${activity.title} · MyGURO`;
+  document.title = `${activity.title} · MyGuro`;
   titleInput.value = activity.title;
   subjectInput.value = activity.subject;
   sections = activity.sections.map(fromServer);
@@ -749,7 +749,7 @@ async function saveTitleSubject() {
       saveStatus.textContent = data.error || "Could not save.";
       return;
     }
-    document.title = `${data.activity.title} · MyGURO`;
+    document.title = `${data.activity.title} · MyGuro`;
     saveStatus.textContent = "Locked · title and subject saved";
   } catch {
     saveStatus.textContent = "Cannot reach the server.";

@@ -1,4 +1,4 @@
-"""The "Support MyGURO" link shown to admin and teachers (never to students), and the teacher pop-up."""
+"""The "Support MyGuro" link shown to admin and teachers (never to students), and the teacher pop-up."""
 
 import re
 from urllib.parse import urlparse
@@ -11,8 +11,8 @@ MAX_LABEL_LENGTH = 30
 MAX_URL_LENGTH = 300
 MAX_GCASH_NAME_LENGTH = 60
 
-DEFAULT_MESSAGE = "Enjoying MyGURO? Help keep it running."
-DEFAULT_LABEL = "Support MyGURO"
+DEFAULT_MESSAGE = "Enjoying MyGuro? Help keep it running."
+DEFAULT_LABEL = "Support MyGuro"
 
 # When the support window opens by itself for a teacher: never, once per login, once a day
 # (while logged in), or on every page.

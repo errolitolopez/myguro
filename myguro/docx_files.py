@@ -153,7 +153,7 @@ def sheet_template_docx_bytes():
     """The Word file to fill in: how to use it, then an example of every type and its answer key."""
     document = Document()
     add_footer_note(document, GENERATED_BY)
-    document.add_heading("MyGURO activity template", level=0)
+    document.add_heading("MyGuro activity template", level=0)
     document.add_paragraph().add_run(INSTRUCTIONS[0]).bold = True
     for text in INSTRUCTIONS[1:]:
         document.add_paragraph(text)
@@ -258,7 +258,7 @@ def sheet_docx_bytes(activity, teacher):
     add_footer_note(document, GENERATED_BY)
     document.add_heading(activity["title"], level=0)
     document.add_paragraph("  ·  ".join(filter(None, [activity["subject"], teacher])))
-    document.add_paragraph("Teacher's copy with the answer key. To use it again in MyGURO: Activities → "
+    document.add_paragraph("Teacher's copy with the answer key. To use it again in MyGuro: Activities → "
                            "Import from Word. Keep the headings and the Type, Points and "
                            "Directions lines as they are. (This part is not imported.)")
     for kind, text in sheet_docx_lines(activity):

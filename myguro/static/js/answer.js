@@ -341,7 +341,7 @@ function showResult() {
 function render() {
   // Read-only once submitted, and also when the teacher closed it (even for a student who never started).
   const locked = Boolean(activity.submitted_at) || activity.closed;
-  document.title = `${activity.title} · MyGURO`;
+  document.title = `${activity.title} · MyGuro`;
   document.getElementById("activity-title").textContent = activity.title;
   document.getElementById("activity-details").textContent =
     [activity.subject, activity.class_name, activity.teacher].filter(Boolean).join(" · ");

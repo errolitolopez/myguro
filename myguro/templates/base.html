@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>{% block title %}MyGURO{% endblock %}</title>
+  <title>{% block title %}MyGuro{% endblock %}</title>
   <meta name="theme-color" content="#198754">
   <link rel="icon" href="{{ url_for('static', filename='img/favicon.svg') }}" type="image/svg+xml">
   <link rel="icon" href="{{ url_for('static', filename='img/favicon-32.png') }}" type="image/png" sizes="32x32">
@@ -30,7 +30,7 @@
   <!-- Footer on every page. The support note and its button are for admin and teachers only;
        the button opens the ways to give. -->
   <footer class="container py-3 mt-auto text-center small text-body-secondary">
-    <div>MyGURO is a free, non-profit tool for schools.</div>
+    <div>MyGuro is a free, non-profit tool for schools.</div>
     {% if SUPPORT %}
     <div class="mt-1">{{ SUPPORT.message }}</div>
     <button type="button" class="btn btn-sm btn-outline-secondary mt-1 bi bi-heart" data-bs-toggle="modal"

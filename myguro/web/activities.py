@@ -68,7 +68,7 @@ def export(activity_id, kind):
 def import_template_docx():
     """The Word file to fill in for importing an activity sheet."""
     return send_file(io.BytesIO(sheet_template_docx_bytes()), as_attachment=True,
-                     download_name="MyGURO activity template.docx",
+                     download_name="MyGuro activity template.docx",
                      mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
 

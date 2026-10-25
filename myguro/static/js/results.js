@@ -93,7 +93,7 @@ function excludeCell(student) {
 
 function render() {
   const { assignment, sections, students, summary } = results;
-  document.title = `${assignment.title} · Results · MyGURO`;
+  document.title = `${assignment.title} · Results · MyGuro`;
   document.getElementById("results-title").textContent = assignment.title;
   document.getElementById("results-details").textContent = [
     assignment.class_name,

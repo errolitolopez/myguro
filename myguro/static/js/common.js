@@ -229,7 +229,7 @@ const copyDetailsButton = document.getElementById("copy-details-button");
 if (copyDetailsButton) {
   copyDetailsButton.addEventListener("click", async () => {
     const text =
-      `MyGURO login\n` +
+      `MyGuro login\n` +
       `Username: ${document.getElementById("details-username").textContent}\n` +
       `Password: ${document.getElementById("details-password").textContent}`;
     try {
@@ -264,7 +264,7 @@ async function downloadLoginDetails(students, button, errorId) {
     }
     const link = document.createElement("a");
     link.href = URL.createObjectURL(await response.blob());
-    link.download = `MyGURO login details ${new Date().toISOString().slice(0, 10)}.xlsx`;
+    link.download = `MyGuro login details ${new Date().toISOString().slice(0, 10)}.xlsx`;
     document.body.append(link);
     link.click();
     link.remove();
