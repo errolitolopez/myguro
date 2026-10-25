@@ -1,7 +1,7 @@
 """Teacher: publishing and unpublishing a sheet. Students see an assigned sheet only while it is published."""
 
 from conftest import assign, error, login, make_activity, make_class
-from test_activity_import import GOOD, upload, xlsx
+from test_docx_import import GOOD, docx_bytes, upload
 
 
 def publish(teacher, activity_id, published=True):
@@ -20,7 +20,7 @@ def test_new_sheets_copies_and_imports_start_unpublished(teacher):
     assert publish(teacher, activity_id).get_json()["activity"]["published"] is True
     copy = teacher.post(f"/api/activities/{activity_id}/duplicate").get_json()["activity"]
     assert copy["published"] is False
-    imported = upload(teacher, xlsx(GOOD), dry_run=False).get_json()["activity"]
+    imported = upload(teacher, docx_bytes(GOOD), dry_run=False).get_json()["activity"]
     assert imported["published"] is False
 
 

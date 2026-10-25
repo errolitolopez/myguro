@@ -1,5 +1,4 @@
 from myguro.domain.docx_import import sections_from_lines
-from myguro.domain.sheet_import import sections_from_rows
 from myguro.domain.sheets import MAX_TITLE_LENGTH, clean_max_attempts, clean_sections, clean_title_subject
 from myguro.errors import NotFoundError, ValidationError
 from myguro.services.base import Service
@@ -52,18 +51,12 @@ class ActivityService(Service):
         """An activity log entry about one sheet (row: the sheet, with id and title)."""
         self.log(action, "activities", summary, ("activity", row["id"], row["title"]))
 
-    def import_sheet(self, rows, data, dry_run):
-        """Make a new draft sheet from spreadsheet rows [(row number, record)] (see
-        domain/sheet_import.py), with the title and subject in data. All or nothing: with any bad
-        row nothing is created and every problem is listed with its row number. dry_run only checks.
+    def import_docx_sheet(self, lines, data, dry_run):
+        """Make a new draft sheet from the lines of a Word file (see domain/docx_import.py), with the
+        title and subject in data. All or nothing: with any bad item nothing is created and every
+        problem is listed with its section and item (where). dry_run only checks.
 
         Returns {imported, activity (after a real import), sections [{kind, title, questions, points}], errors}."""
-        sections, errors = sections_from_rows(rows)
-        return self.finish_import(sections, errors, data, dry_run)
-
-    def import_docx_sheet(self, lines, data, dry_run):
-        """Same as import_sheet, from the lines of a Word file (see domain/docx_import.py); a
-        problem is located by section and item (where) instead of by row."""
         sections, errors = sections_from_lines(lines)
         return self.finish_import(sections, errors, data, dry_run)
 

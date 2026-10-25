@@ -9,7 +9,7 @@ from myguro.database import get_db
 from myguro.errors import ValidationError
 from myguro.exports import sheet_pdf_bytes
 from myguro.docx_files import read_docx_lines, sheet_docx_bytes, sheet_template_docx_bytes
-from myguro.imports import read_sheet_rows, sheet_template_xlsx_bytes, sheet_xlsx_bytes
+from myguro.imports import sheet_xlsx_bytes
 from myguro.services import ActivityService, AssignmentService
 from myguro.web.security import current_user, json_body, role_required_api, role_required_page
 
@@ -54,8 +54,8 @@ def print_pdf(activity_id):
 @bp.get("/activities/<int:activity_id>/export.<kind>")
 @role_required_page("teacher")
 def export(activity_id, kind):
-    """Download the sheet with its answer key as Word (.docx) or Excel (.xlsx), in the same format
-    the import reads, so it can be imported again as a new activity."""
+    """Download the sheet with its answer key as Word (.docx), which the import reads so it can be
+    imported again as a new activity, or as Excel (.xlsx)."""
     activities = service()
     if kind not in ("docx", "xlsx") or not activities.exists(activity_id):
         return redirect(url_for("activities.list_page"))
@@ -66,15 +66,6 @@ def export(activity_id, kind):
         content, mimetype = sheet_xlsx_bytes(activity), XLSX_TYPE
     return send_file(io.BytesIO(content), as_attachment=True, download_name=f"{file_name(activity['title'])}.{kind}",
                      mimetype=mimetype)
-
-
-@bp.get("/activities/import-template.xlsx")
-@role_required_page("teacher")
-def import_template():
-    """The Excel file to fill in for importing an activity sheet."""
-    return send_file(io.BytesIO(sheet_template_xlsx_bytes()), as_attachment=True,
-                     download_name="myguro activity template.xlsx",
-                     mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 
 @bp.get("/activities/import-template.docx")
@@ -110,16 +101,14 @@ def api_create():
 @bp.post("/api/activities/import")
 @role_required_api("teacher")
 def api_import():
-    """Make a draft sheet from an uploaded .xlsx or .docx (form fields "file", "title", "subject").
+    """Make a draft sheet from an uploaded .docx (form fields "file", "title", "subject").
     dry_run=1 only checks it."""
     upload = request.files.get("file")
-    if upload is None or not upload.filename:
-        raise ValidationError("Choose an Excel (.xlsx) or Word (.docx) file.")
+    if upload is None or not upload.filename.lower().endswith(".docx"):
+        raise ValidationError("Choose a Word (.docx) file.")
     data = {"title": request.form.get("title"), "subject": request.form.get("subject")}
     dry_run = request.form.get("dry_run") == "1"
-    if upload.filename.lower().endswith(".docx"):
-        return jsonify(service().import_docx_sheet(read_docx_lines(upload.read()), data, dry_run=dry_run))
-    return jsonify(service().import_sheet(read_sheet_rows(upload.read()), data, dry_run=dry_run))
+    return jsonify(service().import_docx_sheet(read_docx_lines(upload.read()), data, dry_run=dry_run))
 
 
 @bp.get("/api/activities/<int:activity_id>")

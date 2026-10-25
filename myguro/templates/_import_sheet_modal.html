@@ -1,18 +1,15 @@
-<!-- Import an activity sheet from Excel or Word: choose the file, check it (preview or problems by row),
+<!-- Import an activity sheet from Word: choose the file, check it (preview or problems by item),
      import. All or nothing: a file with a bad row makes no sheet. The new sheet is a draft. -->
 <div class="modal fade" id="import-sheet-modal" tabindex="-1" aria-labelledby="import-sheet-title" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable modal-fullscreen-md-down">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 class="modal-title fs-5" id="import-sheet-title">Import an activity from Excel or Word</h2>
+        <h2 class="modal-title fs-5" id="import-sheet-title">Import an activity from Word</h2>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <ol class="small ps-3">
-          <li>Download a template and fill it in:
-            <a href="{{ url_for('activities.import_template') }}">Excel</a>
-            (one row per section or question; the <em>How to fill</em> sheet explains each column) or
-            <a href="{{ url_for('activities.import_template_docx') }}">Word</a>
+          <li>Download the <a href="{{ url_for('activities.import_template_docx') }}">Word template</a> and fill it in
             (headings, numbered questions and an ANSWER KEY at the end; instructions are on its first page).
             Files that do not follow the template are not imported.</li>
           <li>Choose the file and press <strong>Check file</strong>. Nothing is saved until you press Import.</li>
@@ -30,8 +27,8 @@
         </div>
         <div class="d-flex flex-wrap gap-2">
           <input id="import-sheet-file" type="file" class="form-control" style="max-width: 24rem;"
-                 accept=".xlsx,.docx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                 aria-label="Excel or Word file">
+                 accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                 aria-label="Word file">
           <button id="import-sheet-check" type="button" class="btn btn-outline-success bi bi-check2-circle">Check file</button>
         </div>
 

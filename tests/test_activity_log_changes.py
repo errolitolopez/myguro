@@ -159,10 +159,10 @@ def test_activity_lifecycle_is_logged(admin, teacher):
     teacher.put(f"/api/activities/{activity_id}/settings", json={"max_attempts": 3})
     copy_id = teacher.post(f"/api/activities/{activity_id}/duplicate").get_json()["activity"]["id"]
     teacher.delete(f"/api/activities/{copy_id}")  # never given: really deleted
-    xlsx = teacher.get(f"/activities/{activity_id}/export.xlsx").data
-    teacher.post("/api/activities/import", data={"file": (io.BytesIO(xlsx), "s.xlsx"), "title": "Imported",
+    docx = teacher.get(f"/activities/{activity_id}/export.docx").data
+    teacher.post("/api/activities/import", data={"file": (io.BytesIO(docx), "s.docx"), "title": "Imported",
                                                  "dry_run": "1"}, content_type="multipart/form-data")  # a check only
-    teacher.post("/api/activities/import", data={"file": (io.BytesIO(xlsx), "s.xlsx"), "title": "Imported",
+    teacher.post("/api/activities/import", data={"file": (io.BytesIO(docx), "s.docx"), "title": "Imported",
                                                  "dry_run": "0"}, content_type="multipart/form-data")
     actions = [item["action"] for item in log_of(admin, category="activities")]
     assert actions == ["activity.created", "activity.saved", "activity.published", "activity.unpublished",

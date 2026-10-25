@@ -1,8 +1,8 @@
-"""Teacher: download a sheet with its answers as Word or Excel, and import it again as a new activity."""
+"""Teacher: download a sheet with its answers as Word or Excel, and import the Word file again as a new activity."""
 
 import io
 
-import pytest
+from openpyxl import load_workbook
 
 from conftest import make_activity
 
@@ -30,7 +30,7 @@ SECTIONS = [
 
 def comparable(activity):
     """What must survive a round trip: every question, in order (matching by its pairs, since the
-    Excel import sorts Column B)."""
+    import sorts Column B)."""
     found = []
     for section in activity["sections"]:
         for question in section["questions"]:
@@ -54,11 +54,10 @@ def round_trip(teacher, activity_id, kind):
     return teacher.get(f"/api/activities/{new_id}").get_json()["activity"], new_id
 
 
-@pytest.mark.parametrize("kind", ["docx", "xlsx"])
-def test_download_then_import_gives_the_same_questions(teacher, kind):
+def test_download_then_import_gives_the_same_questions(teacher):
     activity_id, _ = make_activity(teacher, sections=SECTIONS)
     original = teacher.get(f"/api/activities/{activity_id}").get_json()["activity"]
-    again, new_id = round_trip(teacher, activity_id, kind)
+    again, new_id = round_trip(teacher, activity_id, "docx")
     assert new_id != activity_id
     assert comparable(again) == comparable(original)
     assert again["sections"][0]["title"] == "I. Lesson"
@@ -67,9 +66,10 @@ def test_download_then_import_gives_the_same_questions(teacher, kind):
 
 def test_excel_keeps_points_per_question(teacher):
     activity_id, _ = make_activity(teacher, sections=SECTIONS)
-    again, _ = round_trip(teacher, activity_id, "xlsx")
-    points = [question["points"] for section in again["sections"] for question in section["questions"]]
-    assert points == [2, 2, 1, 1, 2, 3, 5, 1]
+    download = teacher.get(f"/activities/{activity_id}/export.xlsx")
+    assert download.status_code == 200
+    rows = list(load_workbook(io.BytesIO(download.data)).worksheets[0].iter_rows(min_row=2, values_only=True))
+    assert [row[11] for row in rows if row[0] == "question"] == [2, 2, 1, 1, 2, 3, 5, 1]
 
 
 def test_word_splits_a_mixed_section_and_keeps_headings_unique(teacher):

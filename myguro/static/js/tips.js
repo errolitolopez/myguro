@@ -12,7 +12,7 @@
       "A new activity starts unpublished. Tap Publish when it is ready for students.",
       "An activity students already submitted is locked. Use Make a copy in the editor to change it.",
       "Scores stay hidden from students until you tap Release scores on the results page.",
-      "You can import a whole activity from Word or Excel on the Activities page.",
+      "You can import a whole activity from Word on the Activities page.",
       "A student answered on paper? Enter a paper score on the results page.",
       "A student was absent? Exclude them from the assignment on the results page.",
       "On the gradebook, swipe the table sideways to see every activity. Turning your phone sideways shows more.",

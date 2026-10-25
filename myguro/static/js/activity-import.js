@@ -1,5 +1,5 @@
-// Activities page: import an activity sheet from an Excel or Word file. Check file -> preview or the
-// problems by row -> Import -> the new draft sheet opens in the editor.
+// Activities page: import an activity sheet from a Word file. Check file -> preview or the
+// problems by item -> Import -> the new draft sheet opens in the editor.
 
 const sheetModalElement = document.getElementById("import-sheet-modal");
 const sheetFile = document.getElementById("import-sheet-file");
@@ -39,7 +39,7 @@ async function sendSheet(dryRun) {
 function showSheetProblems(errors) {
   document.getElementById("import-sheet-problem-list").replaceChildren(...errors.map((problem) => {
     const item = document.createElement("li");
-    item.textContent = `${problem.where || `Row ${problem.row}`}: ${problem.message}`;
+    item.textContent = `${problem.where}: ${problem.message}`;
     return item;
   }));
   sheetPart("import-sheet-problems", true);
@@ -58,7 +58,7 @@ function sheetRow(values) {
 sheetCheckButton.addEventListener("click", async () => {
   resetSheetCheck();
   if (!sheetFile.files.length) {
-    showError("import-sheet-error", "Choose the Excel or Word file first.");
+    showError("import-sheet-error", "Choose the Word file first.");
     return;
   }
   if (!sheetTitle.value.trim()) {
@@ -123,6 +123,6 @@ sheetModalElement.addEventListener("show.bs.modal", () => {
 sheetFile.addEventListener("change", () => {
   resetSheetCheck();
   if (sheetFile.files.length && !sheetTitle.value.trim()) {
-    sheetTitle.value = sheetFile.files[0].name.replace(/\.(xlsx|docx)$/i, "").trim();
+    sheetTitle.value = sheetFile.files[0].name.replace(/\.docx$/i, "").trim();
   }
 });

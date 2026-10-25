@@ -1,11 +1,10 @@
-"""Reading students and activity sheets from an uploaded Excel file, and the templates to fill in.
+"""Reading students from an uploaded Excel file and the template to fill in, and writing an activity sheet to Excel.
 
 Students: Last name, First name, Middle initial (optional) columns, or one Name column.
-Activity sheets: one row per section or question (Row, Title, Description, Question type, ...).
 
 Only the reading is here (rows of text by column); the rules for each student are in
-services/accounts.py (AccountService.import_students), the ones for a sheet in
-domain/sheet_import.py.
+services/accounts.py (AccountService.import_students). Activity sheets are only written to Excel,
+not read back: they are imported from Word (docx_files.py).
 """
 
 import io
@@ -130,117 +129,14 @@ def template_xlsx_bytes():
 
 # ---- Activity sheets ----------------------------------------------------------------------------
 
-MAX_SHEET_ROWS = 500
 CHOICE_FIELDS = [f"choice_{letter}" for letter in "abcdef"]
 SHEET_COLUMNS = ["Row", "Title", "Description", "Question type",
                  "Choice A", "Choice B", "Choice C", "Choice D", "Choice E", "Choice F", "Answer", "Points"]
-SHEET_HEADER_NAMES = {
-    "row": "row", "row type": "row", "kind": "row", "type": "row",
-    "title": "title", "section title": "title",
-    "description": "description", "text": "description", "directions": "description",
-    "prompt": "description", "question": "description",
-    "question type": "question_type", "activity type": "question_type", "answer type": "question_type",
-    "answer": "answer", "correct answer": "answer", "key": "answer",
-    "points": "points", "point": "points", "score": "points",
-}
-for _letter in "abcdef":
-    SHEET_HEADER_NAMES[f"choice {_letter}"] = f"choice_{_letter}"
-    SHEET_HEADER_NAMES[f"choice{_letter}"] = f"choice_{_letter}"
-    SHEET_HEADER_NAMES[_letter] = f"choice_{_letter}"
-
-
-def read_sheet_rows(content):
-    """[(row number, {row, title, description, question_type, choice_a..choice_f, answer, points})]
-    from an activity sheet .xlsx file (bytes)."""
-    return read_table(
-        content, SHEET_HEADER_NAMES,
-        lambda fields: "row" in fields and ("title" in fields or "description" in fields),
-        'The first row must have the column names "Row", "Title" and "Description" '
-        "(download the template to see them all).",
-        "The file has no rows.",
-        MAX_SHEET_ROWS, f"The file has more than {MAX_SHEET_ROWS} rows. Split it into smaller sheets.")
-
-
-def sheet_template_xlsx_bytes():
-    """The file to fill in: the columns (Row and Question type as dropdowns), an example, and
-    a sheet explaining them. Only the first sheet is imported."""
-    from myguro.domain.sheets import QUESTION_TYPES
-
-    workbook = Workbook()
-    sheet = workbook.active
-    sheet.title = "Activity"
-    sheet.append(SHEET_COLUMNS)
-    for cell in sheet[1]:
-        cell.font = Font(bold=True)
-        cell.fill = PatternFill("solid", fgColor="E9ECEF")
-    for letter, width in zip("ABCDEFGHIJKL", (12, 28, 60, 20, 16, 16, 16, 16, 16, 16, 28, 9)):
-        sheet.column_dimensions[letter].width = width
-    kinds = DataValidation(type="list", formula1='"text,activity,question"', allow_blank=True)
-    kinds.add(f"A2:A{MAX_SHEET_ROWS + 1}")
-    types = DataValidation(type="list", formula1='"' + ",".join(QUESTION_TYPES) + '"', allow_blank=True)
-    types.add(f"D2:D{MAX_SHEET_ROWS + 1}")
-    sheet.add_data_validation(kinds)
-    sheet.add_data_validation(types)
-    sheet.freeze_panes = "A2"
-
-    example = workbook.create_sheet("Example")
-    example.append(SHEET_COLUMNS)
-    for cell in example[1]:
-        cell.font = Font(bold=True)
-    for line in [
-        ("text", "I. Lesson", "Reading material for the students.", "", "", "", "", "", "", "", "", ""),
-        ("activity", "II. Let's check", "Directions: answer the questions.", "", "", "", "", "", "", "", "", ""),
-        ("question", "", "What is 2 + 2?", "multiple_choice", "3", "4", "5", "", "", "", "B", 1),
-        ("question", "", "The sky is blue.", "true_false", "", "", "", "", "", "", "True", 1),
-        ("question", "", "Capital of the Philippines?", "identification", "", "", "", "", "", "",
-         "Manila / City of Manila", 2),
-        ("question", "", "___ is the capital of ___.", "fill_blank", "", "", "", "", "", "",
-         "Manila ; Philippines", 2),
-        ("question", "", "Match the country with its capital.", "matching", "Tokyo", "", "", "", "", "",
-         "Philippines = Manila ; Japan = Kyoto ; Thailand = Bangkok", 3),
-        ("question", "", "Explain why the sky is blue.", "short_answer", "", "", "", "", "", "",
-         "Mention scattering of light (optional guide for checking)", 5),
-    ]:
-        example.append(line)
-    for letter, width in zip("ABCDEFGHIJKL", (12, 20, 40, 20, 8, 8, 8, 8, 8, 8, 50, 9)):
-        example.column_dimensions[letter].width = width
-
-    help_sheet = workbook.create_sheet("How to fill")
-    for line in [
-        ["One row per section or question, in the order students see them. Keep the first row (the column names)."],
-        ["See the Example sheet. Only the Activity sheet is imported."],
-        [],
-        ["Row", "text = a reading section (Title + Description). activity = a section with questions "
-                "(Title + Description as directions). question = a question of the activity row above it."],
-        ["Title", "For text and activity rows. Leave empty on question rows."],
-        ["Description", "text: the reading. activity: the directions. question: the question itself."],
-        ["Question type", "multiple_choice, true_false, identification, fill_blank, matching or short_answer "
-                          "(question rows only)."],
-        ["Choice A to F", "Multiple choice: 2 to 6 choices, filled from A without gaps. "
-                          "Matching: optional extra choices that match nothing."],
-        ["Answer", "Multiple choice: the letter (B). True or false: True or False. "
-                   "Identification: accepted answers split by a slash with spaces around it (Manila / City of Manila); "
-                   "a slash without spaces, like 1/2, is part of the answer. "
-                   "Fill in the blank: put ___ for each blank in the Description and one answer per blank "
-                   "split by ; (more spellings of one blank split by \" / \"). "
-                   "Matching: the Description is the instruction; the Answer is item = match pairs split by ; "
-                   "(Hinduism = India ; Taoism = China), 2 to 10 pairs. Column B is made from the matches "
-                   "(sorted A to Z) plus any extra choices in Choice A to F. Don't use = or ; inside a pair. "
-                   "Short answer: an optional guide for checking."],
-        ["Points", "Optional, 1 to 100. Empty = 1 (short answer = 5)."],
-    ]:
-        help_sheet.append(line)
-    help_sheet.column_dimensions["A"].width = 16
-    help_sheet.column_dimensions["B"].width = 100
-
-    output = io.BytesIO()
-    workbook.save(output)
-    return output.getvalue()
 
 
 def sheet_xlsx_bytes(activity):
-    """An activity as an Excel file in the import format (one row per section or question), so the
-    teacher can keep it, edit it, or import it as a new activity. activity is ActivityService.get."""
+    """An activity as an Excel file (one row per section or question), for the teacher to keep.
+    activity is ActivityService.get."""
     from myguro.domain.richtext import rich_to_text
 
     workbook = Workbook()
