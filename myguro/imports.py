@@ -13,6 +13,7 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Font, PatternFill
 from openpyxl.worksheet.datavalidation import DataValidation
 
+from myguro.config import GENERATED_BY
 from myguro.domain.accounts import GRADES
 from myguro.errors import ValidationError
 
@@ -120,6 +121,12 @@ def template_xlsx_bytes():
         help_sheet.append(line)
     help_sheet.column_dimensions["A"].width = 14
     help_sheet.column_dimensions["B"].width = 80
+    # Not a row of the Students sheet (that would be read as a student): the printed footer of both
+    # sheets, and a last line on the help sheet.
+    help_sheet.append([])
+    help_sheet.append([GENERATED_BY])
+    for page in (sheet, help_sheet):
+        page.oddFooter.center.text = GENERATED_BY
 
     output = io.BytesIO()
     workbook.save(output)

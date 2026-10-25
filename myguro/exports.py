@@ -13,6 +13,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
+from myguro.config import GENERATED_BY
 from myguro.domain.richtext import rich_to_text
 
 FONTS_DIR = os.path.join(os.path.dirname(__file__), "fonts")
@@ -57,6 +58,14 @@ def details_lines(data, teacher, exported_at):
 
 # --- Excel --------------------------------------------------------------------------
 
+def add_generated_by(sheet):
+    """The note under the table (visible) and in the printed footer, after everything else is written."""
+    sheet.append([])
+    sheet.append([GENERATED_BY])
+    sheet.cell(row=sheet.max_row, column=1).font = Font(italic=True, color="6C757D")
+    sheet.oddFooter.center.text = GENERATED_BY
+
+
 def results_xlsx_bytes(data, teacher, exported_at, timezone_info):
     """The results as an .xlsx file (bytes): a title block, then one row per student."""
     assignment = data["assignment"]
@@ -98,6 +107,7 @@ def results_xlsx_bytes(data, teacher, exported_at, timezone_info):
     for index, width in enumerate(widths, start=1):
         sheet.column_dimensions[get_column_letter(index)].width = width
     sheet.freeze_panes = sheet.cell(row=header_row + 1, column=3)  # keep headers and names visible
+    add_generated_by(sheet)
 
     output = io.BytesIO()
     workbook.save(output)
@@ -164,6 +174,8 @@ class ResultsPDF(FPDF):
     def footer(self):
         self.set_y(-9)
         self.text_style(7, grey=True)
+        self.cell(0, 4, GENERATED_BY, align="C")
+        self.set_x(self.l_margin)  # the same line again, for the page number on the right
         self.cell(0, 4, f"Page {self.page_no()}", align="R")
 
 
@@ -285,6 +297,7 @@ def gradebook_xlsx_bytes(data, teacher, exported_at, timezone_info):
     for index, width in enumerate(widths, start=1):
         sheet.column_dimensions[get_column_letter(index)].width = width
     sheet.freeze_panes = sheet.cell(row=header_row + 1, column=3)  # keep headers and names visible
+    add_generated_by(sheet)
 
     output = io.BytesIO()
     workbook.save(output)
@@ -372,6 +385,8 @@ class SheetPDF(FPDF):
     def footer(self):
         self.set_y(-10)
         self.text_style(8, grey=True)
+        self.cell(0, 4, GENERATED_BY, align="C")
+        self.set_x(self.l_margin)  # the same line again, for the page number on the right
         self.cell(0, 4, f"Page {self.page_no()}", align="R")
 
 
