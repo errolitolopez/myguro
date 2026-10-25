@@ -59,8 +59,8 @@ async function loadDashboard() {
       showClasses(data.classes, "student");
     } else {
       setText("stat-students", data.students);
-      setText("stat-published", data.published);
-      setText("stat-drafts", data.drafts);
+      setText("stat-open", data.open);
+      setText("stat-closed", data.closed);
       setText("stat-submissions", data.submissions);
       showClasses(data.classes, "teacher");
     }

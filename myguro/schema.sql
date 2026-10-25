@@ -59,7 +59,6 @@ CREATE TABLE IF NOT EXISTS activities (
     title TEXT NOT NULL,
     subject TEXT NOT NULL DEFAULT '',
     max_attempts INTEGER DEFAULT 1,  -- how many times a student may submit; NULL = unlimited
-    published INTEGER NOT NULL DEFAULT 0,  -- 0 = students don't see it even when assigned; 1 = they do
     -- Set when the teacher deletes a sheet that was given to students: it is hidden from the teacher's
     -- list and from students, with its assignments and answers kept, so it can be restored.
     deleted_at TEXT,
@@ -95,6 +94,9 @@ CREATE TABLE IF NOT EXISTS assignments (
     due_date TEXT,
     -- 0 = students don't see their scores yet (so answers can't be passed around); the teacher releases them
     scores_released INTEGER NOT NULL DEFAULT 0,
+    -- 0 = closed: students given the sheet don't see it; 1 = open: they can answer it. Each class or group
+    -- is opened on its own, so one sheet can be open for one class and closed for another
+    is_open INTEGER NOT NULL DEFAULT 0,
     assigned_at TEXT NOT NULL DEFAULT (datetime('now')),
     UNIQUE (activity_id, class_id)
 );
@@ -191,7 +193,7 @@ CREATE TABLE IF NOT EXISTS activity_log (
     actor_name TEXT NOT NULL,
     actor_username TEXT NOT NULL,
     actor_role TEXT NOT NULL,          -- "" for a failed login with an unknown username
-    action TEXT NOT NULL,              -- a code, like 'activity.published'
+    action TEXT NOT NULL,              -- a code, like 'assignment.opened'
     category TEXT NOT NULL,            -- see domain/log.py CATEGORIES
     target_type TEXT NOT NULL DEFAULT '',
     target_id INTEGER,

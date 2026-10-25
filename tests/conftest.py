@@ -123,24 +123,32 @@ SAMPLE_SECTIONS = [
 ]
 
 
-def make_activity(teacher, title="Early Eastern Philosophy", sections=None, published=True):
-    """An activity with sections, published unless published=False. Returns (activity id, question ids in order)."""
+def make_activity(teacher, title="Early Eastern Philosophy", sections=None):
+    """An activity with sections. Returns (activity id, question ids in order)."""
     activity_id = teacher.post("/api/activities", json={"title": title}).get_json()["activity"]["id"]
     response = teacher.put(f"/api/activities/{activity_id}",
                            json={"title": title, "sections": sections or SAMPLE_SECTIONS})
     assert response.status_code == 200, response.get_json()
-    if published:
-        assert teacher.put(f"/api/activities/{activity_id}/published", json={"published": True}).status_code == 200
     questions = [question["id"] for section in response.get_json()["activity"]["sections"]
                  for question in section["questions"]]
     return activity_id, questions
 
 
-def assign(teacher, activity_id, class_id, **options):
+def open_assignment(teacher, assignment_id, opened=True):
+    """Open an assignment to its students (or close it with opened=False); returns the response."""
+    return teacher.put(f"/api/assignments/{assignment_id}/open", json={"open": opened})
+
+
+def assign(teacher, activity_id, class_id, opened=True, **options):
+    """Give the sheet to a class and return the assignment id. A new assignment is closed, so most
+    tests open it right away (opened=False keeps it closed)."""
     response = teacher.put(f"/api/activities/{activity_id}/assignments",
                            json={"assignments": [{"class_id": class_id, **options}]})
     assert response.status_code == 200, response.get_json()
-    return next(item["assignment"]["id"] for item in response.get_json()["classes"] if item["id"] == class_id)
+    assignment_id = next(item["assignment"]["id"] for item in response.get_json()["classes"] if item["id"] == class_id)
+    if opened:
+        assert open_assignment(teacher, assignment_id).status_code == 200
+    return assignment_id
 
 
 def error(response):

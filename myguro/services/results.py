@@ -132,6 +132,7 @@ class ResultsService(Service):
                 "class_name": class_title(assignment["class_name"], assignment["class_subject"]),
                 "due_date": assignment["due_date"],
                 "scores_released": bool(assignment["scores_released"]),
+                "is_open": bool(assignment["is_open"]),
                 "everyone": bool(assignment["everyone"]),
                 "max_attempts": assignment["max_attempts"],
                 "total_points": self.activities.total_points(activity_id),
@@ -159,6 +160,7 @@ class ResultsService(Service):
                 "to_check": summary["to_check"],
                 "average": summary["average"],  # None until something is checked
                 "due_date": data["assignment"]["due_date"],
+                "is_open": data["assignment"]["is_open"],
             })
         # sorted() is stable, so assignments with the same to-check state stay newest first
         return sorted(cards, key=lambda card: card["to_check"] == 0)
@@ -281,6 +283,20 @@ class ResultsService(Service):
                             f"({assignment['class_name']}) {'to' if released else 'from'} the students.", assignment)
         self.commit()
         return {"scores_released": released}
+
+    def set_opened(self, assignment_id, opened):
+        """Open the assignment to its students, or close it again. Closing is always allowed (even
+        after submissions); nothing is deleted, so opening again brings back all their answers."""
+        assignment = self.require_open(assignment_id)
+        if not isinstance(opened, bool):
+            raise ValidationError("Choose whether to open the activity.")
+        self.assignments.set_is_open(assignment_id, opened)
+        if bool(assignment["is_open"]) != opened:
+            self.log_giving("assignment.opened" if opened else "assignment.closed",
+                            f"{'Opened' if opened else 'Closed'} {assignment['title']} "
+                            f"({assignment['class_name']}) {'to' if opened else 'for'} the students.", assignment)
+        self.commit()
+        return {"is_open": opened}
 
     def reopen(self, assignment_id, student_id):
         """Give one student another try, even past the activity's limit: a new attempt starting

@@ -1,6 +1,6 @@
 """Teacher: excluding a student from one assigned activity (absent) and adding them back."""
 
-from conftest import assign, error, login, make_activity, make_class
+from conftest import assign, error, login, make_activity, make_class, open_assignment
 
 
 def class_assignment(teacher):
@@ -85,6 +85,7 @@ def test_exclusion_works_for_direct_assignments(teacher, other_teacher):
     activity_id, _ = make_activity(teacher)
     direct = teacher.put(f"/api/activities/{activity_id}/assignments", json={
         "assignments": [], "direct": {"student_ids": [outside[0]["id"], outside[1]["id"]]}}).get_json()["direct"]
+    open_assignment(teacher, direct["id"])
     assert exclude(teacher, direct["id"], outside[0]["id"]).status_code == 200
     assert login(outside[0]["username"]).get("/api/my-activities").get_json()["activities"] == []
     assert len(login(outside[1]["username"]).get("/api/my-activities").get_json()["activities"]) == 1

@@ -95,7 +95,7 @@ WRITE_ROUTES = [
     ("post", "/api/users"), ("put", "/api/users/1"), ("post", "/api/users/batch-delete"),
     ("post", "/api/classes"), ("put", "/api/classes/1"), ("post", "/api/classes/1/students"),
     ("post", "/api/activities"), ("put", "/api/activities/1"), ("delete", "/api/activities/1"),
-    ("put", "/api/activities/1/assignments"), ("put", "/api/activities/1/published"),
+    ("put", "/api/activities/1/assignments"), ("put", "/api/assignments/1/open"),
     ("put", "/api/assignments/1/release"), ("put", "/api/submissions/1/points"),
     ("put", "/api/my-activities/1/answers"), ("post", "/api/my-activities/1/submit"),
     ("put", "/api/settings"), ("post", "/api/school-years"), ("put", "/api/school-year"),

@@ -15,21 +15,53 @@ const assignList = document.getElementById("assign-classes");
 const assignSaveButton = document.getElementById("assign-save-button");
 
 // One class or group the sheet is given to: "Grade 12 – Luna" / "3 of 3 submitted · average 67% · due Oct 15, 2026".
-// Opens its results.
+// The text opens its results; the button opens the sheet to that class or group, or closes it again.
 function checkItem(item) {
-  const row = el("a", "list-group-item list-group-item-action d-flex justify-content-between align-items-center gap-2");
-  row.href = `/results/${item.id}`;
-  const left = el("div");
+  const row = el("div", "list-group-item d-flex justify-content-between align-items-center gap-2");
+  const link = el("a", "flex-grow-1 text-decoration-none text-reset");
+  link.href = `/results/${item.id}`;
   const details = [`${item.submitted} of ${item.students} submitted`];
   if (item.average !== null) details.push(`average ${item.average}%`);
   if (item.due_date) details.push(`due ${formatDay(item.due_date)}`);
-  left.append(el("div", "fw-semibold", item.class_name), el("div", "small text-body-secondary", details.join(" · ")));
+  link.append(el("div", "fw-semibold", item.class_name), el("div", "small text-body-secondary", details.join(" · ")));
   // Points still to check (short answers) stand out; "Checked" only once someone has submitted
   const badge = !item.to_check && !item.submitted ? el("span", "badge text-bg-secondary", "No answers yet")
     : el("span", item.to_check ? "badge text-bg-warning" : "badge text-bg-success",
       item.to_check ? `${plural(item.to_check, "point")} to check` : "Checked");
-  row.append(left, badge);
+  badge.classList.add("d-none", "d-sm-inline");  // the buttons matter more on a small phone
+
+  // Students see the sheet only while this is open. Closed is the starting state.
+  const toggle = el("button", item.is_open
+    ? "btn btn-sm btn-outline-secondary text-nowrap bi bi-door-closed"
+    : "btn btn-sm btn-success text-nowrap bi bi-door-open", item.is_open ? " Close" : " Open");
+  toggle.type = "button";
+  toggle.dataset.openToggle = "1";  // lockEditor() leaves it enabled on a locked sheet
+  toggle.setAttribute("aria-label", `${item.is_open ? "Close" : "Open"} for ${item.class_name}`);
+  toggle.addEventListener("click", () => setOpened(item, toggle));
+  row.append(link, badge, toggle);
   return row;
+}
+
+async function setOpened(item, button) {
+  const stopLoading = startLoading(button);
+  if (!stopLoading) return;
+  try {
+    const response = await apiFetch(`/api/assignments/${item.id}/open`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ open: !item.is_open }),
+    });
+    if (!response) return;
+    if (!response.ok) {
+      showEditorError((await response.json()).error || "Could not save.");
+      return;
+    }
+    await loadCheckCard();
+  } catch {
+    showEditorError("Cannot reach the server. Check your connection.");
+  } finally {
+    stopLoading();
+  }
 }
 
 // The card replaces the old "Given to" line: every class or group the sheet is given to.

@@ -1,6 +1,6 @@
 """Teacher: deleting an assigned activity archives it (students lose access, work is kept) and restore."""
 
-from conftest import assign, error, login, make_activity, make_class
+from conftest import assign, error, login, make_activity, make_class, open_assignment
 
 
 def assigned_sheet(teacher):
@@ -39,12 +39,12 @@ def test_deleting_an_assigned_sheet_archives_it(teacher):
     assert teacher.get(f"/api/activities/{activity_id}/assignments").status_code == 404
     assert teacher.get(f"/api/assignments/{assignment_id}/results").status_code == 404
     counts = teacher.get("/api/dashboard").get_json()
-    assert (counts["published"], counts["drafts"]) == (0, 0)
+    assert (counts["open"], counts["closed"]) == (0, 0)
     classes = teacher.get("/api/classes").get_json()["classes"]
     assert [item["activities"] for item in classes] == [0]
 
 
-def test_restore_brings_back_unpublished_with_the_students_work(teacher):
+def test_restore_brings_back_closed_with_the_students_work(teacher):
     class_id, activity_id, assignment_id, students, questions = assigned_sheet(teacher)
     student = login(students[0]["username"])
     other = login(students[1]["username"])
@@ -54,11 +54,11 @@ def test_restore_brings_back_unpublished_with_the_students_work(teacher):
 
     assert teacher.delete(f"/api/activities/{activity_id}").get_json()["archived"] is True  # even though submitted
     restored = teacher.post(f"/api/activities/{activity_id}/restore").get_json()["activity"]
-    assert restored["published"] is False and restored["id"] == activity_id
+    assert restored["open"] == 0 and restored["id"] == activity_id
     assert listed(teacher) == [activity_id] and listed(teacher, deleted=True) == []
-    assert student.get("/api/my-activities").get_json()["activities"] == []  # still unpublished
+    assert student.get("/api/my-activities").get_json()["activities"] == []  # still closed
 
-    assert teacher.put(f"/api/activities/{activity_id}/published", json={"published": True}).status_code == 200
+    assert open_assignment(teacher, assignment_id).status_code == 200
     seen = student.get("/api/my-activities").get_json()["activities"]
     assert [(item["id"], item["status"]) for item in seen] == [(assignment_id, "submitted")]
     detail = other.get(f"/api/my-activities/{assignment_id}").get_json()["activity"]

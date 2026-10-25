@@ -143,12 +143,6 @@ def api_settings(activity_id):
     return jsonify(activity=service().update_settings(activity_id, json_body()))
 
 
-@bp.put("/api/activities/<int:activity_id>/published")
-@role_required_api("teacher")
-def api_published(activity_id):
-    return jsonify(activity=service().set_published(activity_id, json_body().get("published")))
-
-
 @bp.get("/api/activities/<int:activity_id>/assignments")
 @role_required_api("teacher")
 def api_assignments(activity_id):

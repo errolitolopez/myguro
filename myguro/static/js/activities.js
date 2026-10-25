@@ -37,11 +37,22 @@ function activityItem(activity) {
   ].filter(Boolean).join(" · ");
   left.append(title, details);
 
-  // "Published · 2 classes", "Unpublished" (the classes are shown when it is given to some)
+  // "Not given yet", "Closed · 2 classes", "Open · 2 classes", "Open for 1 of 2 classes"
   const badge = document.createElement("span");
-  badge.className = activity.published ? "badge text-bg-success" : "badge text-bg-secondary";
-  badge.textContent = (activity.published ? "Published" : "Unpublished")
-    + (activity.assigned ? ` · ${plural(activity.assigned, "class", "classes")}` : "");
+  const groups = plural(activity.assigned, "class", "classes");
+  if (!activity.assigned) {
+    badge.className = "badge text-bg-secondary";
+    badge.textContent = "Not given yet";
+  } else if (activity.open === activity.assigned) {
+    badge.className = "badge text-bg-success";
+    badge.textContent = `Open · ${groups}`;
+  } else if (activity.open === 0) {
+    badge.className = "badge text-bg-secondary";
+    badge.textContent = `Closed · ${groups}`;
+  } else {
+    badge.className = "badge text-bg-info";
+    badge.textContent = `Open for ${activity.open} of ${groups}`;
+  }
 
   row.append(left, badge);
   return row;
@@ -93,7 +104,7 @@ const deletedToggle = document.getElementById("deleted-toggle");
 const deletedList = document.getElementById("deleted-list");
 let deletedActivities = [];
 
-// One deleted sheet with a Restore button. A restored sheet comes back unpublished.
+// One deleted sheet with a Restore button. A restored sheet comes back with its assignments closed.
 function deletedItem(activity) {
   const row = document.createElement("div");
   row.className = "list-group-item d-flex justify-content-between align-items-center gap-2";

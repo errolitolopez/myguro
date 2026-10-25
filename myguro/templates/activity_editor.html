@@ -30,7 +30,6 @@
     <div class="card-body">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <label for="activity-title" class="form-label mb-0 fw-semibold">Title</label>
-        <span id="status-badge" class="badge text-bg-secondary">Unpublished</span>
       </div>
       <input id="activity-title" class="form-control form-control-lg mb-3" maxlength="150" autocomplete="off">
       <label for="activity-subject" class="form-label">Subject <span class="text-body-secondary">(optional)</span></label>
@@ -44,9 +43,8 @@
         <span id="max-attempts-status" class="small text-body-secondary"></span>
       </div>
       <div class="form-text mt-1">How many times a student may submit. Their latest submission counts.</div>
-      <!-- Big buttons side by side (stacked on a phone): these are the two steps that reach students -->
+      <!-- Big buttons side by side (stacked on a phone) -->
       <div class="d-flex flex-column flex-sm-row gap-2 mt-3 pt-3 border-top">
-        <button id="publish-button" type="button" class="btn btn-lg flex-fill btn-success text-nowrap bi bi-eye">Publish</button>
         <button id="assign-button" type="button" class="btn btn-lg flex-fill btn-primary text-nowrap bi bi-people">Assign</button>
         <!-- Print: opens the saved sheet as a PDF in a new tab (Print or Download from there) -->
         <div class="dropdown flex-fill d-grid">
@@ -71,6 +69,7 @@
   <!-- Check results: every class or group the sheet is given to, points to check first -->
   <div id="check-card" class="card mb-4">
     <div class="card-header fw-semibold bi bi-clipboard-check"> Check results</div>
+    <!-- Open / Close: students see and answer the sheet only for the classes or groups that are open -->
     <div id="check-list" class="list-group list-group-flush">
       <div class="list-group-item small text-body-secondary">Loading...</div>
     </div>
@@ -139,7 +138,7 @@
         <p class="small text-body-secondary">
           Tick the classes that get this activity, or choose individual students who are not in your classes.
           Students can still submit after the due date; it is marked late.
-          Students see it once you publish the activity.
+          Each class starts closed: tap Open on its row in Check results when students may start.
         </p>
         <div id="assign-classes" class="d-grid gap-2"></div>
         <div id="assign-direct" class="mt-3"></div>

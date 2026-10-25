@@ -154,8 +154,6 @@ def test_activity_lifecycle_is_logged(admin, teacher):
     activity_id = teacher.post("/api/activities", json={"title": "Quiz 1", "subject": "Science"}).get_json()["activity"]["id"]
     teacher.put(f"/api/activities/{activity_id}", json={"title": "Quiz 1", "subject": "Science", "sections": [
         {"kind": "text", "title": "Lesson", "description": "Read."}]})
-    teacher.put(f"/api/activities/{activity_id}/published", json={"published": True})
-    teacher.put(f"/api/activities/{activity_id}/published", json={"published": False})
     teacher.put(f"/api/activities/{activity_id}/settings", json={"max_attempts": 3})
     copy_id = teacher.post(f"/api/activities/{activity_id}/duplicate").get_json()["activity"]["id"]
     teacher.delete(f"/api/activities/{copy_id}")  # never given: really deleted
@@ -165,7 +163,7 @@ def test_activity_lifecycle_is_logged(admin, teacher):
     teacher.post("/api/activities/import", data={"file": (io.BytesIO(docx), "s.docx"), "title": "Imported",
                                                  "dry_run": "0"}, content_type="multipart/form-data")
     actions = [item["action"] for item in log_of(admin, category="activities")]
-    assert actions == ["activity.created", "activity.saved", "activity.published", "activity.unpublished",
+    assert actions == ["activity.created", "activity.saved",
                        "activity.attempts_changed", "activity.copied", "activity.deleted", "activity.imported"]
     first = log_of(admin, category="activities")[0]
     assert first["target"] == {"type": "activity", "id": activity_id, "name": "Quiz 1"}
@@ -199,10 +197,13 @@ def test_giving_changing_and_taking_back(admin, teacher):
     assert "Individual students" in entries[3][1]
 
 
-def test_release_exclude_and_include(admin, teacher):
+def test_open_release_exclude_and_include(admin, teacher):
     class_id, students = make_class(teacher)
     activity_id, _ = make_activity(teacher)
     assignment_id = assign(teacher, activity_id, class_id)
+    teacher.put(f"/api/assignments/{assignment_id}/open", json={"open": True})  # already open: no entry
+    teacher.put(f"/api/assignments/{assignment_id}/open", json={"open": False})
+    teacher.put(f"/api/assignments/{assignment_id}/open", json={"open": True})
     teacher.put(f"/api/assignments/{assignment_id}/release", json={"released": True})
     teacher.put(f"/api/assignments/{assignment_id}/release", json={"released": False})
     student_id = students[0]["id"]
@@ -210,7 +211,8 @@ def test_release_exclude_and_include(admin, teacher):
     teacher.put(url, json={"excluded": True})
     teacher.put(url, json={"excluded": False})
     actions = [action for action, _ in sheet_log(admin, category="giving")][1:]  # the first is "given"
-    assert actions == ["assignment.released", "assignment.hidden", "assignment.excluded", "assignment.included"]
+    assert actions == ["assignment.opened", "assignment.closed", "assignment.opened", "assignment.released",
+                       "assignment.hidden", "assignment.excluded", "assignment.included"]
 
 
 def test_student_submit_retry_and_autosave(admin, teacher):
@@ -259,10 +261,9 @@ def test_checking_points_remarks_paper_and_another_try(admin, teacher):
 
 def test_failed_activity_and_checking_actions_write_nothing(admin, teacher, other_teacher):
     class_id, students = make_class(teacher)
-    activity_id, _ = make_activity(teacher, published=False)
-    empty_id = teacher.post("/api/activities", json={"title": "Empty"}).get_json()["activity"]["id"]
+    activity_id, _ = make_activity(teacher)
     before = len(log_of(admin))
-    assert teacher.put(f"/api/activities/{empty_id}/published", json={"published": True}).status_code == 400
+    assert teacher.put("/api/assignments/999/open", json={"open": True}).status_code == 404
     assert other_teacher.put(f"/api/activities/{activity_id}/assignments",
                              json={"assignments": [{"class_id": class_id, "everyone": True}]}).status_code == 404
     assert other_teacher.put("/api/submissions/1/points", json={"points": {}}).status_code == 404

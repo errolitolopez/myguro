@@ -70,15 +70,12 @@ class ActivityRepository(Repository):
 
     def archive(self, activity_id):
         """Hide a sheet from the teacher and the students, keeping every assignment and answer."""
-        self.execute("UPDATE activities SET deleted_at = datetime('now'), published = 0 WHERE id = ?",
+        self.execute("UPDATE activities SET deleted_at = datetime('now') WHERE id = ?",
                      (activity_id,))
 
     def restore(self, activity_id):
-        """Bring an archived sheet back (unpublished: archiving unpublished it)."""
+        """Bring an archived sheet back (its assignments stay closed: archiving closed them)."""
         self.execute("UPDATE activities SET deleted_at = NULL WHERE id = ?", (activity_id,))
-
-    def set_published(self, activity_id, published):
-        self.execute("UPDATE activities SET published = ? WHERE id = ?", (int(published), activity_id))
 
     def delete(self, activity_id):
         self.execute("DELETE FROM questions WHERE activity_id = ?", (activity_id,))
@@ -167,8 +164,6 @@ class ActivityRepository(Repository):
     def count_all(self):
         return self.value("SELECT COUNT(*) FROM activities WHERE deleted_at IS NULL")
 
-    def count_for_teacher(self, teacher_id, published):
-        """The teacher's sheets that are published (published=True) or not (False)."""
-        return self.value("SELECT COUNT(*) FROM activities "
-                          "WHERE teacher_id = ? AND published = ? AND deleted_at IS NULL",
-                          (teacher_id, int(published)))
+    def count_open(self, activity_id):
+        """How many of the sheet's assignments are open to students."""
+        return self.value("SELECT COUNT(*) FROM assignments WHERE activity_id = ? AND is_open = 1", (activity_id,))

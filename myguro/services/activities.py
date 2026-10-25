@@ -25,11 +25,10 @@ class ActivityService(Service):
             "max_attempts": row["max_attempts"],  # None = unlimited
             # True once a student submitted it: then it can't be edited
             "locked": self.activities.has_submissions(row["id"]),
-            # Students see an assigned sheet only while it is published
-            "published": bool(row["published"]),
             "deleted_at": row["deleted_at"],  # set while the sheet is deleted (archived)
-            # How many classes it is given to (0 = a draft)
+            # How many classes or groups it is given to (0 = a draft), and how many of them are open
             "assigned": self.activities.count_assigned(row["id"]),
+            "open": self.activities.count_open(row["id"]),
             "created_at": row["created_at"],
             "updated_at": row["updated_at"],
         }
@@ -104,21 +103,6 @@ class ActivityService(Service):
         self.commit()
         return self.activity_json(self.require(new_id))
 
-    def set_published(self, activity_id, published):
-        """Show the sheet to the students it is given to, or hide it again. Hiding is always
-        allowed (even after submissions); nothing is deleted, so publishing again restores it all."""
-        self.require(activity_id)
-        if not isinstance(published, bool):
-            raise ValidationError("Choose whether to publish the activity.")
-        if published and not self.activities.has_sections(activity_id):
-            raise ValidationError("Add at least one section before publishing.")
-        self.activities.set_published(activity_id, published)
-        row = self.require(activity_id)
-        self.log_activity("activity.published" if published else "activity.unpublished",
-                          f"{'Published' if published else 'Unpublished'} the activity {row['title']}.", row)
-        self.commit()
-        return self.activity_json(self.require(activity_id))
-
     def delete(self, activity_id):
         """Delete a sheet. One nobody has been given is really deleted; an assigned one is archived:
         hidden from the teacher's list and from students, with every assignment and answer kept so
@@ -127,6 +111,7 @@ class ActivityService(Service):
         archived = bool(self.activities.count_assigned(activity_id))
         if archived:
             self.activities.archive(activity_id)
+            self.assignments.close_all(activity_id)  # so restoring it does not open it again by itself
         else:
             self.activities.delete(activity_id)
         self.log_activity("activity.deleted", f"Deleted the activity {row['title']}"
@@ -135,12 +120,12 @@ class ActivityService(Service):
         return archived
 
     def restore(self, activity_id):
-        """Bring a deleted sheet back, unpublished, with its assignments and student work."""
+        """Bring a deleted sheet back with its assignments (closed) and student work."""
         row = self.activities.get_for_teacher(activity_id, self.user["id"], include_deleted=True)
         if row is None or row["deleted_at"] is None:
             raise NotFoundError("Activity not found.")
         self.activities.restore(activity_id)
-        self.log_activity("activity.restored", f"Restored the activity {row['title']} (unpublished).", row)
+        self.log_activity("activity.restored", f"Restored the activity {row['title']} (its assignments are closed).", row)
         self.commit()
         return self.activity_json(self.require(activity_id))
 

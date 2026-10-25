@@ -1,6 +1,6 @@
 """Teacher: giving a sheet directly to individual students, with no class."""
 
-from conftest import assign, error, login, make_activity, make_class
+from conftest import assign, error, login, make_activity, make_class, open_assignment
 
 OLD_ASSIGNMENTS_TABLE = """
     CREATE TABLE assignments (
@@ -74,11 +74,15 @@ def outside_students(other_teacher, section="Bonifacio"):
     return make_class(other_teacher, name=f"Grade 9 - {section}", section=section)[1]
 
 
-def give_directly(teacher, activity_id, student_ids, classes=(), **options):
+def give_directly(teacher, activity_id, student_ids, classes=(), opened=True, **options):
+    """Give the sheet to individual students and return the direct assignment (opened unless opened=False)."""
     response = teacher.put(f"/api/activities/{activity_id}/assignments", json={
         "assignments": list(classes), "direct": {"student_ids": student_ids, **options}})
     assert response.status_code == 200, response.get_json()
-    return response.get_json()["direct"]
+    direct = response.get_json()["direct"]
+    if opened:
+        assert open_assignment(teacher, direct["id"]).status_code == 200
+    return direct
 
 
 def test_give_to_students_without_a_class(teacher, other_teacher):

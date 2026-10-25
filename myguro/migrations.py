@@ -153,15 +153,19 @@ def add_missing_columns(db):
         db.execute("ALTER TABLE activities ADD COLUMN max_attempts INTEGER DEFAULT 1")
     if "deleted_at" not in activity_columns:
         db.execute("ALTER TABLE activities ADD COLUMN deleted_at TEXT")
-    if "published" not in activity_columns:
-        db.execute("ALTER TABLE activities ADD COLUMN published INTEGER NOT NULL DEFAULT 0")
-        # Sheets already given to students stay visible: only new sheets start unpublished. This
-        # runs once, when the column is added, so a teacher's later Unpublish is never undone.
-        db.execute("UPDATE activities SET published = 1 WHERE id IN (SELECT activity_id FROM assignments)")
-
     assignment_columns = [row["name"] for row in db.execute("PRAGMA table_info(assignments)")]
     if "scores_released" not in assignment_columns:
         db.execute("ALTER TABLE assignments ADD COLUMN scores_released INTEGER NOT NULL DEFAULT 0")
+    if "is_open" not in assignment_columns:
+        db.execute("ALTER TABLE assignments ADD COLUMN is_open INTEGER NOT NULL DEFAULT 0")
+        # What students could see before stays open; only new assignments start closed. This runs
+        # once, when the column is added, so a teacher's later Close is never undone. The old
+        # sheet-level "published" column stays in old databases, unused.
+        if "published" in activity_columns:
+            db.execute("UPDATE assignments SET is_open = 1 "
+                       "WHERE activity_id IN (SELECT id FROM activities WHERE published = 1)")
+        else:
+            db.execute("UPDATE assignments SET is_open = 1")
 
     submission_columns = [row["name"] for row in db.execute("PRAGMA table_info(submissions)")]
     if "paper" not in submission_columns:

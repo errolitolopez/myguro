@@ -103,10 +103,10 @@ def add_demo(app):
                   "sections")
     question_ids = [q["id"] for section in saved["activity"]["sections"] for q in section["questions"]]
     check(teacher.put(f"/api/activities/{activity_id}/settings", json={"max_attempts": 2}), "tries")
-    check(teacher.put(f"/api/activities/{activity_id}/published", json={"published": True}), "publish")
     given = check(teacher.put(f"/api/activities/{activity_id}/assignments", json={"assignments": [
         {"class_id": class_id, "due_date": "2026-12-31"}]}), "assign")
     assignment_id = next(item["assignment"]["id"] for item in given["classes"] if item["id"] == class_id)
+    check(teacher.put(f"/api/assignments/{assignment_id}/open", json={"open": True}), "open")
 
     # Student 1 right, student 2 with mistakes (both submit), student 3 unfinished, the rest not started.
     plan = [(found[0], GOOD, True), (found[1], MISTAKES, True), (found[2], UNFINISHED, False)]

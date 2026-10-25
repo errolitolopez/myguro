@@ -6,7 +6,7 @@ DIRECT_CLASS_NAME = "Individual students"
 # A student sees an assignment when they are in its class and it is for everyone, or they are one
 # of its chosen students. A direct assignment (class_id NULL) is seen only by its chosen students.
 # A student the teacher excluded (for example absent) does not see it until added back.
-# A sheet the teacher has not published, or has deleted, is seen by nobody.
+# An assignment the teacher has not opened (or has closed), or of a deleted sheet, is seen by nobody.
 VISIBLE_TO_STUDENT = """
     (
         (
@@ -18,7 +18,7 @@ VISIBLE_TO_STUDENT = """
         )
         AND NOT EXISTS (SELECT 1 FROM assignment_exclusions x
                         WHERE x.assignment_id = asg.id AND x.student_id = :student)
-        AND a.published = 1
+        AND asg.is_open = 1
         AND a.deleted_at IS NULL
     )
 """
@@ -54,6 +54,20 @@ class AssignmentRepository(Repository):
     def update(self, assignment_id, everyone, due_date):
         self.execute("UPDATE assignments SET everyone = ?, due_date = ? WHERE id = ?",
                      (int(everyone), due_date, assignment_id))
+
+    def set_is_open(self, assignment_id, is_open):
+        self.execute("UPDATE assignments SET is_open = ? WHERE id = ?", (int(is_open), assignment_id))
+
+    def close_all(self, activity_id):
+        """Close every assignment of a sheet (when the sheet is deleted and archived)."""
+        self.execute("UPDATE assignments SET is_open = 0 WHERE activity_id = ?", (activity_id,))
+
+    def count_for_teacher(self, teacher_id, year_id, is_open):
+        """How many of the teacher's assignments in one school year are open (is_open=True) or closed."""
+        return self.value(
+            "SELECT COUNT(*) FROM assignments asg JOIN activities a ON a.id = asg.activity_id "
+            "WHERE a.teacher_id = ? AND asg.school_year_id = ? AND asg.is_open = ? AND a.deleted_at IS NULL",
+            (teacher_id, year_id, int(is_open)))
 
     def set_scores_released(self, assignment_id, released):
         self.execute("UPDATE assignments SET scores_released = ? WHERE id = ?", (int(released), assignment_id))

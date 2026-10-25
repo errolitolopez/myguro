@@ -691,60 +691,15 @@ document.getElementById("add-activity-button").addEventListener("click", () => a
 
 // --- Load and save ---------------------------------------------------------------
 
-let isPublished = false; // set by showStatusBadge
-
-// showStatusBadge(true) -> a green "Published" badge and an "Unpublish" button;
-// showStatusBadge(false) -> a gray "Unpublished" badge and a "Publish" button.
-function showStatusBadge(published) {
-  isPublished = published;
-  const badge = document.getElementById("status-badge");
-  badge.textContent = published ? "Published" : "Unpublished";
-  badge.className = published ? "badge text-bg-success" : "badge text-bg-secondary";
-  const button = document.getElementById("publish-button");
-  button.textContent = published ? "Unpublish" : "Publish";
-  button.className = published
-    ? "btn btn-lg flex-fill btn-outline-secondary text-nowrap bi bi-eye-slash"
-    : "btn btn-lg flex-fill btn-success text-nowrap bi bi-eye";
-}
-
 function showActivity(activity) {
   document.title = `${activity.title} · MyGURO`;
   titleInput.value = activity.title;
   subjectInput.value = activity.subject;
-  showStatusBadge(activity.published);
   sections = activity.sections.map(fromServer);
   maxAttemptsSelect.value = activity.max_attempts === null ? "" : String(activity.max_attempts);
   render();
   if (activity.locked) lockEditor();
 }
-
-// Publish / Unpublish: students see an assigned sheet only while it is published.
-document.getElementById("publish-button").addEventListener("click", async (event) => {
-  if (unsaved && !isPublished) {
-    showEditorError("Save your changes before publishing.");
-    return;
-  }
-  const stopLoading = startLoading(event.currentTarget);
-  if (!stopLoading) return;
-  try {
-    const response = await apiFetch(`/api/activities/${activityId}/published`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ published: !isPublished }),
-    });
-    if (!response) return;
-    const data = await response.json();
-    if (!response.ok) {
-      showEditorError(data.error || "Could not save.");
-      return;
-    }
-    showStatusBadge(data.activity.published);
-  } catch {
-    showEditorError("Cannot reach the server. Check your connection.");
-  } finally {
-    stopLoading();
-  }
-});
 
 // --- Submissions allowed (saved right away; can change even after students submitted) ---
 
@@ -798,7 +753,7 @@ async function saveTitleSubject() {
 titleInput.addEventListener("change", saveTitleSubject);
 subjectInput.addEventListener("change", saveTitleSubject);
 
-// After a student submits, the questions can't change: show the sheet read-only. Assign, publish,
+// After a student submits, the questions can't change: show the sheet read-only. Assign, Open / Close,
 // delete (it is archived), the tries allowed, and the title and subject still work.
 function lockEditor() {
   sheetLocked = true;
@@ -806,8 +761,8 @@ function lockEditor() {
   const editorArea = document.querySelector("main");
   editorArea.querySelectorAll("input, textarea, select").forEach((field) => (field.disabled = true));
   editorArea.querySelectorAll("button").forEach((button) => {
-    if (!["assign-button", "print-button", "copy-button", "publish-button", "delete-button", "delete-no", "delete-yes"]
-      .includes(button.id)) button.disabled = true;
+    if (!["assign-button", "print-button", "copy-button", "delete-button", "delete-no", "delete-yes"]
+      .includes(button.id) && !button.dataset.openToggle) button.disabled = true;
   });
   maxAttemptsSelect.disabled = false; // more tries can still be given
   titleInput.disabled = false;

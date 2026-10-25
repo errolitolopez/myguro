@@ -1,6 +1,6 @@
 """Teacher: giving a sheet to classes (everyone or selected students, due date)."""
 
-from conftest import assign, error, login, make_activity, make_class
+from conftest import assign, error, login, make_activity, make_class, open_assignment
 
 
 def test_assign_everyone_and_selected(teacher):
@@ -12,6 +12,8 @@ def test_assign_everyone_and_selected(teacher):
         {"class_id": bonifacio_id, "everyone": False, "student_ids": [bonifacio[0]["id"], bonifacio[1]["id"]]},
     ]})
     classes = {item["id"]: item["assignment"] for item in response.get_json()["classes"]}
+    for item in classes.values():
+        open_assignment(teacher, item["id"])  # students see it only once it is open
     assert classes[rizal_id]["due_date"] == "2026-10-15" and classes[rizal_id]["everyone"] is True
     assert sorted(classes[bonifacio_id]["student_ids"]) == sorted([bonifacio[0]["id"], bonifacio[1]["id"]])
     assert teacher.get("/api/activities").get_json()["activities"][0]["assigned"] == 2

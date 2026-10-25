@@ -108,6 +108,16 @@ function render() {
   back.textContent = assignment.class_id === null ? "‹ Activities" : `‹ ${assignment.class_name}`;
   document.getElementById("edit-link").href = `/activities/${assignment.activity_id}`;
 
+  // Open / Close: students see and answer the activity only while it is open for this class or group.
+  const opened = assignment.is_open;
+  document.getElementById("open-button").textContent = opened ? "Close" : "Open";
+  document.getElementById("open-button").className = opened
+    ? "btn btn-sm text-nowrap btn-outline-secondary bi bi-door-closed"
+    : "btn btn-sm text-nowrap btn-success bi bi-door-open";
+  document.getElementById("open-note").textContent = opened
+    ? "Open: students can see and answer this activity."
+    : "Closed: students can't see this activity yet. Open it when they may start.";
+
   const released = assignment.scores_released;
   document.getElementById("release-button").textContent = released ? "Hide scores" : "Release scores";
   document.getElementById("release-button").className =
@@ -191,6 +201,30 @@ async function loadResults() {
     showError("results-error", "Cannot reach the server. Check your connection.");
   }
 }
+
+document.getElementById("open-button").addEventListener("click", async (event) => {
+  const stopLoading = startLoading(event.currentTarget);
+  if (!stopLoading) return;
+  hideError("results-error");
+  try {
+    const response = await apiFetch(`/api/assignments/${assignmentId}/open`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ open: !results.assignment.is_open }),
+    });
+    if (!response) return;
+    if (!response.ok) {
+      showError("results-error", (await response.json()).error || "Could not save.");
+      return;
+    }
+    results.assignment.is_open = (await response.json()).is_open;
+    render();
+  } catch {
+    showError("results-error", "Cannot reach the server. Check your connection.");
+  } finally {
+    stopLoading();
+  }
+});
 
 document.getElementById("release-button").addEventListener("click", async (event) => {
   const stopLoading = startLoading(event.currentTarget);
