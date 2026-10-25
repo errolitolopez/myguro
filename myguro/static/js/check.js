@@ -248,6 +248,16 @@ function renderStudent(data) {
   savePointsButton.classList.toggle("d-none", !editable);
 
   const parts = [];
+  // When this attempt was started and handed in (a close submits unfinished work: then no time spent)
+  if (detail.started_at) {
+    const times = [`Started ${formatDateTime(detail.started_at)}`];
+    if (detail.submitted_at) {
+      times.push(detail.auto_submitted
+        ? `submitted ${formatDateTime(detail.submitted_at)} when the activity was closed`
+        : `submitted ${formatDateTime(detail.submitted_at)} (${durationText(detail.started_at, detail.submitted_at)})`);
+    }
+    parts.push(el("p", "small text-body-secondary mb-2", times.join(" · ")));
+  }
   if (detail.score) {
     const total = detail.score.total;
     parts.push(el("p", "fw-semibold",

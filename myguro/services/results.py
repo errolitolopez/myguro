@@ -105,6 +105,10 @@ class ResultsService(Service):
                 "excluded": excluded,
                 "attempts": len(submitted),
                 "submitted_at": counted["submitted_at"] if counted else None,
+                # When that attempt (the one that counts, else the one being answered) was started;
+                # a paper score has no real start
+                "started_at": (counted or latest)["started_at"] if latest and not (counted or latest)["paper"] else None,
+                "auto_submitted": bool(counted and counted["auto_submitted"]),
                 "late": bool(counted and counted["late"]),
                 "paper": bool(counted and counted["paper"]),
                 "score": score["total"] if score else None,
@@ -182,7 +186,9 @@ class ResultsService(Service):
         return {
             "id": submission["id"],
             "attempt": submission["attempt"],
+            "started_at": None if submission["paper"] else submission["started_at"],
             "submitted_at": submission["submitted_at"],
+            "auto_submitted": bool(submission["auto_submitted"]),  # submitted by a close, not by the student
             "late": bool(submission["late"]),
             "paper": bool(submission["paper"]),
             "note": submission["note"],

@@ -111,3 +111,22 @@ def test_check_card_lists_every_class_the_sheet_is_given_to(teacher, other_teach
     assert card["submitted"] == 1 and card["to_check"] == 5 and card["due_date"] == "2020-01-01"
     assert teacher.get("/api/results/to-check?activity_id=99999").get_json() == {"assignments": []}
     assert other_teacher.get("/api/results/to-check").get_json() == {"assignments": []}
+
+
+def test_results_and_the_checking_page_tell_when_the_student_started_and_submitted(teacher):
+    class_id, students = make_class(teacher)
+    activity_id, q = make_activity(teacher)
+    assignment_id = assign(teacher, activity_id, class_id)
+    student = login(students[0]["username"])
+    student.put(f"/api/my-activities/{assignment_id}/answers", json={"answers": {str(q[0]): 1}})
+
+    row = next(r for r in teacher.get(f"/api/assignments/{assignment_id}/results").get_json()["students"]
+               if r["id"] == students[0]["id"])
+    assert row["started_at"] and row["submitted_at"] is None  # still answering
+    other = next(r for r in teacher.get(f"/api/assignments/{assignment_id}/results").get_json()["students"]
+                 if r["id"] == students[1]["id"])
+    assert other["started_at"] is None
+
+    student.post(f"/api/my-activities/{assignment_id}/submit", json={"answers": {str(q[0]): 1}})
+    detail = teacher.get(f"/api/assignments/{assignment_id}/students/{students[0]['id']}").get_json()["detail"]
+    assert detail["started_at"] and detail["submitted_at"] and detail["auto_submitted"] is False

@@ -175,6 +175,14 @@ function render() {
     if (student.paper) status.append(" ", el("span", "badge text-bg-secondary", "Paper"));
     if (student.late) status.append(" ", el("span", "badge text-bg-warning", "Late"));
 
+    // When they started and handed in; a close submits unfinished work, so then there is no real time spent
+    if (student.started_at) status.append(el("div", "small text-body-secondary", `Started ${formatDateTime(student.started_at)}`));
+    if (student.submitted_at && !student.paper) {
+      status.append(el("div", "small text-body-secondary", student.auto_submitted
+        ? `Submitted by close ${formatDateTime(student.submitted_at)}`
+        : `Submitted ${formatDateTime(student.submitted_at)} · ${durationText(student.started_at, student.submitted_at)}`));
+    }
+
     row.append(name, status, scoreCell(student.score),
       ...sections.map((section) => scoreCell(student.section_scores[section.id])),
       el("td", "text-body-secondary", student.attempts ? String(student.attempts) : "–"),

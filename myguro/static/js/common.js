@@ -33,6 +33,20 @@ function formatDay(isoDate) {
   });
 }
 
+// "2026-10-10 07:17:40" (UTC, from SQLite) -> "Oct 10, 3:17 PM" in the viewer's time zone
+function formatDateTime(utcText) {
+  return new Date(utcText.replace(" ", "T") + "Z").toLocaleString(undefined, {
+    month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
+  });
+}
+
+// durationText("2026-10-10 07:00:00", "2026-10-10 07:27:10") -> "27 min"; 65 minutes -> "1 h 5 min"
+function durationText(startUtc, endUtc) {
+  const minutes = Math.round((new Date(endUtc.replace(" ", "T") + "Z") - new Date(startUtc.replace(" ", "T") + "Z")) / 60000);
+  if (minutes < 1) return "less than 1 min";
+  return minutes < 60 ? `${minutes} min` : `${Math.floor(minutes / 60)} h ${minutes % 60} min`;
+}
+
 // plural(1, "student") -> "1 student", plural(2, "activity", "activities") -> "2 activities"
 function plural(count, one, many = `${one}s`) {
   return `${count} ${count === 1 ? one : many}`;
