@@ -23,9 +23,9 @@
     <div class="d-flex flex-wrap justify-content-end gap-2">
       <button id="open-button" type="button" class="btn btn-sm btn-success text-nowrap bi bi-door-open">Open</button>
       <button id="release-button" type="button" class="btn btn-sm btn-primary text-nowrap bi bi-unlock">Release scores</button>
-      <a class="btn btn-sm btn-outline-success text-nowrap bi bi-file-earmark-excel"
+      <a class="btn btn-sm btn-outline-secondary text-nowrap bi bi-file-earmark-excel"
          href="{{ url_for('results.export', assignment_id=assignment_id, kind='xlsx') }}">Export Excel</a>
-      <a class="btn btn-sm btn-outline-danger text-nowrap bi bi-file-earmark-pdf"
+      <a class="btn btn-sm btn-outline-secondary text-nowrap bi bi-file-earmark-pdf"
          href="{{ url_for('results.export', assignment_id=assignment_id, kind='pdf') }}">Export PDF</a>
       <a id="edit-link" class="btn btn-sm btn-outline-secondary text-nowrap bi bi-box-arrow-up-right" href="#">View activity</a>
     </div>
