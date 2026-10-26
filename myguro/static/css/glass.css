@@ -878,16 +878,17 @@ html[data-text-align="justify"] :is([data-reading], .reading-sample) :is(div, p,
   .support-option .btn { width: 100%; }
 }
 
-/* Alerts (messages, errors, tips): a tinted glass box with a bar in the meaning's colour, and the
+/* Alerts (messages, errors, tips): a glass box like a card with a bar in the meaning's colour, and the
    normal text colour, so they follow every theme. Bootstrap's own alert colours are fixed light or dark
    shades that clash with the themes. ":root .alert" is as specific as Bootstrap's dark-mode alert rules
    ("[data-bs-theme=dark] .alert-info") and comes later, so it wins in both modes. */
 :root .alert {
   --alert-color: var(--bs-secondary-color);
   --bs-alert-color: var(--bs-body-color);
-  --bs-alert-bg: rgba(128, 128, 128, 0.12); /* fallback where color-mix is missing */
-  --bs-alert-bg: color-mix(in srgb, var(--alert-color) 14%, var(--glass-bg));
-  --bs-alert-border-color: color-mix(in srgb, var(--alert-color) 30%, transparent);
+  /* The same glass and border as a card, so an alert looks like part of the theme. Only the bar on
+     the left says what kind of message it is. */
+  --bs-alert-bg: var(--glass-bg);
+  --bs-alert-border-color: var(--glass-border);
   --bs-alert-link-color: var(--bs-emphasis-color);
   --bs-alert-border-radius: 0.75rem;
   border-left: 4px solid var(--alert-color);
