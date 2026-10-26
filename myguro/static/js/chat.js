@@ -114,6 +114,43 @@
     });
   }
 
+  // Keeps the bubble in the corner of what the person actually sees. A fixed element is anchored to the
+  // page's layout width, so when something on a page is wider than the phone (the page then zooms out
+  // or can be panned sideways) the bubble ends up at the far right of that wider page, off screen.
+  // The visual viewport is the part of the page on the screen: the bubble is moved to its corner and
+  // kept at its normal size when the page is zoomed. With nothing wider and no zoom, nothing changes.
+  const keepInCorner = () => {
+    const view = window.visualViewport;
+    if (!view) return;
+    const page = document.documentElement;
+    const moveX = view.offsetLeft + view.width - page.clientWidth;
+    const moveY = view.offsetTop + view.height - page.clientHeight;
+    const scale = 1 / view.scale;
+    const moved = Math.abs(moveX) > 0.5 || Math.abs(moveY) > 0.5 || Math.abs(scale - 1) > 0.01;
+    bubbleBox.style.transformOrigin = "bottom right";
+    bubbleBox.style.transform = moved ? `translate(${moveX}px, ${moveY}px) scale(${scale})` : "";
+  };
+  if (window.visualViewport) {
+    let pending = false;
+    const soon = () => {
+      if (pending) return; // at most once a frame
+      pending = true;
+      requestAnimationFrame(() => {
+        pending = false;
+        keepInCorner();
+      });
+    };
+    window.visualViewport.addEventListener("resize", soon);
+    window.visualViewport.addEventListener("scroll", soon);
+    window.addEventListener("resize", soon);
+    window.addEventListener("load", soon);
+    // Pages draw their tables after they load, which is when the page can become wider: look again a
+    // little later, too.
+    setTimeout(soon, 500);
+    setTimeout(soon, 2000);
+    keepInCorner();
+  }
+
   // The window size is remembered in this browser; if the browser blocks storage it just starts small.
   const sizeButton = document.getElementById("chat-size");
   const setLarge = (large) => {

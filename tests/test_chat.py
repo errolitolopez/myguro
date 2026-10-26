@@ -390,3 +390,8 @@ def test_robot_parts_are_there_for_the_animation(teacher, chat_on):
     for name in ("bot-blink", "bot-swing", "bot-bob", "bot-wiggle", "bot-look"):
         assert f"@keyframes {name}" in css
     assert "prefers-reduced-motion" in css.split("GuroBot is alive")[1]  # it all stops for reduced motion
+
+
+def test_bubble_script_keeps_the_bubble_in_the_visible_corner():
+    script = open("myguro/static/js/chat.js").read()
+    assert "visualViewport" in script and "keepInCorner" in script
