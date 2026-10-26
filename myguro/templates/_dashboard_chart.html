@@ -1,6 +1,6 @@
 {# The interactive bar chart on the teacher and student dashboards, drawn by dashboard-chart.js.
    Needs: role ("teacher" or "student"). #}
-<div class="card mt-4" id="chart-card" data-role="{{ role }}">
+<div class="card mt-4 mb-4" id="chart-card" data-role="{{ role }}">
   <div class="card-body">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
       <h2 id="chart-title" class="h5 mb-0 bi bi-bar-chart-line"> {{ "Class results" if role == "teacher" else "My scores" }}</h2>
