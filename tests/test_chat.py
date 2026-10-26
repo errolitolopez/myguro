@@ -1,6 +1,15 @@
 """The navigation chatbot: the admin switch, the teacher-only chat, and its strict limits."""
 
+import pytest
+
 from conftest import error, login
+
+
+@pytest.fixture(autouse=True)
+def no_real_key(app, tmp_path, monkeypatch):
+    """Never use the real key saved in instance/gemini.env: a test must not call the real service."""
+    monkeypatch.setattr(app, "instance_path", str(tmp_path))
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
 
 
 def chatbot_setting(client):
@@ -346,3 +355,28 @@ def test_bubble_uses_the_robot_icon(teacher, chat_on):
     page = teacher.get("/dashboard").get_data(as_text=True)
     assert page.count('viewBox="0 0 48 48"') == 2  # on the bubble and in the window header
     assert "bi-chat-dots" not in page
+
+
+def test_key_is_read_from_the_saved_file_when_the_environment_has_none(app, tmp_path, monkeypatch):
+    """PythonAnywhere starts the app without run.sh, so the key saved by set-gemini-key.sh must be found."""
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.setattr(app, "instance_path", str(tmp_path))
+    with app.test_request_context():
+        assert chat_client.find_api_key() is None  # no file yet
+        (tmp_path / "gemini.env").write_text("export GEMINI_API_KEY=k\\\"ey\\$1\\ x\n")  # the way printf %q writes it
+        assert chat_client.find_api_key() == 'k"ey$1 x'
+        monkeypatch.setenv("GEMINI_API_KEY", "from-environment")
+        assert chat_client.find_api_key() == "from-environment"  # the environment wins
+
+
+def test_a_failed_call_is_logged_without_the_key(app, teacher, chat_on, monkeypatch, caplog):
+    import urllib.request
+
+    def broken(request, timeout):
+        raise OSError("network down")
+
+    monkeypatch.setenv("GEMINI_API_KEY", "secret-key-123")
+    monkeypatch.setattr(urllib.request, "urlopen", broken)
+    data = say(teacher).get_json()
+    assert data["reply"] == rules.UNAVAILABLE_REPLY
+    assert "network down" in caplog.text and "secret-key-123" not in caplog.text

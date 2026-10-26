@@ -2,7 +2,10 @@
 
 import json
 import os
+import shlex
 import urllib.request
+
+from flask import current_app
 
 from myguro.domain.chat import SPECIAL_KEYS
 
@@ -13,12 +16,31 @@ MAX_TOKENS = 60
 TIMEOUT_SECONDS = 10
 
 
+def find_api_key():
+    """The Gemini key: the GEMINI_API_KEY environment variable, else the line `export GEMINI_API_KEY=...`
+    in instance/gemini.env (saved by set-gemini-key.sh). The file is read here because a server that
+    does not start the app with run.sh (PythonAnywhere) never reads the environment of that script."""
+    key = os.environ.get("GEMINI_API_KEY")
+    if key:
+        return key
+    try:
+        with open(os.path.join(current_app.instance_path, "gemini.env")) as saved:
+            for line in saved:
+                words = shlex.split(line)  # the script quotes the key, so split it the way a shell would
+                if len(words) == 2 and words[0] == "export" and words[1].startswith("GEMINI_API_KEY="):
+                    return words[1].split("=", 1)[1] or None
+    except (OSError, ValueError):
+        pass
+    return None
+
+
 def ask_model(message, topics, prompt, history=()):
     """The topic key (a page or a how-to) the model picked for this question, or None if there is no API
     key, the call failed, or the model did not pick one. Only the question and the topic list are sent: no names,
     classes or scores, and only the latest few earlier messages of this teacher (history: [(sender, text)]). Never raises, so the chat just says it is not available."""
-    api_key = os.environ.get("GEMINI_API_KEY")
+    api_key = find_api_key()
     if not api_key:
+        current_app.logger.warning("GuroBot: no Gemini API key (set GEMINI_API_KEY or run set-gemini-key.sh).")
         return None
     body = {
         "systemInstruction": {"parts": [{"text": prompt}]},
@@ -47,6 +69,9 @@ def ask_model(message, topics, prompt, history=()):
             call = part.get("functionCall")
             if call and call.get("name") == "help":
                 return call["args"].get("key")
-    except Exception:  # any failure (network, key, limit, odd answer) means "not available"
+    except Exception as error:  # any failure (network, key, limit, odd answer) means "not available"
+        # The reason goes to the server log only (never the key, which is in a header), so it can be fixed
+        current_app.logger.warning("GuroBot: the Gemini call failed: %s: %s", type(error).__name__, error)
         return None
+    current_app.logger.warning("GuroBot: Gemini did not pick a topic.")
     return None
