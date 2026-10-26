@@ -10,39 +10,39 @@
   <div id="dashboard-error" class="alert alert-danger d-none" role="alert"></div>
 
   {% if user.role == "admin" %}
-  <div class="row g-3">
-    <div class="col-6 col-md-4">
+  <div class="bento">
+    <div>
       <a class="card h-100 text-decoration-none" href="{{ url_for('accounts.teachers_page') }}"><div class="card-body">
         <div class="text-body-secondary small">Teachers</div>
-        <div class="fs-3 fw-semibold" id="stat-teachers">–</div>
+        <div class="fs-3 fw-bold stat-number" id="stat-teachers">–</div>
       </div></a>
     </div>
-    <div class="col-6 col-md-4">
+    <div class="bento-wide">
       <a class="card h-100 text-decoration-none" href="{{ url_for('accounts.students_page') }}"><div class="card-body">
         <div class="text-body-secondary small">Students</div>
-        <div class="fs-3 fw-semibold" id="stat-students">–</div>
+        <div class="fs-3 fw-bold stat-number" id="stat-students">–</div>
       </div></a>
     </div>
-    <div class="col-6 col-md-4">
+    <div>
       <a class="card h-100 text-decoration-none" href="{{ url_for('accounts.supervisors_page') }}"><div class="card-body">
         <div class="text-body-secondary small">Supervisors</div>
-        <div class="fs-3 fw-semibold" id="stat-supervisors">–</div>
+        <div class="fs-3 fw-bold stat-number" id="stat-supervisors">–</div>
       </div></a>
     </div>
-    <div class="col-6 col-md-4">
+    <div>
       <div class="card h-100"><div class="card-body">
         <div class="text-body-secondary small">Classes</div>
-        <div class="fs-3 fw-semibold" id="stat-classes">–</div>
+        <div class="fs-3 fw-bold stat-number" id="stat-classes">–</div>
       </div></div>
     </div>
-    <div class="col-6 col-md-4">
+    <div>
       <div class="card h-100"><div class="card-body">
         <div class="text-body-secondary small">Activities</div>
-        <div class="fs-3 fw-semibold" id="stat-activities">–</div>
+        <div class="fs-3 fw-bold stat-number" id="stat-activities">–</div>
       </div></div>
     </div>
     <!-- A full copy of the database. Turns yellow when the last backup is old or there never was one. -->
-    <div class="col-12">
+    <div class="bento-wide">
       <div class="card {{ 'border-warning' if backup.stale else '' }}" {% if backup.stale %}id="backup-warning"{% endif %}>
         <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-2">
           <div>
@@ -57,23 +57,23 @@
     </div>
   </div>
   {% elif user.role == "student" %}
-  <div class="row g-3 mb-4">
-    <div class="col-6 col-md-3">
+  <div class="bento mb-4">
+    <div>
       <div class="card h-100"><div class="card-body">
         <div class="text-body-secondary small">Classes</div>
-        <div class="fs-3 fw-semibold" id="stat-classes">–</div>
+        <div class="fs-3 fw-bold stat-number" id="stat-classes">–</div>
       </div></div>
     </div>
-    <div class="col-6 col-md-3">
+    <div class="bento-wide">
       <a class="card h-100 text-decoration-none" href="{{ url_for('student.activities_page') }}"><div class="card-body">
         <div class="text-body-secondary small">To do</div>
-        <div class="fs-3 fw-semibold" id="stat-to-do">–</div>
+        <div class="fs-3 fw-bold stat-number" id="stat-to-do">–</div>
       </div></a>
     </div>
-    <div class="col-6 col-md-3">
+    <div>
       <a class="card h-100 text-decoration-none" href="{{ url_for('student.activities_page') }}"><div class="card-body">
         <div class="text-body-secondary small">Submitted</div>
-        <div class="fs-3 fw-semibold" id="stat-submitted">–</div>
+        <div class="fs-3 fw-bold stat-number" id="stat-submitted">–</div>
       </div></a>
     </div>
   </div>
@@ -82,35 +82,35 @@
   <div id="class-list" class="list-group"></div>
   <p id="no-classes" class="text-body-secondary d-none">You're not in a class yet. Ask your teacher to add you.</p>
   {% else %}
-  <div class="row g-3 mb-4">
-    <div class="col-6 col-md-4">
+  <div class="bento mb-4">
+    <div>
       <div class="card h-100"><div class="card-body">
         <div class="text-body-secondary small">Students</div>
-        <div class="fs-3 fw-semibold" id="stat-students">–</div>
+        <div class="fs-3 fw-bold stat-number" id="stat-students">–</div>
       </div></div>
     </div>
-    <div class="col-6 col-md-4">
+    <div>
       <a class="card h-100 text-decoration-none" href="{{ url_for('activities.list_page') }}"><div class="card-body">
         <div class="text-body-secondary small">Not started activities</div>
-        <div class="fs-3 fw-semibold" id="stat-not-started">–</div>
+        <div class="fs-3 fw-bold stat-number" id="stat-not-started">–</div>
       </div></a>
     </div>
-    <div class="col-6 col-md-4">
+    <div class="bento-wide">
       <a class="card h-100 text-decoration-none" href="{{ url_for('activities.list_page') }}"><div class="card-body">
         <div class="text-body-secondary small">Open activities</div>
-        <div class="fs-3 fw-semibold" id="stat-open">–</div>
+        <div class="fs-3 fw-bold stat-number" id="stat-open">–</div>
       </div></a>
     </div>
-    <div class="col-6 col-md-4">
+    <div class="bento-wide">
       <a class="card h-100 text-decoration-none" href="{{ url_for('activities.list_page') }}"><div class="card-body">
         <div class="text-body-secondary small">Closed activities</div>
-        <div class="fs-3 fw-semibold" id="stat-closed">–</div>
+        <div class="fs-3 fw-bold stat-number" id="stat-closed">–</div>
       </div></a>
     </div>
-    <div class="col-6 col-md-4">
+    <div class="bento-wide">
       <div class="card h-100"><div class="card-body">
         <div class="text-body-secondary small">Answers submitted</div>
-        <div class="fs-3 fw-semibold" id="stat-submissions">–</div>
+        <div class="fs-3 fw-bold stat-number" id="stat-submissions">–</div>
       </div></div>
     </div>
   </div>
