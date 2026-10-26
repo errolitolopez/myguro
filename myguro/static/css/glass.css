@@ -42,6 +42,7 @@
   --bs-link-color-rgb: var(--bs-body-color-rgb);
   --bs-link-hover-color: var(--bs-emphasis-color);
   --bs-link-hover-color-rgb: var(--bs-emphasis-color-rgb);
+  --success-color: #22c55e;
   --confirm-rgb: 99, 102, 241; /* the confirm colour as r, g, b, for focus rings */
   --confirm-bg: #4f46e5;
   --confirm-hover: #4338ca;
@@ -120,6 +121,7 @@
   --page-base: #2b2b2b;
   --page-gradient: radial-gradient(circle at top left, #313335, #262626);
   /* Buttons in the IDE's own colours: steel blue, brick red, amber. */
+  --success-color: #6a8759;
   --accent-from: #4b6eaf;
   --accent-to: #6897bb;
   --confirm-rgb: 75, 110, 175;
@@ -162,6 +164,7 @@
   --page-base: #fdf6e3;
   --page-gradient: radial-gradient(circle at top left, #fdf6e3, #eee8d5);
   /* Buttons in the Solarized accents: blue, red, yellow. */
+  --success-color: #859900;
   --accent-from: #268bd2;
   --accent-to: #2aa198;
   --confirm-rgb: 38, 139, 210;
@@ -190,6 +193,7 @@
   --bs-tertiary-bg: #0f1228;
   --bs-tertiary-bg-rgb: 15, 18, 40;
   --bs-border-color: #272c55;
+  --success-color: #34d399;
   --accent-from: #a855f7;
   --accent-to: #22d3ee;
   --confirm-bg: #7c3aed;
@@ -873,3 +877,23 @@ html[data-text-align="justify"] :is([data-reading], .reading-sample) :is(div, p,
   .support-option { flex-wrap: wrap; }
   .support-option .btn { width: 100%; }
 }
+
+/* Alerts (messages, errors, tips): a tinted glass box with a bar in the meaning's colour, and the
+   normal text colour, so they follow every theme. Bootstrap's own alert colours are fixed light or dark
+   shades that clash with the themes. ":root .alert" is as specific as Bootstrap's dark-mode alert rules
+   ("[data-bs-theme=dark] .alert-info") and comes later, so it wins in both modes. */
+:root .alert {
+  --alert-color: var(--bs-secondary-color);
+  --bs-alert-color: var(--bs-body-color);
+  --bs-alert-bg: rgba(128, 128, 128, 0.12); /* fallback where color-mix is missing */
+  --bs-alert-bg: color-mix(in srgb, var(--alert-color) 14%, var(--glass-bg));
+  --bs-alert-border-color: color-mix(in srgb, var(--alert-color) 30%, transparent);
+  --bs-alert-link-color: var(--bs-emphasis-color);
+  --bs-alert-border-radius: 0.75rem;
+  border-left: 4px solid var(--alert-color);
+}
+:root .alert-info { --alert-color: var(--accent-to); }
+:root .alert-success { --alert-color: var(--success-color); }
+:root .alert-warning { --alert-color: var(--warn-bg); }
+:root .alert-danger { --alert-color: var(--danger-bg); }
+:root .alert-dark { --alert-color: var(--bs-emphasis-color); }
