@@ -340,3 +340,9 @@ def test_suggestions_come_with_the_history_and_are_valid_questions(teacher, chat
     # tapping one is an ordinary question: it goes through the same route and the same limits
     assert say(teacher, rules.SUGGESTIONS[0]).status_code == 200
     assert teacher.delete("/api/chat/history").get_json()["suggestions"] == rules.SUGGESTIONS
+
+
+def test_bubble_uses_the_robot_icon(teacher, chat_on):
+    page = teacher.get("/dashboard").get_data(as_text=True)
+    assert page.count('viewBox="0 0 48 48"') == 2  # on the bubble and in the window header
+    assert "bi-chat-dots" not in page

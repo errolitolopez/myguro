@@ -998,16 +998,16 @@ html[data-effects="light"] main { animation: none; }
   align-items: flex-end;
   gap: 0.5rem;
 }
-.chat-toggle { width: 3.25rem; height: 3.25rem; font-size: 1.35rem; box-shadow: var(--glass-shadow); }
+.chat-toggle { width: 3.5rem; height: 3.5rem; box-shadow: var(--glass-shadow); }
 .chat-panel {
   /* On a phone the panel is almost as wide as the screen; on a desktop it stays small. */
   width: min(22rem, calc(100vw - 2rem));
-  /* Never taller than the room above the bubble (3.25rem button + 0.5rem gap + 1rem left at the top). The
+  /* Never taller than the room above the bubble (3.5rem button + 0.5rem gap + 1rem left at the top). The
      messages shrink to fit, while the header and the box stay. 100vh first for browsers without dvh. */
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - var(--chat-bottom) - 4.75rem);
-  max-height: calc(100dvh - var(--chat-bottom) - 4.75rem);
+  max-height: calc(100vh - var(--chat-bottom) - 5rem);
+  max-height: calc(100dvh - var(--chat-bottom) - 5rem);
   box-shadow: var(--glass-shadow);
   /* Solid, not frosted glass: page text must not show through the chat. !important beats the shared
      .card glass rules above, which set the same properties with the same weight. */
