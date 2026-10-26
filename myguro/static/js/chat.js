@@ -74,6 +74,32 @@
     }
   };
 
+  // The window size is remembered in this browser; if the browser blocks storage it just starts small.
+  const sizeButton = document.getElementById("chat-size");
+  const setLarge = (large) => {
+    panel.classList.toggle("chat-panel-large", large);
+    sizeButton.classList.toggle("bi-arrows-angle-expand", !large);
+    sizeButton.classList.toggle("bi-arrows-angle-contract", large);
+    const label = large ? "Make the chat window smaller" : "Make the chat window bigger";
+    sizeButton.setAttribute("aria-label", label);
+    sizeButton.title = label;
+    messages.scrollTop = messages.scrollHeight;
+  };
+  try {
+    setLarge(localStorage.getItem("chat-large") === "1");
+  } catch {
+    setLarge(false);
+  }
+  sizeButton.addEventListener("click", () => {
+    const large = !panel.classList.contains("chat-panel-large");
+    setLarge(large);
+    try {
+      localStorage.setItem("chat-large", large ? "1" : "0");
+    } catch {
+      // not remembered
+    }
+  });
+
   const open = () => {
     if (!historyLoaded) loadHistory();
     panel.classList.remove("d-none");

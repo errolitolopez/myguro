@@ -1001,3 +1001,6 @@ html[data-effects="light"] main { animation: none; }
 /* The teacher's own messages are on the right in the accent colour, MyGuro's on the left in a neutral one. */
 .chat-message-mine { align-self: flex-end; background: var(--accent-gradient); color: var(--confirm-text); border-bottom-right-radius: 0.25rem; }
 .chat-message-reply { align-self: flex-start; background: var(--bs-secondary-bg); border-bottom-left-radius: 0.25rem; }
+/* The bigger chat window (the expand button in its header): wider and taller, but never past the screen. */
+.chat-panel-large { width: min(40rem, calc(100vw - 2rem)); }
+.chat-panel-large .chat-messages { height: min(32rem, calc(100vh - 12rem)); }

@@ -304,3 +304,8 @@ def test_guides_and_pages_are_what_the_model_is_offered(teacher, chat_on, asked)
     _, keys, prompt = asked.calls[0]
     assert set(rules.TEACHER_PAGES) | set(TEACHER_GUIDES) == set(keys)
     assert all(f'"{key}"' in prompt for key in keys)
+
+
+def test_bubble_has_the_size_button(teacher, chat_on):
+    page = teacher.get("/dashboard").get_data(as_text=True)
+    assert 'id="chat-size"' in page and 'aria-label="Make the chat window bigger"' in page
