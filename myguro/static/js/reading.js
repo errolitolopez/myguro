@@ -1,6 +1,6 @@
-// Reading settings: text size, text alignment and line spacing. Loaded in <head> so they are set
+// Display settings: text size, text alignment, line spacing and where the phone menu bar sits. Loaded in <head> so they are set
 // before the page is drawn (no jump). A person's choices are kept in this browser only, like the theme.
-// They become attributes on <html> (data-text-size, data-text-align, data-line-spacing); glass.css
+// They become attributes on <html> (data-text-size, data-text-align, data-line-spacing, data-tab-bar); glass.css
 // does the rest.
 
 (function () {
@@ -8,6 +8,7 @@
     size: { key: "myguro-text-size", attribute: "data-text-size", choices: ["small", "normal", "large", "xlarge"], fallback: "normal" },
     align: { key: "myguro-text-align", attribute: "data-text-align", choices: ["left", "justify"], fallback: "left" },
     spacing: { key: "myguro-line-spacing", attribute: "data-line-spacing", choices: ["normal", "relaxed"], fallback: "normal" },
+    tabbar: { key: "myguro-tab-bar", attribute: "data-tab-bar", choices: ["bottom", "top"], fallback: "bottom" },
   };
 
   // saved(OPTIONS.size) -> "large" (or the fallback when nothing valid is saved)

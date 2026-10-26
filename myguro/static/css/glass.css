@@ -489,6 +489,16 @@ h6, .h6 { font-size: 0.9375rem; }
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+/* Display settings → Menu bar on phones → Top: the same bar sits under the navbar and stays in view while
+   scrolling (sticky), so the page needs no room reserved at the bottom. */
+html[data-tab-bar="top"] .tabbar {
+  position: sticky;
+  inset: 0 0 auto 0;
+  padding-bottom: 0;
+  border-top: 0;
+  border-bottom: 1px solid var(--glass-border);
+}
+
 .tab-link {
   flex: 1 1 0;
   display: flex;
@@ -514,12 +524,12 @@ h6, .h6 { font-size: 0.9375rem; }
 
 @media (max-width: 767.98px) {
   /* Room for the bar, so the last row of a page is never hidden behind it. */
-  body:has(.tabbar) {
+  html:not([data-tab-bar="top"]) body:has(.tabbar) {
     padding-bottom: calc(3rem + env(safe-area-inset-bottom));
   }
 
   /* The editor and answer bars sit on top of the tab bar, not under it. */
-  body:has(.tabbar) .position-fixed.bottom-0 {
+  html:not([data-tab-bar="top"]) body:has(.tabbar) .position-fixed.bottom-0 {
     bottom: calc(3rem + env(safe-area-inset-bottom)) !important; /* !important beats Bootstrap's bottom-0 */
   }
 }
