@@ -1,19 +1,15 @@
-{# The chatbot's icon: a robot head with a graduation cap, holding a microphone. It takes the text colour
-   (currentColor), so it is white on the green bubble. Size it with the size="" it is included with. #}
+{# The chatbot's icon: a smiling robot head with a graduation cap. It takes the text colour (currentColor),
+   so it is white on the green bubble. Size it with the size="" it is included with. #}
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="{{ size }}" height="{{ size }}" fill="none"
      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
   <!-- graduation cap: the board, the part on the head, and the tassel -->
-  <polygon points="21,3 38,10 21,17 4,10" fill="currentColor"/>
-  <path d="M12 13.5 V18 Q21 22 30 18 V13.5"/>
-  <path d="M38 10 V17"/>
-  <circle cx="38" cy="18.5" r="1.4" fill="currentColor" stroke="none"/>
-  <!-- robot head with two eyes and a mouth -->
-  <rect x="9" y="21" width="24" height="19" rx="5.5"/>
-  <circle cx="16" cy="29" r="2.2" fill="currentColor" stroke="none"/>
-  <circle cx="26" cy="29" r="2.2" fill="currentColor" stroke="none"/>
-  <path d="M17 35 H25"/>
-  <!-- microphone -->
-  <rect x="36" y="29" width="8" height="12" rx="4" fill="currentColor"/>
-  <path d="M34 37 V38.5 A6 6 0 0 0 46 38.5 V37"/>
-  <path d="M40 44.5 V47"/>
+  <polygon points="24,3 42,10 24,17 6,10" fill="currentColor"/>
+  <path d="M14 13.5 V18.5 Q24 23 34 18.5 V13.5"/>
+  <path d="M42 10 V17"/>
+  <circle cx="42" cy="18.5" r="1.4" fill="currentColor" stroke="none"/>
+  <!-- robot head with two eyes and a smile -->
+  <rect x="9" y="22" width="30" height="21" rx="6"/>
+  <circle cx="18" cy="30" r="2.4" fill="currentColor" stroke="none"/>
+  <circle cx="30" cy="30" r="2.4" fill="currentColor" stroke="none"/>
+  <path d="M17.5 35.5 Q24 41 30.5 35.5"/>
 </svg>
