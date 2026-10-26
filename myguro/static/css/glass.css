@@ -992,12 +992,17 @@ html[data-effects="light"] main { animation: none; }
      stay on the screen, so its header and buttons are never cut off at the top. */
   --chat-bottom: calc(var(--chat-lift, 0rem) + max(1rem, env(safe-area-inset-bottom)));
   bottom: var(--chat-bottom);
+  /* The box holds the whole window even while it is minimized and invisible, so on a small screen it would
+     sit over the page and eat the clicks meant for the buttons under it. Only the round button and an open
+     window take clicks. */
+  pointer-events: none;
   z-index: 1030;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 0.5rem;
 }
+.chat-toggle, .chat-panel.chat-open { pointer-events: auto; }
 .chat-toggle { width: 3.5rem; height: 3.5rem; box-shadow: var(--glass-shadow); }
 .chat-panel {
   /* On a phone the panel is almost as wide as the screen; on a desktop it stays small. */
