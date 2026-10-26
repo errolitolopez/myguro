@@ -18,7 +18,12 @@ if [ ! -f .venv/.installed ] || [ requirements.txt -nt .venv/.installed ]; then
   touch .venv/.installed
 fi
 
-# 2. Start the app (the database and the default admin are created on first start)
+# 2. The Gemini key for the navigation chatbot, if ./set-gemini-key.sh saved one
+if [ -f instance/gemini.env ]; then
+  . instance/gemini.env
+fi
+
+# 3. Start the app (the database and the default admin are created on first start)
 if [ "$1" = "lan" ]; then
   ip=$(hostname -I 2>/dev/null | awk '{print $1}')
   echo "Open on other devices: http://${ip:-<your-computer-ip>}:5000"
