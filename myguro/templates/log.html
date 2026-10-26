@@ -64,7 +64,7 @@
   <div id="log-summary" class="small text-body-secondary"></div>
   <div class="small text-body-secondary mb-2">Keeps the latest {{ "{:,}".format(max_entries) }} entries. Older ones are removed.</div>
   <div id="log-list" class="list-group">
-    <div class="list-group-item text-body-secondary">Loading...</div>
+    {% include "_skeleton.html" %}
   </div>
 
   <!-- Page controls (hidden when everything fits on one page) -->

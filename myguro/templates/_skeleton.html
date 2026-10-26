@@ -1,0 +1,8 @@
+{# Grey shimmering rows shown in a list while it loads; the script replaces them with the real rows. #}
+<span class="visually-hidden" role="status">Loading...</span>
+{% for width in ("w-50", "w-75", "w-25") %}
+<div class="list-group-item" aria-hidden="true">
+  <span class="skeleton {{ width }}"></span>
+  <span class="skeleton skeleton-sm w-25"></span>
+</div>
+{% endfor %}
