@@ -1,7 +1,7 @@
 """Errors the services raise when a request can't be done. The web layer turns them into
 JSON answers like {"error": "Title is required."} with the right HTTP status."""
 
-from flask import jsonify
+from flask import jsonify, render_template, request
 
 
 class AppError(Exception):
@@ -43,6 +43,13 @@ def register_error_handlers(app):
     def handle_too_big(error):
         megabytes = app.config["MAX_CONTENT_LENGTH"] // (1024 * 1024)
         return jsonify(error=f"The file is too big (at most {megabytes} MB)."), 413
+
+    @app.errorhandler(404)
+    def handle_not_found(error):
+        # The pages call /api/... and read JSON; a person who typed a wrong address gets a page
+        if request.path.startswith("/api/"):
+            return jsonify(error="Not found."), 404
+        return render_template("not_found.html"), 404
 
     @app.errorhandler(AppError)
     def handle_app_error(error):

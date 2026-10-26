@@ -46,3 +46,10 @@ def test_tip_box_for_teachers_and_students_not_on_answer_page(admin, teacher):
     assert 'id="tip-box" class="container d-none" data-role="teacher"' in teacher.get("/dashboard").get_data(as_text=True)
     assert 'data-role="student"' in student.get("/my-activities").get_data(as_text=True)
     assert 'id="tip-box"' not in student.get(f"/my-activities/{assignment_id}").get_data(as_text=True)
+
+
+def test_a_wrong_address_shows_the_not_found_page_and_an_api_one_answers_json(teacher):
+    page = teacher.get("/no-such-page")
+    assert page.status_code == 404 and b"Page not found" in page.data
+    api = teacher.get("/api/no-such-route")
+    assert api.status_code == 404 and api.get_json() == {"error": "Not found."}
