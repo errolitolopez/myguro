@@ -28,18 +28,21 @@ async function loadStatus() {
       showError("recovery-error", data.error || "Could not load your recovery code.");
       return;
     }
+    const exists = data.created_at !== null; // a code was made (it may be used up)
     const line = document.createElement("div");
     line.className = "fw-semibold bi " + (data.has_code ? "bi-shield-check" : "bi-shield-exclamation");
     line.textContent = data.has_code
-      ? ` You have a recovery code (made ${formatDay(data.created_at)}).`
-      : " You don't have a recovery code yet.";
+      ? ` You have a recovery code (made ${formatDay(data.created_at)}). It can be used ` +
+        `${plural(data.uses_left, "more time")} to reset your password.`
+      : exists ? " Your recovery code is used up. Make a new one." : " You don't have a recovery code yet.";
     statusBox.replaceChildren(line);
+    // Replacing a code that still works needs a confirmation; a used-up one does not.
     hasCode = data.has_code;
-    makeButton.textContent = data.has_code ? "Make a new code" : "Make a recovery code";
+    makeButton.textContent = exists ? "Make a new code" : "Make a recovery code";
     document.getElementById("recovery-replace-note").classList.toggle("d-none", !data.has_code);
     // With a code already, the password box stays hidden until the person chooses to make a new one.
-    form.classList.toggle("d-none", data.has_code);
-    startButton.classList.toggle("d-none", !data.has_code);
+    form.classList.toggle("d-none", exists);
+    startButton.classList.toggle("d-none", !exists);
   } catch {
     statusBox.replaceChildren();
     showError("recovery-error", "Cannot reach the server. Check your connection.");

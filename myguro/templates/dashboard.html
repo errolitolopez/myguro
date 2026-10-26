@@ -12,7 +12,7 @@
   <!-- Until the person makes a recovery code, only the admin can help if they forget the password. -->
   <div class="alert alert-warning small" role="status" id="recovery-nudge">
     <i class="bi bi-shield-exclamation" aria-hidden="true"></i>
-    You don't have a recovery code yet. Without one, only the admin can reset your password.
+    You don't have a working recovery code. Without one, only the admin can reset your password.
     <a href="{{ url_for('recovery.code_page') }}" class="fw-semibold">Make one now</a>
   </div>
   {% endif %}

@@ -1,4 +1,4 @@
-// Forgot password: username + recovery code + a new password. The recovery code stays valid.
+// Forgot password: username + recovery code + a new password. Each use takes one of the code's uses.
 
 const form = document.getElementById("forgot-form");
 const usernameInput = document.getElementById("forgot-username");
@@ -40,6 +40,9 @@ form.addEventListener("submit", async (event) => {
     form.classList.add("d-none");
     document.getElementById("forgot-intro").classList.add("d-none");
     document.getElementById("forgot-done").classList.remove("d-none");
+    document.getElementById("forgot-done-text").textContent = data.uses_left > 0
+      ? `Your password was changed. Your recovery code can be used ${plural(data.uses_left, "more time")}.`
+      : "Your password was changed. Your recovery code is used up now: log in and make a new one.";
     confetti();
   } catch {
     showError("forgot-error", "Cannot reach the server. Check your connection.");
