@@ -530,7 +530,7 @@ html[data-tab-bar="top"] .web-tabs { display: block !important; }
 
   /* The chat bubble goes above the bar too, not on top of it. */
   html:not([data-tab-bar="top"]) body:has(.tabbar) .chat-bubble {
-    bottom: calc(3rem + 0.75rem + env(safe-area-inset-bottom));
+    bottom: calc(var(--chat-lift, 0rem) + 3rem + 0.75rem + env(safe-area-inset-bottom));
   }
 }
 
@@ -988,7 +988,7 @@ html[data-effects="light"] main { animation: none; }
 .chat-bubble {
   position: fixed;
   right: max(1rem, env(safe-area-inset-right));
-  bottom: max(1rem, env(safe-area-inset-bottom));
+  bottom: calc(var(--chat-lift, 0rem) + max(1rem, env(safe-area-inset-bottom)));
   z-index: 1030;
   display: flex;
   flex-direction: column;
@@ -1025,3 +1025,6 @@ html[data-effects="light"] main { animation: none; }
 @media (prefers-reduced-motion: reduce) {
   .chat-panel, .chat-panel.chat-open, .chat-messages { transition: none; }
 }
+/* Pages with their own bar at the bottom (the activity editor's Preview / Save, the check page's Save scores):
+   the bubble sits above that bar so it never covers its buttons. */
+body:has(.position-fixed.bottom-0), body:has(.sticky-bottom) { --chat-lift: 3.75rem; }

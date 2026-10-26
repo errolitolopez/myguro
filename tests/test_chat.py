@@ -321,3 +321,12 @@ def test_the_model_is_told_about_admin_only_and_none(teacher, chat_on, asked):
     say(teacher)
     prompt = asked.calls[0][2]
     assert '"admin-only"' in prompt and '"none"' in prompt and "delet" in prompt
+
+
+def test_the_editor_has_a_bottom_bar_the_bubble_must_clear(teacher, chat_on):
+    """The CSS lifts the bubble above any page with a fixed or sticky bottom bar (browser check: see the checklist)."""
+    css = open("myguro/static/css/glass.css").read()
+    assert "--chat-lift: 3.75rem" in css and "body:has(.position-fixed.bottom-0)" in css
+    sheet = teacher.post("/api/activities", json={"title": "Test", "subject": "Math"}).get_json()
+    page = teacher.get(f"/activities/{sheet['activity']['id']}").get_data(as_text=True)
+    assert "position-fixed bottom-0" in page and 'id="chat-bubble"' in page
