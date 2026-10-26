@@ -960,3 +960,15 @@ html[data-effects="light"] main { animation: none; }
   user-select: all;
   -webkit-user-select: all;
 }
+
+/* The logo of a way to give (GCash, Ko-fi) on a white tile: brand logos are made for a light background,
+   and the tile keeps them readable in the dark themes too. The height is set on the image. */
+.support-logo {
+  flex: none;
+  display: grid;
+  place-items: center;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.75rem;
+  background: #fff; /* white in every theme, on purpose */
+}
+.support-logo img { display: block; width: auto; max-width: 7rem; }
