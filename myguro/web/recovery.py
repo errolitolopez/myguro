@@ -31,8 +31,10 @@ def api_status():
 @bp.post("/api/recovery-code")
 @login_required_api
 def api_create():
-    """{current_password} -> {code}: shown once. A new code replaces the old one."""
-    return jsonify(RecoveryService(get_db(), current_user()).create(json_body().get("current_password"))), 201
+    """{current_password, replace} -> {code}: shown once. If there is a code already, replace must be true."""
+    data = json_body()
+    return jsonify(RecoveryService(get_db(), current_user()).create(data.get("current_password"),
+                                                                    data.get("replace"))), 201
 
 
 @bp.post("/api/recover")

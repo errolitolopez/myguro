@@ -12,7 +12,7 @@ USER = "jdelacruz01"
 
 def make_code(client=None, password=PASSWORD):
     client = client or login(USER)
-    response = client.post("/api/recovery-code", json={"current_password": password})
+    response = client.post("/api/recovery-code", json={"current_password": password, "replace": True})
     assert response.status_code == 201, response.get_json()
     return response.get_json()["code"]
 
@@ -35,6 +35,17 @@ def test_making_a_code_needs_the_current_password(admin):
     response = login(USER).post("/api/recovery-code", json={"current_password": "wrong"})
     assert response.status_code == 400 and "Current password" in response.get_json()["error"]
     assert flask_app.test_client().post("/api/recovery-code", json={"current_password": PASSWORD}).status_code == 401
+
+
+def test_replacing_a_code_needs_a_confirmation(admin):
+    student = login(USER)
+    first = student.post("/api/recovery-code", json={"current_password": PASSWORD})  # the first code needs none
+    assert first.status_code == 201
+    for body in ({"current_password": PASSWORD}, {"current_password": PASSWORD, "replace": False},
+                 {"current_password": PASSWORD, "replace": "yes"}):
+        refused = student.post("/api/recovery-code", json=body)
+        assert refused.status_code == 400 and "already have a recovery code" in refused.get_json()["error"]
+    assert recover(first.get_json()["code"]).status_code == 200  # the code was kept, not replaced
 
 
 def test_a_new_code_replaces_the_old_one(admin):

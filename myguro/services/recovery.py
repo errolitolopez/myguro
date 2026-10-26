@@ -25,12 +25,16 @@ class RecoveryService(Service):
         row = self.recovery.get(self.user["id"])
         return {"has_code": row is not None, "created_at": row["created_at"] if row else None}
 
-    def create(self, current_password):
-        """Make a new code for the logged-in person (the old one stops working). Asks for the current
-        password, so someone who finds a phone left logged in cannot take the account over. The code is
-        returned here and never again."""
+    def create(self, current_password, replace=False):
+        """Make a new code for the logged-in person. Asks for the current password, so someone who finds a
+        phone left logged in cannot take the account over. When the person already has a code, replace
+        must be True (the page asks "are you sure?" first): making a new one stops the old one, and the
+        question keeps it from being done by accident or over and over. The code is returned here and
+        never again."""
         if not check_password_hash(self.user["password_hash"], str(current_password or "")):
             raise ValidationError("Current password is wrong.")
+        if self.recovery.get(self.user["id"]) is not None and replace is not True:
+            raise ValidationError("You already have a recovery code. Confirm that you want to replace it.")
         code = self.new_code_for(self.user["id"])
         self.log("auth.recovery_code_made", "sign-in", "Made a new recovery code.")
         self.commit()

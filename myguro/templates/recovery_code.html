@@ -41,6 +41,26 @@
   </div>
   <a href="{{ url_for('dashboard.page') }}" class="small">Back to dashboard</a>
 </main>
+
+<!-- Asked before a code is replaced, so it is not done by accident or over and over. -->
+<div class="modal fade" id="replace-modal" tabindex="-1" aria-labelledby="replace-modal-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-0">
+        <h2 class="modal-title h5" id="replace-modal-title">Replace your recovery code?</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Your old code will stop working right away. If you saved it somewhere, that copy will not work any more.
+        You will get a new code to save.
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Keep my old code</button>
+        <button id="replace-confirm" type="button" class="btn btn-danger bi bi-arrow-repeat">Replace it</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
