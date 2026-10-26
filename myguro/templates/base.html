@@ -42,21 +42,28 @@
   {% if SUPPORT %}
 
   <div class="modal fade" id="support-modal" tabindex="-1" aria-labelledby="support-modal-title" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
-        <div class="modal-header">
-          <h2 class="modal-title fs-5" id="support-modal-title">{{ SUPPORT.label }}</h2>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-header border-0 pb-0">
+          <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
-          <p class="text-body-secondary">{{ SUPPORT.message }} Choose how you want to give:</p>
-          <div class="list-group">
+        <div class="modal-body pt-0">
+          <div class="text-center mb-3">
+            <div class="support-heart" aria-hidden="true"><i class="bi bi-heart-fill"></i></div>
+            <h2 class="h4 mb-1" id="support-modal-title">{{ SUPPORT.label }}</h2>
+            <p class="text-body-secondary mb-0">{{ SUPPORT.message }}</p>
+          </div>
+          <div class="small text-body-secondary mb-2">Choose how you want to give:</div>
+          <div class="d-grid gap-2">
             {% for option in SUPPORT.options %}
-            <div class="list-group-item d-flex justify-content-between align-items-center gap-2">
-              <div>
+            <div class="support-option">
+              <div class="support-icon" aria-hidden="true">
+                <i class="bi {{ 'bi-phone' if option.kind == 'number' else 'bi-box-arrow-up-right' }}"></i>
+              </div>
+              <div class="flex-grow-1 min-w-0">
                 <div class="fw-semibold">{{ option.title }}</div>
                 {% if option.kind == "number" %}
-                <div>{{ option.display }}</div>
+                <div class="support-number">{{ option.display }}</div>
                 {% if option.name %}<div class="small text-body-secondary">{{ option.name }}</div>{% endif %}
                 {% endif %}
               </div>
@@ -70,6 +77,9 @@
             </div>
             {% endfor %}
           </div>
+        </div>
+        <div class="modal-footer border-0 pt-0 justify-content-center">
+          <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Maybe later</button>
         </div>
       </div>
     </div>
