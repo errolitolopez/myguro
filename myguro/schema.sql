@@ -263,3 +263,14 @@ CREATE TABLE IF NOT EXISTS activity_log (
 CREATE INDEX IF NOT EXISTS activity_log_at ON activity_log (at);
 CREATE INDEX IF NOT EXISTS activity_log_actor ON activity_log (actor_id, at);
 CREATE INDEX IF NOT EXISTS activity_log_category ON activity_log (category, at);
+
+-- Feedback: each teacher or student rates MyGuro from 1 to 5 on a few questions (domain/feedback.py).
+-- One row per person per question; rating again replaces the row. The admin only reads totals, never
+-- who gave what, and the activity log never records it.
+CREATE TABLE IF NOT EXISTS feedback (
+    user_id INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    question TEXT NOT NULL,
+    rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (user_id, question)
+);
