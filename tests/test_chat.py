@@ -90,7 +90,7 @@ def test_service_not_available_gets_a_plain_reply(teacher, chat_on, asked):
 
 
 def test_no_api_key_means_not_available(teacher, chat_on, monkeypatch):
-    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     assert say(teacher).get_json()["link"] is None
 
 
@@ -156,3 +156,23 @@ def test_bubble_only_for_a_teacher_when_on(teacher, admin, app):
 
 def test_bubble_not_on_the_login_page(chat_on, app):
     assert 'id="chat-bubble"' not in app.test_client().get("/login").get_data(as_text=True)
+
+
+def test_gemini_request_and_answer_shape(monkeypatch):
+    """The real client with the network replaced: forced navigate call, key in a header, page read back."""
+    import io, json, urllib.request
+    seen = {}
+
+    def fake_urlopen(request, timeout):
+        seen["body"] = json.loads(request.data)
+        seen["key"] = request.get_header("X-goog-api-key")
+        reply = {"candidates": [{"content": {"parts": [{"functionCall": {"name": "navigate", "args": {"page": "classes"}}}]}}]}
+        return io.BytesIO(json.dumps(reply).encode())
+
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
+    assert chat_client.ask_model("my classes", rules.TEACHER_PAGES, "prompt") == "classes"
+    assert seen["key"] == "test-key"
+    assert seen["body"]["toolConfig"]["functionCallingConfig"]["allowedFunctionNames"] == ["navigate"]
+    assert seen["body"]["contents"][0]["parts"][0]["text"] == "my classes"
+    assert seen["body"]["tools"][0]["functionDeclarations"][0]["parameters"]["properties"]["page"]["enum"][-1] == "none"
