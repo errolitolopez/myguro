@@ -10,6 +10,7 @@ from myguro.services.base import Service
 GRADES_HIGH_TO_LOW = "grades_high_to_low"
 DISABLED_GRADES = "disabled_grades"
 FEEDBACK_POPUP = "feedback_popup"
+CHATBOT_ENABLED = "chatbot_enabled"
 SUPPORT_KEYS = {"enabled": "support_enabled", "message": "support_message", "label": "support_label",
                 "url": "support_url", "gcash_number": "support_gcash_number", "gcash_name": "support_gcash_name",
                 "popup": "support_popup"}
@@ -84,10 +85,16 @@ class SettingsService(Service):
         saved = self.settings.get(FEEDBACK_POPUP)
         return saved if saved in FEEDBACK_POPUP_MODES else FEEDBACK_DEFAULT_POPUP
 
+    def chatbot_enabled(self):
+        """The navigation chatbot for teachers. Off until the admin turns it on, because each question
+        goes to an outside AI service."""
+        return self.settings.get(CHATBOT_ENABLED) == "1"
+
     def get(self):
         disabled = self.disabled_grades()
         return {
             "feedback_popup": self.feedback_popup_mode(),
+            "chatbot_enabled": self.chatbot_enabled(),
             "support": self.support(),
             "grades_high_to_low": self.grades_high_to_low(),
             "grades": [{"name": grade, "enabled": grade not in disabled} for grade in self.all_grade_options()],
@@ -109,6 +116,10 @@ class SettingsService(Service):
             if data[FEEDBACK_POPUP] not in FEEDBACK_POPUP_MODES:
                 raise ValidationError("Choose when the feedback pop-up opens.")
             self.settings.set(FEEDBACK_POPUP, data[FEEDBACK_POPUP])
+        if CHATBOT_ENABLED in data:
+            if not isinstance(data[CHATBOT_ENABLED], bool):
+                raise ValidationError("Choose on or off.")
+            self.settings.set(CHATBOT_ENABLED, "1" if data[CHATBOT_ENABLED] else "0")
         if "support" in data:
             if not isinstance(data["support"], dict):
                 raise ValidationError("Support link is not valid.")
@@ -116,7 +127,8 @@ class SettingsService(Service):
             for name, value in zip(SUPPORT_KEYS, cleaned):
                 self.settings.set(SUPPORT_KEYS[name], ("1" if value else "0") if name == "enabled" else value)
         changed = [label for key, label in (("grades_high_to_low", "grade order"), ("disabled_grades", "grades in use"),
-                                            (FEEDBACK_POPUP, "the feedback pop-up"), ("support", "the support link")) if key in data]
+                                            (FEEDBACK_POPUP, "the feedback pop-up"), (CHATBOT_ENABLED, "the chatbot"),
+                                            ("support", "the support link")) if key in data]
         if changed:
             self.log("settings.changed", "settings", f"Changed settings: {', '.join(changed)}.")
         self.commit()

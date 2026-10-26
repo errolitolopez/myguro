@@ -39,6 +39,20 @@
 
   <div class="card mt-3">
     <div class="card-body">
+      <div class="form-check form-switch">
+        <input id="chatbot-enabled" class="form-check-input" type="checkbox" role="switch" disabled>
+        <label for="chatbot-enabled" class="form-check-label fw-semibold">Navigation chatbot (teachers)</label>
+      </div>
+      <div class="form-text">
+        A chat bubble that helps teachers find a page. It only opens pages: it cannot read or change
+        anything. Each question a teacher types is sent to an outside AI service, and no student or class
+        data is sent. Off by default.
+      </div>
+    </div>
+  </div>
+
+  <div class="card mt-3">
+    <div class="card-body">
       <h2 class="h6 fw-semibold mb-1">School years</h2>
       <div class="form-text mb-2">
         Classes and the work given to them belong to a school year. When you start a new year it
