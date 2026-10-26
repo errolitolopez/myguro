@@ -818,9 +818,13 @@ html[data-text-align="justify"] :is([data-reading], .reading-sample) :is(div, p,
 
 /* The support window: a heart on the accent gradient, then one tidy row per way to give. */
 .support-heart {
+  /* Above its neighbours, and room around it: the scrolling body of the window would clip the glow
+     and the beat if the heart touched its edge. */
+  position: relative;
+  z-index: 1;
   width: 4rem;
   height: 4rem;
-  margin: 0 auto 0.75rem;
+  margin: 0.5rem auto 1rem;
   display: grid;
   place-items: center;
   border-radius: 50%;
