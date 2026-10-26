@@ -1,4 +1,4 @@
-// Forgot password: username + recovery code + a new password. The server uses the code up and sends back a new one.
+// Forgot password: username + recovery code + a new password. The recovery code stays valid.
 
 const form = document.getElementById("forgot-form");
 const usernameInput = document.getElementById("forgot-username");
@@ -40,7 +40,6 @@ form.addEventListener("submit", async (event) => {
     form.classList.add("d-none");
     document.getElementById("forgot-intro").classList.add("d-none");
     document.getElementById("forgot-done").classList.remove("d-none");
-    showRecoveryCode(document.getElementById("forgot-code-box"), data.code, usernameInput.value.trim());
     confetti();
   } catch {
     showError("forgot-error", "Cannot reach the server. Check your connection.");

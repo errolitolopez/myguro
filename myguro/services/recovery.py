@@ -47,9 +47,10 @@ class RecoveryService(Service):
         return code
 
     def recover(self, username, code, new_password, ip, throttle):
-        """Choose a new password with the username and the recovery code. The code is used up: the
-        answer holds a new one. A wrong username or code gives the same answer, counts toward the same
-        lock-out as wrong passwords, and is logged."""
+        """Choose a new password with the username and the recovery code. The code stays valid, so it can
+        be used again the next time the password is forgotten (like the recovery key of an account); a
+        person who thinks it leaked makes a new one. A wrong username or code gives the same answer,
+        counts toward the same lock-out as wrong passwords, and is logged."""
         username = str(username or "").strip()
         new_password = str(new_password or "")
         if not username or not str(code or "").strip() or not new_password:
@@ -83,9 +84,8 @@ class RecoveryService(Service):
 
         check_password_change(user["username"], "", new_password)
         self.users.set_password(user["id"], generate_password_hash(new_password), must_change_password=False)
-        new_code = self.new_code_for(user["id"])
         throttle.passed(key)
         self.log("auth.password_recovered", "sign-in", "Chose a new password with the recovery code.",
                  actor=user, address=ip)
         self.commit()
-        return {"code": new_code}
+        return {"ok": True}

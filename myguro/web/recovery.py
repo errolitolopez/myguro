@@ -39,7 +39,7 @@ def api_create():
 
 @bp.post("/api/recover")
 def api_recover():
-    """{username, code, new_password} -> {code}: the new recovery code. No login needed (the person forgot the password)."""
+    """{username, code, new_password} -> {ok}: the code stays valid. No login needed (the person forgot the password)."""
     data = json_body()
     return jsonify(RecoveryService(get_db()).recover(
         data.get("username"), data.get("code"), data.get("new_password"), request.remote_addr,

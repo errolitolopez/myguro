@@ -56,18 +56,17 @@ def test_a_new_code_replaces_the_old_one(admin):
     assert recover(new).status_code == 200
 
 
-def test_recovering_sets_the_password_and_uses_the_code_up(admin):
+def test_recovering_sets_the_password_and_the_code_works_again(admin):
     code = make_code()
     response = recover(code)
-    assert response.status_code == 200
-    fresh = response.get_json()["code"]
-    assert CODE_SHAPE.match(fresh) and fresh != code
+    assert response.status_code == 200 and response.get_json() == {"ok": True}  # no new code is made
 
     assert flask_app.test_client().post("/api/login", json={"username": USER, "password": PASSWORD}).status_code == 401
     ok = flask_app.test_client().post("/api/login", json={"username": USER, "password": "brandnew1"})
     assert ok.status_code == 200 and ok.get_json()["must_change_password"] is False
-    assert recover(code, password="another123").status_code == 401  # used up
-    assert recover(fresh, password="another123").status_code == 200  # the new one works
+    # The same code works the next time the password is forgotten
+    assert recover(code, password="another123").status_code == 200
+    assert flask_app.test_client().post("/api/login", json={"username": USER, "password": "another123"}).status_code == 200
 
 
 def test_the_code_can_be_typed_loosely(admin):
@@ -116,14 +115,13 @@ def test_too_many_wrong_codes_lock_the_try(admin):
 
 def test_the_log_records_it_without_the_code(admin):
     code = make_code()
-    fresh = recover(code).get_json()["code"]
+    assert recover(code).status_code == 200
     recover("AAAAA-AAAAA-AAAAA-AAAAA-AAAAA")
     entries = admin.get("/api/log?per_page=100").get_json()["entries"]
     actions = [entry["action"] for entry in entries]
     assert {"auth.recovery_code_made", "auth.password_recovered", "auth.recovery_failed"} <= set(actions)
     text = admin.get("/api/log?per_page=100").get_data(as_text=True)
-    assert code not in text and fresh not in text
-    assert code.replace("-", "") not in text and fresh.replace("-", "") not in text
+    assert code not in text and code.replace("-", "") not in text
 
 
 @pytest.mark.parametrize("role_client", ["admin", "teacher", "supervisor"])
