@@ -72,6 +72,8 @@
     </div>
   </div>
 
+  
+  {% with role="student" %}{% include "_dashboard_chart.html" %}{% endwith %}
   {% else %}
   <div class="bento mb-4">
     <div>
@@ -106,6 +108,8 @@
     </div>
   </div>
 
+  {% with role="teacher" %}{% include "_dashboard_chart.html" %}{% endwith %}
+
   <div class="d-flex justify-content-between align-items-center mb-2">
     <h2 class="h5 mb-0">My classes</h2>
     <a class="btn btn-sm btn-outline-success bi bi-people" href="{{ url_for('classes.list_page') }}">Manage classes</a>
@@ -121,4 +125,11 @@
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/common.js') }}"></script>
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% if user.role in ("teacher", "student") %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"
+        integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC"
+        crossorigin="anonymous"></script>
+<script src="{{ url_for('static', filename='js/dashboard-chart.js') }}"></script>
+{% endif %}
+
 {% endblock %}

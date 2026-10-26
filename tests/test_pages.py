@@ -53,3 +53,11 @@ def test_a_wrong_address_shows_the_not_found_page_and_an_api_one_answers_json(te
     assert page.status_code == 404 and b"Page not found" in page.data
     api = teacher.get("/api/no-such-route")
     assert api.status_code == 404 and api.get_json() == {"error": "Not found."}
+
+
+def test_dashboard_chart_is_for_teachers_and_students_only(admin, teacher):
+    chart = 'id="chart-card"'
+    assert chart not in admin.get("/dashboard").get_data(as_text=True)
+    assert 'data-role="teacher"' in teacher.get("/dashboard").get_data(as_text=True)
+    page = login("jdelacruz01").get("/dashboard").get_data(as_text=True)
+    assert chart in page and 'data-role="student"' in page

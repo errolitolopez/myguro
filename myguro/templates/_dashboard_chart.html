@@ -1,0 +1,36 @@
+{# The interactive bar chart on the teacher and student dashboards, drawn by dashboard-chart.js.
+   Needs: role ("teacher" or "student"). #}
+<div class="card mt-4" id="chart-card" data-role="{{ role }}">
+  <div class="card-body">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+      <h2 id="chart-title" class="h5 mb-0 bi bi-bar-chart-line"> {{ "Class results" if role == "teacher" else "My scores" }}</h2>
+      <div class="d-flex gap-2">
+        <button id="chart-back" class="btn btn-outline-secondary btn-sm bi bi-arrow-90deg-up d-none" type="button">Subjects</button>
+        {% if role == "teacher" %}
+        <select id="chart-class" class="form-select form-select-sm w-auto" aria-label="Class shown in the chart"></select>
+        {% endif %}
+      </div>
+    </div>
+    <div id="chart-error" class="alert alert-danger d-none" role="alert"></div>
+    <div id="chart-empty" class="text-body-secondary text-center py-4 d-none"></div>
+    <div id="chart-body">
+      <div class="btn-group btn-group-sm mb-2" role="group" id="chart-metrics" aria-label="Show in the chart">
+        <input type="radio" class="btn-check" name="chart-metric" id="metric-average" value="average" autocomplete="off" checked>
+        <label class="btn btn-toggle" for="metric-average">Average score</label>
+        <input type="radio" class="btn-check" name="chart-metric" id="metric-count" value="count" autocomplete="off">
+        <label class="btn btn-toggle" for="metric-count">{{ "Submitted" if role == "teacher" else "Done" }}</label>
+      </div>
+      <div id="chart-sub" class="small text-body-secondary mb-2"></div>
+      <!-- Chart.js needs a box with a set height to draw into. -->
+      <div class="position-relative" style="height: 15rem;">
+        <canvas id="chart" role="img" aria-label="Bar chart of results"></canvas>
+      </div>
+      <!-- The same numbers as a table, for screen readers (the tooltip is never the only way to a value). -->
+      <table class="visually-hidden">
+        <caption id="chart-table-caption">Chart values</caption>
+        <thead><tr><th scope="col">Name</th><th scope="col">Value</th></tr></thead>
+        <tbody id="chart-table"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
