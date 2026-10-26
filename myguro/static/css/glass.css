@@ -413,18 +413,20 @@ footer {
   --bs-btn-disabled-border-color: var(--warn-bg);
   --bs-btn-focus-shadow-rgb: 217, 164, 6;
 }
-/* A gray button joined to a box (the eye button by a password) looks like part of the box: the same
-   see-through glass and border, not a solid slate block. Comes after the gray rules so it wins. */
-.input-group > .btn-outline-secondary {
+/* The calm gray button (btn-outline-secondary: the account menu, search, support, downloads, the eye
+   button by a password) is see-through glass with the same border as a form box, not a solid slate
+   block. Hover and open show the theme's accent on the border. The solid gray (btn-secondary, used for
+   Cancel) stays solid. Comes after the gray rules so it wins. */
+.btn-outline-secondary {
   --bs-btn-color: var(--bs-body-color);
   --bs-btn-bg: var(--glass-input);
   --bs-btn-border-color: var(--glass-input-border);
   --bs-btn-hover-color: var(--bs-emphasis-color);
   --bs-btn-hover-bg: var(--glass-hover);
-  --bs-btn-hover-border-color: var(--glass-input-border);
+  --bs-btn-hover-border-color: var(--accent-to);
   --bs-btn-active-color: var(--bs-emphasis-color);
   --bs-btn-active-bg: var(--glass-hover);
-  --bs-btn-active-border-color: var(--glass-input-border);
+  --bs-btn-active-border-color: var(--accent-to);
   --bs-btn-disabled-color: var(--bs-secondary-color);
   --bs-btn-disabled-bg: var(--glass-input-disabled);
   --bs-btn-disabled-border-color: var(--glass-input-border);
