@@ -48,6 +48,7 @@
         <li><hr class="dropdown-divider"></li>
         {% endif %}
         <li class="px-3 pb-2">{% include "_theme_select.html" %}</li>
+        <li class="px-3 pb-2">{% include "_reading_settings.html" %}</li>
         {% if user.role == "admin" %}
         <li><a class="dropdown-item bi bi-gear {{ 'active' if request.endpoint == 'settings.page' }}" href="{{ url_for('settings.page') }}"> Settings</a></li>
         {% endif %}

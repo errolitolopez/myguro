@@ -785,3 +785,17 @@ main { animation: page-in 0.35s ease both; }
    colour behind the text, so nothing pulls the eye while reading. The plain page gradient stays. */
 body:has([data-reading])::before,
 body:has([data-reading])::after { display: none; }
+
+/* Reading settings (reading.js sets the attributes on <html>, kept per browser). Text size scales
+   everything that uses rem (text, buttons, spacing), so the page keeps its proportions. */
+html[data-text-size="small"] { font-size: 87.5%; }
+html[data-text-size="large"] { font-size: 112.5%; }
+html[data-text-size="xlarge"] { font-size: 125%; }
+html[data-line-spacing="relaxed"] { --bs-body-line-height: 1.8; }
+/* Justified text only on the reading pages (data-reading), and only in blocks that wrap onto more than
+   one line; hyphens: auto stops the big gaps between words that justified text gets on a phone. The
+   page's language (lang="en" in base.html) tells the browser how to hyphenate. */
+html[data-text-align="justify"] [data-reading] :is(div, p, li, label) {
+  text-align: justify;
+  hyphens: auto;
+}
