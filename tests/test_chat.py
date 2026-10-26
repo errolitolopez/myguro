@@ -265,7 +265,7 @@ def test_gemini_request_and_answer_shape(monkeypatch):
     assert seen["key"] == "test-key"
     assert seen["body"]["toolConfig"]["functionCallingConfig"]["allowedFunctionNames"] == ["help"]
     assert seen["body"]["contents"][0]["parts"][0]["text"] == "my classes"
-    assert seen["body"]["tools"][0]["functionDeclarations"][0]["parameters"]["properties"]["key"]["enum"][-1] == "none"
+    assert seen["body"]["tools"][0]["functionDeclarations"][0]["parameters"]["properties"]["key"]["enum"][-2:] == ["none", "admin-only"]
 
 
 # --- How-to guides ---
@@ -309,3 +309,15 @@ def test_guides_and_pages_are_what_the_model_is_offered(teacher, chat_on, asked)
 def test_bubble_has_the_size_button(teacher, chat_on):
     page = teacher.get("/dashboard").get_data(as_text=True)
     assert 'id="chat-size"' in page and 'aria-label="Make the chat window bigger"' in page
+
+
+def test_admin_only_questions_say_to_ask_the_admin(teacher, chat_on, asked):
+    asked.key = "admin-only"
+    data = say(teacher, "what page to delete a user?").get_json()
+    assert (data["reply"], data["link"]) == (rules.ADMIN_ONLY_REPLY, None)
+
+
+def test_the_model_is_told_about_admin_only_and_none(teacher, chat_on, asked):
+    say(teacher)
+    prompt = asked.calls[0][2]
+    assert '"admin-only"' in prompt and '"none"' in prompt and "delet" in prompt

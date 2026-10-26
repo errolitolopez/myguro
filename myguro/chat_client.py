@@ -4,6 +4,8 @@ import json
 import os
 import urllib.request
 
+from myguro.domain.chat import SPECIAL_KEYS
+
 API_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 # Models change often: the server can set another one with GEMINI_MODEL without a code change.
 DEFAULT_MODEL = "gemini-2.5-flash-lite"
@@ -28,7 +30,7 @@ def ask_model(message, topics, prompt, history=()):
             "name": "help",
             "description": "Show the teacher a page of MyGuro or a how-to guide.",
             "parameters": {"type": "OBJECT", "required": ["key"],
-                           "properties": {"key": {"type": "STRING", "enum": [*topics, "none"]}}},
+                           "properties": {"key": {"type": "STRING", "enum": [*topics, *SPECIAL_KEYS]}}},
         }]}],
         # It must call help, it cannot just talk
         "toolConfig": {"functionCallingConfig": {"mode": "ANY", "allowedFunctionNames": ["help"]}},

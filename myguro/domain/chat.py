@@ -11,7 +11,10 @@ MAX_CONTEXT_MESSAGES = 2 * (MAX_QUESTIONS_PER_CHAT - 1)
 MAX_SHOWN_MESSAGES = 50  # the newest ones the bubble loads
 
 NO_PAGE_KEY = "none"  # what the model picks when no page fits the question
-NO_PAGE_REPLY = "I can only help you find pages."
+ADMIN_ONLY_KEY = "admin-only"  # what the model picks when the teacher asks for something only the admin can do
+SPECIAL_KEYS = (NO_PAGE_KEY, ADMIN_ONLY_KEY)
+NO_PAGE_REPLY = "Sorry, I can't help with that. Ask me where a page is, or how to do something in MyGuro."
+ADMIN_ONLY_REPLY = "Only the admin can do that. Please ask your admin."
 CHAT_FULL_MESSAGE = f"This chat is full ({MAX_QUESTIONS_PER_CHAT} questions). Delete it and start a new chat."
 UNAVAILABLE_REPLY = "The chatbot is not available right now."
 
@@ -48,6 +51,7 @@ TEACHER_TOPICS = {
 PROMPT = """You help a teacher use MyGuro, a learning activity sheet web app.
 Always call the help tool with the key that best fits what the teacher asked for. Earlier messages are there so you can understand a follow-up question such as "and then?".
 Pick a "how-" key when they ask how to do something. Pick a page key when they ask where something is.
+If the teacher asks to do something only the admin can do, pick "admin-only". That means creating, changing, resetting or deleting user accounts (teachers, students, supervisors), starting a school year, building the school schedule, changing settings, reading the activity log, or making backups.
 If the question is not about using MyGuro, pick "none".
 Never answer in text. These are the keys:
 """
@@ -75,7 +79,9 @@ def build_prompt(topics):
 
 def answer_for(topics, key):
     """{reply, link} for the key the model picked. An unknown key (or "none") gets the fixed reply and
-    no link, so the model can never name an address or write steps of its own."""
+    no link; "admin-only" says to ask the admin, so the model can never name an address or write steps of its own."""
+    if key == ADMIN_ONLY_KEY:
+        return {"reply": ADMIN_ONLY_REPLY, "link": None}
     topic = topics.get(key) if isinstance(key, str) else None
     if topic is None:
         return {"reply": NO_PAGE_REPLY, "link": None}
