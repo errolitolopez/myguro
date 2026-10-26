@@ -1,5 +1,7 @@
-from myguro.config import SCHOOL_TIMEZONE
-from myguro.domain.log import CATEGORIES, LOG_ROLES, day_bounds
+from datetime import datetime
+
+from myguro.config import SCHOOL_TIMEZONE, school_today
+from myguro.domain.log import CATEGORIES, CHART_VIEWS, LOG_ROLES, chart_days, day_bounds
 from myguro.domain.text import clean_name, like_pattern
 from myguro.errors import ValidationError
 from myguro.services.base import Service
@@ -25,11 +27,9 @@ class LogService(Service):
             "address": row["address"],
         }
 
-    def list(self, query="", role="", category="", user_id=None, date_from="", date_to="", page=1,
-             per_page=DEFAULT_PER_PAGE):
-        """One page of entries, newest first, filtered by search text (person, target, summary), the
-        person's role, category, one person (user_id) and a date range (school time, both days
-        included). A page past the end shows the last page."""
+    @staticmethod
+    def filters(query="", role="", category="", user_id=None, date_from="", date_to=""):
+        """The checked filters for the repository (the same for the list and the chart)."""
         if role and role not in LOG_ROLES:
             raise ValidationError("Unknown role.")
         if category and category not in CATEGORIES:
@@ -40,6 +40,14 @@ class LogService(Service):
             filters["date_from"] = day_bounds(date_from, SCHOOL_TIMEZONE)[0]
         if date_to:
             filters["date_to"] = day_bounds(date_to, SCHOOL_TIMEZONE)[1]
+        return filters
+
+    def list(self, query="", role="", category="", user_id=None, date_from="", date_to="", page=1,
+             per_page=DEFAULT_PER_PAGE):
+        """One page of entries, newest first, filtered by search text (person, target, summary), the
+        person's role, category, one person (user_id) and a date range (school time, both days
+        included). A page past the end shows the last page."""
+        filters = self.filters(query, role, category, user_id, date_from, date_to)
         per_page = max(1, min(per_page, MAX_PER_PAGE))
         total = self.logs.count(filters)
         pages = max(1, -(-total // per_page))  # rounded up
@@ -47,3 +55,28 @@ class LogService(Service):
         rows = self.logs.search(filters, per_page, (page - 1) * per_page)
         return {"entries": [self.entry_json(row) for row in rows], "page": page, "pages": pages,
                 "per_page": per_page, "total": total}
+
+    def chart(self, view, query="", role="", category="", user_id=None, date_from="", date_to=""):
+        """Entries counted for a chart, with the same filters as the list. view = "day" (one bar per
+        school-time day: the filtered dates, else the last 14 days), "category" or "role". A breakdown
+        ignores its own filter, so the other bars stay visible and one can be picked. Holds counts only."""
+        if view not in CHART_VIEWS:
+            raise ValidationError("Choose day, category or role.")
+        if view == "category":
+            category = ""
+        if view == "role":
+            role = ""
+        if view == "day":
+            days = chart_days(date_from, date_to, school_today())
+            # Only the shown days are counted, so a long log is not read for nothing
+            date_from, date_to = days[0].isoformat(), days[-1].isoformat()
+        filters = self.filters(query, role, category, user_id, date_from, date_to)
+        if view == "day":
+            offset = int(datetime.now(SCHOOL_TIMEZONE).utcoffset().total_seconds())
+            counted = self.logs.count_by_day(filters, offset)
+            items = [{"key": day.isoformat(), "count": counted.get(day.isoformat(), 0)} for day in days]
+        else:
+            counted = self.logs.count_by(filters, view)
+            keys = CATEGORIES if view == "category" else LOG_ROLES
+            items = [{"key": key, "count": counted.get(key, 0)} for key in keys]
+        return {"view": view, "items": items, "total": sum(item["count"] for item in items)}

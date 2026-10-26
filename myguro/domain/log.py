@@ -1,6 +1,6 @@
 """Rules of the activity log that need no database: its categories, and day bounds in school time."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 
 from myguro.errors import ValidationError
 
@@ -22,6 +22,30 @@ def day_bounds(day, timezone_info):
     end = start + timedelta(days=1)
     as_utc = lambda moment: moment.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")  # noqa: E731
     return as_utc(start), as_utc(end)
+
+
+# The chart by day shows 14 days unless the dates are filtered, and never more than 62.
+DEFAULT_CHART_DAYS = 14
+MAX_CHART_DAYS = 62
+CHART_VIEWS = ("day", "category", "role")
+
+
+def chart_days(date_from, date_to, today):
+    """The school-time days the day chart shows, oldest first, as date objects. date_from / date_to are
+    "YYYY-MM-DD" or empty: no end = today, no start = 14 days up to the end. A range longer than 62 days
+    keeps its last 62. today is a date (passed in so the rule can be tested)."""
+    def read(text):
+        try:
+            return date.fromisoformat(text)
+        except ValueError:
+            raise ValidationError("Choose a valid date.") from None
+
+    last = read(date_to) if date_to else today
+    first = read(date_from) if date_from else last - timedelta(days=DEFAULT_CHART_DAYS - 1)
+    if first > last:
+        raise ValidationError("The From date must be before the To date.")
+    first = max(first, last - timedelta(days=MAX_CHART_DAYS - 1))
+    return [first + timedelta(days=number) for number in range((last - first).days + 1)]
 
 
 def clean_summary(text):

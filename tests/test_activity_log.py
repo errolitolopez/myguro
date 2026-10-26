@@ -230,3 +230,55 @@ def test_log_keeps_only_the_newest_entries(app, admin, monkeypatch):
 def test_log_page_says_how_many_entries_are_kept(supervisor):
     from myguro.domain.log import MAX_LOG_ENTRIES
     assert f"{MAX_LOG_ENTRIES:,}" in supervisor.get("/log").get_data(as_text=True)
+
+
+def chart(client, query=""):
+    response = client.get(f"/api/log/chart{query}")
+    assert response.status_code == 200, response.get_json()
+    return response.get_json()
+
+
+def test_chart_by_day_counts_school_time_days_and_fills_empty_days(app, supervisor):
+    # 2026-10-01 23:30 in Manila (UTC+8) is 15:30 UTC the same day; 17:00 UTC on Oct 1 is already Oct 2 there.
+    add_entries(app, [
+        {"action": "a.b", "category": "classes", "summary": "x", "at": "2026-10-01 15:30:00"},
+        {"action": "a.b", "category": "classes", "summary": "x", "at": "2026-10-01 17:00:00"},
+        {"action": "a.b", "category": "classes", "summary": "x", "at": "2026-10-01 18:00:00"},
+    ])
+    data = chart(supervisor, "?view=day&from=2026-09-30&to=2026-10-03")
+    assert [item["key"] for item in data["items"]] == ["2026-09-30", "2026-10-01", "2026-10-02", "2026-10-03"]
+    assert [item["count"] for item in data["items"]] == [0, 1, 2, 0] and data["total"] == 3
+
+
+def test_chart_by_day_defaults_to_the_last_14_days_and_never_more_than_62(supervisor):
+    assert len(chart(supervisor, "?view=day")["items"]) == 14
+    assert len(chart(supervisor, "?view=day&from=2020-01-01&to=2026-10-01")["items"]) == 62
+    assert supervisor.get("/api/log/chart?view=day&from=2026-10-05&to=2026-10-01").status_code == 400
+    assert supervisor.get("/api/log/chart?view=day&from=nope").status_code == 400
+
+
+def test_chart_breakdowns_follow_the_filters_but_ignore_their_own(app, supervisor):
+    add_entries(app, [
+        {"action": "a.b", "category": "classes", "summary": "x", "at": "2026-10-01 01:00:00"},
+        {"action": "a.b", "category": "giving", "summary": "x", "at": "2026-10-01 02:00:00"},
+        {"action": "a.b", "category": "giving", "summary": "x", "at": "2026-10-01 03:00:00",
+         "actor": {"id": 8, "name": "Reyes, Ana", "username": "areyes", "role": "student"}},
+    ])
+    day = "&from=2026-10-01&to=2026-10-01"
+    by_category = {item["key"]: item["count"] for item in chart(supervisor, "?view=category" + day)["items"]}
+    assert by_category["classes"] == 1 and by_category["giving"] == 2 and by_category["sign-in"] == 0
+    # With a category picked, the category chart still shows every category
+    still = {item["key"]: item["count"] for item in chart(supervisor, "?view=category&category=classes" + day)["items"]}
+    assert still == by_category
+    # ...but the role chart is narrowed to that category
+    by_role = {item["key"]: item["count"] for item in chart(supervisor, "?view=role&category=giving" + day)["items"]}
+    assert by_role["teacher"] == 1 and by_role["student"] == 1 and by_role["admin"] == 0
+
+
+def test_chart_is_read_only_counts_for_supervisor_and_admin(app, admin, supervisor, teacher):
+    assert admin.get("/api/log/chart").status_code == 200
+    assert teacher.get("/api/log/chart").status_code == 403
+    assert supervisor.get("/api/log/chart?view=nope").status_code == 400
+    assert supervisor.post("/api/log/chart", json={}).status_code == 405
+    text = supervisor.get("/api/log/chart?view=category").get_data(as_text=True)
+    assert "username" not in text and "name" not in text.replace("view", "")

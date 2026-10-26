@@ -21,6 +21,18 @@ def page():
                            max_entries=MAX_LOG_ENTRIES)
 
 
+@bp.get("/api/log/chart")
+@role_required_api("supervisor", "admin")
+def api_chart():
+    """?view=day|category|role and the same filters as the list. Counts only, no names."""
+    args = request.args
+    return jsonify(service().chart(
+        args.get("view", "day"), query=args.get("q", ""), role=args.get("role", ""),
+        category=args.get("category", ""), user_id=args.get("user_id", type=int),
+        date_from=args.get("from", ""), date_to=args.get("to", ""),
+    ))
+
+
 @bp.get("/api/log")
 @role_required_api("supervisor", "admin")
 def api_list():

@@ -49,6 +49,25 @@ class LogRepository(Repository):
         where, params = self._where(filters)
         return self.value(f"SELECT COUNT(*) FROM activity_log{where}", params)
 
+    def count_by_day(self, filters, offset_seconds):
+        """{"2026-10-01": entries} for the days that have any, counted in school time (the stored time
+        shifted by the school's fixed UTC offset, as the Philippines has no daylight saving)."""
+        where, params = self._where(filters)
+        rows = self.all(f"SELECT date(at, ?) AS day, COUNT(*) AS how_many FROM activity_log{where} GROUP BY day",
+                        [f"{offset_seconds:+d} seconds", *params])
+        return {row["day"]: row["how_many"] for row in rows}
+
+    # The columns a chart may group by (a fixed list, so no request text ever reaches the SQL).
+    GROUP_COLUMNS = {"category": "category", "role": "actor_role"}
+
+    def count_by(self, filters, view):
+        """{value: entries} grouped by "category" or "role"."""
+        column = self.GROUP_COLUMNS[view]
+        where, params = self._where(filters)
+        rows = self.all(f"SELECT {column} AS value, COUNT(*) AS how_many FROM activity_log{where} GROUP BY {column}",
+                        params)
+        return {row["value"]: row["how_many"] for row in rows}
+
     def search(self, filters, limit, offset):
         """One page of entries, newest first."""
         where, params = self._where(filters)
