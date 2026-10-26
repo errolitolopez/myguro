@@ -108,6 +108,18 @@
     </div>
   </div>
 
+  <!-- Work waiting for the teacher: short answers (and other points) still to check. Filled in by dashboard.js. -->
+  <div class="card mb-4" id="to-check-card">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+        <h2 class="h5 mb-0 bi bi-check2-square"> To check</h2>
+        <span id="to-check-total" class="badge text-bg-warning d-none"></span>
+      </div>
+      <div id="to-check-error" class="alert alert-danger d-none" role="alert"></div>
+      <div id="to-check-list" class="list-group">{% include "_skeleton.html" %}</div>
+    </div>
+  </div>
+
   {% with role="teacher" %}{% include "_dashboard_chart.html" %}{% endwith %}
 
   <div class="d-flex justify-content-between align-items-center mb-2">

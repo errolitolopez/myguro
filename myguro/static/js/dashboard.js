@@ -35,6 +35,71 @@ function showClasses(classes, role) {
   }
 }
 
+const MAX_TO_CHECK_ROWS = 5;
+
+// toCheckRow({title, class_name, submitted, students, to_check, id}) -> a row that opens the results
+function toCheckRow(item) {
+  const row = document.createElement("a");
+  row.href = `/results/${item.id}`;
+  row.className = "list-group-item list-group-item-action d-flex justify-content-between align-items-center gap-2";
+
+  const left = document.createElement("div");
+  const title = document.createElement("div");
+  title.className = "fw-semibold";
+  title.textContent = item.title;
+  const details = document.createElement("div");
+  details.className = "small text-body-secondary";
+  details.textContent = `${item.class_name} · ${item.submitted} of ${plural(item.students, "student")} submitted`;
+  left.append(title, details);
+
+  const badge = document.createElement("span");
+  badge.className = "badge text-bg-warning text-nowrap";
+  badge.textContent = `${item.to_check} pts to check`;
+
+  row.append(left, badge);
+  return row;
+}
+
+// Fills the To check card with the activities that have points still to check (short answers the
+// teacher has not scored), and the total of those points.
+async function loadToCheck() {
+  const list = document.getElementById("to-check-list");
+  const total = document.getElementById("to-check-total");
+  const message = (text) => {
+    const item = document.createElement("div");
+    item.className = "list-group-item small text-body-secondary";
+    item.textContent = text;
+    return item;
+  };
+  hideError("to-check-error");
+  try {
+    const response = await apiFetch("/api/results/to-check");
+    if (!response) return;
+    const data = await response.json();
+    if (!response.ok) {
+      list.replaceChildren();
+      showError("to-check-error", data.error || "Could not load what to check.");
+      return;
+    }
+    const waiting = data.assignments.filter((item) => item.to_check > 0);
+    const points = waiting.reduce((sum, item) => sum + item.to_check, 0);
+    total.textContent = `${points} pts`;
+    total.classList.toggle("d-none", waiting.length === 0);
+    if (waiting.length === 0) {
+      list.replaceChildren(message("Nothing to check. You are all caught up."));
+      return;
+    }
+    const rows = waiting.slice(0, MAX_TO_CHECK_ROWS).map(toCheckRow);
+    if (waiting.length > MAX_TO_CHECK_ROWS) {
+      rows.push(message(`And ${plural(waiting.length - MAX_TO_CHECK_ROWS, "more activity", "more activities")} to check.`));
+    }
+    list.replaceChildren(...rows);
+  } catch {
+    list.replaceChildren();
+    showError("to-check-error", "Cannot reach the server. Check your connection.");
+  }
+}
+
 async function loadDashboard() {
   hideError("dashboard-error");
   try {
@@ -69,3 +134,5 @@ async function loadDashboard() {
 }
 
 loadDashboard();
+// Only the teacher dashboard has the To check card.
+if (document.getElementById("to-check-card")) loadToCheck();

@@ -58,6 +58,10 @@ def test_a_wrong_address_shows_the_not_found_page_and_an_api_one_answers_json(te
 def test_dashboard_chart_is_for_teachers_and_students_only(admin, teacher):
     chart = 'id="chart-card"'
     assert chart not in admin.get("/dashboard").get_data(as_text=True)
-    assert 'data-role="teacher"' in teacher.get("/dashboard").get_data(as_text=True)
+    teacher_page = teacher.get("/dashboard").get_data(as_text=True)
+    assert 'data-role="teacher"' in teacher_page
+    # The To check card is a teacher thing too
+    assert 'id="to-check-card"' in teacher_page
+    assert 'id="to-check-card"' not in login("jdelacruz01").get("/dashboard").get_data(as_text=True)
     page = login("jdelacruz01").get("/dashboard").get_data(as_text=True)
     assert chart in page and 'data-role="student"' in page
