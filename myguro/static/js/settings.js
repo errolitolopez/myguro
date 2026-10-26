@@ -2,6 +2,7 @@
 
 const gradesSwitch = document.getElementById("grades-high-to-low");
 const gradeList = document.getElementById("grade-list");
+const feedbackPopup = document.getElementById("feedback-popup");
 const status = document.getElementById("settings-status");
 
 const supportForm = document.getElementById("support-form");
@@ -60,6 +61,8 @@ function showSettings(settings) {
   showSupport(settings.support);
   gradesSwitch.checked = settings.grades_high_to_low;
   gradesSwitch.disabled = false;
+  feedbackPopup.value = settings.feedback_popup;
+  feedbackPopup.disabled = false;
   gradeList.replaceChildren(...settings.grades.map((grade, index) => {
     const column = document.createElement("div");
     column.className = "col";
@@ -86,7 +89,7 @@ function showSettings(settings) {
 // Sends the change and shows what the server saved (or puts the switches back on an error).
 async function save(body) {
   status.textContent = "Saving...";
-  const fields = [gradesSwitch, ...gradeList.querySelectorAll("input")];
+  const fields = [gradesSwitch, feedbackPopup, ...gradeList.querySelectorAll("input")];
   fields.forEach((field) => (field.disabled = true));
   try {
     const response = await apiFetch("/api/settings", {
@@ -117,6 +120,7 @@ function saveGrades() {
 }
 
 gradesSwitch.addEventListener("change", () => save({ grades_high_to_low: gradesSwitch.checked }));
+feedbackPopup.addEventListener("change", () => save({ feedback_popup: feedbackPopup.value }));
 
 async function loadSettings(clearStatus = true) {
   try {

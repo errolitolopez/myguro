@@ -820,8 +820,8 @@ html[data-text-align="justify"] :is([data-reading], .reading-sample) :is(div, p,
 .star:focus-visible { outline: 2px solid var(--accent-to); outline-offset: 2px; border-radius: 0.5rem; }
 @media (prefers-reduced-motion: reduce) { .star { transition: none; } .star:hover { transform: none; } }
 
-/* The support window: a heart on the accent gradient, then one tidy row per way to give. */
-.support-heart {
+/* The support and feedback windows: a round icon (.modal-badge) on the accent gradient, then one tidy row per way to give. */
+.modal-badge {
   /* Above its neighbours, and room around it: the scrolling body of the window would clip the glow
      and the beat if the heart touched its edge. */
   position: relative;
@@ -836,9 +836,9 @@ html[data-text-align="justify"] :is([data-reading], .reading-sample) :is(div, p,
   color: #fff; /* white on the gradient in every theme */
   font-size: 1.8rem;
   box-shadow: 0 8px 20px -6px rgba(var(--confirm-rgb), 0.6);
-  animation: support-beat 2.4s ease-in-out infinite;
+  animation: badge-beat 2.4s ease-in-out infinite;
 }
-@keyframes support-beat {
+@keyframes badge-beat {
   0%, 100% { transform: scale(1); }
   8% { transform: scale(1.1); }
   16% { transform: scale(1); }
@@ -871,7 +871,7 @@ html[data-text-align="justify"] :is([data-reading], .reading-sample) :is(div, p,
   overflow-wrap: anywhere;
 }
 .min-w-0 { min-width: 0; } /* lets a long name wrap inside a flex row instead of pushing the button out */
-@media (prefers-reduced-motion: reduce) { .support-heart { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .modal-badge { animation: none; } }
 @media (max-width: 575.98px) {
   /* On a phone the button goes under the text, so a long number never gets squeezed. */
   .support-option { flex-wrap: wrap; }

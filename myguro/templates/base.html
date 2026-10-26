@@ -49,7 +49,7 @@
         </div>
         <div class="modal-body pt-2">
           <div class="text-center mb-3">
-            <div class="support-heart" aria-hidden="true"><i class="bi bi-heart-fill"></i></div>
+            <div class="modal-badge" aria-hidden="true"><i class="bi bi-heart-fill"></i></div>
             <h2 class="h4 mb-1" id="support-modal-title">{{ SUPPORT.label }}</h2>
             <p class="text-body-secondary mb-0">{{ SUPPORT.message }}</p>
           </div>
@@ -99,6 +99,31 @@
   </script>
   {% endif %}
 
+  {% if FEEDBACK_POPUP %}
+  <!-- Asks someone who has not sent feedback yet. Opens by itself (see FEEDBACK_POPUP in myguro/__init__.py). -->
+  <div class="modal fade" id="feedback-modal" tabindex="-1" aria-labelledby="feedback-modal-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-0 pb-0">
+          <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body pt-2 text-center">
+          <div class="modal-badge" aria-hidden="true"><i class="bi bi-star-fill"></i></div>
+          <h2 class="h4 mb-1" id="feedback-modal-title">How is MyGuro for you?</h2>
+          <p class="text-body-secondary mb-0">
+            Tell us what you think. It takes less than a minute: a few questions, each rated 1 to 5 stars.
+            Your answers are private.
+          </p>
+        </div>
+        <div class="modal-footer border-0 pt-0 justify-content-center">
+          <a href="{{ url_for('feedback.page') }}" class="btn btn-success bi bi-star">Give feedback</a>
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Maybe later</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
           integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
           crossorigin="anonymous"></script>
@@ -107,6 +132,11 @@
   <!-- Teachers: the support window opens by itself, as often as the admin chose in Settings. -->
   <script>
     bootstrap.Modal.getOrCreateInstance(document.getElementById("support-modal")).show();
+  </script>
+  {% endif %}
+  {% if FEEDBACK_POPUP %}
+  <script>
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("feedback-modal")).show();
   </script>
   {% endif %}
   {% block scripts %}{% endblock %}
