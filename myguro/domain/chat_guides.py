@@ -90,4 +90,73 @@ TEACHER_GUIDES = {
         ["Open the account menu at the top right.",
          "Choose the school year in the School year box.",
          "Past years are read-only. Choose the current year again to work."]),
+    "how-rename-class": (
+        "Rename a class or change its subject", "How to edit a class's name or subject.", "classes",
+        ["Open Classes, then open the class.",
+         "Tap Edit.",
+         "Change the name or the subject.",
+         "Tap Save."]),
+    "how-remove-students": (
+        "Remove students from a class", "How to take students out of a class. Their accounts are kept.", "classes",
+        ["Open Classes, then open the class.",
+         "Tick the students you want to remove.",
+         "Tap Remove from this class, then Remove to confirm.",
+         "Their accounts are kept, so you can add them back later."]),
+    "how-copy-activity": (
+        "Copy an activity", "How to make a copy of an activity sheet to reuse or change.", "activities",
+        ["Open Activities and open the activity.",
+         "Tap Make a copy.",
+         "The copy is a new draft with the same sections and questions. Change it and Save."]),
+    "how-question-types": (
+        "Set up each question type", "How to write multiple choice, true or false, identification, fill in the blank and short answer questions, and set the answers and points.", "activities",
+        ["Open an activity and add a question to an activity section, then choose its type.",
+         "Multiple choice: tap + Add choice for each choice and mark the right one.",
+         "True or False: pick the right answer.",
+         "Identification: type every accepted answer in one box, separated by / (for example Taoism / Daoism). Capitals and extra spaces are ignored.",
+         "Fill in the blank: type ___ in the question for each blank, then type the accepted answers for each blank. Each right blank gives part of the points.",
+         "Short answer: you score it yourself after the student submits. You can add a guide for checking that only you see.",
+         "Set the points of each question, then Save."]),
+    "how-preview-activity": (
+        "See an activity as students see it", "How to preview an activity sheet without the answer key.", "activities",
+        ["Open Activities and open the activity.",
+         "Tap Preview. You see it as students will, with no answers."]),
+    "how-more-tries": (
+        "Allow more tries", "How to let students submit an activity more than once, or as many times as they want.", "activities",
+        ["Open Activities and open the activity.",
+         "Choose a number from 1 to 10 in Submissions allowed, or Unlimited.",
+         "You can change it even after students submitted.",
+         "A student with tries left taps Try again. The latest submission counts."]),
+    "how-due-date": (
+        "Set or change a due date", "How to give an activity a due date or change it.", "activities",
+        ["Open Activities and open the activity.",
+         "Tap Assign.",
+         "Set the due date next to the class or the students.",
+         "Tap Save. Late work is still accepted, but it is marked late."]),
+    "how-find-work-to-check": (
+        "Find work waiting to be checked", "How to see which students' short answers still need a score.", "dashboard",
+        ["Open the Dashboard.",
+         "Look at the To check card. It lists the activities with answers waiting for your score.",
+         "Tap one to open it, then score each student (see the guide on checking answers)."]),
+    "how-export-results": (
+        "Download results", "How to download an activity's results as Excel or PDF.", "classes",
+        ["Open Classes, open the class, then open the activity to see its results.",
+         "Tap Export Excel to compute grades, or Export PDF to print or send.",
+         "For every activity of a class in one table, use the class Gradebook instead."]),
+    "how-display": (
+        "Change the theme, text size or menu bar", "How to change the theme (light or dark), text size, line spacing, or turn the bottom menu bar or the blur effects on or off.", "display",
+        ["Open Display from the account menu at the top right.",
+         "Theme: choose Auto, Light or Dark.",
+         "Reading: choose the text size, alignment and line spacing.",
+         "Effects: turn off the glass blur and moving background if pages feel slow on a phone.",
+         "Menu: turn the menu bar at the bottom of the phone on or off."]),
+    "how-feedback": (
+        "Send feedback about MyGuro", "How to rate MyGuro and send feedback.", "feedback",
+        ["Open Feedback from the account menu.",
+         "Rate each question from 1 to 5 stars.",
+         "Send it. Your answers are private, and you can send them only once."]),
+    "how-change-password": (
+        "Change your password", "How to change the account password.", "password",
+        ["Open Password from the account menu.",
+         "Type your current password and then the new one.",
+         "Save it. Make a recovery code too, in case you forget it."]),
 }
