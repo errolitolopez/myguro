@@ -341,83 +341,17 @@ footer {
 .table { --bs-table-bg: transparent; }
 .alert { -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
 
-/* Every button is solid, never an outline, and keeps its colour by meaning: blue = save /
-   create / confirm / submit / assign / open (the success and primary classes, outline or not,
-   all look the same), red = delete, gray = cancel and secondary, yellow = warning. The outline
-   classes stay in the markup; only their look changes here. A button with a "bi bi-..." class
-   shows its icon before the text (the icon is drawn by ::before, so changing the button's text
-   from script keeps it). */
-.btn-success,
-.btn-outline-success,
-.btn-primary,
-.btn-outline-primary {
-  --bs-btn-color: var(--confirm-text);
-  --bs-btn-bg: var(--confirm-bg);
-  --bs-btn-border-color: var(--confirm-bg);
-  --bs-btn-hover-color: var(--confirm-text);
-  --bs-btn-hover-bg: var(--confirm-hover);
-  --bs-btn-hover-border-color: var(--confirm-hover);
-  --bs-btn-active-color: var(--confirm-text);
-  --bs-btn-active-bg: var(--confirm-active);
-  --bs-btn-active-border-color: var(--confirm-active);
-  --bs-btn-disabled-color: var(--confirm-text);
-  --bs-btn-disabled-bg: var(--confirm-bg);
-  --bs-btn-disabled-border-color: var(--confirm-bg);
-  --bs-btn-focus-shadow-rgb: var(--confirm-rgb);
-}
-.btn-danger,
-.btn-outline-danger {
-  --bs-btn-color: var(--confirm-text);
-  --bs-btn-bg: var(--danger-bg);
-  --bs-btn-border-color: var(--danger-bg);
-  --bs-btn-hover-color: var(--confirm-text);
-  --bs-btn-hover-bg: var(--danger-hover);
-  --bs-btn-hover-border-color: var(--danger-hover);
-  --bs-btn-active-color: var(--confirm-text);
-  --bs-btn-active-bg: var(--danger-active);
-  --bs-btn-active-border-color: var(--danger-active);
-  --bs-btn-disabled-color: var(--confirm-text);
-  --bs-btn-disabled-bg: var(--danger-bg);
-  --bs-btn-disabled-border-color: var(--danger-bg);
-  --bs-btn-focus-shadow-rgb: 225, 83, 97;
-}
-.btn-secondary,
-.btn-outline-secondary {
-  --bs-btn-color: var(--neutral-text);
-  --bs-btn-bg: var(--neutral-bg);
-  --bs-btn-border-color: var(--neutral-border);
-  --bs-btn-hover-color: var(--neutral-text);
-  --bs-btn-hover-bg: var(--neutral-hover);
-  --bs-btn-hover-border-color: var(--neutral-border);
-  --bs-btn-active-color: var(--neutral-text);
-  --bs-btn-active-bg: var(--neutral-active);
-  --bs-btn-active-border-color: var(--neutral-border);
-  --bs-btn-disabled-color: var(--neutral-text);
-  --bs-btn-disabled-bg: var(--neutral-bg);
-  --bs-btn-disabled-border-color: var(--neutral-border);
-  --bs-btn-focus-shadow-rgb: 130, 138, 145;
-}
-.btn-warning,
-.btn-outline-warning {
-  --bs-btn-color: var(--warn-text);
-  --bs-btn-bg: var(--warn-bg);
-  --bs-btn-border-color: var(--warn-bg);
-  --bs-btn-hover-color: var(--warn-text);
-  --bs-btn-hover-bg: var(--warn-hover);
-  --bs-btn-hover-border-color: var(--warn-hover);
-  --bs-btn-active-color: var(--warn-text);
-  --bs-btn-active-bg: var(--warn-active);
-  --bs-btn-active-border-color: var(--warn-active);
-  --bs-btn-disabled-color: var(--warn-text);
-  --bs-btn-disabled-bg: var(--warn-bg);
-  --bs-btn-disabled-border-color: var(--warn-bg);
-  --bs-btn-focus-shadow-rgb: 217, 164, 6;
-}
-/* The calm gray button (btn-outline-secondary: the account menu, search, support, downloads, the eye
-   button by a password) is see-through glass with the same border as a form box, not a solid slate
-   block. Hover and open show the theme's accent on the border. The solid gray (btn-secondary, used for
-   Cancel) stays solid. Comes after the gray rules so it wins. */
-.btn-outline-secondary {
+/* Every button looks the same: see-through glass with a form-box border, and the theme's accent on
+   the border when hovered or open. The label and its icon say what it does (Save, Delete, Download),
+   so colour does not have to. The outline classes stay in the markup; only the look is shared. One
+   place to change them all. The only coloured buttons are the chosen one of a segmented control
+   (.btn-toggle below) and the disabled look. A button with a "bi bi-..." class shows its icon before
+   the text (the icon is drawn by ::before, so changing the button's text from script keeps it). */
+.btn-success, .btn-outline-success,
+.btn-primary, .btn-outline-primary,
+.btn-danger, .btn-outline-danger,
+.btn-secondary, .btn-outline-secondary,
+.btn-warning, .btn-outline-warning {
   --bs-btn-color: var(--bs-body-color);
   --bs-btn-bg: var(--glass-input);
   --bs-btn-border-color: var(--glass-input-border);
@@ -430,9 +364,10 @@ footer {
   --bs-btn-disabled-color: var(--bs-secondary-color);
   --bs-btn-disabled-bg: var(--glass-input-disabled);
   --bs-btn-disabled-border-color: var(--glass-input-border);
+  --bs-btn-focus-shadow-rgb: var(--confirm-rgb);
   box-shadow: var(--glass-input-shadow);
+  font-weight: 500;
 }
-
 /* Toggle buttons (To do / Submitted, True / False, Plain text / Formatted, attempts) are a
    segmented control: the ones that are off are calm glass with the text colour, the one that is
    on is solid blue. They come after the solid rules above so they win. */
@@ -677,15 +612,9 @@ body::after {
 body { font-variant-numeric: tabular-nums; }
 h1, .h1, h2, .h2, h3, .h3, h4, .h4 { font-weight: 700; letter-spacing: -0.01em; }
 
-/* The accent gradient on solid blue buttons. It sits on top of Bootstrap's own background colour, which
-   stays as the fallback and for the disabled look. */
-.btn-success, .btn-outline-success, .btn-primary, .btn-outline-primary,
+/* The accent gradient on the chosen button of a segmented control. */
 .btn-check:checked + .btn-toggle, .btn-toggle.active {
   background-image: var(--accent-gradient);
-  border-color: transparent;
-}
-.btn-success:hover, .btn-outline-success:hover, .btn-primary:hover, .btn-outline-primary:hover {
-  filter: brightness(1.08);
   border-color: transparent;
 }
 .btn:disabled { background-image: none; }
