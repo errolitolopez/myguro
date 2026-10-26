@@ -141,7 +141,7 @@ def test_daily_limit_then_next_day_works(teacher, chat_on, asked, monkeypatch):
 
 
 def test_history_is_saved_for_that_teacher_only(teacher, other_teacher, chat_on, asked):
-    assert teacher.get("/api/chat/history").get_json() == {"questions_left": rules.MAX_QUESTIONS_PER_CHAT, "messages": []}
+    assert teacher.get("/api/chat/history").get_json() == {"questions_left": rules.MAX_QUESTIONS_PER_CHAT, "suggestions": rules.SUGGESTIONS, "messages": []}
     say(teacher, "where are my classes?")
     asked.key = "none"
     say(teacher, "tell me a joke")
@@ -180,7 +180,7 @@ def test_other_teachers_chat_is_never_sent(teacher, other_teacher, chat_on, aske
 def test_refused_messages_are_not_saved(teacher, chat_on, asked):
     say(teacher, "   ")
     say(teacher, "x" * (rules.MAX_MESSAGE_LENGTH + 1))
-    assert teacher.get("/api/chat/history").get_json() == {"questions_left": rules.MAX_QUESTIONS_PER_CHAT, "messages": []}
+    assert teacher.get("/api/chat/history").get_json() == {"questions_left": rules.MAX_QUESTIONS_PER_CHAT, "suggestions": rules.SUGGESTIONS, "messages": []}
 
 
 def test_a_chat_holds_five_questions_then_must_be_deleted(teacher, chat_on, asked):
@@ -194,7 +194,7 @@ def test_a_chat_holds_five_questions_then_must_be_deleted(teacher, chat_on, aske
     history = teacher.get("/api/chat/history").get_json()
     assert history["questions_left"] == 0 and len(history["messages"]) == 2 * rules.MAX_QUESTIONS_PER_CHAT
     # deleting the chat starts a new one
-    assert teacher.delete("/api/chat/history").get_json() == {"questions_left": rules.MAX_QUESTIONS_PER_CHAT, "messages": []}
+    assert teacher.delete("/api/chat/history").get_json() == {"questions_left": rules.MAX_QUESTIONS_PER_CHAT, "suggestions": rules.SUGGESTIONS, "messages": []}
     assert say(teacher, "fresh start").get_json()["questions_left"] == rules.MAX_QUESTIONS_PER_CHAT - 1
 
 
@@ -215,7 +215,7 @@ def test_teacher_clears_their_history(teacher, other_teacher, chat_on, asked):
     say(teacher, "mine")
     say(other_teacher, "theirs")
     assert teacher.delete("/api/chat/history").get_json()["messages"] == []
-    assert teacher.get("/api/chat/history").get_json() == {"questions_left": rules.MAX_QUESTIONS_PER_CHAT, "messages": []}
+    assert teacher.get("/api/chat/history").get_json() == {"questions_left": rules.MAX_QUESTIONS_PER_CHAT, "suggestions": rules.SUGGESTIONS, "messages": []}
     assert len(other_teacher.get("/api/chat/history").get_json()["messages"]) == 2
 
 
@@ -330,3 +330,13 @@ def test_the_editor_has_a_bottom_bar_the_bubble_must_clear(teacher, chat_on):
     sheet = teacher.post("/api/activities", json={"title": "Test", "subject": "Math"}).get_json()
     page = teacher.get(f"/activities/{sheet['activity']['id']}").get_data(as_text=True)
     assert "position-fixed bottom-0" in page and 'id="chat-bubble"' in page
+
+
+def test_suggestions_come_with_the_history_and_are_valid_questions(teacher, chat_on, asked):
+    data = teacher.get("/api/chat/history").get_json()
+    assert data["suggestions"] == rules.SUGGESTIONS and len(rules.SUGGESTIONS) >= 3
+    assert all(0 < len(text) <= rules.MAX_MESSAGE_LENGTH for text in rules.SUGGESTIONS)
+    assert len(set(rules.SUGGESTIONS)) == len(rules.SUGGESTIONS)
+    # tapping one is an ordinary question: it goes through the same route and the same limits
+    assert say(teacher, rules.SUGGESTIONS[0]).status_code == 200
+    assert teacher.delete("/api/chat/history").get_json()["suggestions"] == rules.SUGGESTIONS

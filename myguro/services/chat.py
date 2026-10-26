@@ -28,7 +28,7 @@ class ChatService(Service):
         """{messages: [{sender, text, link}]}: this teacher's newest messages, oldest first."""
         self.require_chat()
         rows = self.usage.recent_messages(self.user["id"], rules.MAX_SHOWN_MESSAGES)
-        return {"questions_left": self.questions_left(), "messages": [{"sender": row["sender"], "text": row["text"],
+        return {"questions_left": self.questions_left(), "suggestions": rules.SUGGESTIONS, "messages": [{"sender": row["sender"], "text": row["text"],
                               "link": {"label": row["link_label"], "url": row["link_url"]} if row["link_url"] else None}
                              for row in rows]}
 
@@ -41,7 +41,7 @@ class ChatService(Service):
         self.require_chat()
         self.usage.clear_messages(self.user["id"])
         self.commit()
-        return {"questions_left": rules.MAX_QUESTIONS_PER_CHAT, "messages": []}
+        return {"questions_left": rules.MAX_QUESTIONS_PER_CHAT, "suggestions": rules.SUGGESTIONS, "messages": []}
 
     def ask(self, data):
         """{message} -> {reply, link}. link is {label, url} from the page list, or None. Not found

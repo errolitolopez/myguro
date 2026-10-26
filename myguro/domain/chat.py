@@ -10,6 +10,17 @@ MAX_QUESTIONS_PER_CHAT = 5  # then the teacher deletes the chat and starts a new
 MAX_CONTEXT_MESSAGES = 2 * (MAX_QUESTIONS_PER_CHAT - 1)
 MAX_SHOWN_MESSAGES = 50  # the newest ones the bubble loads
 
+# Buttons in an empty chat: one tap sends the text as the teacher's question. Each one matches a page or a
+# how-to guide, so the answer is useful. Shown by the bubble, so keep them short.
+SUGGESTIONS = [
+    "How do I create a class?",
+    "How do I add students to a class?",
+    "How do I write an activity sheet?",
+    "How do I give an activity to students?",
+    "How do I check students' answers?",
+    "Where is my schedule?",
+]
+
 NO_PAGE_KEY = "none"  # what the model picks when no page fits the question
 ADMIN_ONLY_KEY = "admin-only"  # what the model picks when the teacher asks for something only the admin can do
 SPECIAL_KEYS = (NO_PAGE_KEY, ADMIN_ONLY_KEY)

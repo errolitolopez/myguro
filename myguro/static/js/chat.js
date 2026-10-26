@@ -34,7 +34,25 @@
   };
 
   // The greeting is the first thing in an empty chat, so it is never an empty box.
-  const showGreeting = () => addMessage("Hi! Tell me which page you are looking for.", false);
+  // The questions to tap in an empty chat; they come from the server with the history.
+  let suggestions = [];
+
+  // In an empty chat: the greeting and, under it, the suggestions. Tapping one sends it as the question.
+  const showGreeting = () => {
+    addMessage("Hi! Ask me where a page is or how to do something in MyGuro.", false);
+    if (!suggestions.length) return;
+    const list = document.createElement("div");
+    list.className = "chat-suggestions d-flex flex-wrap gap-2";
+    for (const text of suggestions) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "btn btn-sm btn-outline-success rounded-pill";
+      button.textContent = text;
+      button.addEventListener("click", () => sendMessage(text));
+      list.append(button);
+    }
+    messages.append(list);
+  };
 
   // The saved chat is loaded the first time the panel opens, not on every page.
   let historyLoaded = false;
@@ -42,7 +60,8 @@
     historyLoaded = true;
     try {
       const response = await fetch("/api/chat/history");
-      const data = response.ok ? await response.json() : { messages: [], questions_left: 5 };
+      const data = response.ok ? await response.json() : { messages: [], questions_left: 5, suggestions: [] };
+      suggestions = data.suggestions || [];
       messages.replaceChildren();
       if (!data.messages.length) showGreeting();
       for (const message of data.messages) {
@@ -142,10 +161,10 @@
   }
   document.getElementById("chat-clear").addEventListener("click", clearChat);
 
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const text = input.value.trim();
+  // Sends one question and shows the reply. The text box and the suggestions both use it.
+  async function sendMessage(text) {
     if (!text || send.disabled) return;
+    messages.querySelector(".chat-suggestions")?.remove();
     addMessage(text, true);
     input.value = "";
     send.disabled = true;
@@ -178,5 +197,10 @@
       send.disabled = full;
       messages.scrollTop = messages.scrollHeight;
     }
+  }
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    sendMessage(input.value.trim());
   });
 })();
