@@ -58,19 +58,13 @@
   </div>
   {% elif user.role == "student" %}
   <div class="bento mb-4">
-    <div>
-      <div class="card h-100"><div class="card-body">
-        <div class="text-body-secondary small">Classes</div>
-        <div class="fs-3 fw-bold stat-number" id="stat-classes">–</div>
-      </div></div>
-    </div>
     <div class="bento-wide">
       <a class="card h-100 text-decoration-none" href="{{ url_for('student.activities_page') }}"><div class="card-body">
         <div class="text-body-secondary small">To do</div>
         <div class="fs-3 fw-bold stat-number" id="stat-to-do">–</div>
       </div></a>
     </div>
-    <div>
+    <div class="bento-wide">
       <a class="card h-100 text-decoration-none" href="{{ url_for('student.activities_page') }}"><div class="card-body">
         <div class="text-body-secondary small">Submitted</div>
         <div class="fs-3 fw-bold stat-number" id="stat-submitted">–</div>
@@ -78,9 +72,6 @@
     </div>
   </div>
 
-  <h2 class="h5">My classes</h2>
-  <div id="class-list" class="list-group"></div>
-  <p id="no-classes" class="text-body-secondary d-none">You're not in a class yet. Ask your teacher to add you.</p>
   {% else %}
   <div class="bento mb-4">
     <div>

@@ -1,5 +1,5 @@
 // Loads the dashboard numbers. Admins see totals for the whole school;
-// teachers see their own students, activities and classes; students see their classes.
+// teachers see their own students, activities and classes; students see what is to do and submitted.
 
 function setText(id, text) {
   const element = document.getElementById(id);
@@ -53,10 +53,8 @@ async function loadDashboard() {
       setText("stat-activities", data.activities);
       setText("stat-supervisors", data.supervisors);
     } else if (data.role === "student") {
-      setText("stat-classes", data.classes.length);
       setText("stat-submitted", data.submitted);
       setText("stat-to-do", data.to_do);
-      showClasses(data.classes, "student");
     } else {
       setText("stat-students", data.students);
       setText("stat-not-started", data.not_started);
