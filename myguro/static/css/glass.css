@@ -55,6 +55,8 @@
   --neutral-hover: #cbd5e1;
   --neutral-active: #b8c4d6;
   --neutral-text: #334155;
+  /* A visible edge, so the button does not melt into light glass (the eye button next to a box). */
+  --neutral-border: #94a3b8;
   --warn-bg: #ffc107;
   --warn-hover: #ffca2c;
   --warn-active: #ffcd39;
@@ -84,6 +86,7 @@
   --neutral-hover: #5c636a;
   --neutral-active: #565e64;
   --neutral-text: #fff;
+  --neutral-border: var(--neutral-bg);
   --navbar-bg: rgba(15, 23, 42, 0.7);
   --page-base: #0f172a;
   --page-gradient: radial-gradient(circle at top left, hsl(222 47% 15%), hsl(222 47% 11%));
@@ -140,6 +143,7 @@
   --neutral-hover: #e3dcc3;
   --neutral-active: #d6cdb0;
   --neutral-text: #586e75;
+  --neutral-border: #b5ad94;
   --navbar-bg: rgba(238, 232, 213, 0.8);
   --page-base: #fdf6e3;
   --page-gradient: radial-gradient(circle at top left, #fdf6e3, #eee8d5);
@@ -342,16 +346,16 @@ footer {
 .btn-outline-secondary {
   --bs-btn-color: var(--neutral-text);
   --bs-btn-bg: var(--neutral-bg);
-  --bs-btn-border-color: var(--neutral-bg);
+  --bs-btn-border-color: var(--neutral-border);
   --bs-btn-hover-color: var(--neutral-text);
   --bs-btn-hover-bg: var(--neutral-hover);
-  --bs-btn-hover-border-color: var(--neutral-hover);
+  --bs-btn-hover-border-color: var(--neutral-border);
   --bs-btn-active-color: var(--neutral-text);
   --bs-btn-active-bg: var(--neutral-active);
-  --bs-btn-active-border-color: var(--neutral-active);
+  --bs-btn-active-border-color: var(--neutral-border);
   --bs-btn-disabled-color: var(--neutral-text);
   --bs-btn-disabled-bg: var(--neutral-bg);
-  --bs-btn-disabled-border-color: var(--neutral-bg);
+  --bs-btn-disabled-border-color: var(--neutral-border);
   --bs-btn-focus-shadow-rgb: 130, 138, 145;
 }
 .btn-warning,
