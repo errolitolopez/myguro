@@ -13,7 +13,7 @@
 {% block content %}
 {% include "_navbar.html" %}
 
-<main class="container py-3 pb-5 mb-5" style="max-width: 760px;" data-assignment-id="{{ assignment_id }}">
+<main data-reading class="container py-3 pb-5 mb-5" style="max-width: 760px;" data-assignment-id="{{ assignment_id }}">
   <a href="{{ url_for('student.activities_page') }}" class="small">‹ My activities</a>
   <div id="answer-error" class="alert alert-danger mt-2 d-none" role="alert"></div>
 

@@ -780,3 +780,8 @@ main { animation: page-in 0.35s ease both; }
   a.card:hover { transform: none; }
   .confetti { display: none; }
 }
+
+/* Reading pages (the student's answer page: answering and reviewing): no myguro logo and no drifting
+   colour behind the text, so nothing pulls the eye while reading. The plain page gradient stays. */
+body:has([data-reading])::before,
+body:has([data-reading])::after { display: none; }
