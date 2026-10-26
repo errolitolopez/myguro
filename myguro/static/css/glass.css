@@ -1000,6 +1000,13 @@ html[data-effects="light"] main { animation: none; }
   /* On a phone the panel is almost as wide as the screen; on a desktop it stays small. */
   width: min(22rem, calc(100vw - 2rem));
   box-shadow: var(--glass-shadow);
+  /* Solid, not frosted glass: page text must not show through the chat. !important beats the shared
+     .card glass rules above, which set the same properties with the same weight. */
+  --bs-card-bg: var(--glass-solid);
+  --bs-card-cap-bg: var(--glass-solid);
+  background-color: var(--glass-solid) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
   /* Closed: shrunk toward the bubble and faded out. It opens and closes (minimizes) by animating back,
      and the bigger size animates too. visibility waits for the fade so a closed panel can't be clicked. */
   transform-origin: bottom right;
