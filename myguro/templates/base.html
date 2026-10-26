@@ -57,7 +57,7 @@
           <div class="d-grid gap-2">
             {% for option in SUPPORT.options %}
             <div class="support-option">
-              {# The service's own app icon (the one a phone shows on the home screen), with rounded corners. #}
+              {# The service's own app icon (the one a phone shows on the home screen), cut into a circle. #}
               {% if option.id == "gcash" %}
               <img class="support-app-icon" src="{{ url_for('static', filename='img/gcash-app-icon.png') }}" alt="" width="48" height="48">
               {% elif option.id == "kofi" %}
