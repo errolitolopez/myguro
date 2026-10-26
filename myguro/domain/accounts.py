@@ -27,11 +27,11 @@ def make_temp_password():
 # --- Person names: Last name, First name, Middle initial (optional) ------------------------
 
 MAX_NAME_PART_LENGTH = 50
-NAME_FORMAT_HELP = "Write the name as Last name, First name (e.g. Altamerano, Rian Joshua)."
+NAME_FORMAT_HELP = "Write the name as Last name, First name (e.g. Bautista, Ana Marie)."
 
 
 def display_name(last_name, first_name, middle_initial=""):
-    """"Altamerano, Rian Joshua J." — how a person's name is shown and sorted (by last name)."""
+    """"Bautista, Ana Marie J." — how a person's name is shown and sorted (by last name)."""
     return f"{last_name}, {first_name}" + (f" {middle_initial}." if middle_initial else "")
 
 
@@ -143,7 +143,7 @@ def clean_grade_section(data):
 
 
 def suggest_username(first_name, last_name):
-    """"Rian Joshua" + "Altamerano" -> "raltamerano" (first letter of the first name + the
+    """"Ana Marie" + "Bautista" -> "abautista" (first letter of the first name + the
     last name, without spaces), the same as the add-account form suggests. ñ -> n, é -> e."""
     def plain(text):
         text = unicodedata.normalize("NFD", text)

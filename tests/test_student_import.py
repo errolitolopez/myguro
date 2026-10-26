@@ -103,16 +103,16 @@ def test_upload_again_skips_students_who_exist(admin):
 
 
 def test_one_name_column(admin):
-    content = xlsx([("Altamerano, Rian Joshua", "Grade 9"), ("Dela Cruz, Juan, M", ""),
+    content = xlsx([("Bautista, Ana Marie", "Grade 9"), ("Dela Cruz, Juan, M", ""),
                     ("Santos, Maria Clara M.", ""), ("Juan Dela Cruz", "")], headers=("Name", "Grade"))
     data = upload(admin, content, True).get_json()
     assert data["errors"] == [{"row": 5, "message": "Write the name as Last name, First name "
-                                                    "(e.g. Altamerano, Rian Joshua)."}]
-    content = xlsx([("Altamerano, Rian Joshua", "Grade 9"), ("Dela Cruz, Juan, M", ""),
+                                                    "(e.g. Bautista, Ana Marie)."}]
+    content = xlsx([("Bautista, Ana Marie", "Grade 9"), ("Dela Cruz, Juan, M", ""),
                     ("Santos, Maria Clara M.", "")], headers=("Name", "Grade"))
     rows = upload(admin, content, True).get_json()["students"]
     assert [(r["name"], r["username"]) for r in rows] == [
-        ("Altamerano, Rian Joshua", "raltamerano"), ("Dela Cruz, Juan M.", "jdelacruz"),
+        ("Bautista, Ana Marie", "abautista"), ("Dela Cruz, Juan M.", "jdelacruz"),
         ("Santos, Maria Clara M.", "msantos")]
 
 

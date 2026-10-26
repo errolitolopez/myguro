@@ -107,16 +107,16 @@ def template_xlsx_bytes():
     for line in [
         ["One student per row on the Students sheet. Keep the first row (the column names)."],
         [],
-        ["Last name", "Required, e.g. Altamerano or Dela Cruz."],
-        ["First name", "Required, e.g. Rian Joshua."],
+        ["Last name", "Required, e.g. Bautista or Dela Cruz."],
+        ["First name", "Required, e.g. Ana Marie."],
         ["Middle initial", "Optional, one letter, e.g. M."],
-        ["Username", "Optional. Leave empty to make one from the name (Altamerano, Rian Joshua -> raltamerano)."],
+        ["Username", "Optional. Leave empty to make one from the name (Bautista, Ana Marie -> abautista)."],
         ["Grade", "Optional. Kinder or Grade 1 to Grade 12 (you can also type just 9)."],
         ["Section", "Optional. Leave empty for irregular students."],
         ["Password", "Optional, at least 6 characters. Leave empty to make one."],
         [],
         ["Students change their password the first time they log in."],
-        ["Instead of the three name columns you can use one Name column: Altamerano, Rian Joshua, M"],
+        ["Instead of the three name columns you can use one Name column: Bautista, Ana Marie, M"],
     ]:
         help_sheet.append(line)
     help_sheet.column_dimensions["A"].width = 14

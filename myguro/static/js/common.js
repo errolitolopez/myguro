@@ -293,7 +293,7 @@ if (yearSelect) {
   });
 }
 
-// "Rian Joshua" + "Altamerano" -> "raltamerano" (first letter of the first name + the last name).
+// "Ana Marie" + "Bautista" -> "abautista" (first letter of the first name + the last name).
 function suggestUsername(firstName, lastName) {
   const plain = (text) => text
     .normalize("NFD")

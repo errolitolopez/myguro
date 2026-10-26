@@ -21,13 +21,13 @@ def test_create_teacher_with_generated_password(admin, app):
 
 
 def test_name_can_be_sent_as_one_text_with_commas(admin):
-    user = admin.post("/api/users", json={"role": "student", "name": "Altamerano, Rian Joshua, J",
-                                          "username": "raltamerano"}).get_json()["user"]
-    assert (user["last_name"], user["first_name"], user["middle_initial"]) == ("Altamerano", "Rian Joshua", "J")
-    assert user["name"] == "Altamerano, Rian Joshua J."
-    assert error(admin.post("/api/users", json={"role": "student", "name": "Rian Joshua Altamerano",
+    user = admin.post("/api/users", json={"role": "student", "name": "Bautista, Ana Marie, J",
+                                          "username": "abautista"}).get_json()["user"]
+    assert (user["last_name"], user["first_name"], user["middle_initial"]) == ("Bautista", "Ana Marie", "J")
+    assert user["name"] == "Bautista, Ana Marie J."
+    assert error(admin.post("/api/users", json={"role": "student", "name": "Ana Marie Bautista",
                                                 "username": "rja"})) == \
-        "Write the name as Last name, First name (e.g. Altamerano, Rian Joshua)."
+        "Write the name as Last name, First name (e.g. Bautista, Ana Marie)."
 
 
 def test_name_rules(admin):
