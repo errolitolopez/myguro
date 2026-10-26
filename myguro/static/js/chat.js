@@ -93,6 +93,27 @@
     }
   };
 
+  // The eyes follow the pointer: the distance and direction from the bubble to the pointer, held to a small
+  // step, are saved as --look-x / --look-y for the CSS. Not for people who asked for less motion.
+  const bubbleBox = document.getElementById("chat-bubble");
+  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    let waiting = false;
+    document.addEventListener("pointermove", (event) => {
+      if (waiting) return; // at most once a frame
+      waiting = true;
+      requestAnimationFrame(() => {
+        waiting = false;
+        const box = toggle.getBoundingClientRect();
+        const dx = event.clientX - (box.left + box.width / 2);
+        const dy = event.clientY - (box.top + box.height / 2);
+        const distance = Math.hypot(dx, dy) || 1;
+        const step = Math.min(1.6, distance / 80); // gets closer to full look as the pointer gets further away
+        bubbleBox.style.setProperty("--look-x", ((dx / distance) * step).toFixed(2));
+        bubbleBox.style.setProperty("--look-y", ((dy / distance) * step).toFixed(2));
+      });
+    });
+  }
+
   // The window size is remembered in this browser; if the browser blocks storage it just starts small.
   const sizeButton = document.getElementById("chat-size");
   const setLarge = (large) => {
@@ -169,6 +190,7 @@
     input.value = "";
     send.disabled = true;
     const waiting = addMessage("...", false);
+    bubbleBox.classList.add("chat-thinking"); // the eyes look side to side while GuroBot thinks
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
@@ -194,6 +216,7 @@
     } catch {
       waiting.textContent = "Cannot reach the server. Check your connection.";
     } finally {
+      bubbleBox.classList.remove("chat-thinking");
       send.disabled = full;
       messages.scrollTop = messages.scrollHeight;
     }

@@ -380,3 +380,13 @@ def test_a_failed_call_is_logged_without_the_key(app, teacher, chat_on, monkeypa
     data = say(teacher).get_json()
     assert data["reply"] == rules.UNAVAILABLE_REPLY
     assert "network down" in caplog.text and "secret-key-123" not in caplog.text
+
+
+def test_robot_parts_are_there_for_the_animation(teacher, chat_on):
+    page = teacher.get("/dashboard").get_data(as_text=True)
+    assert page.count('class="bot-eye"') == 4 and page.count('class="bot-tassel"') == 2  # bubble + header
+    assert page.count('class="bot-mouth"') == 2
+    css = open("myguro/static/css/glass.css").read()
+    for name in ("bot-blink", "bot-swing", "bot-bob", "bot-wiggle", "bot-look"):
+        assert f"@keyframes {name}" in css
+    assert "prefers-reduced-motion" in css.split("GuroBot is alive")[1]  # it all stops for reduced motion
