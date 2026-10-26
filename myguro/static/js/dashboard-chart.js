@@ -1,4 +1,4 @@
-// The dashboard bar chart, drawn with Chart.js (same idea as mymotoworks).
+// The dashboard bar chart, drawn with Chart.js (same idea as mymotoworks; the drawing is in chart-helpers.js).
 // Teacher: pick a class; one bar per activity (average score, or how many students submitted). Tap a bar
 //   to open that activity's results.
 // Student: one bar per subject (average score, or activities done). Tap a subject to see its activities,
@@ -14,48 +14,13 @@ let shownSubject = null; // student: the subject whose activities are shown, nul
 let activitiesData = []; // student: everything from /api/my-activities
 let gradebook = null; // teacher: the gradebook of the chosen class
 
-// cssColor("--accent-to") -> "#06b6d4". Chart.js draws on a canvas and cannot read CSS, so the theme's
-// colour variables are read here (the chart is drawn again when the theme changes).
-const cssColor = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-
 const chosenMetric = () => document.querySelector("input[name=chart-metric]:checked").value;
-
-// shorten("Pre-test: Ancient Greece", 12) -> "Pre-test: An…"
-const shorten = (text, max) => (text.length > max ? `${text.slice(0, max - 1)}…` : text);
 
 // percentOf({earned: 8, possible: 12, pending: 2}) -> 80 (of the points checked so far), or null
 const percentOf = (score) => {
   if (!score) return null;
   const checked = score.possible - score.pending;
   return checked > 0 ? Math.round((100 * score.earned) / checked) : null;
-};
-
-// Writes each bar's value above it, but only when there are few bars (the tooltip has the rest).
-const valueLabels = {
-  id: "valueLabels",
-  afterDatasetsDraw(instance) {
-    const { ctx } = instance;
-    const suffix = instance.options.plugins.valueLabels.suffix;
-    ctx.save();
-    ctx.fillStyle = cssColor("--bs-secondary-color");
-    ctx.font = "11px sans-serif";
-    ctx.textAlign = "center";
-    instance.getDatasetMeta(0).data.forEach((bar, index) => {
-      const value = instance.data.datasets[0].data[index];
-      if (value > 0) ctx.fillText(`${value}${suffix}`, bar.x, bar.y - 4);
-    });
-    ctx.restore();
-  },
-};
-
-// The accent gradient (bottom to top) for the bars. Before the chart has an area it is one colour.
-const barFill = (context) => {
-  const area = context.chart.chartArea;
-  if (!area) return cssColor("--accent-from");
-  const gradient = context.chart.ctx.createLinearGradient(0, area.bottom, 0, area.top);
-  gradient.addColorStop(0, cssColor("--accent-from"));
-  gradient.addColorStop(1, cssColor("--accent-to"));
-  return gradient;
 };
 
 // fillTable(view) puts the same numbers in the hidden table
@@ -73,59 +38,11 @@ const fillTable = (view) => {
   document.getElementById("chart-table").replaceChildren(...rows);
 };
 
-// drawChart({labels, values, titles, details, max, suffix, onBarClick}) -> one bar per value.
-// titles = the full names for the tooltip; details = the text under the name in the tooltip.
+// drawChart(view) -> one bar per value (see makeBarChart in chart-helpers.js for the view).
 const drawChart = (view) => {
   lastView = view;
-  if (chart) chart.destroy();
   fillTable(view);
-  const textColor = cssColor("--bs-secondary-color");
-  const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  chart = new Chart(document.getElementById("chart"), {
-    type: "bar",
-    data: {
-      labels: view.labels,
-      datasets: [{
-        data: view.values,
-        backgroundColor: barFill,
-        hoverBackgroundColor: cssColor("--accent-to"),
-        borderRadius: { topLeft: 4, topRight: 4 },
-        borderSkipped: "bottom",
-        maxBarThickness: 36,
-      }],
-    },
-    options: {
-      maintainAspectRatio: false,
-      animation: calm ? false : { duration: 500 },
-      layout: { padding: { top: 18 } },
-      onClick: (event, elements) => {
-        if (view.onBarClick && elements.length > 0) view.onBarClick(elements[0].index);
-      },
-      onHover: (event, elements) => {
-        event.native.target.style.cursor = view.onBarClick && elements.length > 0 ? "pointer" : "default";
-      },
-      plugins: {
-        legend: { display: false },
-        valueLabels: { suffix: view.suffix },
-        tooltip: {
-          callbacks: {
-            title: (items) => view.titles[items[0].dataIndex],
-            label: (item) => view.details[item.dataIndex],
-          },
-        },
-      },
-      scales: {
-        x: { grid: { display: false }, ticks: { color: textColor, maxRotation: 0, autoSkip: true } },
-        y: {
-          beginAtZero: true,
-          max: view.max,
-          grid: { color: cssColor("--bs-border-color") },
-          ticks: { color: textColor, maxTicksLimit: 5, precision: 0, callback: (value) => `${value}${view.suffix}` },
-        },
-      },
-    },
-    plugins: view.labels.length <= 12 ? [valueLabels] : [],
-  });
+  chart = makeBarChart(document.getElementById("chart"), view, chart);
 };
 
 // showEmpty("No classes yet.") hides the chart and says why; showEmpty(null) shows the chart again
