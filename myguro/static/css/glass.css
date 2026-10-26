@@ -42,6 +42,7 @@
   --bs-link-color-rgb: var(--bs-body-color-rgb);
   --bs-link-hover-color: var(--bs-emphasis-color);
   --bs-link-hover-color-rgb: var(--bs-emphasis-color-rgb);
+  --confirm-rgb: 99, 102, 241; /* the confirm colour as r, g, b, for focus rings */
   --confirm-bg: #4f46e5;
   --confirm-hover: #4338ca;
   --confirm-active: #3730a3;
@@ -118,6 +119,19 @@
   --navbar-bg: rgba(60, 63, 65, 0.8);
   --page-base: #2b2b2b;
   --page-gradient: radial-gradient(circle at top left, #313335, #262626);
+  /* Buttons in the IDE's own colours: steel blue, brick red, amber. */
+  --accent-from: #4b6eaf;
+  --accent-to: #6897bb;
+  --confirm-rgb: 75, 110, 175;
+  --confirm-bg: #4b6eaf;
+  --confirm-hover: #5a7fc0;
+  --confirm-active: #3f5e96;
+  --danger-bg: #bc3f3c;
+  --danger-hover: #cc4c49;
+  --danger-active: #a53735;
+  --warn-bg: #e0a33a;
+  --warn-hover: #eab257;
+  --warn-active: #f0bf70;
 }
 [data-myguro-theme="solarized"] {
   --bs-body-bg: #fdf6e3;
@@ -147,6 +161,20 @@
   --navbar-bg: rgba(238, 232, 213, 0.8);
   --page-base: #fdf6e3;
   --page-gradient: radial-gradient(circle at top left, #fdf6e3, #eee8d5);
+  /* Buttons in the Solarized accents: blue, red, yellow. */
+  --accent-from: #268bd2;
+  --accent-to: #2aa198;
+  --confirm-rgb: 38, 139, 210;
+  --confirm-bg: #268bd2;
+  --confirm-hover: #1f78b8;
+  --confirm-active: #1a6aa4;
+  --danger-bg: #dc322f;
+  --danger-hover: #c42a27;
+  --danger-active: #ac2421;
+  --warn-bg: #b58900;
+  --warn-hover: #9d7800;
+  --warn-active: #876800;
+  --warn-text: #fff;
 }
 [data-myguro-theme="neon"] {
   /* A dark base with electric violet and cyan. */
@@ -180,6 +208,13 @@
   --aurora-1: rgba(168, 85, 247, 0.38);
   --aurora-2: rgba(34, 211, 238, 0.26);
   --aurora-3: rgba(244, 114, 182, 0.2);
+  --confirm-rgb: 124, 58, 237;
+  --danger-bg: #f43f5e;
+  --danger-hover: #fb5b77;
+  --danger-active: #e11d48;
+  --warn-bg: #fbbf24;
+  --warn-hover: #fcd34d;
+  --warn-active: #fde68a;
 }
 
 body {
@@ -283,7 +318,11 @@ footer {
   box-shadow: var(--glass-input-shadow);
 }
 .form-control:focus,
-.form-select:focus { background-color: var(--glass-input-focus); }
+.form-select:focus {
+  background-color: var(--glass-input-focus);
+  border-color: var(--accent-to);
+  box-shadow: 0 0 0 0.2rem rgba(var(--confirm-rgb), 0.25);
+}
 .form-control:disabled,
 .form-select:disabled { background-color: var(--glass-input-disabled); }
 
@@ -324,7 +363,7 @@ footer {
   --bs-btn-disabled-color: var(--confirm-text);
   --bs-btn-disabled-bg: var(--confirm-bg);
   --bs-btn-disabled-border-color: var(--confirm-bg);
-  --bs-btn-focus-shadow-rgb: 99, 102, 241;
+  --bs-btn-focus-shadow-rgb: var(--confirm-rgb);
 }
 .btn-danger,
 .btn-outline-danger {
