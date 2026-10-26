@@ -1,11 +1,12 @@
-// Teacher and student: rate MyGuro from 1 to 5 on a few questions. The earlier answers are shown and
-// can be changed. The answers are private: the admin only sees totals.
+// Teacher and student: rate MyGuro from 1 to 5 on every question and send it once. After that the page
+// only says it was sent. The answers are private: the admin only sees totals.
 
 const questionsBox = document.getElementById("feedback-questions");
 const form = document.getElementById("feedback-form");
 const saveButton = document.getElementById("feedback-save");
 const MAX_STARS = 5;
 let ratings = {}; // question key -> 1-5, the stars now chosen
+const questionKeys = []; // every question of the page, in order
 
 // starRating(key, text) -> a block with the question and five star buttons (a radio group)
 function starRating(key, text) {
@@ -33,7 +34,7 @@ function starRating(key, text) {
     star.addEventListener("click", () => {
       ratings[key] = value;
       paintStars(group, value);
-      document.getElementById("feedback-saved").classList.add("d-none");
+      hideError("feedback-error");
     });
     group.append(star);
   }
@@ -63,16 +64,32 @@ async function loadFeedback() {
       showError("feedback-error", data.error || "Could not load the questions.");
       return;
     }
-    ratings = data.ratings;
-    questionsBox.replaceChildren(...data.questions.map((question) => starRating(question.key, question.text)));
+    if (data.submitted) {
+      showSent("feedback-already");
+      return;
+    }
+    questionsBox.replaceChildren(...data.questions.map((question) => {
+      questionKeys.push(question.key);
+      return starRating(question.key, question.text);
+    }));
   } catch {
     questionsBox.replaceChildren();
     showError("feedback-error", "Cannot reach the server. Check your connection.");
   }
 }
 
+// showSent(id) -> replaces the form with one of the messages ("sent now" or "sent before")
+function showSent(id) {
+  form.classList.add("d-none");
+  document.getElementById(id).classList.remove("d-none");
+}
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
+  if (questionKeys.some((key) => !ratings[key])) {
+    showError("feedback-error", "Please rate every question.");
+    return;
+  }
   const stopLoading = startLoading(saveButton);
   if (!stopLoading) return;
   hideError("feedback-error");
@@ -85,10 +102,10 @@ form.addEventListener("submit", async (event) => {
     if (!response) return;
     const data = await response.json();
     if (!response.ok) {
-      showError("feedback-error", data.error || "Could not save your feedback.");
+      showError("feedback-error", data.error || "Could not send your feedback.");
       return;
     }
-    document.getElementById("feedback-saved").classList.remove("d-none");
+    showSent("feedback-saved");
     window.scrollTo({ top: 0 });
   } catch {
     showError("feedback-error", "Cannot reach the server. Check your connection.");

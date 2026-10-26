@@ -30,8 +30,8 @@ def api_mine():
 @bp.put("/api/feedback")
 @role_required_api("teacher", "student")
 def api_save():
-    """{ratings: {"easy": 4, "overall": 5}}"""
-    return jsonify(ratings=service().save(json_body()))
+    """{ratings: {question: 1-5 for every question}}. Sent once: a second try is refused."""
+    return jsonify(service().save(json_body()))
 
 
 @bp.get("/api/feedback/summary")

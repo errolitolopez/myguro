@@ -20,7 +20,8 @@ QUESTION_KEYS = [key for key, _ in QUESTIONS]
 
 
 def clean_ratings(data):
-    """{"easy": 4, ...} -> the same dict, checked. Only known questions, whole numbers 1 to 5, at least one.
+    """{"easy": 4, ...} -> the same dict, checked. Only known questions, whole numbers 1 to 5, at least one
+    (the caller decides whether all are needed).
     Raises ValidationError with a plain message."""
     if not isinstance(data, dict) or not data:
         raise ValidationError("Choose a rating for at least one question.")
@@ -33,6 +34,12 @@ def clean_ratings(data):
             raise ValidationError(f"A rating is a whole number from {MIN_RATING} to {MAX_RATING}.")
         ratings[key] = value
     return ratings
+
+
+def require_every_question(ratings):
+    """Feedback is sent once, so every question must be rated. Raises ValidationError if one is missing."""
+    if any(key not in ratings for key in QUESTION_KEYS):
+        raise ValidationError("Please rate every question.")
 
 
 def summarize(rows, respondents):

@@ -8,18 +8,19 @@
 <main class="container py-3" style="max-width: 640px;">
   <h1 class="h4">Rate MyGuro</h1>
   <p class="text-body-secondary">
-    Tap the stars: 1 is poor and 5 is excellent. Your answers are private. The admin only sees totals,
-    never who answered. You can come back and change them.
+    Tap the stars: 1 is poor and 5 is excellent. Rate every question, then send. Your answers are private:
+    the admin only sees totals, never who answered. You can send feedback once.
   </p>
 
   <div id="feedback-error" class="alert alert-danger d-none" role="alert"></div>
-  <div id="feedback-saved" class="alert alert-success d-none" role="status">Thank you! Your feedback was saved.</div>
+  <div id="feedback-saved" class="alert alert-success d-none" role="status">Thank you! Your feedback was sent.</div>
+  <div id="feedback-already" class="alert alert-info d-none" role="status">You already sent your feedback. Thank you!</div>
 
   <form id="feedback-form" novalidate>
     <div id="feedback-questions" class="d-grid gap-3 mb-3">
       <div class="list-group">{% include "_skeleton.html" %}</div>
     </div>
-    <button id="feedback-save" type="submit" class="btn btn-success bi bi-check2">Save feedback</button>
+    <button id="feedback-save" type="submit" class="btn btn-success bi bi-check2">Send feedback</button>
   </form>
 </main>
 {% endblock %}

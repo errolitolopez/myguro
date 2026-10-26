@@ -13,19 +13,23 @@ class FeedbackService(Service):
         self.feedback = FeedbackRepository(db)
 
     def mine(self):
-        """The questions, and the ratings this person gave before."""
+        """The questions, and whether this person already sent their feedback."""
         self.require_rater()
         return {"questions": [{"key": key, "text": text} for key, text in rules.QUESTIONS],
-                "ratings": self.feedback.mine(self.user["id"])}
+                "submitted": bool(self.feedback.mine(self.user["id"]))}
 
     def save(self, data):
-        """{ratings: {question: 1-5}}: keeps the person's earlier answers for questions not sent."""
+        """{ratings: {question: 1-5}}: every question, sent once. A second try is refused, so the
+        totals the admin reads cannot be changed afterwards."""
         self.require_rater()
+        if self.feedback.mine(self.user["id"]):
+            raise ValidationError("You already sent your feedback. Thank you!")
         ratings = rules.clean_ratings(data.get("ratings"))
+        rules.require_every_question(ratings)
         for question, rating in ratings.items():
             self.feedback.save(self.user["id"], question, rating)
         self.commit()
-        return self.feedback.mine(self.user["id"])
+        return {"submitted": True}
 
     def summary(self, role=""):
         """Admin: the average and how many gave each rating, per question. role = "teacher" or
