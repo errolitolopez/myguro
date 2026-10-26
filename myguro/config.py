@@ -30,6 +30,10 @@ def configure(app, test_config=None):
     app.config["DATABASE"] = os.environ.get("MYGURO_DATABASE", os.path.join(app.instance_path, "myguro.db"))
     # No "remember me": the login ends when the browser is closed, since school computers are shared.
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+    # Behind a proxy (PythonAnywhere, nginx) every request comes from the proxy's own address, and the
+    # person's real address is in a header the proxy adds. Reading that header is only safe when a proxy
+    # really sets it (else anyone could send a fake address), so it is off unless the server turns it on.
+    app.config["TRUST_PROXY"] = os.environ.get("MYGURO_TRUST_PROXY", "").lower() in ("1", "true", "yes")
     # Largest upload accepted (an Excel file of students). Bigger requests get "too big".
     app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_MB * 1024 * 1024
     app.secret_key = load_secret_key(app.instance_path)

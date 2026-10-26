@@ -1,8 +1,9 @@
 """Who is logged in, and decorators that let only the right people open a page or API."""
 
+import ipaddress
 from functools import wraps
 
-from flask import g, jsonify, redirect, request, session, url_for
+from flask import current_app, g, jsonify, redirect, request, session, url_for
 
 from myguro.database import get_db
 from myguro.repositories import UserRepository
@@ -19,6 +20,25 @@ def current_user():
                 session.clear()
             g.user = user
     return g.user
+
+
+def client_address():
+    """The address of the person's device, for the activity log and the wrong-password lock-out.
+    Normally request.remote_addr. Behind a proxy (config TRUST_PROXY, from the MYGURO_TRUST_PROXY
+    environment variable) that is the proxy's own address for everyone, so the address the proxy saw is
+    read from the X-Real-IP header, else the last entry of X-Forwarded-For (the one our proxy added; the
+    earlier ones can be made up by the visitor). Anything that is not a valid address falls back to
+    remote_addr."""
+    direct = request.remote_addr or ""
+    if not current_app.config.get("TRUST_PROXY"):
+        return direct
+    candidate = request.headers.get("X-Real-IP", "").strip()
+    if not candidate:
+        candidate = request.headers.get("X-Forwarded-For", "").split(",")[-1].strip()
+    try:
+        return str(ipaddress.ip_address(candidate))
+    except ValueError:
+        return direct
 
 
 def json_body():

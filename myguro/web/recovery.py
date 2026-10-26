@@ -1,10 +1,10 @@
 """Recovery codes: make one (logged in), and choose a new password with one (forgot the password)."""
 
-from flask import Blueprint, current_app, jsonify, redirect, render_template, request, url_for
+from flask import Blueprint, current_app, jsonify, redirect, render_template, url_for
 
 from myguro.database import get_db
 from myguro.services import RecoveryService
-from myguro.web.security import current_user, json_body, login_required_api, login_required_page
+from myguro.web.security import client_address, current_user, json_body, login_required_api, login_required_page
 
 bp = Blueprint("recovery", __name__)
 
@@ -42,5 +42,5 @@ def api_recover():
     """{username, code, new_password} -> {ok, uses_left}. Each use takes one of the code's uses. No login needed (the person forgot the password)."""
     data = json_body()
     return jsonify(RecoveryService(get_db()).recover(
-        data.get("username"), data.get("code"), data.get("new_password"), request.remote_addr,
+        data.get("username"), data.get("code"), data.get("new_password"), client_address(),
         current_app.extensions["login_throttle"]))

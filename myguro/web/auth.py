@@ -1,10 +1,10 @@
 """Login, logout, change password."""
 
-from flask import Blueprint, current_app, jsonify, redirect, render_template, request, session, url_for
+from flask import Blueprint, current_app, jsonify, redirect, render_template, session, url_for
 
 from myguro.database import get_db
 from myguro.services import AuthService
-from myguro.web.security import current_user, json_body
+from myguro.web.security import client_address, current_user, json_body
 
 bp = Blueprint("auth", __name__)
 
@@ -32,7 +32,7 @@ def change_password_page():
 @bp.post("/api/login")
 def api_login():
     data = json_body()
-    user = AuthService(get_db()).login(data.get("username"), data.get("password"), request.remote_addr,
+    user = AuthService(get_db()).login(data.get("username"), data.get("password"), client_address(),
                                        current_app.extensions["login_throttle"])
     session.clear()
     session["user_id"] = user["id"]
