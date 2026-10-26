@@ -39,7 +39,7 @@
 
   // In an empty chat: the greeting and, under it, the suggestions. Tapping one sends it as the question.
   const showGreeting = () => {
-    addMessage("Hi! Ask me where a page is or how to do something in MyGuro.", false);
+    addMessage("Hi, I'm GuroBot! Ask me where a page is or how to do something in MyGuro.", false);
     if (!suggestions.length) return;
     const list = document.createElement("div");
     list.className = "chat-suggestions d-flex flex-wrap gap-2";
