@@ -98,7 +98,7 @@ def test_only_the_question_and_the_page_list_are_sent(teacher, chat_on, asked):
     say(teacher, "  where   are my classes? ")
     (message, keys, prompt), = asked.calls
     assert message == "where are my classes?"
-    assert keys == list(rules.TEACHER_PAGES)
+    assert keys == list(rules.TEACHER_TOPICS)
     # no names or account details of the teacher in what the model gets
     assert "Santos" not in prompt and "msantos" not in prompt
 
@@ -206,20 +206,57 @@ def test_bubble_not_on_the_login_page(chat_on, app):
 
 
 def test_gemini_request_and_answer_shape(monkeypatch):
-    """The real client with the network replaced: forced navigate call, key in a header, page read back."""
+    """The real client with the network replaced: forced help call, key in a header, page read back."""
     import io, json, urllib.request
     seen = {}
 
     def fake_urlopen(request, timeout):
         seen["body"] = json.loads(request.data)
         seen["key"] = request.get_header("X-goog-api-key")
-        reply = {"candidates": [{"content": {"parts": [{"functionCall": {"name": "navigate", "args": {"page": "classes"}}}]}}]}
+        reply = {"candidates": [{"content": {"parts": [{"functionCall": {"name": "help", "args": {"key": "classes"}}}]}}]}
         return io.BytesIO(json.dumps(reply).encode())
 
     monkeypatch.setenv("GEMINI_API_KEY", "test-key")
     monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
-    assert chat_client.ask_model("my classes", rules.TEACHER_PAGES, "prompt") == "classes"
+    assert chat_client.ask_model("my classes", rules.TEACHER_TOPICS, "prompt") == "classes"
     assert seen["key"] == "test-key"
-    assert seen["body"]["toolConfig"]["functionCallingConfig"]["allowedFunctionNames"] == ["navigate"]
+    assert seen["body"]["toolConfig"]["functionCallingConfig"]["allowedFunctionNames"] == ["help"]
     assert seen["body"]["contents"][0]["parts"][0]["text"] == "my classes"
-    assert seen["body"]["tools"][0]["functionDeclarations"][0]["parameters"]["properties"]["page"]["enum"][-1] == "none"
+    assert seen["body"]["tools"][0]["functionDeclarations"][0]["parameters"]["properties"]["key"]["enum"][-1] == "none"
+
+
+# --- How-to guides ---
+
+from myguro.domain.chat_guides import TEACHER_GUIDES
+
+
+def test_every_guide_has_steps_and_starts_on_a_real_page():
+    for key, (title, about, page, steps) in TEACHER_GUIDES.items():
+        assert key.startswith("how-") and key not in rules.TEACHER_PAGES
+        assert title and about and steps, key
+        assert page in rules.TEACHER_PAGES, key
+
+
+def test_teacher_gets_the_written_steps_and_a_button(teacher, chat_on, asked):
+    asked.key = "how-new-class"
+    data = say(teacher, "how do I make a class?").get_json()
+    title, _, _, steps = TEACHER_GUIDES["how-new-class"]
+    assert data["reply"] == f"How to: {title}\n" + "\n".join(f"{n}. {step}" for n, step in enumerate(steps, 1))
+    assert data["link"] == {"label": "Open Classes", "url": "/classes"}
+    # saved in the history with its button
+    saved = teacher.get("/api/chat/history").get_json()["messages"][-1]
+    assert saved["text"] == data["reply"] and saved["link"] == data["link"]
+
+
+def test_every_guide_works_through_the_chat(teacher, chat_on, asked):
+    for key in TEACHER_GUIDES:
+        asked.key = key
+        data = say(teacher).get_json()
+        assert data["reply"].startswith("How to: ") and data["link"]["url"].startswith("/")
+
+
+def test_guides_and_pages_are_what_the_model_is_offered(teacher, chat_on, asked):
+    say(teacher)
+    _, keys, prompt = asked.calls[0]
+    assert set(rules.TEACHER_PAGES) | set(TEACHER_GUIDES) == set(keys)
+    assert all(f'"{key}"' in prompt for key in keys)

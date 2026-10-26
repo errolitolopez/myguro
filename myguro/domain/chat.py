@@ -1,5 +1,6 @@
 """Navigation chatbot rules: the pages it may open, its limits and fixed replies (no database, no Flask)."""
 
+from myguro.domain.chat_guides import TEACHER_GUIDES
 from myguro.errors import ValidationError
 
 MAX_MESSAGE_LENGTH = 300
@@ -11,9 +12,8 @@ NO_PAGE_KEY = "none"  # what the model picks when no page fits the question
 NO_PAGE_REPLY = "I can only help you find pages."
 UNAVAILABLE_REPLY = "The chatbot is not available right now."
 
-# The pages a teacher can be sent to: key -> (title, path, what is there, extra hint or ""). Only pages
-# that need no id. The model only ever picks a key; the reply and the link come from this list, so it
-# can never send anyone to an address that is not here. Keys go to the model, so never rename one.
+# The pages a teacher can be sent to: key -> (title, path, what is there, extra note or ""). Only pages
+# that need no id. Keys go to the model and into saved chats, so never rename one.
 TEACHER_PAGES = {
     "dashboard": ("Dashboard", "/dashboard",
                   "The home page: what needs attention, scores to check, and the school year.", ""),
@@ -31,10 +31,22 @@ TEACHER_PAGES = {
                       "Make a recovery code to reset a forgotten password without the admin.", ""),
 }
 
-PROMPT = """You help a teacher find a page in MyGuro, a learning activity sheet web app.
-Always call the navigate tool. Pick the page that best fits what the teacher asked for.
-If the question is not about finding a page in MyGuro, pick "none".
-Never answer in text. These are the pages:
+# Everything the model can pick from. A page: reply "Here is X." with a button. A how-to guide: the
+# written steps with a button to the page where they start. Both come from the lists above, so the
+# model only ever names a key and never writes text or an address.
+TEACHER_TOPICS = {
+    **{key: {"title": title, "path": path, "about": about, "steps": [], "note": note, "button": f"Open {title}"}
+       for key, (title, path, about, note) in TEACHER_PAGES.items()},
+    **{key: {"title": f"How to: {title}", "path": TEACHER_PAGES[page][1], "about": about, "steps": steps, "note": "",
+             "button": f"Open {TEACHER_PAGES[page][0]}"}
+       for key, (title, about, page, steps) in TEACHER_GUIDES.items()},
+}
+
+PROMPT = """You help a teacher use MyGuro, a learning activity sheet web app.
+Always call the help tool with the key that best fits what the teacher asked for.
+Pick a "how-" key when they ask how to do something. Pick a page key when they ask where something is.
+If the question is not about using MyGuro, pick "none".
+Never answer in text. These are the keys:
 """
 
 
@@ -49,20 +61,24 @@ def clean_message(message):
 
 
 def pages_for(role):
-    """The pages this role may be sent to (empty for a role that has no chatbot)."""
-    return TEACHER_PAGES if role == "teacher" else {}
+    """The topics (pages and how-to guides) this role may ask about (empty for a role with no chatbot)."""
+    return TEACHER_TOPICS if role == "teacher" else {}
 
 
-def build_prompt(pages):
-    """The instructions for the model, with one line per page."""
-    return PROMPT + "\n".join(f'- "{key}": {title}. {about}' for key, (title, _, about, _) in pages.items())
+def build_prompt(topics):
+    """The instructions for the model, with one line per topic."""
+    return PROMPT + "\n".join(f'- "{key}": {topic["title"]}. {topic["about"]}' for key, topic in topics.items())
 
 
-def answer_for(pages, key):
-    """{reply, link} for the page key the model picked. An unknown key (or "none") gets the fixed
-    reply and no link, so the model can never name an address of its own."""
-    page = pages.get(key) if isinstance(key, str) else None
-    if page is None:
+def answer_for(topics, key):
+    """{reply, link} for the key the model picked. An unknown key (or "none") gets the fixed reply and
+    no link, so the model can never name an address or write steps of its own."""
+    topic = topics.get(key) if isinstance(key, str) else None
+    if topic is None:
         return {"reply": NO_PAGE_REPLY, "link": None}
-    title, path, _, hint = page
-    return {"reply": f"Here is {title}. {hint}".strip(), "link": {"label": f"Open {title}", "url": path}}
+    if topic["steps"]:
+        steps = "\n".join(f"{number}. {step}" for number, step in enumerate(topic["steps"], 1))
+        reply = f"{topic['title']}\n{steps}"
+    else:
+        reply = f"Here is {topic['title']}. {topic['note']}".strip()
+    return {"reply": reply, "link": {"label": topic["button"], "url": topic["path"]}}
