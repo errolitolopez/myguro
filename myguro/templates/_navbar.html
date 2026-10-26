@@ -47,8 +47,7 @@
         </li>
         <li><hr class="dropdown-divider"></li>
         {% endif %}
-        <li class="px-3 pb-2">{% include "_theme_select.html" %}</li>
-        <li class="px-3 pb-2">{% include "_reading_settings.html" %}</li>
+        <li><a class="dropdown-item bi bi-palette {{ 'active' if request.endpoint == 'display.page' }}" href="{{ url_for('display.page') }}"> Display</a></li>
         {% if user.role in ("admin", "teacher", "student") %}
         <li><a class="dropdown-item bi bi-star {{ 'active' if request.endpoint == 'feedback.page' }}" href="{{ url_for('feedback.page') }}"> Feedback</a></li>
         {% endif %}

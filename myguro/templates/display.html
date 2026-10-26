@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Display · MyGuro{% endblock %}
+
+{% block content %}
+{% include "_navbar.html" %}
+
+<main class="container py-3" style="max-width: 640px;">
+  <h1 class="h4">Display</h1>
+  <p class="text-body-secondary">
+    How MyGuro looks to you. These choices are saved in this browser only, so on another phone or
+    computer you choose again.
+  </p>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <h2 class="h5 bi bi-palette"> Theme</h2>
+      {% include "_theme_select.html" %}
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <h2 class="h5 bi bi-fonts"> Reading</h2>
+      {% include "_reading_settings.html" %}
+    </div>
+  </div>
+
+  <!-- A sample that follows the choices above, so a person sees the size, spacing and alignment at once. -->
+  <div class="card">
+    <div class="card-body reading-sample">
+      <h2 class="h5">Preview</h2>
+      <p class="mb-0">
+        Read the paragraph below and answer the questions that follow. A good reading text is easy on the
+        eyes: the letters are big enough, the lines are not crowded, and the edges are tidy. Change the
+        choices above until this paragraph feels comfortable to read for a long time.
+      </p>
+    </div>
+  </div>
+</main>
+{% endblock %}

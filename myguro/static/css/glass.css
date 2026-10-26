@@ -792,10 +792,10 @@ html[data-text-size="small"] { font-size: 87.5%; }
 html[data-text-size="large"] { font-size: 112.5%; }
 html[data-text-size="xlarge"] { font-size: 125%; }
 html[data-line-spacing="relaxed"] { --bs-body-line-height: 1.8; }
-/* Justified text only on the reading pages (data-reading), and only in blocks that wrap onto more than
+/* Justified text only on the reading pages (data-reading) and the sample on the Display page, and only in blocks that wrap onto more than
    one line; hyphens: auto stops the big gaps between words that justified text gets on a phone. The
    page's language (lang="en" in base.html) tells the browser how to hyphenate. */
-html[data-text-align="justify"] [data-reading] :is(div, p, li, label) {
+html[data-text-align="justify"] :is([data-reading], .reading-sample) :is(div, p, li, label) {
   text-align: justify;
   hyphens: auto;
 }

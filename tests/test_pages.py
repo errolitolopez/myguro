@@ -65,3 +65,11 @@ def test_dashboard_chart_is_for_teachers_and_students_only(admin, teacher):
     assert 'id="to-check-card"' not in login("jdelacruz01").get("/dashboard").get_data(as_text=True)
     page = login("jdelacruz01").get("/dashboard").get_data(as_text=True)
     assert chart in page and 'data-role="student"' in page
+
+
+def test_display_page_is_open_to_every_role(admin, teacher, supervisor):
+    for client in (admin, teacher, supervisor, login("jdelacruz01")):
+        page = client.get("/display").get_data(as_text=True)
+        assert "data-theme-select" in page and 'data-reading-select="size"' in page
+        # The choices live on this page now, not in the account menu of the other pages
+        assert "data-theme-select" not in client.get("/dashboard" if client is not supervisor else "/log").get_data(as_text=True)
