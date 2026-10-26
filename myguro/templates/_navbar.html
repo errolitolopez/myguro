@@ -23,6 +23,9 @@
     <a class="navbar-brand d-flex align-items-center" href="{{ url_for(tabs[0][0]) }}" aria-label="MyGuro home">
       {% with height=30 %}{% include "_logo.html" %}{% endwith %}
     </a>
+    <div class="d-flex align-items-center gap-2">
+    <button id="palette-button" class="btn btn-outline-secondary bi bi-search" type="button"
+            aria-label="Quick jump (Ctrl+K)" title="Quick jump (Ctrl+K)"></button>
     <!-- One account menu for every screen size: Settings (admin), Password and Logout. -->
     <div class="dropdown">
       <button class="btn btn-outline-secondary bi bi-person-circle dropdown-toggle" type="button"
@@ -52,6 +55,7 @@
         <li><hr class="dropdown-divider"></li>
         <li><button id="logout-button" class="dropdown-item bi bi-box-arrow-right" type="button"> Logout</button></li>
       </ul>
+    </div>
     </div>
   </div>
   <!-- Wider screens (768px and up): the pages as tabs under the brand. -->
@@ -92,3 +96,17 @@
 {% if user.role in ("teacher", "student") and request.endpoint != "student.answer_page" %}
 <div id="tip-box" class="container d-none" data-role="{{ user.role }}"></div>
 {% endif %}
+
+{# Quick jump: filled in by palette.js. The pages of the role are handed over as JSON. #}
+{% set palette_pages = [] %}
+{% for endpoint, actives, label, icon in tabs %}
+  {% set _ = palette_pages.append({"label": label, "icon": icon, "href": url_for(endpoint)}) %}
+{% endfor %}
+<dialog id="palette" class="palette" aria-label="Quick jump" data-role="{{ user.role }}"
+        data-pages="{{ palette_pages | tojson | forceescape }}">
+  <input id="palette-input" class="palette-input" type="search" placeholder="Jump to..." autocomplete="off"
+         aria-label="Search pages, classes and activities">
+  <ul id="palette-list" class="palette-list"></ul>
+  <div class="palette-hint">Arrow keys to move · Enter to open · Esc to close</div>
+</dialog>
+<script src="{{ url_for('static', filename='js/palette.js') }}" defer></script>
