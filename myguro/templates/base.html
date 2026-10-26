@@ -57,19 +57,18 @@
           <div class="d-grid gap-2">
             {% for option in SUPPORT.options %}
             <div class="support-option">
-              {# The service's own logo on a white tile, so it reads the same in every theme. GCash is a wide
-                 wordmark that already says the name; Ko-fi is a small cup icon next to its name. #}
+              {# The service's own app icon (the one a phone shows on the home screen), with rounded corners. #}
               {% if option.id == "gcash" %}
-              <div class="support-logo"><img src="{{ url_for('static', filename='img/gcash-logo.svg') }}" alt="{{ option.title }}" height="26"></div>
+              <img class="support-app-icon" src="{{ url_for('static', filename='img/gcash-app-icon.png') }}" alt="" width="48" height="48">
               {% elif option.id == "kofi" %}
-              <div class="support-logo"><img src="{{ url_for('static', filename='img/kofi-logo.svg') }}" alt="" height="26"></div>
+              <img class="support-app-icon" src="{{ url_for('static', filename='img/kofi-app-icon.png') }}" alt="" width="48" height="48">
               {% else %}
               <div class="support-icon" aria-hidden="true">
                 <i class="bi {{ 'bi-phone' if option.kind == 'number' else 'bi-box-arrow-up-right' }}"></i>
               </div>
               {% endif %}
               <div class="flex-grow-1 min-w-0">
-                <div class="fw-semibold {{ 'visually-hidden' if option.id == 'gcash' }}">{{ option.title }}</div>
+                <div class="fw-semibold">{{ option.title }}</div>
                 {% if option.kind == "number" %}
                 <div class="support-number">{{ option.display }}</div>
                 {% if option.name %}<div class="small text-body-secondary">{{ option.name }}</div>{% endif %}

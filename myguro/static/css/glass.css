@@ -961,14 +961,13 @@ html[data-effects="light"] main { animation: none; }
   -webkit-user-select: all;
 }
 
-/* The logo of a way to give (GCash, Ko-fi) on a white tile: brand logos are made for a light background,
-   and the tile keeps them readable in the dark themes too. The height is set on the image. */
-.support-logo {
+/* The app icon of a way to give (GCash, Ko-fi): the picture a phone shows for the app, at 48px with the
+   rounded corners of an app icon (about a fifth of the side). The files are bigger, so they stay sharp on
+   high-density screens. */
+.support-app-icon {
   flex: none;
-  display: grid;
-  place-items: center;
-  padding: 0.4rem 0.6rem;
-  border-radius: 0.75rem;
-  background: #fff; /* white in every theme, on purpose */
+  width: 3rem;
+  height: 3rem;
+  border-radius: 22%;
+  object-fit: cover;
 }
-.support-logo img { display: block; width: auto; max-width: 7rem; }

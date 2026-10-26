@@ -181,10 +181,10 @@ def test_support_popup_mode_checked(admin):
     assert error(response) == "Choose when to show the pop-up from the list."
 
 
-def test_support_window_shows_the_gcash_and_kofi_logos(admin, teacher, app):
+def test_support_window_shows_the_gcash_and_kofi_app_icons(admin, teacher, app):
     admin.put("/api/settings", json={"support": {**SUPPORT, "gcash_number": "09171234567", "gcash_name": "Juan D."}})
     page = teacher.get("/dashboard").get_data(as_text=True)
-    assert "img/kofi-logo.svg" in page and "img/gcash-logo.svg" in page
-    # The logo files are served
-    assert app.test_client().get("/static/img/gcash-logo.svg").status_code == 200
-    assert app.test_client().get("/static/img/kofi-logo.svg").status_code == 200
+    assert "img/kofi-app-icon.png" in page and "img/gcash-app-icon.png" in page
+    # The icon files are served
+    assert app.test_client().get("/static/img/gcash-app-icon.png").status_code == 200
+    assert app.test_client().get("/static/img/kofi-app-icon.png").status_code == 200
