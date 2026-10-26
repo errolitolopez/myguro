@@ -137,7 +137,7 @@
   <div id="chat-bubble" class="chat-bubble">
     <section id="chat-panel" class="chat-panel card" aria-labelledby="chat-title" inert>
       <div class="card-header d-flex align-items-center justify-content-between py-2">
-        <h2 id="chat-title" class="h6 mb-0 bi bi-chat-dots"> Where to?</h2>
+        <h2 id="chat-title" class="h6 mb-0 bi bi-chat-dots"> Ask MyGuro</h2>
         <div class="d-flex align-items-center gap-2">
           <span id="chat-left" class="small text-body-secondary"></span>
           <button id="chat-size" type="button" class="btn btn-sm btn-outline-secondary bi bi-arrows-angle-expand"
@@ -150,12 +150,12 @@
       <div id="chat-messages" class="chat-messages" role="log" aria-live="polite"></div>
       <form id="chat-form" class="d-flex gap-2 p-2 border-top" novalidate>
         <input id="chat-input" class="form-control" maxlength="300" autocomplete="off"
-               placeholder="Which page do you need?" aria-label="Which page do you need?">
+               placeholder="Ask where a page is or how to do something" aria-label="Ask where a page is or how to do something">
         <button id="chat-send" type="submit" class="btn btn-success bi bi-send" aria-label="Send"></button>
       </form>
     </section>
     <button id="chat-toggle" type="button" class="chat-toggle btn btn-success rounded-circle bi bi-chat-dots-fill"
-            aria-label="Ask where to go" aria-expanded="false" aria-controls="chat-panel"></button>
+            aria-label="Ask MyGuro" aria-expanded="false" aria-controls="chat-panel"></button>
   </div>
   {% endif %}
 
