@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}My schedule · MyGuro{% endblock %}
+
+{% block content %}
+{% include "_navbar.html" %}
+
+<main class="container py-3">
+  <h1 class="h4 mb-1">My schedule</h1>
+  <div class="small text-body-secondary mb-3" id="schedule-details"></div>
+  <div id="schedule-error" class="alert alert-danger d-none" role="alert"></div>
+  <div id="schedule-empty" class="alert alert-info d-none" role="status"></div>
+  <div class="table-responsive">
+    <table class="table table-bordered align-middle text-center bg-body small mb-0 d-none" id="schedule-table">
+      <thead id="schedule-head"></thead>
+      <tbody id="schedule-body"></tbody>
+    </table>
+  </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/schedule-grid.js') }}"></script>
+<script src="{{ url_for('static', filename='js/my-schedule.js') }}"></script>
+{% endblock %}

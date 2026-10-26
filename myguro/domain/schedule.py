@@ -10,6 +10,11 @@ import math
 import random
 
 DAYS = 5
+DAY_NAMES = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+# The teaching periods of a school day. The health break after the third one is not a period.
+PERIOD_TIMES = (("6:00", "6:50"), ("6:50", "7:40"), ("7:40", "8:30"), ("8:45", "9:35"), ("9:35", "10:25"),
+                ("10:25", "11:15"))
+BREAK_AFTER = 2  # the index of the period the health break follows
 
 # What the generator is told when the admin has not changed anything.
 DEFAULT_RULES = {

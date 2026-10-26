@@ -12,9 +12,10 @@ from myguro.services.dashboard import DashboardService
 from myguro.services.gradebook import GradebookService
 from myguro.services.log import LogService
 from myguro.services.results import ResultsService
+from myguro.services.schedule import ScheduleService
 from myguro.services.school_years import SchoolYearService
 from myguro.services.settings import SettingsService
 from myguro.services.student_work import StudentWorkService
 
 __all__ = ["AccountService", "ActivityService", "AssignmentService", "AttendanceService", "AuthService", "BackupService", "ClassService",
-           "DashboardService", "GradebookService", "LoginThrottle", "LogService", "ResultsService", "SchoolYearService", "SettingsService", "StudentWorkService"]
+           "DashboardService", "GradebookService", "LoginThrottle", "LogService", "ResultsService", "ScheduleService", "SchoolYearService", "SettingsService", "StudentWorkService"]

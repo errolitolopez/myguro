@@ -195,6 +195,52 @@ CREATE TABLE IF NOT EXISTS settings (
     value TEXT NOT NULL
 );
 
+-- The schedule generator (admin enters the data, the app builds the timetable, teachers see their own).
+-- Periods are the same for every section (domain/schedule.py PERIOD_TIMES); days are 0 = Monday ... 4 = Friday.
+CREATE TABLE IF NOT EXISTS schedule_sections (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE COLLATE NOCASE,   -- "12-STEM Ingenuity"
+    grade TEXT NOT NULL DEFAULT '',
+    room TEXT NOT NULL DEFAULT '',              -- the section's own room, so rooms never clash
+    adviser TEXT NOT NULL DEFAULT ''
+);
+
+CREATE TABLE IF NOT EXISTS schedule_teachers (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    user_id INTEGER REFERENCES users (id),      -- the MyGuro teacher account, so they can see their own schedule
+    max_gap INTEGER,                            -- longest idle stretch in periods; NULL = the school's rule
+    max_per_day INTEGER                         -- most periods a day; NULL = the school's rule
+);
+
+-- Periods a teacher cannot teach.
+CREATE TABLE IF NOT EXISTS schedule_blocked (
+    teacher_id INTEGER NOT NULL REFERENCES schedule_teachers (id),
+    day INTEGER NOT NULL,
+    period INTEGER NOT NULL,
+    PRIMARY KEY (teacher_id, day, period)
+);
+
+-- Who teaches what to which section, and how many periods a week.
+CREATE TABLE IF NOT EXISTS schedule_assignments (
+    id INTEGER PRIMARY KEY,
+    section_id INTEGER NOT NULL REFERENCES schedule_sections (id),
+    subject TEXT NOT NULL,                      -- the short name, "PHILO"
+    teacher_id INTEGER NOT NULL REFERENCES schedule_teachers (id),
+    per_week INTEGER NOT NULL,
+    UNIQUE (section_id, subject)
+);
+
+-- The timetable that was built (or changed by hand): one row per taught period.
+CREATE TABLE IF NOT EXISTS schedule_slots (
+    section_id INTEGER NOT NULL REFERENCES schedule_sections (id),
+    day INTEGER NOT NULL,
+    period INTEGER NOT NULL,
+    subject TEXT NOT NULL,
+    teacher_id INTEGER NOT NULL REFERENCES schedule_teachers (id),
+    PRIMARY KEY (section_id, day, period)
+);
+
 -- The activity log: who did what, newest last. Nothing edits a row; the oldest are deleted when the
 -- log passes MAX_LOG_ENTRIES (domain/log.py), so it cannot grow without end.
 -- The names are copied in as they were at that time, and there are no foreign keys, so renaming

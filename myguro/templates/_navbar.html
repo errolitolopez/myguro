@@ -3,13 +3,15 @@
   {% set tabs = [("dashboard.page", ("dashboard.page",), "Dashboard", "bi-house"),
                  ("accounts.users_page", ("accounts.users_page", "accounts.teachers_page", "accounts.students_page",
                                           "accounts.supervisors_page"), "Users", "bi-people"),
+                 ("schedule.admin_page", ("schedule.admin_page",), "Schedule", "bi-calendar-week"),
                  ("log.page", ("log.page",), "Log", "bi-clipboard-data")] %}
 {% elif user.role == "supervisor" %}
   {% set tabs = [("log.page", ("log.page",), "Log", "bi-clipboard-data")] %}
 {% elif user.role == "teacher" %}
   {% set tabs = [("dashboard.page", ("dashboard.page",), "Dashboard", "bi-house"),
                  ("activities.list_page", ("activities.list_page", "activities.editor_page"), "Activities", "bi-journal-text"),
-                 ("classes.list_page", ("classes.list_page", "classes.detail_page"), "Classes", "bi-mortarboard")] %}
+                 ("classes.list_page", ("classes.list_page", "classes.detail_page"), "Classes", "bi-mortarboard"),
+                 ("schedule.my_page", ("schedule.my_page",), "Schedule", "bi-calendar-week")] %}
 {% else %}
   {% set tabs = [("dashboard.page", ("dashboard.page",), "Dashboard", "bi-house"),
                  ("student.activities_page", ("student.activities_page", "student.answer_page"), "Activities", "bi-journal-text")] %}
