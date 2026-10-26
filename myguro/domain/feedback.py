@@ -16,6 +16,12 @@ QUESTIONS = [
     ("look", "I like how MyGuro looks."),
     ("overall", "Overall, how would you rate MyGuro?"),
 ]
+# The pop-up that asks people who have not sent feedback yet (admin's Settings): when it opens by itself.
+# "login" = once each time they log in, "daily" = once a day. It stops for a person once they have sent it.
+POPUP_MODES = ("off", "login", "daily")
+DEFAULT_POPUP = "login"
+POPUP_ROLES = FEEDBACK_ROLES
+
 QUESTION_KEYS = [key for key, _ in QUESTIONS]
 
 

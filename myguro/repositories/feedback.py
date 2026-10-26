@@ -7,6 +7,10 @@ class FeedbackRepository(Repository):
         rows = self.all("SELECT question, rating FROM feedback WHERE user_id = ?", (user_id,))
         return {row["question"]: row["rating"] for row in rows}
 
+    def has_sent(self, user_id):
+        """True if the person already sent their feedback."""
+        return self.one("SELECT 1 FROM feedback WHERE user_id = ? LIMIT 1", (user_id,)) is not None
+
     def save(self, user_id, question, rating):
         """Add the rating, or replace the person's earlier one for this question."""
         self.execute(

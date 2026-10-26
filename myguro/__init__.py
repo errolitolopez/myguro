@@ -9,15 +9,21 @@ Layers (each only uses the ones below it):
 
 from datetime import date
 
-from flask import Flask, redirect, session, url_for
+from flask import Flask, redirect, request, session, url_for
 
 from myguro import commands, config, database, seed, seed_demo
 from myguro.database import get_db
+from myguro.domain.feedback import POPUP_ROLES as FEEDBACK_POPUP_ROLES
 from myguro.domain.support import popup_due
 from myguro.errors import register_error_handlers
+from myguro.repositories import FeedbackRepository
 from myguro.services import LoginThrottle, SchoolYearService, SettingsService
 from myguro.web import BLUEPRINTS
 from myguro.web.security import current_user
+
+
+# Pages where the feedback pop-up never opens.
+FEEDBACK_POPUP_SKIP_PAGES = {"student.answer_page", "feedback.page", "auth.change_password_page", "auth.login_page", None}
 
 
 def create_app(test_config=None):
@@ -54,12 +60,25 @@ def create_app(test_config=None):
             popup = popup_due(settings.popup_mode(user["role"]), session.get("support_popup_day"), today)
             if popup:
                 session["support_popup_day"] = today
+        # The feedback pop-up asks teachers and students who have not sent feedback yet, as often as the
+        # admin chose. Not while the support window opens (one window at a time), not on the answer page
+        # (nobody is interrupted mid-activity), and not on the feedback page itself.
+        feedback_popup = False
+        if (user and not popup and user["role"] in FEEDBACK_POPUP_ROLES
+                and request.endpoint not in FEEDBACK_POPUP_SKIP_PAGES):
+            mode = settings.feedback_popup_mode()
+            if mode != "off" and not FeedbackRepository(get_db()).has_sent(user["id"]):
+                today = date.today().isoformat()
+                feedback_popup = popup_due(mode, session.get("feedback_popup_day"), today)
+                if feedback_popup:
+                    session["feedback_popup_day"] = today
         return {
             "GRADES": settings.grade_options(),
             "ALL_GRADES": settings.all_grade_options(),
             # The "Support myguro" link in the page footer: admin and teachers only, when turned on
             "SUPPORT": support,
             "SUPPORT_POPUP": popup,
+            "FEEDBACK_POPUP": feedback_popup,
             # The school years for the picker in the account menu (not on the login page)
             "SCHOOL_YEARS": SchoolYearService(get_db(), user).overview() if user and user["role"] != "supervisor" else None,
         }

@@ -86,3 +86,50 @@ def test_feedback_page_per_role(admin, teacher, supervisor):
     assert 'id="feedback-form"' in teacher.get("/feedback").get_data(as_text=True)
     assert 'id="feedback-results"' in admin.get("/feedback").get_data(as_text=True)
     assert supervisor.get("/feedback").headers["Location"].endswith("/dashboard")
+
+
+POPUP = 'id="feedback-modal"'
+
+
+def test_popup_asks_once_per_login_until_feedback_is_sent(admin, teacher):
+    student = login("jdelacruz01")
+    assert POPUP in student.get("/dashboard").get_data(as_text=True)  # the default is once each login
+    assert POPUP not in student.get("/dashboard").get_data(as_text=True)  # not again in the same login
+    assert POPUP in login("jdelacruz01").get("/dashboard").get_data(as_text=True)  # a new login asks again
+    assert POPUP in teacher.get("/dashboard").get_data(as_text=True)  # teachers too
+
+    sender = login("jdelacruz01")
+    sender.put("/api/feedback", json={"ratings": ALL_FIVE})
+    assert POPUP not in login("jdelacruz01").get("/dashboard").get_data(as_text=True)  # sent: never again
+
+
+def test_popup_is_not_for_admin_supervisor_or_the_feedback_page(admin, supervisor):
+    assert POPUP not in admin.get("/dashboard").get_data(as_text=True)
+    assert POPUP not in supervisor.get("/log").get_data(as_text=True)
+    student = login("jdelacruz01")
+    assert POPUP not in student.get("/feedback").get_data(as_text=True)
+    assert POPUP in student.get("/dashboard").get_data(as_text=True)  # the feedback page did not use up the ask
+
+
+def test_popup_never_opens_on_the_answer_page(admin, teacher):
+    from conftest import assign, make_activity, make_class
+    class_id, students = make_class(teacher)
+    activity_id, _ = make_activity(teacher)
+    assignment_id = assign(teacher, activity_id, class_id)
+    teacher.put(f"/api/assignments/{assignment_id}/status", json={"status": "open"})
+    student = login(students[0]["username"])
+    assert POPUP not in student.get(f"/my-activities/{assignment_id}").get_data(as_text=True)
+    assert POPUP in student.get("/dashboard").get_data(as_text=True)
+
+
+def test_admin_chooses_when_the_popup_opens(admin):
+    assert admin.get("/api/settings").get_json()["settings"]["feedback_popup"] == "login"
+    assert admin.put("/api/settings", json={"feedback_popup": "nope"}).status_code == 400
+
+    assert admin.put("/api/settings", json={"feedback_popup": "off"}).get_json()["settings"]["feedback_popup"] == "off"
+    assert POPUP not in login("jdelacruz01").get("/dashboard").get_data(as_text=True)
+
+    admin.put("/api/settings", json={"feedback_popup": "daily"})
+    student = login("jdelacruz01")
+    assert POPUP in student.get("/dashboard").get_data(as_text=True)
+    assert POPUP not in student.get("/dashboard").get_data(as_text=True)  # once a day

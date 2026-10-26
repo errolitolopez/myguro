@@ -1,6 +1,7 @@
 import json
 
 from myguro.domain.accounts import GRADES
+from myguro.domain.feedback import DEFAULT_POPUP as FEEDBACK_DEFAULT_POPUP, POPUP_MODES as FEEDBACK_POPUP_MODES
 from myguro.domain.support import (DEFAULT_LABEL, DEFAULT_MESSAGE, DEFAULT_POPUP, POPUP_MODES, clean_support,
                                    format_gcash_number)
 from myguro.errors import ValidationError
@@ -8,6 +9,7 @@ from myguro.services.base import Service
 
 GRADES_HIGH_TO_LOW = "grades_high_to_low"
 DISABLED_GRADES = "disabled_grades"
+FEEDBACK_POPUP = "feedback_popup"
 SUPPORT_KEYS = {"enabled": "support_enabled", "message": "support_message", "label": "support_label",
                 "url": "support_url", "gcash_number": "support_gcash_number", "gcash_name": "support_gcash_name",
                 "popup": "support_popup"}
@@ -77,9 +79,15 @@ class SettingsService(Service):
         """When the support window opens by itself for this role ("off" for anyone but a teacher)."""
         return self.support()["popup"] if role in POPUP_ROLES else "off"
 
+    def feedback_popup_mode(self):
+        """When the feedback pop-up opens by itself: "off", "login" or "daily" (the default is login)."""
+        saved = self.settings.get(FEEDBACK_POPUP)
+        return saved if saved in FEEDBACK_POPUP_MODES else FEEDBACK_DEFAULT_POPUP
+
     def get(self):
         disabled = self.disabled_grades()
         return {
+            "feedback_popup": self.feedback_popup_mode(),
             "support": self.support(),
             "grades_high_to_low": self.grades_high_to_low(),
             "grades": [{"name": grade, "enabled": grade not in disabled} for grade in self.all_grade_options()],
@@ -97,6 +105,10 @@ class SettingsService(Service):
             if not isinstance(grades, list) or any(grade not in GRADES for grade in grades):
                 raise ValidationError("Choose grades from the list.")
             self.settings.set(DISABLED_GRADES, json.dumps([grade for grade in GRADES if grade in grades]))
+        if FEEDBACK_POPUP in data:
+            if data[FEEDBACK_POPUP] not in FEEDBACK_POPUP_MODES:
+                raise ValidationError("Choose when the feedback pop-up opens.")
+            self.settings.set(FEEDBACK_POPUP, data[FEEDBACK_POPUP])
         if "support" in data:
             if not isinstance(data["support"], dict):
                 raise ValidationError("Support link is not valid.")
@@ -104,7 +116,7 @@ class SettingsService(Service):
             for name, value in zip(SUPPORT_KEYS, cleaned):
                 self.settings.set(SUPPORT_KEYS[name], ("1" if value else "0") if name == "enabled" else value)
         changed = [label for key, label in (("grades_high_to_low", "grade order"), ("disabled_grades", "grades in use"),
-                                            ("support", "the support link")) if key in data]
+                                            (FEEDBACK_POPUP, "the feedback pop-up"), ("support", "the support link")) if key in data]
         if changed:
             self.log("settings.changed", "settings", f"Changed settings: {', '.join(changed)}.")
         self.commit()
