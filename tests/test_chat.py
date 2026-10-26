@@ -142,3 +142,17 @@ def test_messages_are_not_stored(teacher, chat_on, asked, app):
     connection.close()
     assert "secretword" not in dump
 
+
+
+def test_bubble_only_for_a_teacher_when_on(teacher, admin, app):
+    assert 'id="chat-bubble"' not in teacher.get("/dashboard").get_data(as_text=True)
+    admin.put("/api/settings", json={"chatbot_enabled": True})
+    page = teacher.get("/dashboard").get_data(as_text=True)
+    assert 'id="chat-bubble"' in page and "js/chat.js" in page
+    assert 'id="chat-bubble"' not in admin.get("/dashboard").get_data(as_text=True)
+    admin.put("/api/settings", json={"chatbot_enabled": False})
+    assert 'id="chat-bubble"' not in teacher.get("/dashboard").get_data(as_text=True)
+
+
+def test_bubble_not_on_the_login_page(chat_on, app):
+    assert 'id="chat-bubble"' not in app.test_client().get("/login").get_data(as_text=True)

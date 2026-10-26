@@ -977,3 +977,27 @@ html[data-effects="light"] main { animation: none; }
 .support-app-icon img { display: block; width: 78%; height: 78%; object-fit: contain; }
 .support-app-icon-gcash { background: #297bfa; } /* the colour of the GCash icon's own background */
 .support-app-icon-kofi { background: #72a4f2; } /* the colour of the Ko-fi icon's own background */
+
+/* The navigation chat bubble (teachers): fixed to the bottom right corner on every page. It sits above the
+   page content but below Bootstrap's modals (z-index 1055), so the support window still covers it. */
+.chat-bubble {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 1030;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+.chat-toggle { width: 3.25rem; height: 3.25rem; font-size: 1.35rem; box-shadow: var(--glass-shadow); }
+.chat-panel {
+  /* On a phone the panel is almost as wide as the screen; on a desktop it stays small. */
+  width: min(22rem, calc(100vw - 2rem));
+  box-shadow: var(--glass-shadow);
+}
+.chat-messages { height: 16rem; overflow-y: auto; padding: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.chat-message { max-width: 85%; padding: 0.4rem 0.75rem; border-radius: var(--radius-card); overflow-wrap: anywhere; }
+/* The teacher's own messages are on the right in the accent colour, MyGuro's on the left in a neutral one. */
+.chat-message-mine { align-self: flex-end; background: var(--accent-gradient); color: var(--confirm-text); border-bottom-right-radius: 0.25rem; }
+.chat-message-reply { align-self: flex-start; background: var(--bs-secondary-bg); border-bottom-left-radius: 0.25rem; }

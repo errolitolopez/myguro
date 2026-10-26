@@ -79,6 +79,8 @@ def create_app(test_config=None):
             "SUPPORT": support,
             "SUPPORT_POPUP": popup,
             "FEEDBACK_POPUP": feedback_popup,
+            # The navigation chat bubble: teachers only, and only while the admin has it on
+            "CHATBOT": bool(user and user["role"] == "teacher" and settings.chatbot_enabled()),
             # The school years for the picker in the account menu (not on the login page)
             "SCHOOL_YEARS": SchoolYearService(get_db(), user).overview() if user and user["role"] != "supervisor" else None,
         }
