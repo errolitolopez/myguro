@@ -88,9 +88,15 @@ function subjectPicker(input) {
   }
 
   select.addEventListener("change", () => {
-    input.value = select.value === OTHER ? "" : select.value;
-    sync();
-    if (select.value === OTHER) input.focus();
+    if (select.value === OTHER) {
+      // An empty box would make sync() pick "Choose a subject" again, so show the box here instead
+      input.value = "";
+      input.classList.remove("d-none");
+      input.focus();
+    } else {
+      input.value = select.value;
+      sync();
+    }
     // The page reacts to typing in the box (unsaved changes, saving a locked sheet), so tell it
     input.dispatchEvent(new Event("input", { bubbles: true }));
     input.dispatchEvent(new Event("change", { bubbles: true }));
