@@ -168,7 +168,7 @@ class AssignmentRepository(Repository):
             f"""
             SELECT asg.id, asg.due_date, asg.scores_released, asg.status AS assignment_status, a.title, a.subject, a.id AS activity_id, a.max_attempts,
                    COALESCE(c.name, '{DIRECT_CLASS_NAME}') AS class_name, COALESCE(c.subject, '') AS class_subject,
-                   t.name AS teacher,
+                   t.name AS teacher, t.id AS teacher_id,
                    sub.id AS submission_id, sub.submitted_at, sub.attempt, sub.paper,
                    last.id AS last_id, last.late AS last_late, last.paper AS last_paper,
                    (SELECT COUNT(*) FROM questions q WHERE q.activity_id = a.id) AS question_count,

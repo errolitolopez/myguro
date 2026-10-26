@@ -50,6 +50,7 @@ class StudentWorkService(Service):
                 "subject": row["subject"],
                 "class_name": class_title(row["class_name"], row["class_subject"]),
                 "teacher": row["teacher"],
+                "teacher_id": row["teacher_id"],
                 "due_date": row["due_date"],
                 # Overdue only when nothing was ever submitted
                 "overdue": bool(row["due_date"] and row["last_id"] is None and today > row["due_date"]),

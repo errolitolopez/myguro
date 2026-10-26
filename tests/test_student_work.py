@@ -173,6 +173,8 @@ def test_my_activities_says_how_many_questions_are_answered(teacher):
     student = login(students[0]["username"])
     row = lambda: student.get("/api/my-activities").get_json()["activities"][0]
     assert row()["status"] == "not_started" and row()["answered"] == 0 and row()["questions"] == len(q)
+    # The page groups subjects by teacher, so each activity says whose it is
+    assert isinstance(row()["teacher_id"], int) and row()["teacher"]
 
     student.put(f"/api/my-activities/{assignment_id}/answers", json={"answers": {str(q[0]): 1, str(q[1]): True}})
     assert row()["status"] == "in_progress" and row()["answered"] == 2

@@ -1,6 +1,6 @@
 // Student: the activities given to them. "To do" (never submitted, soonest due first) and
-// "Submitted" (with the score that counts: the latest submission). First the subjects; tap one
-// to open its page with the activities of that subject. Tapping an activity opens it.
+// "Submitted" (with the score that counts: the latest submission). First the subjects, grouped by
+// teacher; tap one to open its page with that teacher's activities of that subject. Tapping an activity opens it.
 
 let activities = [];
 let today = "";
@@ -65,16 +65,45 @@ function activityItem(activity) {
   return row;
 }
 
-// The subject's name as the first activity wrote it ("No subject" when it has none).
-function subjectLabel(key) {
-  return groupBySubject(activities).find((group) => group.key === key)?.label || "No subject";
+// The teacher in the address (?teacher=3), or null. Two teachers can teach a subject with the same name,
+// so a subject is always opened for one teacher.
+function chosenTeacher() {
+  const value = new URLSearchParams(window.location.search).get("teacher");
+  return value === null ? null : Number(value);
+}
+
+// The subjects grouped by teacher: a heading with the teacher's name, then that teacher's subjects.
+// Tapping a subject opens ?subject=...&teacher=<id> (showQuery keeps the To do / Submitted choice).
+function teacherGroupsElement(items, showQuery) {
+  const teachers = new Map();
+  items.forEach((item) => {
+    if (!teachers.has(item.teacher_id)) teachers.set(item.teacher_id, { name: item.teacher, items: [] });
+    teachers.get(item.teacher_id).items.push(item);
+  });
+  const box = document.createElement("div");
+  [...teachers.entries()].sort((a, b) => a[1].name.localeCompare(b[1].name)).forEach(([id, teacher]) => {
+    const heading = document.createElement("h2");
+    heading.className = "h6 text-body-secondary mt-3 mb-2 bi bi-person";
+    heading.textContent = ` ${teacher.name}`;
+    box.append(heading, subjectListElement(groupBySubject(teacher.items), `${showQuery}&teacher=${id}`));
+  });
+  return box;
+}
+
+// The subject's name as the first activity wrote it ("No subject" when it has none), with the teacher.
+function subjectLabel(key, teacherId) {
+  const mine = activities.filter((activity) => activity.teacher_id === teacherId);
+  const label = groupBySubject(mine).find((group) => group.key === key)?.label || "No subject";
+  return `${label} · ${mine[0] ? mine[0].teacher : ""}`;
 }
 
 function render() {
   const showDone = document.getElementById("show-done").checked;
   // Once submitted it stays under Submitted, even while trying again.
   const subject = chosenSubject(); // null = the list of subjects
-  const inSubject = activities.filter((activity) => subject === null || subjectKey(activity.subject) === subject);
+  const teacher = chosenTeacher();
+  const inSubject = activities.filter((activity) => subject === null
+    || (subjectKey(activity.subject) === subject && (teacher === null || activity.teacher_id === teacher)));
   const todo = inSubject.filter((activity) => !activity.done);
   const done = inSubject.filter((activity) => activity.done);
   document.getElementById("count-todo").textContent = `(${todo.length})`;
@@ -90,14 +119,14 @@ function render() {
     empty.className = "list-group-item text-body-secondary";
     empty.textContent = showDone ? "Nothing submitted yet." : "Nothing to do. Great job!";
     box.append(empty);
-    list.replaceChildren(...(subject === null ? [] : [subjectHeaderElement(subjectLabel(subject), extraQuery)]), box);
+    list.replaceChildren(...(subject === null ? [] : [subjectHeaderElement(subjectLabel(subject, teacher), extraQuery)]), box);
   } else if (subject === null) {
-    list.replaceChildren(subjectListElement(groupBySubject(shown), extraQuery));
+    list.replaceChildren(teacherGroupsElement(shown, extraQuery));
   } else {
     const rows = document.createElement("div");
     rows.className = "list-group";
     rows.append(...shown.map(activityItem));
-    list.replaceChildren(subjectHeaderElement(subjectLabel(subject), extraQuery), rows);
+    list.replaceChildren(subjectHeaderElement(subjectLabel(subject, teacher), extraQuery), rows);
   }
 }
 
