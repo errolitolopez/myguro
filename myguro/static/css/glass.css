@@ -4,14 +4,27 @@
    person asked for less transparency, panels are plain and opaque. */
 
 :root {
-  /* Bootstrap reads its text font from this variable. The system fonts are the fallback while Roboto loads. */
+  /* Bootstrap reads its text font from this variable. The system fonts are the fallback while Inter loads. */
   --bs-body-font-size: 0.9375rem;
-  --bs-body-font-family: Roboto, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --bs-body-font-family: Inter, Roboto, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --glass-bg: rgba(255, 255, 255, 0.6);
   --glass-bg-strong: rgba(255, 255, 255, 0.88);
   --glass-border: rgba(226, 232, 240, 0.8);
-  --glass-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-  --glass-blur: blur(12px);
+  /* Two soft layers plus a 1px inner light edge: the panel looks lifted off the page. */
+  --glass-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset, 0 12px 28px -8px rgba(15, 23, 42, 0.18),
+    0 4px 8px -4px rgba(15, 23, 42, 0.08);
+  --glass-blur: blur(14px);
+  --radius-card: 1.25rem;
+  /* The one accent gradient: primary buttons, progress bars, the active tab, score rings. */
+  --accent-from: #4f46e5;
+  --accent-to: #06b6d4;
+  --accent-gradient: linear-gradient(135deg, var(--accent-from), var(--accent-to));
+  --aurora-1: rgba(99, 102, 241, 0.28);
+  --aurora-2: rgba(6, 182, 212, 0.22);
+  --aurora-3: rgba(236, 72, 153, 0.14);
+  --ring-track: rgba(100, 116, 139, 0.2);
+  --skeleton-base: rgba(148, 163, 184, 0.18);
+  --skeleton-shine: rgba(255, 255, 255, 0.55);
   --glass-hover: rgba(255, 255, 255, 0.85);
   --glass-input: transparent;
   --glass-input-focus: rgba(255, 255, 255, 0.55);
@@ -29,16 +42,19 @@
   --bs-link-color-rgb: var(--bs-body-color-rgb);
   --bs-link-hover-color: var(--bs-emphasis-color);
   --bs-link-hover-color-rgb: var(--bs-emphasis-color-rgb);
-  --confirm-bg: #0d6efd;
-  --confirm-hover: #0b5ed7;
-  --confirm-active: #0a58ca;
+  --confirm-bg: #4f46e5;
+  --confirm-hover: #4338ca;
+  --confirm-active: #3730a3;
   --confirm-text: #fff;
   --danger-bg: #dc3545;
   --danger-hover: #bb2d3b;
   --danger-active: #b02a37;
-  --neutral-bg: #6c757d;
-  --neutral-hover: #5c636a;
-  --neutral-active: #565e64;
+  /* Gray buttons: a soft slate with dark text on the light themes. The solid gray with white text
+     only suits the dark themes (set under [data-bs-theme="dark"]). */
+  --neutral-bg: #e2e8f0;
+  --neutral-hover: #cbd5e1;
+  --neutral-active: #b8c4d6;
+  --neutral-text: #334155;
   --warn-bg: #ffc107;
   --warn-hover: #ffca2c;
   --warn-active: #ffcd39;
@@ -49,14 +65,25 @@
   --glass-bg: rgba(15, 23, 42, 0.6);
   --glass-bg-strong: rgba(15, 23, 42, 0.9);
   --glass-border: rgba(51, 65, 85, 0.8);
-  --glass-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+  --glass-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 12px 28px -8px rgba(0, 0, 0, 0.55),
+    0 4px 8px -4px rgba(0, 0, 0, 0.35);
   --glass-hover: rgba(30, 41, 59, 0.8);
+  --aurora-1: rgba(99, 102, 241, 0.32);
+  --aurora-2: rgba(6, 182, 212, 0.2);
+  --aurora-3: rgba(236, 72, 153, 0.14);
+  --ring-track: rgba(148, 163, 184, 0.22);
+  --skeleton-base: rgba(148, 163, 184, 0.14);
+  --skeleton-shine: rgba(255, 255, 255, 0.1);
   --glass-input: transparent;
   --glass-input-focus: rgba(15, 23, 42, 0.5);
   --glass-input-disabled: rgba(100, 116, 139, 0.2);
   --glass-input-border: rgba(55, 65, 81, 0.8);
   --glass-input-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
   --glass-solid: #1e293b;
+  --neutral-bg: #6c757d;
+  --neutral-hover: #5c636a;
+  --neutral-active: #565e64;
+  --neutral-text: #fff;
   --navbar-bg: rgba(15, 23, 42, 0.7);
   --page-base: #0f172a;
   --page-gradient: radial-gradient(circle at top left, hsl(222 47% 15%), hsl(222 47% 11%));
@@ -109,9 +136,46 @@
   --glass-input-focus: rgba(253, 246, 227, 0.7);
   --glass-input-border: rgba(196, 188, 165, 0.9);
   --glass-solid: #fdf6e3;
+  --neutral-bg: #eee8d5;
+  --neutral-hover: #e3dcc3;
+  --neutral-active: #d6cdb0;
+  --neutral-text: #586e75;
   --navbar-bg: rgba(238, 232, 213, 0.8);
   --page-base: #fdf6e3;
   --page-gradient: radial-gradient(circle at top left, #fdf6e3, #eee8d5);
+}
+[data-myguro-theme="neon"] {
+  /* A dark base with electric violet and cyan. */
+  --bs-body-bg: #090b1a;
+  --bs-body-bg-rgb: 9, 11, 26;
+  --bs-body-color: #cfd6f6;
+  --bs-body-color-rgb: 207, 214, 246;
+  --bs-emphasis-color: #fff;
+  --bs-emphasis-color-rgb: 255, 255, 255;
+  --bs-secondary-color: rgba(207, 214, 246, 0.65);
+  --bs-secondary-bg: #141833;
+  --bs-secondary-bg-rgb: 20, 24, 51;
+  --bs-tertiary-bg: #0f1228;
+  --bs-tertiary-bg-rgb: 15, 18, 40;
+  --bs-border-color: #272c55;
+  --accent-from: #a855f7;
+  --accent-to: #22d3ee;
+  --confirm-bg: #7c3aed;
+  --confirm-hover: #6d28d9;
+  --confirm-active: #5b21b6;
+  --glass-bg: rgba(20, 24, 51, 0.62);
+  --glass-bg-strong: rgba(16, 19, 42, 0.94);
+  --glass-border: rgba(124, 58, 237, 0.35);
+  --glass-hover: rgba(34, 40, 82, 0.85);
+  --glass-input-focus: rgba(9, 11, 26, 0.6);
+  --glass-input-border: rgba(99, 102, 241, 0.4);
+  --glass-solid: #141833;
+  --navbar-bg: rgba(12, 14, 32, 0.78);
+  --page-base: #090b1a;
+  --page-gradient: radial-gradient(circle at top left, #12163a, #070815);
+  --aurora-1: rgba(168, 85, 247, 0.38);
+  --aurora-2: rgba(34, 211, 238, 0.26);
+  --aurora-3: rgba(244, 114, 182, 0.2);
 }
 
 body {
@@ -150,12 +214,12 @@ footer {
    --bs-border-radius, not from the card's own variable, so the header kept a 5px corner and its
    square tint showed outside the curve. */
 .card {
-  --bs-card-border-radius: 1rem;
-  --bs-card-inner-border-radius: calc(1rem - var(--bs-card-border-width));
+  --bs-card-border-radius: var(--radius-card);
+  --bs-card-inner-border-radius: calc(var(--radius-card) - var(--bs-card-border-width));
 }
 .modal-content {
-  --bs-modal-border-radius: 1rem;
-  --bs-modal-inner-border-radius: calc(1rem - var(--bs-modal-border-width));
+  --bs-modal-border-radius: var(--radius-card);
+  --bs-modal-inner-border-radius: calc(var(--radius-card) - var(--bs-modal-border-width));
 }
 /* Dropdown menus are plain and opaque, not glass: they open over busy content (cards, tables), where
    see-through text is hard to read. */
@@ -256,7 +320,7 @@ footer {
   --bs-btn-disabled-color: var(--confirm-text);
   --bs-btn-disabled-bg: var(--confirm-bg);
   --bs-btn-disabled-border-color: var(--confirm-bg);
-  --bs-btn-focus-shadow-rgb: 49, 132, 253;
+  --bs-btn-focus-shadow-rgb: 99, 102, 241;
 }
 .btn-danger,
 .btn-outline-danger {
@@ -276,16 +340,16 @@ footer {
 }
 .btn-secondary,
 .btn-outline-secondary {
-  --bs-btn-color: var(--confirm-text);
+  --bs-btn-color: var(--neutral-text);
   --bs-btn-bg: var(--neutral-bg);
   --bs-btn-border-color: var(--neutral-bg);
-  --bs-btn-hover-color: var(--confirm-text);
+  --bs-btn-hover-color: var(--neutral-text);
   --bs-btn-hover-bg: var(--neutral-hover);
   --bs-btn-hover-border-color: var(--neutral-hover);
-  --bs-btn-active-color: var(--confirm-text);
+  --bs-btn-active-color: var(--neutral-text);
   --bs-btn-active-bg: var(--neutral-active);
   --bs-btn-active-border-color: var(--neutral-active);
-  --bs-btn-disabled-color: var(--confirm-text);
+  --bs-btn-disabled-color: var(--neutral-text);
   --bs-btn-disabled-bg: var(--neutral-bg);
   --bs-btn-disabled-border-color: var(--neutral-bg);
   --bs-btn-focus-shadow-rgb: 130, 138, 145;
@@ -522,3 +586,197 @@ body::before {
   }
 }
 @media print { body::before { display: none; } }
+
+/* ---- Modern layer: aurora, accent gradient, bento dashboard, score rings, skeletons, palette ---- */
+
+/* Aurora: three soft colour blobs drifting slowly behind the glass. One fixed layer that only moves
+   with transform (cheap for the GPU); the glass panels blur it where they cover it. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: -20%;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(40% 35% at 20% 25%, var(--aurora-1), transparent 70%),
+    radial-gradient(35% 40% at 80% 20%, var(--aurora-2), transparent 70%),
+    radial-gradient(45% 40% at 55% 85%, var(--aurora-3), transparent 70%);
+  animation: aurora-drift 28s ease-in-out infinite alternate;
+}
+@keyframes aurora-drift {
+  0% { transform: translate3d(-2%, -1%, 0) rotate(0deg) scale(1); }
+  50% { transform: translate3d(3%, 2%, 0) rotate(4deg) scale(1.06); }
+  100% { transform: translate3d(-1%, 3%, 0) rotate(-3deg) scale(1.02); }
+}
+@media print { body::after { display: none; } }
+
+/* Tabular numbers keep scores and counts from jumping when digits change. */
+body { font-variant-numeric: tabular-nums; }
+h1, .h1, h2, .h2, h3, .h3, h4, .h4 { font-weight: 700; letter-spacing: -0.01em; }
+
+/* The accent gradient on solid blue buttons. It sits on top of Bootstrap's own background colour, which
+   stays as the fallback and for the disabled look. */
+.btn-success, .btn-outline-success, .btn-primary, .btn-outline-primary,
+.btn-check:checked + .btn-toggle, .btn-toggle.active {
+  background-image: var(--accent-gradient);
+  border-color: transparent;
+}
+.btn-success:hover, .btn-outline-success:hover, .btn-primary:hover, .btn-outline-primary:hover {
+  filter: brightness(1.08);
+  border-color: transparent;
+}
+.btn:disabled { background-image: none; }
+.btn { transition: transform 0.12s ease, filter 0.15s ease, background-color 0.15s ease; }
+.btn:not(:disabled):active { transform: translateY(1px) scale(0.98); }
+.progress-bar { background-image: var(--accent-gradient); }
+.navbar .nav-link.active { border-bottom-color: var(--accent-to); }
+.tab-link.active { color: var(--accent-to); }
+
+/* Cards that are links lift a little on hover; the list rows only change colour. */
+a.card { transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease; }
+a.card:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent-to);
+}
+
+/* Pages fade in once; nothing slides, so the layout never shifts. */
+@keyframes page-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+main { animation: page-in 0.35s ease both; }
+
+/* Bento dashboard: a grid of uneven tiles. Two columns on a phone, four from 768px. The tiles with
+   .bento-wide take two columns; Bootstrap's col-* classes are not used here. */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+.bento > * { min-width: 0; }
+.bento-wide { grid-column: span 2; }
+@media (min-width: 768px) {
+  .bento { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+.stat-number {
+  /* Gradient text, with the plain colour as the fallback where background-clip: text is missing. */
+  color: var(--bs-emphasis-color);
+  background-image: var(--accent-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.bento-wide .stat-number { font-size: 2.4rem !important; /* beats Bootstrap's fs-3 */ }
+
+/* Score ring: a circle filled by --pct (0-100) with the percent in the middle. conic-gradient draws the
+   arc; the mask cuts the middle out, so the track and arc stay a ring on any background. */
+.score-ring {
+  --size: 4.5rem;
+  --pct: 0;
+  position: relative;
+  flex: none;
+  width: var(--size);
+  height: var(--size);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: calc(var(--size) * 0.26);
+}
+.score-ring::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(var(--accent-from), var(--accent-to) calc(var(--pct) * 1%), var(--ring-track) 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 0.4rem), #000 calc(100% - 0.4rem + 1px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 0.4rem), #000 calc(100% - 0.4rem + 1px));
+}
+.score-ring-sm { --size: 2.75rem; }
+.score-ring-sm::before {
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 0.28rem), #000 calc(100% - 0.28rem + 1px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 0.28rem), #000 calc(100% - 0.28rem + 1px));
+}
+
+/* Skeleton rows: shimmering grey bars shown while a list loads, in place of a "Loading..." line. */
+.skeleton {
+  display: block;
+  height: 0.9rem;
+  border-radius: 0.5rem;
+  background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s linear infinite;
+}
+.skeleton-sm { height: 0.65rem; margin-top: 0.5rem; }
+@keyframes skeleton-shimmer { to { background-position: -200% 0; } }
+
+/* Submit celebration: the result card pops, and small pieces fall once. JS adds the pieces only when the
+   score is shown (released). */
+.result-pop { animation: result-pop 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+@keyframes result-pop { 0% { transform: scale(0.94); opacity: 0.4; } 100% { transform: none; opacity: 1; } }
+.confetti {
+  position: fixed;
+  inset: 0;
+  z-index: 1060;
+  pointer-events: none;
+  overflow: hidden;
+}
+.confetti i {
+  position: absolute;
+  top: -1rem;
+  width: 0.5rem;
+  height: 0.9rem;
+  border-radius: 2px;
+  animation: confetti-fall 1.8s ease-in forwards;
+}
+@keyframes confetti-fall {
+  to { transform: translate3d(var(--dx), 105vh, 0) rotate(var(--spin)); opacity: 0.8; }
+}
+
+/* Command palette (Ctrl+K or /): a native <dialog> near the top of the screen. */
+.palette {
+  width: min(32rem, calc(100vw - 2rem));
+  margin: 12vh auto auto;
+  padding: 0;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-card);
+  background: var(--glass-bg-strong);
+  color: var(--bs-body-color);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+.palette::backdrop { background: rgba(0, 0, 0, 0.35); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+.palette-input {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  border: 0;
+  border-bottom: 1px solid var(--glass-border);
+  background: transparent;
+  color: inherit;
+  font-size: 1rem;
+  outline: none;
+}
+.palette-list { max-height: 50vh; overflow-y: auto; padding: 0.4rem; margin: 0; list-style: none; }
+.palette-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.6rem;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+.palette-item.active, .palette-item:hover { background: var(--glass-hover); outline: 1px solid var(--accent-to); }
+.palette-kind { margin-left: auto; font-size: 0.7rem; color: var(--bs-secondary-color); }
+.palette-empty { padding: 0.8rem 1rem; color: var(--bs-secondary-color); }
+.palette-hint { padding: 0.4rem 1rem; border-top: 1px solid var(--glass-border); font-size: 0.7rem; color: var(--bs-secondary-color); }
+
+/* Smooth scrolling for anchors and scrollTo(). Only when motion is welcome (see the block below). */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+/* Less motion: still aurora, no drifting, no lifting, no shimmer, no confetti. */
+@media (prefers-reduced-motion: reduce) {
+  body::after, main, .skeleton, .result-pop { animation: none; }
+  a.card:hover { transform: none; }
+  .confetti { display: none; }
+}
