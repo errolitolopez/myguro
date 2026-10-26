@@ -284,3 +284,12 @@ CREATE TABLE IF NOT EXISTS recovery_codes (
     uses_left INTEGER NOT NULL DEFAULT 3,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+-- Navigation chatbot (domain/chat.py): how many messages each teacher sent each school day, for the daily
+-- limit. Counts only: the messages themselves are never kept.
+CREATE TABLE IF NOT EXISTS chat_usage (
+    user_id INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    day TEXT NOT NULL,
+    count INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (user_id, day)
+);
