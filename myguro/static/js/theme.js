@@ -1,13 +1,13 @@
 // Colour theme. Loaded in <head> so the theme is set before the page is drawn (no flash).
 // "auto" follows the device; a person's choice is kept in this browser only.
 // Every theme is built on Bootstrap's light or dark mode (data-bs-theme); the named themes
-// (Darcula, Solarized) then change the colours on top of it (data-myguro-theme, see glass.css).
+// (Darcula, Solarized, Neon) then change the colours on top of it (data-myguro-theme, see glass.css).
 
 (function () {
   const KEY = "myguro-theme";
-  const CHOICES = ["auto", "light", "dark", "darcula", "solarized"];
+  const CHOICES = ["auto", "light", "dark", "darcula", "solarized", "neon"];
   // Which Bootstrap mode each named theme starts from.
-  const BASE = { light: "light", dark: "dark", darcula: "dark", solarized: "light" };
+  const BASE = { light: "light", dark: "dark", darcula: "dark", solarized: "light", neon: "dark" };
   const dark = window.matchMedia("(prefers-color-scheme: dark)");
 
   function saved() {
