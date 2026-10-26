@@ -20,7 +20,8 @@ class LoginThrottle:
         record = self.failed.get(key, {"count": 0, "locked_until": 0})
         wait = int(record["locked_until"] - time.time())
         if wait > 0:
-            raise TooManyRequestsError(f"Too many wrong tries. Try again in {wait // 60 + 1} min.")
+            raise TooManyRequestsError(f"Too many wrong tries. Try again in {wait // 60 + 1} min, "
+                                       "or ask your adviser or admin to reset your password.")
 
     def wrong(self, key):
         record = self.failed.get(key, {"count": 0, "locked_until": 0})
