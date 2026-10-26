@@ -102,17 +102,19 @@
 
   const open = () => {
     if (!historyLoaded) loadHistory();
-    panel.classList.remove("d-none");
+    panel.inert = false;
+    panel.classList.add("chat-open");
     toggle.setAttribute("aria-expanded", "true");
     input.focus();
   };
   const close = () => {
-    panel.classList.add("d-none");
+    panel.classList.remove("chat-open");
+    panel.inert = true; // a closed window can't be tabbed into
     toggle.setAttribute("aria-expanded", "false");
     toggle.focus();
   };
 
-  toggle.addEventListener("click", () => (panel.classList.contains("d-none") ? open() : close()));
+  toggle.addEventListener("click", () => (panel.classList.contains("chat-open") ? close() : open()));
   closeButton.addEventListener("click", close);
   panel.addEventListener("keydown", (event) => {
     if (event.key === "Escape") close();
