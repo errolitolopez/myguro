@@ -192,9 +192,15 @@ function subjectHeaderElement(label, extraQuery = "") {
   return header;
 }
 
+// How long a recovery code stays on the screen before it hides itself (a shoulder-surfer or a phone left
+// open should not get a long look at it).
+const RECOVERY_CODE_SHOW_SECONDS = 10;
+
 // showRecoveryCode(box, "K7M2P-...", "abautista") -> shows the code big, with Copy and Download buttons, in box.
 // The code is shown once, so the person is asked to save it (the phone's notes or a password manager).
+// After RECOVERY_CODE_SHOW_SECONDS it hides itself, with a countdown bar to warn them.
 function showRecoveryCode(box, code, username) {
+  clearInterval(box.recoveryTimer); // a code shown here before no longer counts down
   const label = document.createElement("div");
   label.className = "small text-body-secondary mb-1";
   label.textContent = "Your recovery code";
@@ -235,9 +241,45 @@ function showRecoveryCode(box, code, username) {
   buttons.append(copy, download);
   const warning = document.createElement("div");
   warning.className = "alert alert-warning small mt-3 mb-0";
-  warning.textContent = "This code is shown only once. Save it now, for example in your phone's notes or a " +
+  warning.textContent = `This code is shown only once and hides itself in ${RECOVERY_CODE_SHOW_SECONDS} seconds. Save it now, ` +
+    "for example in your phone's notes or a " +
     "password manager. Anyone who has it can reset your password, so don't share it.";
-  box.replaceChildren(label, codeText, buttons, warning);
+  // The countdown: a bar that empties, and the seconds left in words.
+  const countdown = document.createElement("div");
+  countdown.className = "mt-3";
+  const seconds = document.createElement("div");
+  seconds.className = "small text-body-secondary mb-1";
+  const track = document.createElement("div");
+  track.className = "progress";
+  track.setAttribute("aria-hidden", "true");
+  track.style.height = "0.35rem";
+  const bar = document.createElement("div");
+  bar.className = "progress-bar";
+  bar.style.width = "100%";
+  bar.style.transition = `width ${RECOVERY_CODE_SHOW_SECONDS}s linear`;
+  track.append(bar);
+  countdown.append(seconds, track);
+
+  box.replaceChildren(label, codeText, buttons, countdown, warning);
+  requestAnimationFrame(() => requestAnimationFrame(() => (bar.style.width = "0%")));
+
+  let left = RECOVERY_CODE_SHOW_SECONDS;
+  const secondsText = () => `Hiding in ${plural(left, "second")}.`;
+  seconds.textContent = secondsText();
+  box.recoveryTimer = setInterval(() => {
+    left -= 1;
+    if (left > 0) {
+      seconds.textContent = secondsText();
+      return;
+    }
+    clearInterval(box.recoveryTimer);
+    const hidden = document.createElement("div");
+    hidden.className = "alert alert-secondary mb-0";
+    hidden.setAttribute("role", "status");
+    hidden.textContent = "The code is hidden now and is not shown again. If you did not save it, make a new " +
+      "one (account menu, Recovery code).";
+    box.replaceChildren(hidden);
+  }, 1000);
 }
 
 // scoreRing(8, 10) -> a circle filled 80% with "80%" inside; scoreRing(8, 10, true) is the small one
