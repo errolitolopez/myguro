@@ -818,7 +818,18 @@ html[data-text-align="justify"] :is([data-reading], .reading-sample) :is(div, p,
 }
 .star:hover { transform: scale(1.15); }
 .star:focus-visible { outline: 2px solid var(--accent-to); outline-offset: 2px; border-radius: 0.5rem; }
-@media (prefers-reduced-motion: reduce) { .star { transition: none; } .star:hover { transform: none; } }
+/* A tapped star bounces; the ones filled before it follow a moment later (the delay is set by the script). */
+.star-pop { animation: star-pop 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes star-pop {
+  0% { transform: scale(0.6) rotate(-20deg); }
+  60% { transform: scale(1.35) rotate(8deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .star { transition: none; }
+  .star:hover { transform: none; }
+  .star-pop { animation: none; }
+}
 
 /* The support and feedback windows: a round icon (.modal-badge) on the accent gradient, then one tidy row per way to give. */
 .modal-badge {

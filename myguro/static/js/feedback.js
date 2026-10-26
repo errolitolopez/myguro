@@ -33,7 +33,7 @@ function starRating(key, text) {
     star.append(document.createElement("i"));
     star.addEventListener("click", () => {
       ratings[key] = value;
-      paintStars(group, value);
+      paintStars(group, value, true);
       hideError("feedback-error");
     });
     group.append(star);
@@ -44,11 +44,18 @@ function starRating(key, text) {
   return block;
 }
 
-// paintStars(group, 3) -> the first three stars filled, the rest empty
-function paintStars(group, chosen) {
+// paintStars(group, 3) -> the first three stars filled, the rest empty. animate = true pops the filled
+// stars one after another (when a person taps), false just draws them (when the page opens).
+function paintStars(group, chosen, animate = false) {
   group.querySelectorAll(".star").forEach((star) => {
     const filled = Number(star.dataset.value) <= chosen;
     star.firstChild.className = `bi ${filled ? "bi-star-fill" : "bi-star"}`;
+    star.classList.remove("star-pop");
+    if (animate && filled) {
+      star.style.animationDelay = `${(Number(star.dataset.value) - 1) * 60}ms`;
+      void star.offsetWidth; // restarts the animation if the star popped a moment ago
+      star.classList.add("star-pop");
+    }
     star.setAttribute("aria-checked", Number(star.dataset.value) === chosen ? "true" : "false");
   });
 }
@@ -79,9 +86,14 @@ async function loadFeedback() {
 }
 
 // showSent(id) -> replaces the form with one of the messages ("sent now" or "sent before")
-function showSent(id) {
+function showSent(id, celebrate = false) {
   form.classList.add("d-none");
-  document.getElementById(id).classList.remove("d-none");
+  const message = document.getElementById(id);
+  message.classList.remove("d-none");
+  if (celebrate) {
+    message.classList.add("result-pop");
+    confetti();
+  }
 }
 
 form.addEventListener("submit", async (event) => {
@@ -105,7 +117,7 @@ form.addEventListener("submit", async (event) => {
       showError("feedback-error", data.error || "Could not send your feedback.");
       return;
     }
-    showSent("feedback-saved");
+    showSent("feedback-saved", true);
     window.scrollTo({ top: 0 });
   } catch {
     showError("feedback-error", "Cannot reach the server. Check your connection.");
