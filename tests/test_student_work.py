@@ -164,3 +164,17 @@ def test_teacher_remarks_reach_the_student_after_release(teacher, other_teacher)
         "A remark is not valid."
     assert other_teacher.put(f"/api/submissions/{submission_id}/points",
                              json={"feedback": {str(q[0]): "x"}}).status_code == 404
+
+
+def test_my_activities_says_how_many_questions_are_answered(teacher):
+    class_id, students = make_class(teacher)
+    activity_id, q = make_activity(teacher)
+    assignment_id = assign(teacher, activity_id, class_id)
+    student = login(students[0]["username"])
+    row = lambda: student.get("/api/my-activities").get_json()["activities"][0]
+    assert row()["status"] == "not_started" and row()["answered"] == 0 and row()["questions"] == len(q)
+
+    student.put(f"/api/my-activities/{assignment_id}/answers", json={"answers": {str(q[0]): 1, str(q[1]): True}})
+    assert row()["status"] == "in_progress" and row()["answered"] == 2
+    student.put(f"/api/my-activities/{assignment_id}/answers", json={"answers": {str(q[1]): None}})  # cleared
+    assert row()["answered"] == 1

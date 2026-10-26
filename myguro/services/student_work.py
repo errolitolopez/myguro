@@ -54,6 +54,9 @@ class StudentWorkService(Service):
                 # Overdue only when nothing was ever submitted
                 "overdue": bool(row["due_date"] and row["last_id"] is None and today > row["due_date"]),
                 "status": status,
+                # How far the attempt being answered is: "3 of 10 answered" (a saved answer is one row)
+                "questions": row["question_count"],
+                "answered": row["answered_count"] if row["submission_id"] and not row["submitted_at"] else 0,
                 "attempt": row["attempt"] or 0,
                 "max_attempts": row["max_attempts"],
                 "closed": row["assignment_status"] == "closed",

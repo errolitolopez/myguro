@@ -170,7 +170,9 @@ class AssignmentRepository(Repository):
                    COALESCE(c.name, '{DIRECT_CLASS_NAME}') AS class_name, COALESCE(c.subject, '') AS class_subject,
                    t.name AS teacher,
                    sub.id AS submission_id, sub.submitted_at, sub.attempt, sub.paper,
-                   last.id AS last_id, last.late AS last_late, last.paper AS last_paper
+                   last.id AS last_id, last.late AS last_late, last.paper AS last_paper,
+                   (SELECT COUNT(*) FROM questions q WHERE q.activity_id = a.id) AS question_count,
+                   (SELECT COUNT(*) FROM submission_answers sa WHERE sa.submission_id = sub.id) AS answered_count
             FROM assignments asg
             JOIN activities a ON a.id = asg.activity_id
             LEFT JOIN classes c ON c.id = asg.class_id

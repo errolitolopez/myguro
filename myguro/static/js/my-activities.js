@@ -7,6 +7,11 @@ let today = "";
 
 const list = document.getElementById("activity-list");
 
+// progressText({answered: 3, questions: 10}) -> "3 / 10 answered"
+function progressText(activity) {
+  return `${activity.answered} / ${activity.questions} answered`;
+}
+
 // The badge on the right: due date / overdue, or the score once submitted.
 function statusBadges(activity) {
   const badges = document.createElement("div");
@@ -30,14 +35,15 @@ function statusBadges(activity) {
     }
     if (activity.paper) add("text-bg-secondary", "Paper");
     if (activity.late) add("text-bg-warning", "Late");
-    if (activity.status === "in_progress") add("text-bg-info", `Trying again · attempt ${activity.attempt}`);
+    if (activity.status === "in_progress") add("text-bg-info", `Trying again · attempt ${activity.attempt} · ${progressText(activity)}`);
     else if (activity.can_retry) add("text-bg-light border", "Can try again");
     return badges;
   }
   if (activity.overdue) add("text-bg-danger", `Overdue · was due ${formatDay(activity.due_date)}`);
   else if (activity.due_date === today) add("text-bg-warning", "Due today");
   else if (activity.due_date) add("text-bg-light border", `Due ${formatDay(activity.due_date)}`);
-  if (activity.status === "in_progress") add("text-bg-info", "In progress");
+  if (activity.status === "in_progress") add("text-bg-info", `In progress · ${progressText(activity)}`);
+  else add("text-bg-light border", "Not started yet");
   return badges;
 }
 
