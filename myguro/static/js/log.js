@@ -100,16 +100,26 @@ function clearPerson() {
   search(1);
 }
 
-// Loads one page of the log with the search, the filters and the person.
-async function search(wantedPage) {
-  const params = new URLSearchParams({ page: wantedPage, q: searchInput.value.trim() });
+// filterParams() -> the search, the filters and the person as query parameters (the list adds the page,
+// the chart adds its view). log-chart.js uses it too, so the chart always counts what the list shows.
+function filterParams() {
+  const params = new URLSearchParams({ q: searchInput.value.trim() });
   if (roleFilter.value) params.set("role", roleFilter.value);
   if (categoryFilter.value) params.set("category", categoryFilter.value);
   if (fromFilter.value) params.set("from", fromFilter.value);
   if (toFilter.value) params.set("to", toFilter.value);
   if (person) params.set("user_id", person.id);
+  return params;
+}
+
+// Loads one page of the log with the search, the filters and the person.
+async function search(wantedPage) {
+  const params = filterParams();
+  params.set("page", wantedPage);
   const mine = ++requestNumber;
   showFilterCount();
+  // Paging does not change the counts, so the chart only reloads for a new search or filter.
+  if (wantedPage === 1) loadLogChart();
   try {
     const response = await apiFetch(`/api/log?${params}`);
     if (!response || mine !== requestNumber) return;

@@ -61,6 +61,34 @@
     </span>
   </div>
 
+  <!-- How busy the log is. Counts what the filters above show; tap a bar to filter by it. -->
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+        <h2 class="h5 mb-0 bi bi-bar-chart-line"> Activity</h2>
+        <div class="btn-group btn-group-sm" role="group" aria-label="Group the chart by">
+          <input type="radio" class="btn-check" name="log-chart-view" id="view-day" value="day" autocomplete="off" checked>
+          <label class="btn btn-toggle" for="view-day">By day</label>
+          <input type="radio" class="btn-check" name="log-chart-view" id="view-category" value="category" autocomplete="off">
+          <label class="btn btn-toggle" for="view-category">By category</label>
+          <input type="radio" class="btn-check" name="log-chart-view" id="view-role" value="role" autocomplete="off">
+          <label class="btn btn-toggle" for="view-role">By role</label>
+        </div>
+      </div>
+      <div id="log-chart-error" class="alert alert-danger d-none" role="alert"></div>
+      <div id="log-chart-sub" class="small text-body-secondary mb-2"></div>
+      <div class="position-relative" style="height: 14rem;">
+        <canvas id="log-chart" role="img" aria-label="Bar chart of log entries"></canvas>
+      </div>
+      <!-- The same numbers as a table for screen readers (the tooltip is never the only way to a value). -->
+      <table class="visually-hidden">
+        <caption>Log entries counted</caption>
+        <thead><tr><th scope="col">Name</th><th scope="col">Entries</th></tr></thead>
+        <tbody id="log-chart-table"></tbody>
+      </table>
+    </div>
+  </div>
+
   <div id="log-summary" class="small text-body-secondary"></div>
   <div class="small text-body-secondary mb-2">Keeps the latest {{ "{:,}".format(max_entries) }} entries. Older ones are removed.</div>
   <div id="log-list" class="list-group">
@@ -78,5 +106,11 @@
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"
+        integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC"
+        crossorigin="anonymous"></script>
+<script src="{{ url_for('static', filename='js/chart-helpers.js') }}"></script>
+<!-- Before log.js: log.js calls loadLogChart() on its first search. -->
+<script src="{{ url_for('static', filename='js/log-chart.js') }}"></script>
 <script src="{{ url_for('static', filename='js/log.js') }}"></script>
 {% endblock %}

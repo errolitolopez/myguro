@@ -26,6 +26,7 @@ def test_read_requires_supervisor_or_admin(admin, supervisor, teacher):
     assert supervisor.get("/api/log").status_code == 200
     assert admin.get("/api/log").status_code == 200
     assert supervisor.get("/log").status_code == 200
+    assert 'id="log-chart"' in supervisor.get("/log").get_data(as_text=True)
     assert admin.get("/log").status_code == 200
     assert teacher.get("/api/log").status_code == 403
     assert teacher.get("/log").status_code == 302
