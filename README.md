@@ -52,6 +52,18 @@ Log in with `admin` / `admin` and set a new password.
 
 Adds 6 sample teachers (e.g. `ecruz`) and 48 sample students: Grades 9 to 12, two sections each, 6 students per section (e.g. `jdelacruz01`, Grade 9 - Rizal). All sample accounts use the password `1234`. They can log in right away. Safe to run again: existing usernames are skipped.
 
+## Backups (admin)
+
+All the school's data is one file, `instance/myguro.db`. Back it up often.
+
+- **Download backup** on the admin's Dashboard: a complete, consistent copy as one file, taken even while the app is
+  being used. The card says "Last backup: 3 days ago" and turns yellow when the last backup is more than 7 days old or
+  there never was one. The download is written in the activity log. Keep the files somewhere other than the host.
+- **Console:** `flask --app app backup [--keep 14] [--to FOLDER]` writes a copy to `instance/backups/` and deletes
+  the oldest ones.
+- **Restore:** stop using the site, keep the current file under another name, upload the backup as
+  `instance/myguro.db`, then reload the app. The file holds password hashes, so keep it private.
+
 ## Code structure
 
 ```

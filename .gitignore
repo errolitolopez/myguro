@@ -3,8 +3,10 @@
 __pycache__/
 *.pyc
 
-# Private data: database and secret key
+# Private data: the database, its secret key and backups must never be in git
 instance/
+backups/
+*.db
 
 # Editors / OS
 .vscode/

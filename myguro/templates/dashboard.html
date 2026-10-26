@@ -41,6 +41,20 @@
         <div class="fs-3 fw-semibold" id="stat-activities">–</div>
       </div></div>
     </div>
+    <!-- A full copy of the database. Turns yellow when the last backup is old or there never was one. -->
+    <div class="col-12">
+      <div class="card {{ 'border-warning' if backup.stale else '' }}" {% if backup.stale %}id="backup-warning"{% endif %}>
+        <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-2">
+          <div>
+            <div class="fw-semibold bi bi-shield-check"> Backup</div>
+            <div class="small {{ 'text-warning-emphasis' if backup.stale else 'text-body-secondary' }}">
+              Last backup: {% if backup.days is none %}never{% elif backup.days == 0 %}today{% elif backup.days == 1 %}1 day ago{% else %}{{ backup.days }} days ago{% endif %}
+            </div>
+          </div>
+          <a href="{{ url_for('backup.download') }}" class="btn btn-outline-secondary bi bi-download"> Download backup</a>
+        </div>
+      </div>
+    </div>
   </div>
   {% elif user.role == "student" %}
   <div class="row g-3 mb-4">
