@@ -1,0 +1,25 @@
+{# One page for every error: 404 not found, 405 not allowed, 500 something went wrong (see myguro/errors.py). #}
+{% extends "base.html" %}
+
+{% block title %}{{ title }} · MyGuro{% endblock %}
+
+{% block content %}
+<main class="container d-flex align-items-center justify-content-center flex-grow-1">
+  <div class="card shadow-sm w-100 text-center" style="max-width: 380px;">
+    <div class="card-body p-4">
+      <h1 class="mb-3">{% with height=48 %}{% include "_logo.html" %}{% endwith %}</h1>
+      <div class="display-4 fw-semibold">{{ status }}</div>
+      <h2 class="h5">{{ title }}</h2>
+      <p class="text-body-secondary">{{ message }}</p>
+      <div class="d-flex justify-content-center gap-2">
+        {% if status == 500 %}
+        {# An empty address reloads this page #}
+        <a href="" class="btn btn-outline-secondary bi bi-arrow-clockwise">Try again</a>
+        {% endif %}
+        <!-- "/" sends a logged-in person to their first page and everyone else to the login page -->
+        <a href="/" class="btn btn-success bi bi-house">Go to MyGuro</a>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

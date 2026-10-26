@@ -83,3 +83,38 @@ def test_display_page_is_open_to_every_role(admin, teacher, supervisor):
         assert 'data-reading-switch="tabbar"' in page and 'data-reading-switch="effects"' in page
         # The choices live on this page now, not in the account menu of the other pages
         assert "data-theme-select" not in client.get("/dashboard" if client is not supervisor else "/log").get_data(as_text=True)
+
+
+def test_a_crash_shows_our_own_page_or_json_and_never_a_traceback(teacher, monkeypatch):
+    from myguro.services import SettingsService
+    import myguro.web.display as display_page
+
+    def boom(*args, **kwargs):
+        raise RuntimeError("secret details")
+
+    monkeypatch.setattr(display_page, "render_template", boom)
+    page = teacher.get("/display")
+    assert page.status_code == 500 and b"Something went wrong" in page.data and b"Try again" in page.data
+    assert b"secret details" not in page.data and b"Traceback" not in page.data
+
+    monkeypatch.setattr(SettingsService, "get", boom)
+    api = teacher.get("/api/settings")
+    assert api.status_code == 500 and api.get_json() == {"error": "Something went wrong. Please try again."}
+
+
+def test_a_wrong_method_shows_our_not_allowed_page(teacher):
+    page = teacher.post("/dashboard")
+    assert page.status_code == 405 and b"Not allowed" in page.data
+    assert teacher.post("/api/settings/nothing").status_code == 404
+
+
+def test_the_error_page_has_a_plain_fallback(app, monkeypatch):
+    import myguro.errors as errors
+
+    def boom(*args, **kwargs):
+        raise RuntimeError("template is broken")
+
+    monkeypatch.setattr(errors, "render_template", boom)
+    with app.test_request_context("/somewhere"):
+        body, status = errors.error_response(500, "x", "y", "z")
+    assert status == 500 and "Something went wrong" in body and "Traceback" not in body
