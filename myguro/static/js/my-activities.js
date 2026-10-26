@@ -61,7 +61,16 @@ function activityItem(activity) {
   details.textContent = [activity.subject, activity.class_name, activity.teacher].filter(Boolean).join(" · ");
   left.append(title, details);
 
-  row.append(left, statusBadges(activity));
+  // A small ring with the percent once the score is released and there is something checked.
+  const right = document.createElement("div");
+  right.className = "d-flex align-items-center gap-2";
+  const score = activity.done && activity.score;
+  if (score && score.possible - score.pending > 0) {
+    right.append(scoreRing(score.earned, score.possible - score.pending, true));
+  }
+  right.append(statusBadges(activity));
+
+  row.append(left, right);
   return row;
 }
 

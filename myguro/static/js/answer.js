@@ -329,6 +329,9 @@ function showResult() {
         ? `${plural(total.pending, "more point")} from short answers: waiting for your teacher to check.`
         : "Everything is checked.";
   document.getElementById("result-late").classList.toggle("d-none", !activity.late);
+  // The ring only shows once the score is released; it is empty before.
+  const checkable = total ? total.possible - total.pending : 0;
+  document.getElementById("result-ring").replaceChildren(...(checkable > 0 ? [scoreRing(total.earned, checkable)] : []));
 
   const triesLeft = activity.max_attempts === null ? null : activity.max_attempts - activity.attempt;
   document.getElementById("result-attempts").textContent = activity.max_attempts === 1 ? ""
@@ -435,6 +438,11 @@ document.getElementById("confirm-submit-button").addEventListener("click", async
     answers = activity.answers;
     render();
     window.scrollTo({ top: 0, behavior: "smooth" });
+    // A small celebration, only when the score is shown (the teacher released it).
+    if (activity.score && activity.score.total) {
+      document.getElementById("result-card").classList.add("result-pop");
+      confetti();
+    }
   } catch {
     submitModal.hide();
     showError("answer-error", "Cannot reach the server. Your answers are kept here; try again.");

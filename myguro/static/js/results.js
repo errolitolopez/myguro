@@ -130,6 +130,8 @@ function render() {
   document.getElementById("stat-not-started").textContent = summary.not_started;
   document.getElementById("stat-late").textContent = summary.late;
   document.getElementById("stat-average").textContent = summary.average === null ? "–" : `${summary.average}%`;
+  document.getElementById("stat-average-ring").replaceChildren(
+    ...(summary.average === null ? [] : [scoreRing(summary.average, 100, true)]));
   document.getElementById("stat-to-check").textContent = summary.to_check;
 
   const head = document.getElementById("results-head");

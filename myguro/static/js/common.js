@@ -192,6 +192,38 @@ function subjectHeaderElement(label, extraQuery = "") {
   return header;
 }
 
+// scoreRing(8, 10) -> a circle filled 80% with "80%" inside; scoreRing(8, 10, true) is the small one
+function scoreRing(earned, possible, small = false) {
+  const percent = possible > 0 ? Math.round((earned / possible) * 100) : 0;
+  const ring = document.createElement("div");
+  ring.className = small ? "score-ring score-ring-sm" : "score-ring";
+  ring.style.setProperty("--pct", percent);
+  ring.setAttribute("role", "img");
+  ring.setAttribute("aria-label", `${percent} percent`);
+  ring.textContent = `${percent}%`;
+  return ring;
+}
+
+// confetti() drops small coloured pieces once. Does nothing when the person wants less motion.
+function confetti() {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const layer = document.createElement("div");
+  layer.className = "confetti";
+  layer.setAttribute("aria-hidden", "true");
+  const colors = ["#6366f1", "#06b6d4", "#f59e0b", "#ec4899", "#22c55e"];
+  for (let i = 0; i < 40; i++) {
+    const piece = document.createElement("i");
+    piece.style.left = `${Math.random() * 100}%`;
+    piece.style.background = colors[i % colors.length];
+    piece.style.setProperty("--dx", `${Math.round(Math.random() * 160 - 80)}px`);
+    piece.style.setProperty("--spin", `${Math.round(Math.random() * 720 - 360)}deg`);
+    piece.style.animationDelay = `${Math.random() * 0.4}s`;
+    layer.append(piece);
+  }
+  document.body.append(layer);
+  setTimeout(() => layer.remove(), 2600);
+}
+
 async function apiFetch(url, options) {
   const response = await fetch(url, options);
   if (response.status === 401) {
