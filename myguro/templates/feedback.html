@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Feedback · MyGuro{% endblock %}
+
+{% block content %}
+{% include "_navbar.html" %}
+
+<main class="container py-3" style="max-width: 640px;">
+  <h1 class="h4">Rate MyGuro</h1>
+  <p class="text-body-secondary">
+    Tap the stars: 1 is poor and 5 is excellent. Your answers are private. The admin only sees totals,
+    never who answered. You can come back and change them.
+  </p>
+
+  <div id="feedback-error" class="alert alert-danger d-none" role="alert"></div>
+  <div id="feedback-saved" class="alert alert-success d-none" role="status">Thank you! Your feedback was saved.</div>
+
+  <form id="feedback-form" novalidate>
+    <div id="feedback-questions" class="d-grid gap-3 mb-3">
+      <div class="list-group">{% include "_skeleton.html" %}</div>
+    </div>
+    <button id="feedback-save" type="submit" class="btn btn-success bi bi-check2">Save feedback</button>
+  </form>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/feedback.js') }}"></script>
+{% endblock %}

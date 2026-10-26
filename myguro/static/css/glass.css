@@ -799,3 +799,19 @@ html[data-text-align="justify"] [data-reading] :is(div, p, li, label) {
   text-align: justify;
   hyphens: auto;
 }
+
+/* Star rating on the feedback page: five big buttons in a row, easy to tap on a phone. */
+.star-rating { display: flex; gap: 0.25rem; }
+.star {
+  padding: 0.25rem;
+  border: 0;
+  background: transparent;
+  color: var(--accent-to);
+  font-size: 1.9rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+.star:hover { transform: scale(1.15); }
+.star:focus-visible { outline: 2px solid var(--accent-to); outline-offset: 2px; border-radius: 0.5rem; }
+@media (prefers-reduced-motion: reduce) { .star { transition: none; } .star:hover { transform: none; } }
