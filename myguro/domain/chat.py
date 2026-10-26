@@ -4,6 +4,8 @@ from myguro.errors import ValidationError
 
 MAX_MESSAGE_LENGTH = 300
 MAX_MESSAGES_PER_DAY = 50
+MAX_SAVED_MESSAGES = 200  # per teacher; older ones are deleted
+MAX_SHOWN_MESSAGES = 50  # the newest ones the bubble loads
 
 NO_PAGE_KEY = "none"  # what the model picks when no page fits the question
 NO_PAGE_REPLY = "I can only help you find pages."

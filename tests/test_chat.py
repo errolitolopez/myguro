@@ -134,14 +134,61 @@ def test_daily_limit_then_next_day_works(teacher, chat_on, asked, monkeypatch):
     assert say(teacher).status_code == 200
 
 
-def test_messages_are_not_stored(teacher, chat_on, asked, app):
-    say(teacher, "secretword please")
-    import sqlite3, os
-    connection = sqlite3.connect(os.environ["MYGURO_DATABASE"])
-    dump = "\n".join(connection.iterdump())
-    connection.close()
-    assert "secretword" not in dump
+def test_history_is_saved_for_that_teacher_only(teacher, other_teacher, chat_on, asked):
+    assert teacher.get("/api/chat/history").get_json() == {"messages": []}
+    say(teacher, "where are my classes?")
+    asked.key = "none"
+    say(teacher, "tell me a joke")
+    messages = teacher.get("/api/chat/history").get_json()["messages"]
+    assert [(m["sender"], m["text"]) for m in messages] == [
+        ("teacher", "where are my classes?"), ("bot", "Here is Classes. Open a class there to find its gradebook and attendance."),
+        ("teacher", "tell me a joke"), ("bot", rules.NO_PAGE_REPLY)]
+    assert messages[1]["link"] == {"label": "Open Classes", "url": "/classes"} and messages[3]["link"] is None
+    assert other_teacher.get("/api/chat/history").get_json() == {"messages": []}
 
+
+def test_history_is_not_sent_to_the_model(teacher, chat_on, asked):
+    say(teacher, "first question")
+    say(teacher, "second question")
+    assert [call[0] for call in asked.calls] == ["first question", "second question"]
+    assert "first question" not in asked.calls[1][2]
+
+
+def test_refused_messages_are_not_saved(teacher, chat_on, asked):
+    say(teacher, "   ")
+    say(teacher, "x" * (rules.MAX_MESSAGE_LENGTH + 1))
+    assert teacher.get("/api/chat/history").get_json() == {"messages": []}
+
+
+def test_only_the_newest_messages_are_kept(teacher, chat_on, asked, monkeypatch):
+    monkeypatch.setattr(rules, "MAX_SAVED_MESSAGES", 4)
+    for number in range(5):
+        say(teacher, f"question {number}")
+    texts = [m["text"] for m in teacher.get("/api/chat/history").get_json()["messages"] if m["sender"] == "teacher"]
+    assert texts == ["question 3", "question 4"]
+
+
+def test_teacher_clears_their_history(teacher, other_teacher, chat_on, asked):
+    say(teacher, "mine")
+    say(other_teacher, "theirs")
+    assert teacher.delete("/api/chat/history").get_json() == {"messages": []}
+    assert teacher.get("/api/chat/history").get_json() == {"messages": []}
+    assert len(other_teacher.get("/api/chat/history").get_json()["messages"]) == 2
+
+
+def test_history_is_closed_to_other_roles_and_when_off(teacher, admin, supervisor, chat_on, asked, app):
+    for client in (admin, supervisor):
+        assert client.get("/api/chat/history").status_code == 404
+        assert client.delete("/api/chat/history").status_code == 404
+    assert app.test_client().get("/api/chat/history").status_code == 401
+    say(teacher)
+    admin.put("/api/settings", json={"chatbot_enabled": False})
+    assert teacher.get("/api/chat/history").status_code == 404
+
+
+def test_history_is_not_in_the_activity_log(admin, teacher, chat_on, asked):
+    say(teacher, "secretword please")
+    assert "secretword" not in str(admin.get("/api/log?per_page=100").get_json())
 
 
 def test_bubble_only_for_a_teacher_when_on(teacher, admin, app):

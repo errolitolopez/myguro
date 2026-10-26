@@ -293,3 +293,17 @@ CREATE TABLE IF NOT EXISTS chat_usage (
     count INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (user_id, day)
 );
+
+-- Navigation chatbot history: each teacher's own questions and the replies, so the chat is still there on
+-- the next page or the next login. Only that teacher can read or clear it; the admin has no way to read
+-- it. Only the newest MAX_SAVED_MESSAGES per teacher are kept (domain/chat.py). Never sent to the AI service.
+CREATE TABLE IF NOT EXISTS chat_messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    sender TEXT NOT NULL CHECK (sender IN ('teacher', 'bot')),
+    text TEXT NOT NULL,
+    link_label TEXT,
+    link_url TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS chat_messages_user ON chat_messages (user_id, id);

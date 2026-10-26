@@ -14,3 +14,28 @@ class ChatRepository(Repository):
             "ON CONFLICT (user_id, day) DO UPDATE SET count = count + 1",
             (user_id, day),
         )
+
+    def add_message(self, user_id, sender, text, link):
+        """Save one message of the chat. link is {label, url} or None."""
+        self.execute(
+            "INSERT INTO chat_messages (user_id, sender, text, link_label, link_url) VALUES (?, ?, ?, ?, ?)",
+            (user_id, sender, text, link["label"] if link else None, link["url"] if link else None),
+        )
+
+    def trim_messages(self, user_id, keep):
+        """Delete all but this person's newest `keep` messages."""
+        self.execute(
+            "DELETE FROM chat_messages WHERE user_id = ? AND id NOT IN "
+            "(SELECT id FROM chat_messages WHERE user_id = ? ORDER BY id DESC LIMIT ?)",
+            (user_id, user_id, keep),
+        )
+
+    def recent_messages(self, user_id, limit):
+        """The newest `limit` messages of this person, oldest first."""
+        rows = self.all(
+            "SELECT sender, text, link_label, link_url FROM chat_messages WHERE user_id = ? "
+            "ORDER BY id DESC LIMIT ?", (user_id, limit))
+        return list(reversed(rows))
+
+    def clear_messages(self, user_id):
+        self.execute("DELETE FROM chat_messages WHERE user_id = ?", (user_id,))

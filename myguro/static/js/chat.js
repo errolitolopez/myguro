@@ -31,7 +31,29 @@
     bubble.append(button);
   };
 
+  // The greeting is the first thing in an empty chat, so it is never an empty box.
+  const showGreeting = () => addMessage("Hi! Tell me which page you are looking for.", false);
+
+  // The saved chat is loaded the first time the panel opens, not on every page.
+  let historyLoaded = false;
+  const loadHistory = async () => {
+    historyLoaded = true;
+    try {
+      const response = await fetch("/api/chat/history");
+      const data = response.ok ? await response.json() : { messages: [] };
+      messages.replaceChildren();
+      if (!data.messages.length) showGreeting();
+      for (const message of data.messages) {
+        const bubble = addMessage(message.text, message.sender === "teacher");
+        addLink(bubble, message.link);
+      }
+    } catch {
+      historyLoaded = false; // try again the next time it opens
+    }
+  };
+
   const open = () => {
+    if (!historyLoaded) loadHistory();
     panel.classList.remove("d-none");
     toggle.setAttribute("aria-expanded", "true");
     input.focus();
@@ -48,8 +70,23 @@
     if (event.key === "Escape") close();
   });
 
-  // The first thing in the panel, so it is never an empty box.
-  addMessage("Hi! Tell me which page you are looking for.", false);
+  showGreeting();
+
+  document.getElementById("chat-clear").addEventListener("click", async () => {
+    const button = document.getElementById("chat-clear");
+    button.disabled = true;
+    try {
+      const response = await fetch("/api/chat/history", { method: "DELETE" });
+      if (response.ok) {
+        messages.replaceChildren();
+        showGreeting();
+      }
+    } catch {
+      // the history stays; the teacher can try again
+    } finally {
+      button.disabled = false;
+    }
+  });
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
