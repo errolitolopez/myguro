@@ -47,6 +47,60 @@ function durationText(startUtc, endUtc) {
   return minutes < 60 ? `${minutes} min` : `${Math.floor(minutes / 60)} h ${minutes % 60} min`;
 }
 
+// The teacher's earlier subjects, fetched once per page: ["Math", "Science"]
+let subjectsPromise = null;
+function loadSubjects() {
+  if (!subjectsPromise) {
+    subjectsPromise = apiFetch("/api/subjects")
+      .then((response) => (response && response.ok ? response.json() : { subjects: [] }))
+      .then((data) => data.subjects)
+      .catch(() => []);
+  }
+  return subjectsPromise;
+}
+
+// subjectPicker(input) puts a dropdown of the teacher's earlier subjects before a text box. Choosing
+// "Other..." shows the box so a new subject can be typed. The box stays the one place the page reads
+// the subject from; after setting input.value in code, call picker.sync() so the dropdown follows.
+function subjectPicker(input) {
+  const OTHER = "__other";
+  const select = document.createElement("select");
+  select.className = "form-select";
+  select.setAttribute("aria-label", "Subject");
+  input.before(select);
+
+  const fill = (subjects) => {
+    select.replaceChildren(
+      new Option("Choose a subject", ""),
+      ...subjects.map((subject) => new Option(subject, subject)),
+      new Option("Other...", OTHER),
+    );
+    sync();
+  };
+
+  // Show the dropdown choice that matches what is in the box
+  function sync() {
+    const value = input.value.trim().toLowerCase();
+    const match = [...select.options].find((option) => option.value && option.value !== OTHER
+      && option.value.toLowerCase() === value);
+    select.value = match ? match.value : value ? OTHER : "";
+    input.classList.toggle("d-none", select.value !== OTHER);
+  }
+
+  select.addEventListener("change", () => {
+    input.value = select.value === OTHER ? "" : select.value;
+    sync();
+    if (select.value === OTHER) input.focus();
+    // The page reacts to typing in the box (unsaved changes, saving a locked sheet), so tell it
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+
+  fill([]);
+  loadSubjects().then(fill);
+  return { sync };
+}
+
 // plural(1, "student") -> "1 student", plural(2, "activity", "activities") -> "2 activities"
 function plural(count, one, many = `${one}s`) {
   return `${count} ${count === 1 ? one : many}`;

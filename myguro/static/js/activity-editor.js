@@ -11,6 +11,7 @@ let nextKey = 1; // gives every question a unique key for its radio button names
 
 const titleInput = document.getElementById("activity-title");
 const subjectInput = document.getElementById("activity-subject");
+const subjectPick = subjectPicker(subjectInput);
 const sectionList = document.getElementById("section-list");
 const saveButton = document.getElementById("save-button");
 const saveStatus = document.getElementById("save-status");
@@ -695,6 +696,7 @@ function showActivity(activity) {
   document.title = `${activity.title} · MyGuro`;
   titleInput.value = activity.title;
   subjectInput.value = activity.subject;
+  subjectPick.sync();
   sections = activity.sections.map(fromServer);
   maxAttemptsSelect.value = activity.max_attempts === null ? "" : String(activity.max_attempts);
   render();

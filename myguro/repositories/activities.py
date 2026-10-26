@@ -35,6 +35,22 @@ class ActivityRepository(Repository):
             (teacher_id,),
         )
 
+    def subjects_for_teacher(self, teacher_id):
+        """The subjects the teacher already used on a sheet or a class, once each (capitals ignored,
+        the first spelling kept), sorted A to Z."""
+        rows = self.all(
+            """
+            SELECT subject FROM activities WHERE teacher_id = ? AND deleted_at IS NULL AND subject != ''
+            UNION ALL
+            SELECT subject FROM classes WHERE teacher_id = ? AND subject != ''
+            """,
+            (teacher_id, teacher_id),
+        )
+        seen = {}
+        for row in rows:
+            seen.setdefault(row["subject"].lower(), row["subject"])
+        return sorted(seen.values(), key=str.lower)
+
     def create(self, teacher_id, title, subject):
         return self.execute("INSERT INTO activities (teacher_id, title, subject) VALUES (?, ?, ?)",
                             (teacher_id, title, subject)).lastrowid

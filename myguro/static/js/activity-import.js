@@ -5,6 +5,7 @@ const sheetModalElement = document.getElementById("import-sheet-modal");
 const sheetFile = document.getElementById("import-sheet-file");
 const sheetTitle = document.getElementById("import-sheet-title-input");
 const sheetSubject = document.getElementById("import-sheet-subject");
+const sheetSubjectPicker = subjectPicker(sheetSubject);
 const sheetCheckButton = document.getElementById("import-sheet-check");
 const sheetConfirmButton = document.getElementById("import-sheet-confirm");
 
@@ -128,6 +129,7 @@ sheetModalElement.addEventListener("show.bs.modal", () => {
   sheetFile.value = "";
   sheetTitle.value = "";
   sheetSubject.value = "";
+  sheetSubjectPicker.sync();
   resetSheetCheck();
 });
 

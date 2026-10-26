@@ -138,3 +138,15 @@ def test_duplicate_makes_a_clean_draft(teacher, other_teacher):
                               for s in sections]
     assert strip(copied) == strip(original)
     assert other_teacher.post(f"/api/activities/{activity_id}/duplicate").status_code == 404
+
+
+def test_subjects_lists_what_the_teacher_used_before(teacher, other_teacher):
+    teacher.post("/api/activities", json={"title": "A", "subject": "Science"})
+    teacher.post("/api/activities", json={"title": "B", "subject": "science"})  # same subject, other capitals
+    teacher.post("/api/activities", json={"title": "C", "subject": "Math"})
+    teacher.post("/api/classes", json={"name": "Grade 9 - Rizal", "subject": "Filipino"})
+    teacher.post("/api/classes", json={"name": "Grade 9 - Bonifacio", "subject": ""})  # no subject: not listed
+    other_teacher.post("/api/activities", json={"title": "D", "subject": "History"})
+
+    assert teacher.get("/api/subjects").get_json()["subjects"] == ["Filipino", "Math", "Science"]
+    assert other_teacher.get("/api/subjects").get_json()["subjects"] == ["History"]

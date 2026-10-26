@@ -10,6 +10,7 @@ const form = document.getElementById("new-activity-form");
 const titleInput = document.getElementById("new-title");
 const subjectInput = document.getElementById("new-subject");
 const createButton = document.getElementById("new-activity-button");
+const newSubjectPicker = subjectPicker(subjectInput);
 
 // "2026-10-10 07:17:40" (UTC, from SQLite) -> "Oct 10, 2026" in the viewer's time zone
 function formatDate(value) {
@@ -221,6 +222,7 @@ form.addEventListener("submit", async (event) => {
 
 modalElement.addEventListener("show.bs.modal", () => {
   form.reset();
+  newSubjectPicker.sync();
   hideError("new-activity-error");
 });
 modalElement.addEventListener("shown.bs.modal", () => titleInput.focus());

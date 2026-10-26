@@ -87,6 +87,13 @@ def api_list():
     return jsonify(activities=service().list(deleted=request.args.get("deleted") == "1"))
 
 
+@bp.get("/api/subjects")
+@role_required_api("teacher")
+def api_subjects():
+    """The subjects the teacher used before (on sheets or classes), for the subject dropdown."""
+    return jsonify(subjects=service().subjects())
+
+
 @bp.post("/api/activities")
 @role_required_api("teacher")
 def api_create():

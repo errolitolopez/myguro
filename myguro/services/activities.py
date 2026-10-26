@@ -43,6 +43,10 @@ class ActivityService(Service):
                               for given in self.activities.given_to(row["id"], year_id)]}
                 for row in self.activities.list_for_teacher(self.user["id"], deleted)]
 
+    def subjects(self):
+        """The subjects this teacher used before, for the subject dropdown."""
+        return self.activities.subjects_for_teacher(self.user["id"])
+
     def create(self, data):
         """Start a sheet (a draft) with its title and subject; sections come in the editor."""
         activity_id = self.activities.create(self.user["id"], *clean_title_subject(data))
