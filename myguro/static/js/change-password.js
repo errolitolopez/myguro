@@ -56,7 +56,8 @@ form.addEventListener("submit", async (event) => {
     }
     if (response.ok) {
       await offerToSavePassword(usernameInput.value, newInput.value);
-      window.location.href = "/dashboard";
+      // The first password change is followed by making a recovery code.
+      window.location.href = form.dataset.firstTime === "1" ? "/recovery-code?welcome=1" : "/dashboard";
       return;
     }
     const data = await response.json();

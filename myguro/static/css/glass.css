@@ -944,3 +944,19 @@ html[data-effects="light"] .modal-backdrop.show {
   backdrop-filter: none;
 }
 html[data-effects="light"] main { animation: none; }
+
+/* A recovery code shown to copy: big, in a fixed-width font, in groups that wrap on a small phone.
+   user-select: all selects the whole code with one tap. */
+.recovery-code {
+  padding: 0.9rem 1rem;
+  border: 2px dashed var(--accent-to);
+  border-radius: 1rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: center;
+  overflow-wrap: anywhere;
+  user-select: all;
+  -webkit-user-select: all;
+}

@@ -8,6 +8,14 @@
 <main class="container py-4">
   <h1 class="h4 mb-3">Hi, {{ user.first_name or user.name }}!</h1>
   <div id="dashboard-error" class="alert alert-danger d-none" role="alert"></div>
+  {% if no_recovery_code %}
+  <!-- Until the person makes a recovery code, only the admin can help if they forget the password. -->
+  <div class="alert alert-warning small" role="status" id="recovery-nudge">
+    <i class="bi bi-shield-exclamation" aria-hidden="true"></i>
+    You don't have a recovery code yet. Without one, only the admin can reset your password.
+    <a href="{{ url_for('recovery.code_page') }}" class="fw-semibold">Make one now</a>
+  </div>
+  {% endif %}
 
   {% if user.role == "admin" %}
   <div class="bento bento-5">

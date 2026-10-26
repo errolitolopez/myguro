@@ -129,3 +129,21 @@ def test_pages(admin):
     student = login(USER)
     assert 'id="recovery-page"' in student.get("/recovery-code").get_data(as_text=True)
     assert student.get("/forgot-password").status_code == 302  # already logged in
+
+
+def test_the_dashboard_nudges_until_a_code_is_made(admin):
+    student = login(USER)
+    assert 'id="recovery-nudge"' in student.get("/dashboard").get_data(as_text=True)
+    make_code(student)
+    assert 'id="recovery-nudge"' not in student.get("/dashboard").get_data(as_text=True)
+
+
+def test_the_first_password_change_leads_to_the_recovery_page(admin):
+    # (a new student starts disabled until the admin enables the account, so a teacher is used here)
+    admin.post("/api/users", json={"role": "teacher", "last_name": "Bautista", "first_name": "Ana Marie",
+                                   "username": "abautista", "password": "temp1234"})
+    newcomer = login("abautista", "temp1234")
+    page = newcomer.get("/change-password").get_data(as_text=True)
+    assert 'data-first-time="1"' in page
+    newcomer.post("/api/change-password", json={"current_password": "temp1234", "new_password": "mine1234"})
+    assert 'data-first-time="0"' in newcomer.get("/change-password").get_data(as_text=True)

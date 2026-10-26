@@ -192,6 +192,54 @@ function subjectHeaderElement(label, extraQuery = "") {
   return header;
 }
 
+// showRecoveryCode(box, "K7M2P-...", "abautista") -> shows the code big, with Copy and Download buttons, in box.
+// The code is shown once, so the person is asked to save it (the phone's notes or a password manager).
+function showRecoveryCode(box, code, username) {
+  const label = document.createElement("div");
+  label.className = "small text-body-secondary mb-1";
+  label.textContent = "Your recovery code";
+  const codeText = document.createElement("div");
+  codeText.className = "recovery-code";
+  codeText.textContent = code;
+
+  const copy = document.createElement("button");
+  copy.type = "button";
+  copy.className = "btn btn-sm btn-success bi bi-clipboard";
+  copy.textContent = "Copy";
+  copy.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      copy.textContent = "Copied";
+    } catch {
+      copy.textContent = "Select the code and copy it";
+    }
+    setTimeout(() => (copy.textContent = "Copy"), 2500);
+  });
+
+  const download = document.createElement("button");
+  download.type = "button";
+  download.className = "btn btn-sm btn-outline-secondary bi bi-download";
+  download.textContent = "Download";
+  download.addEventListener("click", () => {
+    const text = `MyGuro recovery code for ${username}\n\n${code}\n\n` +
+      "Keep this safe. Anyone who has it can reset your password.\n";
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
+    link.download = "myguro-recovery-code.txt";
+    link.click();
+    URL.revokeObjectURL(link.href);
+  });
+
+  const buttons = document.createElement("div");
+  buttons.className = "d-flex flex-wrap gap-2 mt-2";
+  buttons.append(copy, download);
+  const warning = document.createElement("div");
+  warning.className = "alert alert-warning small mt-3 mb-0";
+  warning.textContent = "This code is shown only once. Save it now, for example in your phone's notes or a " +
+    "password manager. Anyone who has it can reset your password, so don't share it.";
+  box.replaceChildren(label, codeText, buttons, warning);
+}
+
 // scoreRing(8, 10) -> a circle filled 80% with "80%" inside; scoreRing(8, 10, true) is the small one
 function scoreRing(earned, possible, small = false) {
   const percent = possible > 0 ? Math.round((earned / possible) * 100) : 0;

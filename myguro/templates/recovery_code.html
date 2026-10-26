@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Recovery code · MyGuro{% endblock %}
+
+{% block content %}
+{% include "_navbar.html" %}
+
+<main id="recovery-page" class="container py-3" style="max-width: 560px;">
+  <h1 class="h4">Recovery code</h1>
+  <div id="welcome" class="alert alert-info d-none" role="status">
+    Your password is set. One more step: make a recovery code, so you can reset your password yourself if you
+    forget it.
+  </div>
+  <p class="text-body-secondary">
+    If you forget your password, this code lets you choose a new one without asking the admin. It is long and
+    random, so nobody can guess it. Save it somewhere safe, like your phone's notes or a password manager. Anyone
+    who has it can reset your password, so don't share it.
+  </p>
+
+  <div id="recovery-error" class="alert alert-danger d-none" role="alert"></div>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <div id="recovery-status" class="mb-3">{% include "_skeleton.html" %}</div>
+
+      <form id="recovery-form" novalidate>
+        <label for="recovery-password" class="form-label">Your current password</label>
+        <div class="input-group mb-2">
+          <input id="recovery-password" type="password" class="form-control" autocomplete="current-password" required>
+          <button type="button" class="btn btn-outline-secondary" data-toggle-password="recovery-password"
+                  aria-label="Show password"><i class="bi bi-eye"></i></button>
+        </div>
+        <div id="recovery-replace-note" class="form-text mb-2 d-none">
+          Making a new code stops the old one from working.
+        </div>
+        <button id="recovery-make" type="submit" class="btn btn-success bi bi-shield-lock">Make a recovery code</button>
+      </form>
+
+      <div id="recovery-result" class="mt-3"></div>
+    </div>
+  </div>
+  <a href="{{ url_for('dashboard.page') }}" class="small">Back to dashboard</a>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/password-toggle.js') }}"></script>
+<script>const RECOVERY_USERNAME = {{ user.username | tojson }};</script>
+<script src="{{ url_for('static', filename='js/recovery-code.js') }}"></script>
+{% endblock %}

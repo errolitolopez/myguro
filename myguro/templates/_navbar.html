@@ -55,6 +55,7 @@
         <li><a class="dropdown-item bi bi-gear {{ 'active' if request.endpoint == 'settings.page' }}" href="{{ url_for('settings.page') }}"> Settings</a></li>
         {% endif %}
         <li><a class="dropdown-item bi bi-key" href="{{ url_for('auth.change_password_page') }}"> Password</a></li>
+        <li><a class="dropdown-item bi bi-shield-lock {{ 'active' if request.endpoint == 'recovery.code_page' }}" href="{{ url_for('recovery.code_page') }}"> Recovery code</a></li>
         <li><hr class="dropdown-divider"></li>
         <li><button id="logout-button" class="dropdown-item bi bi-box-arrow-right" type="button"> Logout</button></li>
       </ul>
