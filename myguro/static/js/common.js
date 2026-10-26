@@ -84,14 +84,20 @@ function subjectPicker(input) {
     const match = [...select.options].find((option) => option.value && option.value !== OTHER
       && option.value.toLowerCase() === value);
     select.value = match ? match.value : value ? OTHER : "";
-    input.classList.toggle("d-none", select.value !== OTHER);
+    showBox(select.value === OTHER);
+  }
+
+  // The box sits under the dropdown, with a gap between them only while it is shown
+  function showBox(visible) {
+    input.classList.toggle("d-none", !visible);
+    select.classList.toggle("mb-2", visible);
   }
 
   select.addEventListener("change", () => {
     if (select.value === OTHER) {
       // An empty box would make sync() pick "Choose a subject" again, so show the box here instead
       input.value = "";
-      input.classList.remove("d-none");
+      showBox(true);
       input.focus();
     } else {
       input.value = select.value;
