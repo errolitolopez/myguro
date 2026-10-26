@@ -961,12 +961,19 @@ html[data-effects="light"] main { animation: none; }
   -webkit-user-select: all;
 }
 
-/* The app icon of a way to give (GCash, Ko-fi): the picture a phone shows for the app, at 48px, cut into a
-   circle. The files are bigger, so they stay sharp on high-density screens. */
+/* The app icon of a way to give (GCash, Ko-fi): the picture a phone shows for the app, a little smaller
+   (78%) inside a circle filled with the picture's own background colour, so its edge disappears and
+   nothing of the artwork touches or crosses the circle. The files are bigger than 48px, so they stay sharp
+   on high-density screens. */
 .support-app-icon {
   flex: none;
   width: 3rem;
   height: 3rem;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
   border-radius: 50%;
-  object-fit: cover;
 }
+.support-app-icon img { display: block; width: 78%; height: 78%; object-fit: contain; }
+.support-app-icon-gcash { background: #297bfa; } /* the colour of the GCash icon's own background */
+.support-app-icon-kofi { background: #72a4f2; } /* the colour of the Ko-fi icon's own background */

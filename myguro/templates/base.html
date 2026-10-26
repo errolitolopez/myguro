@@ -57,11 +57,11 @@
           <div class="d-grid gap-2">
             {% for option in SUPPORT.options %}
             <div class="support-option">
-              {# The service's own app icon (the one a phone shows on the home screen), cut into a circle. #}
+              {# The service's own app icon (the one a phone shows on the home screen), a little smaller inside a circle of its own colour. #}
               {% if option.id == "gcash" %}
-              <img class="support-app-icon" src="{{ url_for('static', filename='img/gcash-app-icon.png') }}" alt="" width="48" height="48">
+              <span class="support-app-icon support-app-icon-gcash"><img src="{{ url_for('static', filename='img/gcash-app-icon.png') }}" alt="" width="48" height="48"></span>
               {% elif option.id == "kofi" %}
-              <img class="support-app-icon" src="{{ url_for('static', filename='img/kofi-app-icon.png') }}" alt="" width="48" height="48">
+              <span class="support-app-icon support-app-icon-kofi"><img src="{{ url_for('static', filename='img/kofi-app-icon.png') }}" alt="" width="48" height="48"></span>
               {% else %}
               <div class="support-icon" aria-hidden="true">
                 <i class="bi {{ 'bi-phone' if option.kind == 'number' else 'bi-box-arrow-up-right' }}"></i>
