@@ -1003,6 +1003,19 @@ html[data-effects="light"] main { animation: none; }
   gap: 0.5rem;
 }
 .chat-toggle, .chat-panel.chat-open { pointer-events: auto; }
+/* A solid coloured circle all the time, not the see-through glass every other button has: it floats over page
+   text, so it must stay readable. The robot takes the white text colour. */
+.btn.chat-toggle {
+  --bs-btn-color: var(--confirm-text);
+  --bs-btn-bg: var(--confirm-bg);
+  --bs-btn-border-color: var(--confirm-bg);
+  --bs-btn-hover-color: var(--confirm-text);
+  --bs-btn-hover-bg: var(--confirm-hover);
+  --bs-btn-hover-border-color: var(--confirm-hover);
+  --bs-btn-active-color: var(--confirm-text);
+  --bs-btn-active-bg: var(--confirm-active);
+  --bs-btn-active-border-color: var(--confirm-active);
+}
 .chat-toggle { width: 3.5rem; height: 3.5rem; box-shadow: var(--glass-shadow); }
 .chat-panel {
   /* On a phone the panel is almost as wide as the screen; on a desktop it stays small. */

@@ -402,3 +402,9 @@ def test_the_invisible_bubble_box_does_not_take_clicks():
     box = css.split("\n.chat-bubble {")[1].split("}")[0]
     assert "pointer-events: none" in box
     assert ".chat-toggle, .chat-panel.chat-open { pointer-events: auto; }" in css
+
+
+def test_the_round_button_is_solid_not_glass():
+    css = open("myguro/static/css/glass.css").read()
+    rule = css.split(".btn.chat-toggle {")[1].split("}")[0]
+    assert "--bs-btn-bg: var(--confirm-bg)" in rule and "--bs-btn-color: var(--confirm-text)" in rule
