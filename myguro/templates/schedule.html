@@ -8,13 +8,26 @@
 <main class="container py-3">
   <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
     <div>
-      <h1 class="h4 mb-1">Schedule</h1>
+      <h1 class="h4 mb-1">Schedule <span class="badge text-bg-warning align-middle fs-6">Beta</span></h1>
       <div class="small text-body-secondary" id="schedule-status">Loading...</div>
     </div>
     <div class="d-flex flex-wrap gap-2">
       <button id="generate-button" type="button" class="btn btn-success bi bi-magic">Build schedule</button>
       <button id="publish-button" type="button" class="btn btn-outline-primary bi bi-send">Publish to teachers</button>
     </div>
+  </div>
+
+  <!-- What to expect while the schedule generator is still being tested -->
+  <div class="alert alert-warning small" role="note">
+    <div class="fw-semibold bi bi-flask"> Beta notes</div>
+    <ul class="mb-0 ps-3">
+      <li>This is new and still being tested. Look over the timetable before you publish it.</li>
+      <li>Building again makes a different timetable and replaces the current one, including your swaps.</li>
+      <li>There are six periods a day, 6:00 to 11:15. Afternoon periods are not available yet.</li>
+      <li>You can not download or print the timetable yet.</li>
+      <li>Teachers see only their own schedule, and only after you publish. Link each teacher to their account for that.</li>
+      <li>Tell us what is wrong or missing, such as a rule you need.</li>
+    </ul>
   </div>
 
   <div id="schedule-error" class="alert alert-danger d-none" role="alert"></div>
