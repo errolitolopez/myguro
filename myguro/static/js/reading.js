@@ -1,4 +1,4 @@
-// Display settings: text size, text alignment, line spacing and where the phone menu bar sits. Loaded in <head> so they are set
+// Display settings: text size, text alignment, line spacing and whether phones get the menu bar at the bottom. Loaded in <head> so they are set
 // before the page is drawn (no jump). A person's choices are kept in this browser only, like the theme.
 // They become attributes on <html> (data-text-size, data-text-align, data-line-spacing, data-tab-bar); glass.css
 // does the rest.
@@ -28,6 +28,23 @@
   Object.values(OPTIONS).forEach((option) => apply(option, saved(option)));
 
   document.addEventListener("DOMContentLoaded", () => {
+    // A switch is a choice between two values: on = the first of the option's choices.
+    document.querySelectorAll("[data-reading-switch]").forEach((box) => {
+      const option = OPTIONS[box.dataset.readingSwitch];
+      if (!option) return;
+      const [on, off] = option.choices;
+      box.checked = saved(option) === on;
+      box.addEventListener("change", () => {
+        const value = box.checked ? on : off;
+        try {
+          localStorage.setItem(option.key, value);
+        } catch {
+          // Private window or blocked storage: the choice only lasts for this page.
+        }
+        apply(option, value);
+      });
+    });
+
     document.querySelectorAll("[data-reading-select]").forEach((select) => {
       const option = OPTIONS[select.dataset.readingSelect];
       if (!option) return;

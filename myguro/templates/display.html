@@ -29,12 +29,14 @@
   <div class="card mb-3">
     <div class="card-body">
       <h2 class="h5 bi bi-layout-text-window-reverse"> Menu</h2>
-      <label class="form-label small text-body-secondary mb-1" for="tab-bar-select">Menu bar on phones</label>
-      <select id="tab-bar-select" class="form-select form-select-sm" data-reading-select="tabbar">
-        <option value="bottom">Bottom (within reach of the thumb)</option>
-        <option value="top">Top (under the logo)</option>
-      </select>
-      <div class="form-text">Wider screens always show the menu at the top.</div>
+      <div class="form-check form-switch">
+        <input id="tab-bar-switch" class="form-check-input" type="checkbox" role="switch" data-reading-switch="tabbar">
+        <label for="tab-bar-switch" class="form-check-label">Menu bar at the bottom on phones</label>
+      </div>
+      <div class="form-text">
+        On: the menu is a bar at the bottom of the screen, within reach of your thumb. Off: the menu tabs show
+        at the top, like on a computer. Wider screens always show them at the top.
+      </div>
     </div>
   </div>
 

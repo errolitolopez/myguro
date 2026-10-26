@@ -489,15 +489,10 @@ h6, .h6 { font-size: 0.9375rem; }
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Display settings → Menu bar on phones → Top: the same bar sits under the navbar and stays in view while
-   scrolling (sticky), so the page needs no room reserved at the bottom. */
-html[data-tab-bar="top"] .tabbar {
-  position: sticky;
-  inset: 0 0 auto 0;
-  padding-bottom: 0;
-  border-top: 0;
-  border-bottom: 1px solid var(--glass-border);
-}
+/* Display settings → Bottom menu bar off: phones get the same tabs as a computer (under the logo) instead of
+   the bar at the bottom. d-none on the tabs is !important in Bootstrap, so showing them needs it too. */
+html[data-tab-bar="top"] .tabbar { display: none; }
+html[data-tab-bar="top"] .web-tabs { display: block !important; }
 
 .tab-link {
   flex: 1 1 0;
