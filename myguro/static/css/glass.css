@@ -527,6 +527,11 @@ html[data-tab-bar="top"] .web-tabs { display: block !important; }
   html:not([data-tab-bar="top"]) body:has(.tabbar) .position-fixed.bottom-0 {
     bottom: calc(3rem + env(safe-area-inset-bottom)) !important; /* !important beats Bootstrap's bottom-0 */
   }
+
+  /* The chat bubble goes above the bar too, not on top of it. */
+  html:not([data-tab-bar="top"]) body:has(.tabbar) .chat-bubble {
+    bottom: calc(3rem + 0.75rem + env(safe-area-inset-bottom));
+  }
 }
 
 /* Slim scrollbar */
