@@ -41,12 +41,15 @@ def asked(monkeypatch):
     class Fake:
         key = "classes"
         calls = []
+        histories = []
 
-    def fake(message, pages, prompt):
+    def fake(message, pages, prompt, history=()):
         Fake.calls.append((message, list(pages), prompt))
+        Fake.histories.append(list(history))
         return Fake.key
 
     Fake.calls = []
+    Fake.histories = []
     monkeypatch.setattr(chat_client, "ask_model", fake)
     return Fake
 
@@ -147,11 +150,28 @@ def test_history_is_saved_for_that_teacher_only(teacher, other_teacher, chat_on,
     assert other_teacher.get("/api/chat/history").get_json() == {"messages": []}
 
 
-def test_history_is_not_sent_to_the_model(teacher, chat_on, asked):
+def test_latest_messages_are_sent_so_it_can_follow_up(teacher, chat_on, asked):
+    asked.key = "how-new-class"
     say(teacher, "first question")
-    say(teacher, "second question")
-    assert [call[0] for call in asked.calls] == ["first question", "second question"]
-    assert "first question" not in asked.calls[1][2]
+    say(teacher, "and then?")
+    assert asked.histories[0] == []
+    # the teacher's question and only the title line of the reply, not the steps
+    assert asked.histories[1] == [("teacher", "first question"), ("bot", "How to: Create a class")]
+    assert "first question" not in asked.calls[1][2]  # never inside the prompt
+
+
+def test_only_the_latest_few_messages_are_sent(teacher, chat_on, asked, monkeypatch):
+    monkeypatch.setattr(rules, "MAX_CONTEXT_MESSAGES", 3)
+    for number in range(4):
+        say(teacher, f"question {number}")
+    # 3 messages = bot, teacher, bot: the leading bot message is dropped so it starts with the teacher
+    assert [text for sender, text in asked.histories[3] if sender == "teacher"] == ["question 2"]
+
+
+def test_other_teachers_chat_is_never_sent(teacher, other_teacher, chat_on, asked):
+    say(other_teacher, "private question")
+    say(teacher, "my question")
+    assert asked.histories[1] == []
 
 
 def test_refused_messages_are_not_saved(teacher, chat_on, asked):

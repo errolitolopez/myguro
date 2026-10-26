@@ -6,6 +6,7 @@ from myguro.errors import ValidationError
 MAX_MESSAGE_LENGTH = 300
 MAX_MESSAGES_PER_DAY = 50
 MAX_SAVED_MESSAGES = 200  # per teacher; older ones are deleted
+MAX_CONTEXT_MESSAGES = 6  # the latest messages the model also sees, so it can follow "and how do I add students to it?"
 MAX_SHOWN_MESSAGES = 50  # the newest ones the bubble loads
 
 NO_PAGE_KEY = "none"  # what the model picks when no page fits the question
@@ -43,7 +44,7 @@ TEACHER_TOPICS = {
 }
 
 PROMPT = """You help a teacher use MyGuro, a learning activity sheet web app.
-Always call the help tool with the key that best fits what the teacher asked for.
+Always call the help tool with the key that best fits what the teacher asked for. Earlier messages are there so you can understand a follow-up question such as "and then?".
 Pick a "how-" key when they ask how to do something. Pick a page key when they ask where something is.
 If the question is not about using MyGuro, pick "none".
 Never answer in text. These are the keys:
@@ -82,3 +83,13 @@ def answer_for(topics, key):
     else:
         reply = f"Here is {topic['title']}. {topic['note']}".strip()
     return {"reply": reply, "link": {"label": topic["button"], "url": topic["path"]}}
+
+
+def context_for(rows):
+    """[(sender, text)] for the model from the teacher's latest saved messages (oldest first). A reply
+    is cut to its first line (the page or guide title), so the steps are not sent again. It must start
+    with the teacher's message."""
+    messages = [(row["sender"], row["text"].split("\n")[0]) for row in rows]
+    while messages and messages[0][0] != "teacher":
+        messages.pop(0)
+    return messages

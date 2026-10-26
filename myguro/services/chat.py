@@ -49,7 +49,10 @@ class ChatService(Service):
         # Counted before the call, so a failing service cannot be used to send without limit
         self.usage.add_one(self.user["id"], today)
         self.commit()
-        key = chat_client.ask_model(message, pages, rules.build_prompt(pages))
+        # The latest few messages let the model follow "and how do I add students to it?". They are the
+        # teacher's own questions and the titles of the replies, nothing else.
+        earlier = rules.context_for(self.usage.recent_messages(self.user["id"], rules.MAX_CONTEXT_MESSAGES))
+        key = chat_client.ask_model(message, pages, rules.build_prompt(pages), earlier)
         answer = {"reply": rules.UNAVAILABLE_REPLY, "link": None} if key is None else rules.answer_for(pages, key)
         # The history is only for the teacher to read again. It is never sent to the AI service.
         self.usage.add_message(self.user["id"], "teacher", message, None)

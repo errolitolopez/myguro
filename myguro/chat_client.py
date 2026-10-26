@@ -11,16 +11,19 @@ MAX_TOKENS = 60
 TIMEOUT_SECONDS = 10
 
 
-def ask_model(message, topics, prompt):
+def ask_model(message, topics, prompt, history=()):
     """The topic key (a page or a how-to) the model picked for this question, or None if there is no API
     key, the call failed, or the model did not pick one. Only the question and the topic list are sent: no names,
-    classes, scores or earlier messages. Never raises, so the chat just says it is not available."""
+    classes or scores, and only the latest few earlier messages of this teacher (history: [(sender, text)]). Never raises, so the chat just says it is not available."""
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         return None
     body = {
         "systemInstruction": {"parts": [{"text": prompt}]},
-        "contents": [{"role": "user", "parts": [{"text": message}]}],
+        "contents": [
+            *[{"role": "user" if sender == "teacher" else "model", "parts": [{"text": text}]} for sender, text in history],
+            {"role": "user", "parts": [{"text": message}]},
+        ],
         "tools": [{"functionDeclarations": [{
             "name": "help",
             "description": "Show the teacher a page of MyGuro or a how-to guide.",
