@@ -67,6 +67,15 @@ def test_dashboard_chart_is_for_teachers_and_students_only(admin, teacher):
     assert chart in page and 'data-role="student"' in page
 
 
+def test_every_page_with_the_account_menu_loads_common_js(admin, teacher, supervisor):
+    """common.js makes Logout work; a page without it has a dead Logout button."""
+    student = login("jdelacruz01")
+    for client, path in [(admin, "/display"), (teacher, "/display"), (student, "/display"), (supervisor, "/display"),
+                         (admin, "/feedback"), (teacher, "/feedback"), (student, "/feedback")]:
+        page = client.get(path).get_data(as_text=True)
+        assert 'id="logout-button"' in page and "js/common.js" in page, path
+
+
 def test_display_page_is_open_to_every_role(admin, teacher, supervisor):
     for client in (admin, teacher, supervisor, login("jdelacruz01")):
         page = client.get("/display").get_data(as_text=True)

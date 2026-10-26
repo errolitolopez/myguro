@@ -39,3 +39,8 @@
   </div>
 </main>
 {% endblock %}
+
+{% block scripts %}
+<!-- common.js has the Logout button and the school year picker of the account menu. -->
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+{% endblock %}
