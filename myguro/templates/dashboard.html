@@ -10,14 +10,14 @@
   <div id="dashboard-error" class="alert alert-danger d-none" role="alert"></div>
 
   {% if user.role == "admin" %}
-  <div class="bento">
+  <div class="bento bento-5">
     <div>
       <a class="card h-100 text-decoration-none" href="{{ url_for('accounts.teachers_page') }}"><div class="card-body">
         <div class="text-body-secondary small">Teachers</div>
         <div class="fs-3 fw-bold stat-number" id="stat-teachers">–</div>
       </div></a>
     </div>
-    <div class="bento-wide">
+    <div>
       <a class="card h-100 text-decoration-none" href="{{ url_for('accounts.students_page') }}"><div class="card-body">
         <div class="text-body-secondary small">Students</div>
         <div class="fs-3 fw-bold stat-number" id="stat-students">–</div>
@@ -42,8 +42,8 @@
       </div></div>
     </div>
     <!-- A full copy of the database. Turns yellow when the last backup is old or there never was one. -->
-    <div class="bento-wide">
-      <div class="card {{ 'border-warning' if backup.stale else '' }}" {% if backup.stale %}id="backup-warning"{% endif %}>
+    <div class="bento-full">
+      <div class="card h-100 {{ 'border-warning' if backup.stale else '' }}" {% if backup.stale %}id="backup-warning"{% endif %}>
         <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-2">
           <div>
             <div class="fw-semibold bi bi-shield-check"> Backup</div>

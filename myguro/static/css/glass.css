@@ -677,6 +677,14 @@ main { animation: page-in 0.35s ease both; }
 @media (min-width: 768px) {
   .bento { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
+/* The admin's five counts are the same size: five columns on a wide screen. On a phone the fifth tile
+   takes the whole row. .bento-full is a tile that takes a whole row (the backup card). */
+.bento-full { grid-column: 1 / -1; }
+.bento-5 > :nth-child(5) { grid-column: span 2; }
+@media (min-width: 768px) {
+  .bento-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .bento-5 > :nth-child(5) { grid-column: auto; }
+}
 .stat-number {
   /* Gradient text, with the plain colour as the fallback where background-clip: text is missing. */
   color: var(--bs-emphasis-color);
