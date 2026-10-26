@@ -23,6 +23,9 @@
     <div class="card-body">
       <div id="recovery-status" class="mb-3">{% include "_skeleton.html" %}</div>
 
+      <!-- With a code already, only this button shows; the password box appears after it is tapped. -->
+      <button id="recovery-start" type="button" class="btn btn-outline-secondary bi bi-arrow-repeat d-none">Make a new code</button>
+
       <form id="recovery-form" novalidate>
         <label for="recovery-password" class="form-label">Your current password</label>
         <div class="input-group mb-2">

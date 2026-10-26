@@ -7,6 +7,7 @@ const makeButton = document.getElementById("recovery-make");
 const resultBox = document.getElementById("recovery-result");
 const replaceModal = bootstrap.Modal.getOrCreateInstance(document.getElementById("replace-modal"));
 const replaceConfirm = document.getElementById("replace-confirm");
+const startButton = document.getElementById("recovery-start");
 let hasCode = false; // whether the person already has a code (then replacing it needs a confirmation)
 
 // formatDay("2026-10-26 08:00:00") -> "Oct 26, 2026" (UTC from SQLite, shown in the viewer's time)
@@ -36,6 +37,9 @@ async function loadStatus() {
     hasCode = data.has_code;
     makeButton.textContent = data.has_code ? "Make a new code" : "Make a recovery code";
     document.getElementById("recovery-replace-note").classList.toggle("d-none", !data.has_code);
+    // With a code already, the password box stays hidden until the person chooses to make a new one.
+    form.classList.toggle("d-none", data.has_code);
+    startButton.classList.toggle("d-none", !data.has_code);
   } catch {
     statusBox.replaceChildren();
     showError("recovery-error", "Cannot reach the server. Check your connection.");
@@ -81,6 +85,11 @@ form.addEventListener("submit", (event) => {
   // The first code needs no question; replacing one does.
   if (hasCode) replaceModal.show();
   else makeCode(makeButton);
+});
+startButton.addEventListener("click", () => {
+  startButton.classList.add("d-none");
+  form.classList.remove("d-none");
+  passwordInput.focus();
 });
 replaceConfirm.addEventListener("click", () => makeCode(replaceConfirm));
 
