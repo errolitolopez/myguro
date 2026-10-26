@@ -5,12 +5,14 @@ from myguro.errors import ValidationError
 
 MAX_MESSAGE_LENGTH = 300
 MAX_MESSAGES_PER_DAY = 50
-MAX_SAVED_MESSAGES = 200  # per teacher; older ones are deleted
-MAX_CONTEXT_MESSAGES = 6  # the latest messages the model also sees, so it can follow "and how do I add students to it?"
+MAX_QUESTIONS_PER_CHAT = 5  # then the teacher deletes the chat and starts a new one
+# The earlier messages of the chat go to the model too, so it can follow "and how do I add students to it?"
+MAX_CONTEXT_MESSAGES = 2 * (MAX_QUESTIONS_PER_CHAT - 1)
 MAX_SHOWN_MESSAGES = 50  # the newest ones the bubble loads
 
 NO_PAGE_KEY = "none"  # what the model picks when no page fits the question
 NO_PAGE_REPLY = "I can only help you find pages."
+CHAT_FULL_MESSAGE = f"This chat is full ({MAX_QUESTIONS_PER_CHAT} questions). Delete it and start a new chat."
 UNAVAILABLE_REPLY = "The chatbot is not available right now."
 
 # The pages a teacher can be sent to: key -> (title, path, what is there, extra note or ""). Only pages

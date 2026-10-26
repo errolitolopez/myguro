@@ -76,6 +76,7 @@ def test_teacher_gets_a_link_from_the_list(teacher, chat_on, asked):
 
 def test_every_link_in_the_list_is_a_real_teacher_page(teacher, chat_on, asked):
     for key, (_, path, _, _) in rules.TEACHER_PAGES.items():
+        teacher.delete("/api/chat/history")  # a chat holds only a few questions
         asked.key = key
         assert say(teacher).get_json()["link"]["url"] == path
         assert teacher.get(path).status_code == 200, path
@@ -84,12 +85,14 @@ def test_every_link_in_the_list_is_a_real_teacher_page(teacher, chat_on, asked):
 @pytest.mark.parametrize("picked", ["none", "../admin", "/users", "https://example.com", "", 5])
 def test_unknown_key_or_no_page_gets_the_fixed_reply(teacher, chat_on, asked, picked):
     asked.key = picked
-    assert say(teacher).get_json() == {"reply": rules.NO_PAGE_REPLY, "link": None}
+    data = say(teacher).get_json()
+    assert (data["reply"], data["link"]) == (rules.NO_PAGE_REPLY, None)
 
 
 def test_service_not_available_gets_a_plain_reply(teacher, chat_on, asked):
     asked.key = None
-    assert say(teacher).get_json() == {"reply": rules.UNAVAILABLE_REPLY, "link": None}
+    data = say(teacher).get_json()
+    assert (data["reply"], data["link"]) == (rules.UNAVAILABLE_REPLY, None)
 
 
 def test_no_api_key_means_not_available(teacher, chat_on, monkeypatch):
@@ -138,7 +141,7 @@ def test_daily_limit_then_next_day_works(teacher, chat_on, asked, monkeypatch):
 
 
 def test_history_is_saved_for_that_teacher_only(teacher, other_teacher, chat_on, asked):
-    assert teacher.get("/api/chat/history").get_json() == {"messages": []}
+    assert teacher.get("/api/chat/history").get_json() == {"questions_left": rules.MAX_QUESTIONS_PER_CHAT, "messages": []}
     say(teacher, "where are my classes?")
     asked.key = "none"
     say(teacher, "tell me a joke")
@@ -147,7 +150,7 @@ def test_history_is_saved_for_that_teacher_only(teacher, other_teacher, chat_on,
         ("teacher", "where are my classes?"), ("bot", "Here is Classes. Open a class there to find its gradebook and attendance."),
         ("teacher", "tell me a joke"), ("bot", rules.NO_PAGE_REPLY)]
     assert messages[1]["link"] == {"label": "Open Classes", "url": "/classes"} and messages[3]["link"] is None
-    assert other_teacher.get("/api/chat/history").get_json() == {"messages": []}
+    assert other_teacher.get("/api/chat/history").get_json()["messages"] == []
 
 
 def test_latest_messages_are_sent_so_it_can_follow_up(teacher, chat_on, asked):
@@ -177,22 +180,42 @@ def test_other_teachers_chat_is_never_sent(teacher, other_teacher, chat_on, aske
 def test_refused_messages_are_not_saved(teacher, chat_on, asked):
     say(teacher, "   ")
     say(teacher, "x" * (rules.MAX_MESSAGE_LENGTH + 1))
-    assert teacher.get("/api/chat/history").get_json() == {"messages": []}
+    assert teacher.get("/api/chat/history").get_json() == {"questions_left": rules.MAX_QUESTIONS_PER_CHAT, "messages": []}
 
 
-def test_only_the_newest_messages_are_kept(teacher, chat_on, asked, monkeypatch):
-    monkeypatch.setattr(rules, "MAX_SAVED_MESSAGES", 4)
-    for number in range(5):
-        say(teacher, f"question {number}")
-    texts = [m["text"] for m in teacher.get("/api/chat/history").get_json()["messages"] if m["sender"] == "teacher"]
-    assert texts == ["question 3", "question 4"]
+def test_a_chat_holds_five_questions_then_must_be_deleted(teacher, chat_on, asked):
+    for number in range(rules.MAX_QUESTIONS_PER_CHAT):
+        data = say(teacher, f"question {number}").get_json()
+        assert data["questions_left"] == rules.MAX_QUESTIONS_PER_CHAT - number - 1
+    response = say(teacher, "one more")
+    assert response.status_code == 400
+    assert response.get_json() == {"error": rules.CHAT_FULL_MESSAGE, "questions_left": 0}
+    assert len(asked.calls) == rules.MAX_QUESTIONS_PER_CHAT  # nothing was sent to the model
+    history = teacher.get("/api/chat/history").get_json()
+    assert history["questions_left"] == 0 and len(history["messages"]) == 2 * rules.MAX_QUESTIONS_PER_CHAT
+    # deleting the chat starts a new one
+    assert teacher.delete("/api/chat/history").get_json() == {"questions_left": rules.MAX_QUESTIONS_PER_CHAT, "messages": []}
+    assert say(teacher, "fresh start").get_json()["questions_left"] == rules.MAX_QUESTIONS_PER_CHAT - 1
+
+
+def test_a_full_chat_does_not_use_the_daily_limit_or_block_others(teacher, other_teacher, chat_on, asked):
+    for number in range(rules.MAX_QUESTIONS_PER_CHAT):
+        say(teacher, f"q{number}")
+    say(teacher, "refused")
+    assert say(other_teacher, "my own chat").status_code == 200
+
+
+def test_the_model_gets_the_whole_chat_so_far(teacher, chat_on, asked):
+    for number in range(rules.MAX_QUESTIONS_PER_CHAT):
+        say(teacher, f"q{number}")
+    assert len([1 for sender, _ in asked.histories[-1] if sender == "teacher"]) == rules.MAX_QUESTIONS_PER_CHAT - 1
 
 
 def test_teacher_clears_their_history(teacher, other_teacher, chat_on, asked):
     say(teacher, "mine")
     say(other_teacher, "theirs")
-    assert teacher.delete("/api/chat/history").get_json() == {"messages": []}
-    assert teacher.get("/api/chat/history").get_json() == {"messages": []}
+    assert teacher.delete("/api/chat/history").get_json()["messages"] == []
+    assert teacher.get("/api/chat/history").get_json() == {"questions_left": rules.MAX_QUESTIONS_PER_CHAT, "messages": []}
     assert len(other_teacher.get("/api/chat/history").get_json()["messages"]) == 2
 
 
@@ -270,6 +293,7 @@ def test_teacher_gets_the_written_steps_and_a_button(teacher, chat_on, asked):
 
 def test_every_guide_works_through_the_chat(teacher, chat_on, asked):
     for key in TEACHER_GUIDES:
+        teacher.delete("/api/chat/history")  # a chat holds only a few questions
         asked.key = key
         data = say(teacher).get_json()
         assert data["reply"].startswith("How to: ") and data["link"]["url"].startswith("/")

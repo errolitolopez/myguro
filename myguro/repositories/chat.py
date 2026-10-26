@@ -22,13 +22,9 @@ class ChatRepository(Repository):
             (user_id, sender, text, link["label"] if link else None, link["url"] if link else None),
         )
 
-    def trim_messages(self, user_id, keep):
-        """Delete all but this person's newest `keep` messages."""
-        self.execute(
-            "DELETE FROM chat_messages WHERE user_id = ? AND id NOT IN "
-            "(SELECT id FROM chat_messages WHERE user_id = ? ORDER BY id DESC LIMIT ?)",
-            (user_id, user_id, keep),
-        )
+    def count_questions(self, user_id):
+        """How many questions the person asked in the chat they have now."""
+        return self.value("SELECT COUNT(*) FROM chat_messages WHERE user_id = ? AND sender = 'teacher'", (user_id,))
 
     def recent_messages(self, user_id, limit):
         """The newest `limit` messages of this person, oldest first."""
