@@ -276,10 +276,11 @@ CREATE TABLE IF NOT EXISTS feedback (
 );
 
 -- A recovery code per person, so a forgotten password can be reset without the admin (domain/recovery.py).
--- Only a hash is kept: the code is shown once, when it is made. Making a new one replaces the old one,
--- and so does using it to reset the password.
+-- Only a hash is kept: the code is shown once, when it is made. Making a new one replaces the old one.
+-- Each use of the code takes one from uses_left; at 0 it no longer works.
 CREATE TABLE IF NOT EXISTS recovery_codes (
     user_id INTEGER PRIMARY KEY REFERENCES users (id) ON DELETE CASCADE,
     code_hash TEXT NOT NULL,
+    uses_left INTEGER NOT NULL DEFAULT 3,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );

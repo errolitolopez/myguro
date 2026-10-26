@@ -148,6 +148,10 @@ def add_missing_columns(db):
         db.execute("ALTER TABLE users ADD COLUMN middle_initial TEXT NOT NULL DEFAULT ''")
         split_old_names(db)
 
+    recovery_columns = [row["name"] for row in db.execute("PRAGMA table_info(recovery_codes)")]
+    if recovery_columns and "uses_left" not in recovery_columns:
+        db.execute("ALTER TABLE recovery_codes ADD COLUMN uses_left INTEGER NOT NULL DEFAULT 3")
+
     activity_columns = [row["name"] for row in db.execute("PRAGMA table_info(activities)")]
     if "max_attempts" not in activity_columns:
         db.execute("ALTER TABLE activities ADD COLUMN max_attempts INTEGER DEFAULT 1")

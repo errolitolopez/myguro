@@ -23,7 +23,8 @@ def recover(code, username=USER, password="brandnew1"):
 
 def test_a_code_is_long_random_and_shown_once(admin):
     student = login(USER)
-    assert student.get("/api/recovery-code").get_json() == {"has_code": False, "created_at": None}
+    assert student.get("/api/recovery-code").get_json() == {
+        "has_code": False, "created_at": None, "uses_left": None, "max_uses": 3}
     code = make_code(student)
     assert CODE_SHAPE.match(code)
     assert code != make_code(student)  # random
@@ -56,17 +57,42 @@ def test_a_new_code_replaces_the_old_one(admin):
     assert recover(new).status_code == 200
 
 
-def test_recovering_sets_the_password_and_the_code_works_again(admin):
+def test_recovering_sets_the_password_and_takes_one_use(admin):
     code = make_code()
     response = recover(code)
-    assert response.status_code == 200 and response.get_json() == {"ok": True}  # no new code is made
+    assert response.status_code == 200 and response.get_json() == {"ok": True, "uses_left": 2}
 
     assert flask_app.test_client().post("/api/login", json={"username": USER, "password": PASSWORD}).status_code == 401
     ok = flask_app.test_client().post("/api/login", json={"username": USER, "password": "brandnew1"})
     assert ok.status_code == 200 and ok.get_json()["must_change_password"] is False
-    # The same code works the next time the password is forgotten
-    assert recover(code, password="another123").status_code == 200
-    assert flask_app.test_client().post("/api/login", json={"username": USER, "password": "another123"}).status_code == 200
+    # Still works while uses are left
+    assert recover(code, password="another123").get_json()["uses_left"] == 1
+
+
+def test_a_code_stops_working_when_its_uses_are_gone(admin):
+    student = login(USER)
+    code = make_code(student)
+    assert student.get("/api/recovery-code").get_json()["max_uses"] == 3
+    assert [recover(code, password=f"password{n}").get_json()["uses_left"] for n in range(3)] == [2, 1, 0]
+    used_up = recover(code, password="password9")
+    assert used_up.status_code == 401  # the same answer as a wrong code
+    assert used_up.get_json() == recover("AAAAA-AAAAA-AAAAA-AAAAA-AAAAA").get_json()
+    # The password is the one set by the last good use
+    assert flask_app.test_client().post("/api/login", json={"username": USER, "password": "password2"}).status_code == 200
+
+    status = login(USER, "password2").get("/api/recovery-code").get_json()
+    assert status["has_code"] is False and status["uses_left"] == 0 and status["created_at"]  # used up, not missing
+
+
+def test_a_used_up_code_is_replaced_without_the_question_and_gets_fresh_uses(admin):
+    code = make_code()
+    for number in range(3):
+        recover(code, password=f"password{number}")
+    student = login(USER, "password2")
+    fresh = student.post("/api/recovery-code", json={"current_password": "password2"})  # no replace flag needed
+    assert fresh.status_code == 201
+    assert student.get("/api/recovery-code").get_json()["uses_left"] == 3
+    assert recover(fresh.get_json()["code"], password="password7").get_json()["uses_left"] == 2
 
 
 def test_the_code_can_be_typed_loosely(admin):
@@ -143,8 +169,12 @@ def test_pages(admin):
 def test_the_dashboard_nudges_until_a_code_is_made(admin):
     student = login(USER)
     assert 'id="recovery-nudge"' in student.get("/dashboard").get_data(as_text=True)
-    make_code(student)
+    code = make_code(student)
     assert 'id="recovery-nudge"' not in student.get("/dashboard").get_data(as_text=True)
+    for number in range(3):
+        recover(code, password=f"password{number}")
+    # A used-up code needs a new one, so the reminder comes back
+    assert 'id="recovery-nudge"' in login(USER, "password2").get("/dashboard").get_data(as_text=True)
 
 
 def test_the_first_password_change_leads_to_the_recovery_page(admin):

@@ -16,6 +16,10 @@ GROUPS = 5
 GROUP_SIZE = 5
 CODE_LENGTH = GROUPS * GROUP_SIZE
 
+# How many times one code can choose a new password. When it is used up the person makes a new code
+# (while logged in), so a code that leaked cannot be used forever.
+MAX_USES = 3
+
 
 def make_code():
     """A new random code written in groups: "K7M2P-9XQ4T-W3HNB-E6RYC-5ZD8J"."""
