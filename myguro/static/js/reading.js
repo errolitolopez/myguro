@@ -1,6 +1,6 @@
-// Display settings: text size, text alignment, line spacing and whether phones get the menu bar at the bottom. Loaded in <head> so they are set
+// Display settings: text size, text alignment, line spacing, visual effects and whether phones get the menu bar at the bottom. Loaded in <head> so they are set
 // before the page is drawn (no jump). A person's choices are kept in this browser only, like the theme.
-// They become attributes on <html> (data-text-size, data-text-align, data-line-spacing, data-tab-bar); glass.css
+// They become attributes on <html> (data-text-size, data-text-align, data-line-spacing, data-effects, data-tab-bar); glass.css
 // does the rest.
 
 (function () {
@@ -8,16 +8,23 @@
     size: { key: "myguro-text-size", attribute: "data-text-size", choices: ["small", "normal", "large", "xlarge"], fallback: "normal" },
     align: { key: "myguro-text-align", attribute: "data-text-align", choices: ["left", "justify"], fallback: "left" },
     spacing: { key: "myguro-line-spacing", attribute: "data-line-spacing", choices: ["normal", "relaxed"], fallback: "normal" },
+    // Full = glass blur and the moving background; Light = plain panels, no motion (smoother on phones).
+    // Until a person chooses, a touch screen starts on Light and a computer on Full.
+    effects: { key: "myguro-effects", attribute: "data-effects", choices: ["full", "light"],
+               fallback: () => (window.matchMedia("(pointer: coarse)").matches ? "light" : "full") },
     tabbar: { key: "myguro-tab-bar", attribute: "data-tab-bar", choices: ["bottom", "top"], fallback: "bottom" },
   };
 
-  // saved(OPTIONS.size) -> "large" (or the fallback when nothing valid is saved)
+  // standard(option) -> the value used until a person chooses (a fixed one, or worked out per device)
+  const standard = (option) => (typeof option.fallback === "function" ? option.fallback() : option.fallback);
+
+  // saved(OPTIONS.size) -> "large" (or the standard value when nothing valid is saved)
   function saved(option) {
     try {
       const value = localStorage.getItem(option.key);
-      return option.choices.includes(value) ? value : option.fallback;
+      return option.choices.includes(value) ? value : standard(option);
     } catch {
-      return option.fallback;
+      return standard(option);
     }
   }
 
@@ -50,7 +57,7 @@
       if (!option) return;
       select.value = saved(option);
       select.addEventListener("change", () => {
-        const value = option.choices.includes(select.value) ? select.value : option.fallback;
+        const value = option.choices.includes(select.value) ? select.value : standard(option);
         try {
           localStorage.setItem(option.key, value);
         } catch {

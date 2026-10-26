@@ -914,3 +914,33 @@ html[data-text-align="justify"] :is([data-reading], .reading-sample) :is(div, p,
 :root .alert-warning { --alert-color: var(--warn-bg); }
 :root .alert-danger { --alert-color: var(--danger-bg); }
 :root .alert-dark { --alert-color: var(--bs-emphasis-color); }
+
+/* Display settings → Effects → off ("light"): the heavy parts of the glass look are dropped, because
+   blurring what is behind every panel and redrawing a moving background cost a lot of GPU work, and a
+   phone cannot keep 60 or 120 frames a second with them. Panels get a more solid colour instead, so
+   the text stays readable, and the shadows are simple. ("!important" only where an earlier rule has it.) */
+html[data-effects="light"] {
+  --glass-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+html[data-effects="light"] body { background-attachment: scroll; }
+html[data-effects="light"] body::after { display: none; }
+html[data-effects="light"] .card,
+html[data-effects="light"] .toast,
+html[data-effects="light"] .alert,
+html[data-effects="light"] .modal-content,
+html[data-effects="light"] .position-fixed.bg-body,
+html[data-effects="light"] .palette,
+html[data-effects="light"] .navbar.bg-success {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+html[data-effects="light"] .card,
+html[data-effects="light"] .toast,
+html[data-effects="light"] .alert { background: var(--glass-bg-strong); }
+html[data-effects="light"] .navbar.bg-success { background-color: var(--glass-solid) !important; /* beats the glass rule above */ }
+html[data-effects="light"] .modal-backdrop.show {
+  opacity: 0.5;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+html[data-effects="light"] main { animation: none; }
