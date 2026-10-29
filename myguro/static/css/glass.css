@@ -983,11 +983,11 @@ html[data-effects="light"] main { animation: none; }
 .support-app-icon-gcash { background: #297bfa; } /* the colour of the GCash icon's own background */
 .support-app-icon-kofi { background: #72a4f2; } /* the colour of the Ko-fi icon's own background */
 
-/* The navigation chat bubble (teachers): fixed to the bottom right corner on every page. It sits above the
+/* The navigation chat bubble (teachers): fixed to the bottom left corner on every page. It sits above the
    page content but below Bootstrap's modals (z-index 1055), so the support window still covers it. */
 .chat-bubble {
   position: fixed;
-  right: max(1rem, env(safe-area-inset-right));
+  left: max(1rem, env(safe-area-inset-left));
   /* How far the bubble is from the bottom of the screen. The window above it uses the same number to
      stay on the screen, so its header and buttons are never cut off at the top. */
   --chat-bottom: calc(var(--chat-lift, 0rem) + max(1rem, env(safe-area-inset-bottom)));
@@ -999,7 +999,7 @@ html[data-effects="light"] main { animation: none; }
   z-index: 1030;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 0.5rem;
 }
 .chat-toggle, .chat-panel.chat-open { pointer-events: auto; }
@@ -1036,7 +1036,7 @@ html[data-effects="light"] main { animation: none; }
   backdrop-filter: none !important;
   /* Closed: shrunk toward the bubble and faded out. It opens and closes (minimizes) by animating back,
      and the bigger size animates too. visibility waits for the fade so a closed panel can't be clicked. */
-  transform-origin: bottom right;
+  transform-origin: bottom left;
   opacity: 0;
   visibility: hidden;
   transform: scale(0.8) translateY(0.75rem);
