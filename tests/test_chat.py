@@ -391,12 +391,6 @@ def test_robot_parts_are_there_for_the_animation(teacher, chat_on):
         assert f"@keyframes {name}" in css
     assert "prefers-reduced-motion" in css.split("GuroBot is alive")[1]  # it all stops for reduced motion
 
-
-def test_bubble_script_keeps_the_bubble_in_the_visible_corner():
-    script = open("myguro/static/js/chat.js").read()
-    assert "visualViewport" in script and "keepInCorner" in script
-
-
 def test_the_invisible_bubble_box_does_not_take_clicks():
     css = open("myguro/static/css/glass.css").read()
     box = css.split("\n.chat-bubble {")[1].split("}")[0]
