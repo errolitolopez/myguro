@@ -563,10 +563,11 @@ function blankAnswerFields(question, id, container) {
 
 function questionCard(section, question, index) {
   const id = `q-${question.key}`;
-  const card = el("div", "border rounded p-2 bg-body");
+  const card = el("div", "border rounded p-3 bg-body question-card");
 
   const header = el("div", "d-flex justify-content-between align-items-center gap-2 mb-2");
-  const label = el("span", "small fw-semibold", `${index + 1}. ${QUESTION_TYPES[question.type]}`);
+  const label = el("span", "d-flex align-items-center gap-2 small fw-semibold");
+  label.append(el("span", "badge rounded-pill text-bg-secondary", String(index + 1)), QUESTION_TYPES[question.type]);
   const right = el("div", "d-flex align-items-center gap-2");
   const points = el("input", "form-control form-control-sm text-end");
   points.type = "number";
@@ -633,10 +634,11 @@ function questionCard(section, question, index) {
 
 function sectionCard(section, index) {
   const activity = section.kind === "activity";
-  const card = el("div", "card");
+  // A coloured side line tells text sections (green) from activity sections (blue) when scrolling a long sheet.
+  const card = el("div", `card border-start border-4 ${activity ? "border-primary" : "border-success"}`);
 
-  const header = el("div", "card-header d-flex justify-content-between align-items-center py-1");
-  const label = el("span", "small fw-semibold text-body-secondary", `Section ${index + 1} · `);
+  const header = el("div", "card-header d-flex justify-content-between align-items-center py-2");
+  const label = el("span", "fw-semibold text-body-secondary", `Section ${index + 1} · `);
   label.append(el("span", activity ? "text-primary" : "text-success", activity ? "Activity" : "Text"));
   header.append(label, moveButtons(sections, index, "section"));
 
@@ -647,7 +649,7 @@ function sectionCard(section, index) {
   body.append(descriptionField(section, id, activity));
 
   if (activity) {
-    const questions = el("div", "d-grid gap-2 my-3");
+    const questions = el("div", "d-grid gap-3 my-3");
     section.questions.forEach((question, questionIndex) =>
       questions.append(questionCard(section, question, questionIndex)));
     if (section.questions.length === 0) {
@@ -861,21 +863,33 @@ function withBlankLines(text) {
   return element;
 }
 
+// A choice row like the student sees it, for looking at only (the radio is off).
+function previewChoice(text) {
+  const row = el("div", "form-check answer-choice");
+  const radio = el("input", "form-check-input");
+  radio.type = "radio";
+  radio.disabled = true;
+  row.append(radio, el("label", "form-check-label", text));
+  return row;
+}
+
 function previewQuestion(question) {
-  const item = el("li", "mb-3");
-  const prompt = el("div");
+  const item = el("li", "answer-question mb-3");
+  const prompt = el("div", "fw-medium");
   prompt.append(question.type === "fill_blank" ? withBlankLines(question.prompt) : el("span", "preserve-lines", question.prompt));
   const points = parseInt(question.points, 10) || 0;
-  prompt.append(el("span", "small text-body-secondary", ` (${plural(points, "pt", "pts")})`));
+  prompt.append(el("span", "badge rounded-pill bg-body-secondary text-body-secondary fw-normal ms-1", plural(points, "pt", "pts")));
   item.append(prompt);
 
   if (question.type === "multiple_choice") {
-    const choices = el("ol", "mb-0");
-    choices.type = "A";
-    question.choices.forEach((choice) => choices.append(el("li", "", choice)));
+    // Tappable-looking rows, the same as the student's page (answer-choice in glass.css).
+    const choices = el("div", "answer-choices mt-2");
+    question.choices.forEach((choice, index) => choices.append(previewChoice(`${LETTERS[index]}. ${choice}`)));
     item.append(choices);
   } else if (question.type === "true_false") {
-    item.append(el("div", "text-body-secondary small", "○ True   ○ False"));
+    const choices = el("div", "answer-choices mt-2");
+    choices.append(previewChoice("True"), previewChoice("False"));
+    item.append(choices);
   } else if (question.type === "identification") {
     item.append(el("div", "blank-line mt-1"));
   } else if (question.type === "matching") {
@@ -909,11 +923,12 @@ document.getElementById("preview-button").addEventListener("click", () => {
     if (section.description.trim()) {
       const text = el("div", "preserve-lines");
       showDescription(text, { description: section.description.trim(), description_format: section.descriptionFormat });
-      if (section.kind === "activity") text.classList.add("fst-italic");
+      // Directions look the same as on the student's page: a side line, not slanted text.
+      if (section.kind === "activity") text.classList.add("border-start", "border-3", "ps-3", "py-1", "my-3", "text-body-secondary");
       block.append(text);
     }
     if (section.kind === "activity") {
-      const list = el("ol");
+      const list = el("ol", "answer-list ps-3");
       section.questions.forEach((question) => list.append(previewQuestion(question)));
       block.append(list);
     }
