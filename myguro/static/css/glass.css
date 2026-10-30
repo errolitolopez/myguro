@@ -330,6 +330,22 @@ footer {
 .form-control:disabled,
 .form-select:disabled { background-color: var(--glass-input-disabled); }
 
+/* A fill-in-the-blank answer looks like a blank line in the sentence, like on paper, not like a text box:
+   only a line under the text. Written with .form-control in the selector so it beats the glass box rules above. */
+.form-control.blank-input,
+.form-control.blank-input:focus,
+.form-control.blank-input:disabled {
+  padding: 0 0.25rem;
+  background-color: transparent;
+  border-width: 0 0 2px;
+  border-color: var(--bs-body-color);
+  border-radius: 0;
+  box-shadow: none;
+  text-align: center;
+}
+.form-control.blank-input:focus { border-color: var(--accent-to); }
+.form-control.blank-input:disabled { opacity: 1; border-style: dotted; } /* locked: still readable */
+
 /* Bootstrap's "light" pieces would glare on dark glass */
 [data-bs-theme="dark"] .text-bg-light {
   background-color: rgba(255, 255, 255, 0.12) !important;

@@ -165,6 +165,14 @@ function choiceQuestion(question, options, locked) {
   return group;
 }
 
+const BLANK_MIN_WIDTH = 8; // characters: how wide an empty blank is
+
+// growBlank(input) -> the blank is as wide as its text (at least BLANK_MIN_WIDTH characters), so a long
+// answer is never hidden. The page's max-width: 100% keeps it inside the screen.
+function growBlank(input) {
+  input.style.width = `${Math.max(BLANK_MIN_WIDTH, input.value.length + 2)}ch`;
+}
+
 function questionItem(question, locked) {
   const item = el("li", "answer-question mb-4");
   const points = el("span", "badge rounded-pill bg-body-secondary text-body-secondary fw-normal ms-1", plural(question.points, "pt", "pts"));
@@ -178,10 +186,12 @@ function questionItem(question, locked) {
       if (index > 0) {
         const blank = el("input", "form-control form-control-sm blank-input mx-1");
         blank.value = value[index - 1] || "";
+        growBlank(blank);
         blank.disabled = locked;
         blank.maxLength = 200;
         blank.setAttribute("aria-label", `Blank ${index}`);
         blank.addEventListener("input", () => {
+          growBlank(blank);
           value[index - 1] = blank.value;
           setAnswer(question.id, [...value]);
         });
