@@ -983,11 +983,11 @@ html[data-effects="light"] main { animation: none; }
 .support-app-icon-gcash { background: #297bfa; } /* the colour of the GCash icon's own background */
 .support-app-icon-kofi { background: #72a4f2; } /* the colour of the Ko-fi icon's own background */
 
-/* The navigation chat bubble (teachers): fixed to the bottom left corner on every page. It sits above the
+/* The navigation chat bubble (teachers): fixed to the bottom right corner on every page, until the teacher drags it somewhere else. It sits above the
    page content but below Bootstrap's modals (z-index 1055), so the support window still covers it. */
 .chat-bubble {
   position: fixed;
-  left: max(1rem, env(safe-area-inset-left));
+  right: max(1rem, env(safe-area-inset-right));
   /* How far the bubble is from the bottom of the screen. The window above it uses the same number to
      stay on the screen, so its header and buttons are never cut off at the top. */
   --chat-bottom: calc(var(--chat-lift, 0rem) + max(1rem, env(safe-area-inset-bottom)));
@@ -999,10 +999,15 @@ html[data-effects="light"] main { animation: none; }
   z-index: 1030;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: flex-end;
   gap: 0.5rem;
 }
 .chat-toggle, .chat-panel.chat-open { pointer-events: auto; }
+/* The button can be dragged (chat.js): the box hangs from its nearest corner, so the window opens toward the
+   middle of the screen. touch-action stops a finger drag on the button from scrolling the page instead. */
+.chat-bubble.chat-left { align-items: flex-start; }
+.chat-bubble.chat-top { flex-direction: column-reverse; }
+.chat-toggle { touch-action: none; cursor: grab; }
 /* A solid coloured circle all the time, not the see-through glass every other button has: it floats over page
    text, so it must stay readable. The robot takes the white text colour. */
 .btn.chat-toggle {
@@ -1024,8 +1029,8 @@ html[data-effects="light"] main { animation: none; }
      messages shrink to fit, while the header and the box stay. 100vh first for browsers without dvh. */
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - var(--chat-bottom) - 5rem);
-  max-height: calc(100dvh - var(--chat-bottom) - 5rem);
+  max-height: var(--chat-room, calc(100vh - var(--chat-bottom) - 5rem));
+  max-height: var(--chat-room, calc(100dvh - var(--chat-bottom) - 5rem));
   box-shadow: var(--glass-shadow);
   /* Solid, not frosted glass: page text must not show through the chat. !important beats the shared
      .card glass rules above, which set the same properties with the same weight. */
@@ -1036,12 +1041,17 @@ html[data-effects="light"] main { animation: none; }
   backdrop-filter: none !important;
   /* Closed: shrunk toward the bubble and faded out. It opens and closes (minimizes) by animating back,
      and the bigger size animates too. visibility waits for the fade so a closed panel can't be clicked. */
-  transform-origin: bottom left;
+  transform-origin: bottom right;
   opacity: 0;
   visibility: hidden;
   transform: scale(0.8) translateY(0.75rem);
   transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s, width 0.25s ease;
 }
+.chat-bubble.chat-left .chat-panel { transform-origin: bottom left; }
+/* :not(.chat-open) so the open window (below) keeps no transform */
+.chat-bubble.chat-top .chat-panel { transform-origin: top right; }
+.chat-bubble.chat-top .chat-panel:not(.chat-open) { transform: scale(0.8) translateY(-0.75rem); }
+.chat-bubble.chat-top.chat-left .chat-panel { transform-origin: top left; }
 .chat-panel.chat-open {
   opacity: 1;
   visibility: visible;

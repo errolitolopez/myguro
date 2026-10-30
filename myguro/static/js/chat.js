@@ -114,6 +114,94 @@
     });
   }
 
+  // The round button can be dragged anywhere on the screen and the place is remembered in this browser.
+  // The box is anchored by the button's nearest corner (left or right, top or bottom), so the button stays
+  // where it is when the window opens: the window grows away from that corner, toward the middle.
+  // A press that moves less than DRAG_DISTANCE pixels is still a click that opens the window.
+  const DRAG_DISTANCE = 6;
+  const EDGE = 8; // the button never goes closer than this to the edge of the screen
+  const POSITION_KEY = "chat-position";
+  let justDragged = false;
+
+  // place({ h: "right", v: "bottom", x: 16, y: 16 }) -> the button 16px from the right and bottom edges
+  const place = ({ h, v, x, y }) => {
+    const page = document.documentElement;
+    const size = toggle.offsetWidth || 56;
+    x = Math.min(Math.max(x, EDGE), page.clientWidth - size - EDGE);
+    y = Math.min(Math.max(y, EDGE), page.clientHeight - size - EDGE);
+    bubbleBox.style.left = h === "left" ? `${x}px` : "auto";
+    bubbleBox.style.right = h === "right" ? `${x}px` : "auto";
+    bubbleBox.style.top = v === "top" ? `${y}px` : "auto";
+    bubbleBox.style.bottom = v === "bottom" ? `${y}px` : "auto";
+    bubbleBox.classList.toggle("chat-left", h === "left");
+    bubbleBox.classList.toggle("chat-top", v === "top");
+    // The window gets the room that is left on its side of the button.
+    const room = page.clientHeight - y - size;
+    bubbleBox.style.setProperty("--chat-room", `${room - EDGE * 2}px`);
+    return { h, v, x, y };
+  };
+
+  // Turns where the button is now into the nearest corner and offsets, and saves them.
+  const settle = () => {
+    const page = document.documentElement;
+    const box = toggle.getBoundingClientRect();
+    const h = box.left + box.width / 2 > page.clientWidth / 2 ? "right" : "left";
+    const v = box.top + box.height / 2 > page.clientHeight / 2 ? "bottom" : "top";
+    const spot = place({
+      h,
+      v,
+      x: h === "left" ? box.left : page.clientWidth - box.right,
+      y: v === "top" ? box.top : page.clientHeight - box.bottom,
+    });
+    try {
+      localStorage.setItem(POSITION_KEY, JSON.stringify(spot));
+    } catch {
+      // not remembered
+    }
+    return spot;
+  };
+
+  let saved = null;
+  try {
+    saved = JSON.parse(localStorage.getItem(POSITION_KEY));
+  } catch {
+    saved = null;
+  }
+  const valid = saved && ["left", "right"].includes(saved.h) && ["top", "bottom"].includes(saved.v)
+    && Number.isFinite(saved.x) && Number.isFinite(saved.y);
+  if (valid) place(saved);
+  // A smaller screen (or a turned phone) must not leave the button outside it.
+  window.addEventListener("resize", () => {
+    if (bubbleBox.style.left) settle(); // only once the button has been moved
+  });
+
+  let drag = null;
+  toggle.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0) return;
+    const box = toggle.getBoundingClientRect();
+    drag = { startX: event.clientX, startY: event.clientY, offsetX: event.clientX - box.left,
+      offsetY: event.clientY - box.top, moving: false };
+    toggle.setPointerCapture(event.pointerId);
+  });
+  toggle.addEventListener("pointermove", (event) => {
+    if (!drag) return;
+    if (!drag.moving && Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) < DRAG_DISTANCE) return;
+    drag.moving = true;
+    // While dragging the box hangs from the top left; settle() picks the nearest corner on release.
+    place({ h: "left", v: "top", x: event.clientX - drag.offsetX, y: event.clientY - drag.offsetY });
+  });
+  const endDrag = () => {
+    if (!drag) return;
+    if (drag.moving) {
+      settle();
+      justDragged = true; // the click that follows the release must not open or close the window
+      setTimeout(() => (justDragged = false), 0);
+    }
+    drag = null;
+  };
+  toggle.addEventListener("pointerup", endDrag);
+  toggle.addEventListener("pointercancel", endDrag);
+
   // The window size is remembered in this browser; if the browser blocks storage it just starts small.
   const sizeButton = document.getElementById("chat-size");
   const setLarge = (large) => {
@@ -154,7 +242,10 @@
     toggle.focus();
   };
 
-  toggle.addEventListener("click", () => (panel.classList.contains("chat-open") ? close() : open()));
+  toggle.addEventListener("click", () => {
+    if (justDragged) return;
+    panel.classList.contains("chat-open") ? close() : open();
+  });
   closeButton.addEventListener("click", close);
   panel.addEventListener("keydown", (event) => {
     if (event.key === "Escape") close();

@@ -402,3 +402,10 @@ def test_the_round_button_is_solid_not_glass():
     css = open("myguro/static/css/glass.css").read()
     rule = css.split(".btn.chat-toggle {")[1].split("}")[0]
     assert "--bs-btn-bg: var(--confirm-bg)" in rule and "--bs-btn-color: var(--confirm-text)" in rule
+
+
+def test_the_round_button_can_be_dragged_and_the_place_is_remembered():
+    script = open("myguro/static/js/chat.js").read()
+    assert "pointerdown" in script and "setPointerCapture" in script and 'localStorage.setItem(POSITION_KEY' in script
+    assert "touch-action: none" in open("myguro/static/css/glass.css").read()  # a drag must not scroll the page
+
