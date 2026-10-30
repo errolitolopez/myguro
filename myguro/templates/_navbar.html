@@ -1,20 +1,20 @@
 {# One list of pages, used by the desktop tabs and by the phone tab bar. #}
 {% if user.role == "admin" %}
-  {% set tabs = [("dashboard.page", ("dashboard.page",), "Dashboard", "bi-house"),
+  {% set tabs = [("dashboard.page", ("dashboard.page",), _("Dashboard"), "bi-house"),
                  ("accounts.users_page", ("accounts.users_page", "accounts.teachers_page", "accounts.students_page",
-                                          "accounts.supervisors_page"), "Users", "bi-people"),
-                 ("schedule.admin_page", ("schedule.admin_page",), "Schedule", "bi-calendar-week"),
-                 ("log.page", ("log.page",), "Log", "bi-clipboard-data")] %}
+                                          "accounts.supervisors_page"), _("Users"), "bi-people"),
+                 ("schedule.admin_page", ("schedule.admin_page",), _("Schedule"), "bi-calendar-week"),
+                 ("log.page", ("log.page",), _("Log"), "bi-clipboard-data")] %}
 {% elif user.role == "supervisor" %}
-  {% set tabs = [("log.page", ("log.page",), "Log", "bi-clipboard-data")] %}
+  {% set tabs = [("log.page", ("log.page",), _("Log"), "bi-clipboard-data")] %}
 {% elif user.role == "teacher" %}
-  {% set tabs = [("dashboard.page", ("dashboard.page",), "Dashboard", "bi-house"),
-                 ("activities.list_page", ("activities.list_page", "activities.editor_page"), "Activities", "bi-journal-text"),
-                 ("classes.list_page", ("classes.list_page", "classes.detail_page"), "Classes", "bi-mortarboard"),
-                 ("schedule.my_page", ("schedule.my_page",), "Schedule", "bi-calendar-week")] %}
+  {% set tabs = [("dashboard.page", ("dashboard.page",), _("Dashboard"), "bi-house"),
+                 ("activities.list_page", ("activities.list_page", "activities.editor_page"), _("Activities"), "bi-journal-text"),
+                 ("classes.list_page", ("classes.list_page", "classes.detail_page"), _("Classes"), "bi-mortarboard"),
+                 ("schedule.my_page", ("schedule.my_page",), _("Schedule"), "bi-calendar-week")] %}
 {% else %}
-  {% set tabs = [("dashboard.page", ("dashboard.page",), "Dashboard", "bi-house"),
-                 ("student.activities_page", ("student.activities_page", "student.answer_page"), "Activities", "bi-journal-text")] %}
+  {% set tabs = [("dashboard.page", ("dashboard.page",), _("Dashboard"), "bi-house"),
+                 ("student.activities_page", ("student.activities_page", "student.answer_page"), _("Activities"), "bi-journal-text")] %}
 {% endif %}
 
 <nav class="navbar bg-success">
@@ -27,9 +27,9 @@
     <!-- Quick language menu, first in the row, before the theme menu. language.js saves the choice (a cookie) and reloads. -->
     <div class="dropdown">
       <button class="btn btn-outline-secondary bi bi-translate" type="button" data-bs-toggle="dropdown"
-              aria-expanded="false" aria-label="Change language" title="Change language"></button>
+              aria-expanded="false" aria-label="{{ _("Change language") }}" title="{{ _("Change language") }}"></button>
       <ul class="dropdown-menu dropdown-menu-end">
-        <li><h6 class="dropdown-header">Language</h6></li>
+        <li><h6 class="dropdown-header">{{ _("Language") }}</h6></li>
         <li><button class="dropdown-item" type="button" data-language-choice="en">English</button></li>
         <li><button class="dropdown-item" type="button" data-language-choice="tl">Taglish</button></li>
       </ul>
@@ -37,9 +37,9 @@
     <!-- Quick theme menu. theme.js saves the choice and marks the current one. -->
     <div class="dropdown">
       <button class="btn btn-outline-secondary bi bi-circle-half" type="button" data-bs-toggle="dropdown"
-              aria-expanded="false" aria-label="Change theme" title="Change theme"></button>
+              aria-expanded="false" aria-label="{{ _("Change theme") }}" title="{{ _("Change theme") }}"></button>
       <ul class="dropdown-menu dropdown-menu-end">
-        <li><h6 class="dropdown-header">Theme</h6></li>
+        <li><h6 class="dropdown-header">{{ _("Theme") }}</h6></li>
         {% for value, label in (("auto", "Auto"), ("light", "Light"), ("dark", "Dark"), ("darcula", "Darcula"),
                                 ("solarized", "Solarized"), ("neon", "Neon")) %}
         <li><button class="dropdown-item" type="button" data-theme-choice="{{ value }}">{{ label }}</button></li>
@@ -47,43 +47,43 @@
       </ul>
     </div>
     <button id="palette-button" class="btn btn-outline-secondary bi bi-search" type="button"
-            aria-label="Quick jump (Ctrl+K)" title="Quick jump (Ctrl+K)"></button>
+            aria-label="{{ _("Quick jump (Ctrl+K)") }}" title="{{ _("Quick jump (Ctrl+K)") }}"></button>
     <!-- One account menu for every screen size: Settings (admin), Password and Logout. -->
     <div class="dropdown">
       <button class="btn btn-outline-secondary bi bi-person-circle dropdown-toggle" type="button"
-              data-bs-toggle="dropdown" aria-expanded="false" aria-label="Account menu">
+              data-bs-toggle="dropdown" aria-expanded="false" aria-label="{{ _("Account menu") }}">
         <span class="d-none d-sm-inline"> {{ user.name }}</span>
       </button>
       <ul class="dropdown-menu dropdown-menu-end">
         <li><h6 class="dropdown-header">{{ user.name }} ({{ user.role }})</h6></li>
         {% if SCHOOL_YEARS %}
         <li class="px-3 pb-2">
-          <label class="form-label small text-body-secondary mb-1" for="year-select">School year</label>
+          <label class="form-label small text-body-secondary mb-1" for="year-select">{{ _("School year") }}</label>
           <select id="year-select" class="form-select form-select-sm">
             {% for year in SCHOOL_YEARS.years %}
             <option value="{{ year.id }}" {{ 'selected' if year.id == SCHOOL_YEARS.viewing_id }}>
-              {{ year.name }}{{ ' (current)' if year.current }}
+              {{ year.name }}{{ (" " ~ _("(current)")) if year.current }}
             </option>
             {% endfor %}
           </select>
         </li>
         <li><hr class="dropdown-divider"></li>
         {% endif %}
-        <li><a class="dropdown-item bi bi-palette {{ 'active' if request.endpoint == 'display.page' }}" href="{{ url_for('display.page') }}"> Display</a></li>
+        <li><a class="dropdown-item bi bi-palette {{ 'active' if request.endpoint == 'display.page' }}" href="{{ url_for('display.page') }}"> {{ _("Display") }}</a></li>
         {% if CHATBOT %}
         <!-- chat.js sets the text and the icon (Hide or Show GuroBot); the choice is kept in this browser. -->
         <li><button id="chat-visibility" class="dropdown-item bi bi-eye-slash" type="button"> Hide GuroBot</button></li>
         {% endif %}
         {% if user.role in ("admin", "teacher", "student") %}
-        <li><a class="dropdown-item bi bi-star {{ 'active' if request.endpoint == 'feedback.page' }}" href="{{ url_for('feedback.page') }}"> Feedback</a></li>
+        <li><a class="dropdown-item bi bi-star {{ 'active' if request.endpoint == 'feedback.page' }}" href="{{ url_for('feedback.page') }}"> {{ _("Feedback") }}</a></li>
         {% endif %}
         {% if user.role == "admin" %}
-        <li><a class="dropdown-item bi bi-gear {{ 'active' if request.endpoint == 'settings.page' }}" href="{{ url_for('settings.page') }}"> Settings</a></li>
+        <li><a class="dropdown-item bi bi-gear {{ 'active' if request.endpoint == 'settings.page' }}" href="{{ url_for('settings.page') }}"> {{ _("Settings") }}</a></li>
         {% endif %}
-        <li><a class="dropdown-item bi bi-key" href="{{ url_for('auth.change_password_page') }}"> Password</a></li>
-        <li><a class="dropdown-item bi bi-shield-lock {{ 'active' if request.endpoint == 'recovery.code_page' }}" href="{{ url_for('recovery.code_page') }}"> Recovery code</a></li>
+        <li><a class="dropdown-item bi bi-key" href="{{ url_for('auth.change_password_page') }}"> {{ _("Password") }}</a></li>
+        <li><a class="dropdown-item bi bi-shield-lock {{ 'active' if request.endpoint == 'recovery.code_page' }}" href="{{ url_for('recovery.code_page') }}"> {{ _("Recovery code") }}</a></li>
         <li><hr class="dropdown-divider"></li>
-        <li><button id="logout-button" class="dropdown-item bi bi-box-arrow-right" type="button"> Logout</button></li>
+        <li><button id="logout-button" class="dropdown-item bi bi-box-arrow-right" type="button"> {{ _("Logout") }}</button></li>
       </ul>
     </div>
     </div>
@@ -116,9 +116,7 @@
 <div class="container mt-2">
   <div class="alert alert-warning py-2 mb-0 small" role="alert">
     <i class="bi bi-clock-history" aria-hidden="true"></i>
-    You are looking at the school year
-    {% for year in SCHOOL_YEARS.years if year.id == SCHOOL_YEARS.viewing_id %}<strong>{{ year.name }}</strong>{% endfor %}.
-    It is over, so nothing can be changed.
+    {% for year in SCHOOL_YEARS.years if year.id == SCHOOL_YEARS.viewing_id %}{{ _("You are looking at the school year {year}. It is over, so nothing can be changed.", year=year.name) }}{% endfor %}
   </div>
 </div>
 {% endif %}
@@ -130,13 +128,13 @@
 {# Quick jump: filled in by palette.js. The pages of the role are handed over as JSON. #}
 {% set palette_pages = [] %}
 {% for endpoint, actives, label, icon in tabs %}
-  {% set _ = palette_pages.append({"label": label, "icon": icon, "href": url_for(endpoint)}) %}
+  {% set added = palette_pages.append({"label": label, "icon": icon, "href": url_for(endpoint)}) %}
 {% endfor %}
-<dialog id="palette" class="palette" aria-label="Quick jump" data-role="{{ user.role }}"
+<dialog id="palette" class="palette" aria-label="{{ _("Quick jump") }}" data-role="{{ user.role }}"
         data-pages="{{ palette_pages | tojson | forceescape }}">
-  <input id="palette-input" class="palette-input" type="search" placeholder="Jump to..." autocomplete="off"
-         aria-label="Search pages, classes and activities">
+  <input id="palette-input" class="palette-input" type="search" placeholder="{{ _("Jump to...") }}" autocomplete="off"
+         aria-label="{{ _("Search pages, classes and activities") }}">
   <ul id="palette-list" class="palette-list"></ul>
-  <div class="palette-hint">Arrow keys to move · Enter to open · Esc to close</div>
+  <div class="palette-hint">{{ _("Arrow keys to move · Enter to open · Esc to close") }}</div>
 </dialog>
 <script src="{{ url_for('static', filename='js/palette.js') }}" defer></script>

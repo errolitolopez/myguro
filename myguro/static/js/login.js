@@ -30,7 +30,7 @@ form.addEventListener("submit", async (event) => {
   const username = usernameInput.value.trim();
   const password = passwordInput.value;
   if (!username || !password) {
-    showError("Enter your username and password.");
+    showError(t("Enter your username and password."));
     return;
   }
 
@@ -53,9 +53,9 @@ form.addEventListener("submit", async (event) => {
     // reads it from the field to offer "Save password?".
     passwordInput.value = "";
     passwordInput.focus();
-    showError(data.error || "Login failed.");
+    showError(data.error || t("Login failed."));
   } catch {
-    showError("Cannot reach the server. Check your connection.");
+    showError(t("Cannot reach the server. Check your connection."));
   } finally {
     button.disabled = false;
   }

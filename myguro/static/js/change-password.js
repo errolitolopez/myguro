@@ -28,15 +28,15 @@ form.addEventListener("submit", async (event) => {
   errorBox.classList.add("d-none");
 
   if (!currentInput.value) {
-    showError("Enter your current password.");
+    showError(t("Enter your current password."));
     return;
   }
   if (newInput.value.length < 6) {
-    showError("New password must be at least 6 characters.");
+    showError(t("New password must be at least {min} characters.", { min: 6 }));
     return;
   }
   if (newInput.value !== confirmInput.value) {
-    showError("The two new passwords don't match.");
+    showError(t("The two new passwords don't match."));
     return;
   }
 
@@ -61,9 +61,9 @@ form.addEventListener("submit", async (event) => {
       return;
     }
     const data = await response.json();
-    showError(data.error || "Could not save the password.");
+    showError(data.error || t("Could not save the password."));
   } catch {
-    showError("Cannot reach the server. Check your connection.");
+    showError(t("Cannot reach the server. Check your connection."));
   } finally {
     button.disabled = false;
   }

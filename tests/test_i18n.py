@@ -63,7 +63,7 @@ def test_the_page_carries_the_dictionary_only_in_taglish(monkeypatch):
 
 
 def test_javascript_has_the_same_text_helper():
-    script = open("myguro/static/js/common.js").read()
+    script = open("myguro/static/js/i18n.js").read()  # not in common.js: the login page does not load that
     assert "function t(" in script and "window.TEXT" in script
 
 
@@ -80,3 +80,14 @@ def test_the_language_script_keeps_the_choice_in_a_cookie_only():
     script = open("myguro/static/js/language.js").read()
     assert 'COOKIE = "myguro-lang"' in script and "SameSite=Lax" in script and "ONE_YEAR = 31536000" in script
     assert "location.reload()" in script and "localStorage" not in script
+
+
+def test_the_login_page_shows_taglish_when_the_cookie_says_so():
+    english = flask_app.test_client().get("/login").get_data(as_text=True)
+    client = flask_app.test_client()
+    client.set_cookie("myguro-lang", "tl")
+    taglish = client.get("/login").get_data(as_text=True)
+    # The visible text changes (the Taglish page also carries the English sentence as a key in window.TEXT)
+    assert ">Forgot your password?<" in english and ">Nakalimutan mo ba ang password mo?<" not in english
+    assert ">Nakalimutan mo ba ang password mo?<" in taglish and ">Forgot your password?<" not in taglish
+    assert '"Forgot your password?": "Nakalimutan mo ba ang password mo?"' in taglish

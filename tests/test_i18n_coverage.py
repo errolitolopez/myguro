@@ -7,7 +7,15 @@ import pytest
 from myguro.i18n.tl import TAGLISH
 
 # The files whose text is translated so far. Each translating task adds its files here.
-TRANSLATED_FILES = []
+TRANSLATED_FILES = [
+    # Shared and sign-in pages
+    "myguro/templates/_navbar.html", "myguro/templates/base.html", "myguro/templates/_language_select.html",
+    "myguro/templates/_theme_select.html", "myguro/templates/login.html", "myguro/templates/forgot_password.html",
+    "myguro/templates/change_password.html", "myguro/templates/recovery_code.html",
+    "myguro/static/js/login.js", "myguro/static/js/forgot-password.js", "myguro/static/js/change-password.js",
+    "myguro/static/js/recovery-code.js", "myguro/static/js/password-toggle.js", "myguro/static/js/palette.js",
+    "myguro/static/js/common.js",
+]
 
 PLACEHOLDER = re.compile(r"\{(\w+)\}")
 QUOTED = r'"((?:[^"\\]|\\.)*)"'

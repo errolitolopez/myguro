@@ -17,6 +17,14 @@ function formatDay(utcText) {
   });
 }
 
+// usesText("Oct 26, 2026", 2) -> "You have a recovery code (made Oct 26, 2026). It can be used 2 more times to reset your password."
+// Two sentences (one and many) so each language can write its own plural.
+function usesText(day, left) {
+  return left === 1
+    ? t("You have a recovery code (made {day}). It can be used 1 more time to reset your password.", { day })
+    : t("You have a recovery code (made {day}). It can be used {count} more times to reset your password.", { day, count: left });
+}
+
 async function loadStatus() {
   hideError("recovery-error");
   try {
@@ -25,27 +33,26 @@ async function loadStatus() {
     const data = await response.json();
     if (!response.ok) {
       statusBox.replaceChildren();
-      showError("recovery-error", data.error || "Could not load your recovery code.");
+      showError("recovery-error", data.error || t("Could not load your recovery code."));
       return;
     }
     const exists = data.created_at !== null; // a code was made (it may be used up)
     const line = document.createElement("div");
     line.className = "fw-semibold bi " + (data.has_code ? "bi-shield-check" : "bi-shield-exclamation");
     line.textContent = data.has_code
-      ? ` You have a recovery code (made ${formatDay(data.created_at)}). It can be used ` +
-        `${plural(data.uses_left, "more time")} to reset your password.`
-      : exists ? " Your recovery code is used up. Make a new one." : " You don't have a recovery code yet.";
+      ? ` ${usesText(formatDay(data.created_at), data.uses_left)}`
+      : exists ? ` ${t("Your recovery code is used up. Make a new one.")}` : ` ${t("You don't have a recovery code yet.")}`;
     statusBox.replaceChildren(line);
     // Replacing a code that still works needs a confirmation; a used-up one does not.
     hasCode = data.has_code;
-    makeButton.textContent = exists ? "Make a new code" : "Make a recovery code";
+    makeButton.textContent = exists ? t("Make a new code") : t("Make a recovery code");
     document.getElementById("recovery-replace-note").classList.toggle("d-none", !data.has_code);
     // With a code already, the password box stays hidden until the person chooses to make a new one.
     form.classList.toggle("d-none", exists);
     startButton.classList.toggle("d-none", !exists);
   } catch {
     statusBox.replaceChildren();
-    showError("recovery-error", "Cannot reach the server. Check your connection.");
+    showError("recovery-error", t("Cannot reach the server. Check your connection."));
   }
 }
 
@@ -63,7 +70,7 @@ async function makeCode(button) {
     const data = await response.json();
     replaceModal.hide();
     if (!response.ok) {
-      showError("recovery-error", data.error || "Could not make the code.");
+      showError("recovery-error", data.error || t("Could not make the code."));
       return;
     }
     passwordInput.value = "";
@@ -72,7 +79,7 @@ async function makeCode(button) {
     loadStatus();
   } catch {
     replaceModal.hide();
-    showError("recovery-error", "Cannot reach the server. Check your connection.");
+    showError("recovery-error", t("Cannot reach the server. Check your connection."));
   } finally {
     stopLoading();
   }
@@ -82,7 +89,7 @@ form.addEventListener("submit", (event) => {
   event.preventDefault();
   hideError("recovery-error");
   if (!passwordInput.value) {
-    showError("recovery-error", "Enter your current password.");
+    showError("recovery-error", t("Enter your current password."));
     return;
   }
   // The first code needs no question; replacing one does.

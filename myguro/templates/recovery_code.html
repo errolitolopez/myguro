@@ -1,20 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}Recovery code · MyGuro{% endblock %}
+{% block title %}{{ _("Recovery code") }} · MyGuro{% endblock %}
 
 {% block content %}
 {% include "_navbar.html" %}
 
 <main id="recovery-page" class="container py-3" style="max-width: 560px;">
-  <h1 class="h4">Recovery code</h1>
+  <h1 class="h4">{{ _("Recovery code") }}</h1>
   <div id="welcome" class="alert alert-info d-none" role="status">
-    Your password is set. One more step: make a recovery code, so you can reset your password yourself if you
-    forget it.
+    {{ _("Your password is set. One more step: make a recovery code, so you can reset your password yourself if you forget it.") }}
   </div>
   <p class="text-body-secondary">
-    If you forget your password, this code lets you choose a new one without asking the admin. It is long and
-    random, so nobody can guess it, and it works 3 times; after that you make a new one. Save it somewhere safe, like your phone's notes or a password manager. Anyone
-    who has it can reset your password, so don't share it.
+    {{ _("If you forget your password, this code lets you choose a new one without asking the admin. It is long and random, so nobody can guess it, and it works 3 times; after that you make a new one. Save it somewhere safe, like your phone's notes or a password manager. Anyone who has it can reset your password, so don't share it.") }}
   </p>
 
   <div id="recovery-error" class="alert alert-danger d-none" role="alert"></div>
@@ -24,25 +21,25 @@
       <div id="recovery-status" class="mb-3">{% include "_skeleton.html" %}</div>
 
       <!-- With a code already, only this button shows; the password box appears after it is tapped. -->
-      <button id="recovery-start" type="button" class="btn btn-outline-secondary bi bi-arrow-repeat d-none">Make a new code</button>
+      <button id="recovery-start" type="button" class="btn btn-outline-secondary bi bi-arrow-repeat d-none">{{ _("Make a new code") }}</button>
 
       <form id="recovery-form" novalidate>
-        <label for="recovery-password" class="form-label">Your current password</label>
+        <label for="recovery-password" class="form-label">{{ _("Your current password") }}</label>
         <div class="input-group mb-2">
           <input id="recovery-password" type="password" class="form-control" autocomplete="current-password" required>
           <button type="button" class="btn btn-outline-secondary" data-toggle-password="recovery-password"
-                  aria-label="Show password"><i class="bi bi-eye"></i></button>
+                  aria-label="{{ _("Show password") }}"><i class="bi bi-eye"></i></button>
         </div>
         <div id="recovery-replace-note" class="form-text mb-2 d-none">
-          Making a new code stops the old one from working.
+          {{ _("Making a new code stops the old one from working.") }}
         </div>
-        <button id="recovery-make" type="submit" class="btn btn-success bi bi-shield-lock">Make a recovery code</button>
+        <button id="recovery-make" type="submit" class="btn btn-success bi bi-shield-lock">{{ _("Make a recovery code") }}</button>
       </form>
 
       <div id="recovery-result" class="mt-3"></div>
     </div>
   </div>
-  <a href="{{ url_for('dashboard.page') }}" class="small">Back to dashboard</a>
+  <a href="{{ url_for('dashboard.page') }}" class="small">{{ _("Back to dashboard") }}</a>
 </main>
 
 <!-- Asked before a code is replaced, so it is not done by accident or over and over. -->
@@ -50,16 +47,15 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header border-0 pb-0">
-        <h2 class="modal-title h5" id="replace-modal-title">Replace your recovery code?</h2>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h2 class="modal-title h5" id="replace-modal-title">{{ _("Replace your recovery code?") }}</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ _("Close") }}"></button>
       </div>
       <div class="modal-body">
-        Your old code will stop working right away. If you saved it somewhere, that copy will not work any more.
-        You will get a new code to save.
+        {{ _("Your old code will stop working right away. If you saved it somewhere, that copy will not work any more. You will get a new code to save.") }}
       </div>
       <div class="modal-footer border-0 pt-0">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Keep my old code</button>
-        <button id="replace-confirm" type="button" class="btn btn-danger bi bi-arrow-repeat">Replace it</button>
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ _("Keep my old code") }}</button>
+        <button id="replace-confirm" type="button" class="btn btn-danger bi bi-arrow-repeat">{{ _("Replace it") }}</button>
       </div>
     </div>
   </div>

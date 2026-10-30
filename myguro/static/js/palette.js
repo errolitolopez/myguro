@@ -10,7 +10,7 @@
   const role = dialog.dataset.role;
   const pages = JSON.parse(dialog.dataset.pages);
 
-  let items = pages.map((page) => ({ label: page.label, icon: page.icon, kind: "Page", href: page.href }));
+  let items = pages.map((page) => ({ label: page.label, icon: page.icon, kind: t("Page"), href: page.href }));
   let loaded = false;
   let shown = [];
   let active = 0;
@@ -24,17 +24,17 @@
         const [classes, activities] = await Promise.all([fetch("/api/classes"), fetch("/api/activities")]);
         if (classes.ok) {
           (await classes.json()).classes.forEach((item) =>
-            items.push({ label: typeof classTitle === "function" ? classTitle(item) : item.name, icon: "bi-mortarboard", kind: "Class", href: `/classes/${item.id}` }));
+            items.push({ label: typeof classTitle === "function" ? classTitle(item) : item.name, icon: "bi-mortarboard", kind: t("Class"), href: `/classes/${item.id}` }));
         }
         if (activities.ok) {
           (await activities.json()).activities.forEach((item) =>
-            items.push({ label: item.title, icon: "bi-journal-text", kind: "Activity", href: `/activities/${item.id}` }));
+            items.push({ label: item.title, icon: "bi-journal-text", kind: t("Activity"), href: `/activities/${item.id}` }));
         }
       } else if (role === "student") {
         const response = await fetch("/api/my-activities");
         if (response.ok) {
           (await response.json()).activities.forEach((item) =>
-            items.push({ label: item.title, icon: "bi-journal-text", kind: "Activity", href: `/my-activities/${item.id}` }));
+            items.push({ label: item.title, icon: "bi-journal-text", kind: t("Activity"), href: `/my-activities/${item.id}` }));
         }
       }
     } catch {
@@ -50,7 +50,7 @@
     if (shown.length === 0) {
       const empty = document.createElement("li");
       empty.className = "palette-empty";
-      empty.textContent = "Nothing found.";
+      empty.textContent = t("Nothing found.");
       list.replaceChildren(empty);
       return;
     }

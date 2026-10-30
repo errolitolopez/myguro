@@ -1,12 +1,5 @@
 // Helpers shared by the logged-in pages.
 
-// t("{count} to do", { count: 3 }) -> "3 pa ang gagawin" in Taglish, "3 to do" in English. The English sentence is
-// the key; window.TEXT holds the Taglish (empty in English), and a sentence with no entry stays English.
-function t(text, values = {}) {
-  const found = (window.TEXT && window.TEXT[text]) || text;
-  return found.replace(/\{(\w+)\}/g, (match, name) => (name in values ? String(values[name]) : match));
-}
-
 function showError(elementId, message) {
   const box = document.getElementById(elementId);
   box.textContent = message;
@@ -210,7 +203,7 @@ function showRecoveryCode(box, code, username) {
   clearInterval(box.recoveryTimer); // a code shown here before no longer counts down
   const label = document.createElement("div");
   label.className = "small text-body-secondary mb-1";
-  label.textContent = "Your recovery code";
+  label.textContent = t("Your recovery code");
   const codeText = document.createElement("div");
   codeText.className = "recovery-code";
   codeText.textContent = code;
@@ -218,21 +211,21 @@ function showRecoveryCode(box, code, username) {
   const copy = document.createElement("button");
   copy.type = "button";
   copy.className = "btn btn-sm btn-success bi bi-clipboard";
-  copy.textContent = "Copy";
+  copy.textContent = t("Copy");
   copy.addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(code);
-      copy.textContent = "Copied";
+      copy.textContent = t("Copied");
     } catch {
-      copy.textContent = "Select the code and copy it";
+      copy.textContent = t("Select the code and copy it");
     }
-    setTimeout(() => (copy.textContent = "Copy"), 2500);
+    setTimeout(() => (copy.textContent = t("Copy")), 2500);
   });
 
   const download = document.createElement("button");
   download.type = "button";
   download.className = "btn btn-sm btn-outline-secondary bi bi-download";
-  download.textContent = "Download";
+  download.textContent = t("Download");
   download.addEventListener("click", () => {
     const text = `MyGuro recovery code for ${username}\n\n${code}\n\n` +
       "Keep this safe. Anyone who has it can reset your password.\n";
@@ -248,9 +241,8 @@ function showRecoveryCode(box, code, username) {
   buttons.append(copy, download);
   const warning = document.createElement("div");
   warning.className = "alert alert-warning small mt-3 mb-0";
-  warning.textContent = `This code is shown only once and hides itself in ${RECOVERY_CODE_SHOW_SECONDS} seconds. Save it now, ` +
-    "for example in your phone's notes or a " +
-    "password manager. Anyone who has it can reset your password, so don't share it.";
+  warning.textContent = t("This code is shown only once and hides itself in {seconds} seconds. Save it now, for example in your phone's notes or a password manager. Anyone who has it can reset your password, so don't share it.",
+    { seconds: RECOVERY_CODE_SHOW_SECONDS });
   // The countdown: a bar that empties, and the seconds left in words.
   const countdown = document.createElement("div");
   countdown.className = "mt-3";
@@ -271,7 +263,7 @@ function showRecoveryCode(box, code, username) {
   requestAnimationFrame(() => requestAnimationFrame(() => (bar.style.width = "0%")));
 
   let left = RECOVERY_CODE_SHOW_SECONDS;
-  const secondsText = () => `Hiding in ${plural(left, "second")}.`;
+  const secondsText = () => (left === 1 ? t("Hiding in 1 second.") : t("Hiding in {count} seconds.", { count: left }));
   seconds.textContent = secondsText();
   box.recoveryTimer = setInterval(() => {
     left -= 1;
@@ -283,8 +275,7 @@ function showRecoveryCode(box, code, username) {
     const hidden = document.createElement("div");
     hidden.className = "alert alert-secondary mb-0";
     hidden.setAttribute("role", "status");
-    hidden.textContent = "The code is hidden now and is not shown again. If you did not save it, make a new " +
-      "one (account menu, Recovery code).";
+    hidden.textContent = t("The code is hidden now and is not shown again. If you did not save it, make a new one (account menu, Recovery code).");
     box.replaceChildren(hidden);
   }, 1000);
 }

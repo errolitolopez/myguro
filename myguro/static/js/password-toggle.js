@@ -8,7 +8,7 @@ document.querySelectorAll("[data-toggle-password]").forEach((button) => {
     const show = input.type === "password";
     input.type = show ? "text" : "password";
     icon.className = show ? "bi bi-eye-slash" : "bi bi-eye";
-    button.setAttribute("aria-label", show ? "Hide password" : "Show password");
+    button.setAttribute("aria-label", show ? t("Hide password") : t("Show password"));
     input.focus();
   });
 });
