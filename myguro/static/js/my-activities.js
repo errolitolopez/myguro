@@ -58,7 +58,10 @@ function activityItem(activity) {
   title.textContent = activity.title;
   const details = document.createElement("div");
   details.className = "small text-body-secondary";
-  details.textContent = [activity.subject, activity.class_name, activity.teacher].filter(Boolean).join(" · ");
+  // Inside a subject the header already says the subject and the teacher, so the row only adds the class.
+  const inSubject = chosenSubject() !== null;
+  details.textContent = (inSubject ? [activity.class_name] : [activity.subject, activity.class_name, activity.teacher])
+    .filter(Boolean).join(" · ");
   left.append(title, details);
 
   // A small ring with the percent once the score is released and there is something checked.
