@@ -265,4 +265,46 @@ TAGLISH = {
     "Submit your answers?": "I-submit na ba ang mga sagot mo?",
     "You can't change your answers after submitting.": "Hindi mo na mababago ang mga sagot mo pagkatapos mag-submit.",
     "Not yet": "Hindi pa",
+    # --- Feedback ---
+    "Rate MyGuro": "I-rate ang MyGuro",
+    "Tap the stars: 1 is poor and 5 is excellent. Rate every question, then send. Your answers are private: the admin only sees totals, never who answered. You can send feedback once.":
+        "I-tap ang mga star: 1 ang pinakamababa at 5 ang pinakamataas. I-rate ang bawat tanong, tapos i-send. Pribado ang mga sagot mo: totals lang ang nakikita ng admin, hindi kung sino ang sumagot. Isang beses ka lang puwedeng magpadala ng feedback.",
+    "Thank you! Your feedback was sent.": "Salamat! Naipadala na ang feedback mo.",
+    "You already sent your feedback. Thank you!": "Naipadala mo na ang feedback mo. Salamat!",
+    "Send feedback": "Ipadala ang feedback",
+    "{value} of {max}": "{value} sa {max}",
+    "Could not load the questions.": "Hindi na-load ang mga tanong.",
+    "Please rate every question.": "Paki-rate ang bawat tanong.",
+    "Could not send your feedback.": "Hindi naipadala ang feedback mo.",
+    # The questions people rate (they live in domain/feedback.py)
+    "MyGuro is easy to use.": "Madaling gamitin ang MyGuro.",
+    "The text is easy to read on my screen.": "Madaling basahin ang text sa screen ko.",
+    "I know what to do on each page.": "Alam ko kung ano ang gagawin sa bawat page.",
+    "I like how MyGuro looks.": "Gusto ko ang itsura ng MyGuro.",
+    "Overall, how would you rate MyGuro?": "Sa kabuuan, ano ang rating mo sa MyGuro?",
+    # --- Display ---
+    "How MyGuro looks to you. These choices are saved in this browser only, so on another phone or computer you choose again.":
+        "Kung paano lumalabas ang MyGuro para sa iyo. Sa browser na ito lang naka-save ang mga pinili mo, kaya sa ibang phone o computer ay pipili ka ulit.",
+    "Reading": "Reading",
+    "Effects": "Effects",
+    "Glass blur and moving background": "Glass blur at gumagalaw na background",
+    "Turn this off if pages feel slow or choppy, which can happen on a phone. Panels become plain and nothing moves behind them. Until you choose, phones start with it off and computers with it on.":
+        "I-off ito kung mabagal o putol-putol ang mga page, na puwedeng mangyari sa phone. Magiging plain ang mga panel at walang gagalaw sa likod. Hangga't hindi ka pumipili, naka-off ito sa mga phone at naka-on sa mga computer.",
+    "Menu": "Menu",
+    "Menu bar at the bottom on phones": "Menu bar sa ibaba sa mga phone",
+    "On: the menu is a bar at the bottom of the screen, within reach of your thumb. Off: the menu tabs show at the top, like on a computer. Wider screens always show them at the top.":
+        "On: nasa ibaba ng screen ang menu bilang bar, abot ng hinlalaki mo. Off: nasa itaas ang mga menu tab, gaya sa computer. Ang mas malalapad na screen ay laging nasa itaas ang mga ito.",
+    "Preview": "Preview",
+    "Read the paragraph below and answer the questions that follow. A good reading text is easy on the eyes: the letters are big enough, the lines are not crowded, and the edges are tidy. Change the choices above until this paragraph feels comfortable to read for a long time.":
+        "Basahin ang talata sa ibaba at sagutin ang mga tanong pagkatapos nito. Madaling tingnan sa mata ang magandang babasahin: sapat ang laki ng mga letra, hindi siksik ang mga linya, at maayos ang mga gilid. Baguhin ang mga pinili sa itaas hanggang maging komportable ang pagbasa ng talatang ito nang matagal.",
+    "Text size": "Laki ng text",
+    "Small": "Maliit",
+    "Normal": "Normal",
+    "Large": "Malaki",
+    "Extra large": "Napakalaki",
+    "Text alignment": "Pagkakahanay ng text",
+    "Left": "Kaliwa",
+    "Justified": "Justified",
+    "Line spacing": "Pagitan ng linya",
+    "Relaxed": "Maluwag",
 }

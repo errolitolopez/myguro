@@ -22,6 +22,9 @@ TRANSLATED_FILES = [
     "myguro/templates/my_activities.html", "myguro/static/js/my-activities.js",
     # The answer page
     "myguro/templates/answer.html", "myguro/static/js/answer.js",
+    # Feedback and Display
+    "myguro/templates/feedback.html", "myguro/static/js/feedback.js", "myguro/templates/display.html",
+    "myguro/templates/_reading_settings.html",
 ]
 
 PLACEHOLDER = re.compile(r"\{(\w+)\}")
@@ -60,3 +63,11 @@ def test_no_sentence_is_wrapped_twice():
     # A template sentence wrapped inside another (_("{{ _("To do") }}")) draws as broken text and fails the page.
     for path in [p for p in TRANSLATED_FILES if p.endswith(".html")]:
         assert '_("{{' not in open(path).read(), path
+
+
+def test_every_feedback_question_has_a_taglish_entry():
+    # The questions live on the server (domain/feedback.py), so the regex over the pages cannot see them.
+    from myguro.domain.feedback import QUESTIONS
+
+    missing = [text for _, text in QUESTIONS if text not in TAGLISH]
+    assert not missing, f"no Taglish for the feedback questions: {missing}"

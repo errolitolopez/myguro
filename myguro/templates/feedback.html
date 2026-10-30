@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Feedback · MyGuro{% endblock %}
+{% block title %}{{ _("Feedback") }} · MyGuro{% endblock %}
 
 {% block content %}
 {% include "_navbar.html" %}
@@ -9,24 +9,23 @@
   <!-- The same star circle as the feedback pop-up. -->
   <div class="text-center mb-3">
     <div class="modal-badge" aria-hidden="true"><i class="bi bi-star-fill"></i></div>
-    <h1 class="h4 mb-1">Rate MyGuro</h1>
+    <h1 class="h4 mb-1">{{ _("Rate MyGuro") }}</h1>
   </div>
   <p class="text-body-secondary text-center">
-    Tap the stars: 1 is poor and 5 is excellent. Rate every question, then send. Your answers are private:
-    the admin only sees totals, never who answered. You can send feedback once.
+    {{ _("Tap the stars: 1 is poor and 5 is excellent. Rate every question, then send. Your answers are private: the admin only sees totals, never who answered. You can send feedback once.") }}
   </p>
 
   <div id="feedback-error" class="alert alert-danger d-none" role="alert"></div>
   <div id="feedback-saved" class="alert alert-success d-none" role="status">
-    <i class="bi bi-check-circle-fill" aria-hidden="true"></i> Thank you! Your feedback was sent.
+    <i class="bi bi-check-circle-fill" aria-hidden="true"></i> {{ _("Thank you! Your feedback was sent.") }}
   </div>
-  <div id="feedback-already" class="alert alert-info d-none" role="status">You already sent your feedback. Thank you!</div>
+  <div id="feedback-already" class="alert alert-info d-none" role="status">{{ _("You already sent your feedback. Thank you!") }}</div>
 
   <form id="feedback-form" novalidate>
     <div id="feedback-questions" class="d-grid gap-3 mb-3">
       <div class="list-group">{% include "_skeleton.html" %}</div>
     </div>
-    <button id="feedback-save" type="submit" class="btn btn-success bi bi-check2">Send feedback</button>
+    <button id="feedback-save" type="submit" class="btn btn-success bi bi-check2">{{ _("Send feedback") }}</button>
   </form>
 </main>
 {% endblock %}

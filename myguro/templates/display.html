@@ -1,62 +1,59 @@
 {% extends "base.html" %}
 
-{% block title %}Display · MyGuro{% endblock %}
+{% block title %}{{ _("Display") }} · MyGuro{% endblock %}
 
 {% block content %}
 {% include "_navbar.html" %}
 
 <main class="container py-3" style="max-width: 640px;">
-  <h1 class="h4">Display</h1>
+  <h1 class="h4">{{ _("Display") }}</h1>
   <p class="text-body-secondary">
-    How MyGuro looks to you. These choices are saved in this browser only, so on another phone or
-    computer you choose again.
+    {{ _("How MyGuro looks to you. These choices are saved in this browser only, so on another phone or computer you choose again.") }}
   </p>
 
   <div class="card mb-3">
     <div class="card-body">
-      <h2 class="h5 bi bi-translate"> Language</h2>
+      <h2 class="h5 bi bi-translate"> {{ _("Language") }}</h2>
       {% include "_language_select.html" %}
     </div>
   </div>
 
   <div class="card mb-3">
     <div class="card-body">
-      <h2 class="h5 bi bi-palette"> Theme</h2>
+      <h2 class="h5 bi bi-palette"> {{ _("Theme") }}</h2>
       {% include "_theme_select.html" %}
     </div>
   </div>
 
   <div class="card mb-3">
     <div class="card-body">
-      <h2 class="h5 bi bi-fonts"> Reading</h2>
+      <h2 class="h5 bi bi-fonts"> {{ _("Reading") }}</h2>
       {% include "_reading_settings.html" %}
     </div>
   </div>
 
   <div class="card mb-3">
     <div class="card-body">
-      <h2 class="h5 bi bi-speedometer2"> Effects</h2>
+      <h2 class="h5 bi bi-speedometer2"> {{ _("Effects") }}</h2>
       <div class="form-check form-switch">
         <input id="effects-switch" class="form-check-input" type="checkbox" role="switch" data-reading-switch="effects">
-        <label for="effects-switch" class="form-check-label">Glass blur and moving background</label>
+        <label for="effects-switch" class="form-check-label">{{ _("Glass blur and moving background") }}</label>
       </div>
       <div class="form-text">
-        Turn this off if pages feel slow or choppy, which can happen on a phone. Panels become plain and
-        nothing moves behind them. Until you choose, phones start with it off and computers with it on.
+        {{ _("Turn this off if pages feel slow or choppy, which can happen on a phone. Panels become plain and nothing moves behind them. Until you choose, phones start with it off and computers with it on.") }}
       </div>
     </div>
   </div>
 
   <div class="card mb-3">
     <div class="card-body">
-      <h2 class="h5 bi bi-layout-text-window-reverse"> Menu</h2>
+      <h2 class="h5 bi bi-layout-text-window-reverse"> {{ _("Menu") }}</h2>
       <div class="form-check form-switch">
         <input id="tab-bar-switch" class="form-check-input" type="checkbox" role="switch" data-reading-switch="tabbar">
-        <label for="tab-bar-switch" class="form-check-label">Menu bar at the bottom on phones</label>
+        <label for="tab-bar-switch" class="form-check-label">{{ _("Menu bar at the bottom on phones") }}</label>
       </div>
       <div class="form-text">
-        On: the menu is a bar at the bottom of the screen, within reach of your thumb. Off: the menu tabs show
-        at the top, like on a computer. Wider screens always show them at the top.
+        {{ _("On: the menu is a bar at the bottom of the screen, within reach of your thumb. Off: the menu tabs show at the top, like on a computer. Wider screens always show them at the top.") }}
       </div>
     </div>
   </div>
@@ -64,11 +61,9 @@
   <!-- A sample that follows the choices above, so a person sees the size, spacing and alignment at once. -->
   <div class="card">
     <div class="card-body reading-sample">
-      <h2 class="h5">Preview</h2>
+      <h2 class="h5">{{ _("Preview") }}</h2>
       <p class="mb-0">
-        Read the paragraph below and answer the questions that follow. A good reading text is easy on the
-        eyes: the letters are big enough, the lines are not crowded, and the edges are tidy. Change the
-        choices above until this paragraph feels comfortable to read for a long time.
+        {{ _("Read the paragraph below and answer the questions that follow. A good reading text is easy on the eyes: the letters are big enough, the lines are not crowded, and the edges are tidy. Change the choices above until this paragraph feels comfortable to read for a long time.") }}
       </p>
     </div>
   </div>

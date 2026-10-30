@@ -17,7 +17,7 @@ function starRating(key, text) {
   const label = document.createElement("div");
   label.className = "fw-semibold mb-2";
   label.id = `question-${key}`;
-  label.textContent = text;
+  label.textContent = t(text); // the question sentences are in domain/feedback.py; each has a Taglish entry (tests/test_i18n_coverage.py)
 
   const group = document.createElement("div");
   group.className = "star-rating";
@@ -29,7 +29,7 @@ function starRating(key, text) {
     star.className = "star";
     star.dataset.value = value;
     star.setAttribute("role", "radio");
-    star.setAttribute("aria-label", `${value} of ${MAX_STARS}`);
+    star.setAttribute("aria-label", t("{value} of {max}", { value, max: MAX_STARS }));
     star.append(document.createElement("i"));
     star.addEventListener("click", () => {
       ratings[key] = value;
@@ -68,7 +68,7 @@ async function loadFeedback() {
     const data = await response.json();
     if (!response.ok) {
       questionsBox.replaceChildren();
-      showError("feedback-error", data.error || "Could not load the questions.");
+      showError("feedback-error", data.error || t("Could not load the questions."));
       return;
     }
     if (data.submitted) {
@@ -81,7 +81,7 @@ async function loadFeedback() {
     }));
   } catch {
     questionsBox.replaceChildren();
-    showError("feedback-error", "Cannot reach the server. Check your connection.");
+    showError("feedback-error", t("Cannot reach the server. Check your connection."));
   }
 }
 
@@ -99,7 +99,7 @@ function showSent(id, celebrate = false) {
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (questionKeys.some((key) => !ratings[key])) {
-    showError("feedback-error", "Please rate every question.");
+    showError("feedback-error", t("Please rate every question."));
     return;
   }
   const stopLoading = startLoading(saveButton);
@@ -114,13 +114,13 @@ form.addEventListener("submit", async (event) => {
     if (!response) return;
     const data = await response.json();
     if (!response.ok) {
-      showError("feedback-error", data.error || "Could not send your feedback.");
+      showError("feedback-error", data.error || t("Could not send your feedback."));
       return;
     }
     showSent("feedback-saved", true);
     window.scrollTo({ top: 0 });
   } catch {
-    showError("feedback-error", "Cannot reach the server. Check your connection.");
+    showError("feedback-error", t("Cannot reach the server. Check your connection."));
   } finally {
     stopLoading();
   }
