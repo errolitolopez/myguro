@@ -6,9 +6,10 @@ import re
 from flask import Blueprint, jsonify, redirect, render_template, request, send_file, url_for
 
 from myguro.database import get_db
+from myguro.domain.file_password import clean_file_password
 from myguro.errors import ValidationError
 from myguro.exports import sheet_pdf_bytes
-from myguro.docx_files import read_docx_lines, sheet_docx_bytes, sheet_template_docx_bytes
+from myguro.docx_files import protect_docx, read_docx_lines, sheet_docx_bytes, sheet_template_docx_bytes
 from myguro.services import ActivityService, AssignmentService
 from myguro.web.security import current_user, json_body, role_required_api, role_required_page
 
@@ -33,32 +34,39 @@ def list_page():
     return render_template("activities.html", user=current_user())
 
 
-@bp.get("/activities/<int:activity_id>/print.pdf")
+@bp.route("/activities/<int:activity_id>/print.pdf", methods=["GET", "POST"])
 @role_required_page("teacher")
 def print_pdf(activity_id):
-    """The saved sheet as a PDF to print: the student copy, or with ?key=1 the copy with answers."""
+    """The saved sheet as a PDF to print. GET is the student copy. The copy with the answers is a POST
+    with key=1 and a password, and the PDF opens only with that password."""
     activities = service()
     if not activities.exists(activity_id):
         return redirect(url_for("activities.list_page"))
+    with_key = request.method == "POST" and request.form.get("key") == "1"
+    if request.args.get("key") == "1":  # the answer key is never given without a password
+        return redirect(url_for("activities.editor_page", activity_id=activity_id))
+    password = clean_file_password(request.form.get("password")) if with_key else None
     activity = activities.get(activity_id)
-    with_key = request.args.get("key") == "1"
     # Characters files can't have become "-": "Science Quiz 1 - answer key.pdf"
     name = file_name(activity["title"] + (" - answer key" if with_key else ""))
-    content = sheet_pdf_bytes(activity, current_user()["name"], with_key)
+    content = sheet_pdf_bytes(activity, current_user()["name"], with_key, password)
     return send_file(io.BytesIO(content), download_name=f"{name}.pdf",
                      mimetype="application/pdf")  # opens in the browser, which has Print and Download
 
 
-@bp.get("/activities/<int:activity_id>/export.<kind>")
+@bp.route("/activities/<int:activity_id>/export.<kind>", methods=["GET", "POST"])
 @role_required_page("teacher")
 def export(activity_id, kind):
     """Download the sheet with its answer key as Word (.docx), which the import reads so it can be
-    imported again as a new activity."""
+    imported again as a new activity. It has the answers, so it is a POST with a password and Word asks
+    for that password to open it (importing it again needs the password taken off first)."""
     activities = service()
-    if kind != "docx" or not activities.exists(activity_id):
-        return redirect(url_for("activities.list_page"))
+    if kind != "docx" or not activities.exists(activity_id) or request.method != "POST":
+        return redirect(url_for("activities.editor_page", activity_id=activity_id)
+                        if activities.exists(activity_id) else url_for("activities.list_page"))
+    password = clean_file_password(request.form.get("password"))
     activity = activities.get(activity_id)
-    content = sheet_docx_bytes(activity, current_user()["name"])
+    content = protect_docx(sheet_docx_bytes(activity, current_user()["name"]), password)
     return send_file(io.BytesIO(content), as_attachment=True, download_name=f"{file_name(activity['title'])}.docx",
                      mimetype=DOCX_TYPE)
 

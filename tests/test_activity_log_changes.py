@@ -4,6 +4,7 @@ import io
 from urllib.parse import urlencode
 
 from conftest import make_class
+from test_export_sheet import download_docx
 from test_student_import import upload, xlsx
 
 
@@ -157,7 +158,7 @@ def test_activity_lifecycle_is_logged(admin, teacher):
     teacher.put(f"/api/activities/{activity_id}/settings", json={"max_attempts": 3})
     copy_id = teacher.post(f"/api/activities/{activity_id}/duplicate").get_json()["activity"]["id"]
     teacher.delete(f"/api/activities/{copy_id}")  # never given: really deleted
-    docx = teacher.get(f"/activities/{activity_id}/export.docx").data
+    docx = download_docx(teacher, activity_id)
     teacher.post("/api/activities/import", data={"file": (io.BytesIO(docx), "s.docx"), "title": "Imported", "subject": "Science",
                                                  "dry_run": "1"}, content_type="multipart/form-data")  # a check only
     teacher.post("/api/activities/import", data={"file": (io.BytesIO(docx), "s.docx"), "title": "Imported", "subject": "Science",

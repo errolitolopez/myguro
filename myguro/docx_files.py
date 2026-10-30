@@ -13,6 +13,7 @@ from docx.opc.exceptions import PackageNotFoundError
 from docx.shared import Pt, RGBColor
 from docx.table import Table
 from docx.text.paragraph import Paragraph
+from msoffcrypto.format.ooxml import OOXMLFile
 
 from myguro.config import GENERATED_BY
 from myguro.errors import ValidationError
@@ -249,6 +250,13 @@ def sheet_docx_lines(activity):
                 if answer:
                     key.append(("p", f"{item}. {answer}"))
     return lines + [("h1", "ANSWER KEY")] + key
+
+
+def protect_docx(content, password):
+    """The Word file (bytes) encrypted so that Word asks for the password to open it."""
+    out = io.BytesIO()
+    OOXMLFile(io.BytesIO(content)).encrypt(password, out)
+    return out.getvalue()
 
 
 def sheet_docx_bytes(activity, teacher):

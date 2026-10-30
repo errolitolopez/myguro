@@ -6,9 +6,11 @@ as numbers so teachers can compute grades; the PDF is an A4 landscape page to pr
 
 import io
 import os
+import secrets
 from datetime import date, datetime, timedelta, timezone
 
 from fpdf import FPDF
+from fpdf.enums import AccessPermission, EncryptionMethod
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
@@ -603,10 +605,16 @@ def print_question(pdf, number, question, with_key):
     pdf.ln(1)
 
 
-def sheet_pdf_bytes(activity, teacher, with_key):
-    """The activity sheet as a PDF to print (bytes). with_key adds each answer and "ANSWER KEY"."""
+def sheet_pdf_bytes(activity, teacher, with_key, password=None):
+    """The activity sheet as a PDF to print (bytes). with_key adds each answer and "ANSWER KEY".
+    With a password the PDF is encrypted: it opens only with it, and can be printed but not changed."""
     pdf = SheetPDF()
     pdf.set_title(activity["title"])
+    if password:
+        # The owner password is random and never kept, so nobody can remove the protection with it.
+        pdf.set_encryption(owner_password=secrets.token_hex(16), user_password=password,
+                           encryption_method=EncryptionMethod.AES_256,
+                           permissions=AccessPermission.PRINT_LOW_RES | AccessPermission.PRINT_HIGH_RES)
     pdf.add_page()
 
     pdf.text_style(14, bold=True)

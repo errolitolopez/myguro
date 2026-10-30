@@ -937,6 +937,36 @@ document.getElementById("preview-button").addEventListener("click", () => {
   bootstrap.Modal.getOrCreateInstance(document.getElementById("preview-modal")).show();
 });
 
+// --- Files with the answers: ask for a password first -----------------------------------
+
+// The Answer key PDF opens in a new tab; the Word file downloads where it is. Either way the password goes in
+// the form body (a POST), never in the address.
+const protectForm = document.getElementById("protect-form");
+const protectModal = bootstrap.Modal.getOrCreateInstance(document.getElementById("protect-modal"));
+const MIN_FILE_PASSWORD = 6;
+document.querySelectorAll("[data-protect]").forEach((button) => {
+  button.addEventListener("click", () => {
+    protectForm.action = button.dataset.action;
+    protectForm.target = button.dataset.protect === "pdf" ? "_blank" : "_self";
+    // Word has no "key" field: the route only needs the password.
+    protectForm.elements.key.disabled = button.dataset.protect !== "pdf";
+    protectForm.elements.password.value = "";
+    document.getElementById("protect-error").classList.add("d-none");
+    protectModal.show();
+  });
+});
+document.getElementById("protect-modal").addEventListener("shown.bs.modal", () => protectForm.elements.password.focus());
+protectForm.addEventListener("submit", (event) => {
+  if (protectForm.elements.password.value.length < MIN_FILE_PASSWORD) {
+    event.preventDefault();
+    const error = document.getElementById("protect-error");
+    error.textContent = `Type a password of at least ${MIN_FILE_PASSWORD} characters.`;
+    error.classList.remove("d-none");
+    return;
+  }
+  setTimeout(() => protectModal.hide(), 0); // the file is on its way
+});
+
 // --- Make a copy ---------------------------------------------------------------------
 
 const copyButton = document.getElementById("copy-button");
