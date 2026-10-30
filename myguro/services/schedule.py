@@ -2,7 +2,7 @@ import random
 
 from myguro.domain.schedule import (BREAK_AFTER, DAY_NAMES, DAYS, DEFAULT_RULES, PERIOD_TIMES, check, generate)
 from myguro.domain.schedule_input import clean_whole, clean_assignment, clean_section, clean_teacher
-from myguro.errors import NotFoundError, ValidationError
+from myguro.errors import NotFoundError, ValidationError, say
 from myguro.repositories import ScheduleRepository
 from myguro.services.base import Service
 
@@ -87,7 +87,7 @@ class ScheduleService(Service):
 
     def describe(self, problem, names):
         """A problem for the admin to read, with the teacher's name and the day when it has them."""
-        text = problem["message"]
+        text = say(problem["message"])  # in the admin's language
         if problem.get("teacher_id") in names:
             text = f"{names[problem['teacher_id']]}: {text}"
         if "day" in problem:

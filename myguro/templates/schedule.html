@@ -8,25 +8,25 @@
 <main class="container py-3">
   <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
     <div>
-      <h1 class="h4 mb-1">Schedule <span class="badge text-bg-warning align-middle fs-6">Beta</span></h1>
-      <div class="small text-body-secondary" id="schedule-status">Loading...</div>
+      <h1 class="h4 mb-1">{{ _("Schedule") }} <span class="badge text-bg-warning align-middle fs-6">{{ _("Beta") }}</span></h1>
+      <div class="small text-body-secondary" id="schedule-status">{{ _("Loading...") }}</div>
     </div>
     <div class="d-flex flex-wrap gap-2">
-      <button id="generate-button" type="button" class="btn btn-success bi bi-magic">Build schedule</button>
-      <button id="publish-button" type="button" class="btn btn-outline-primary bi bi-send">Publish to teachers</button>
+      <button id="generate-button" type="button" class="btn btn-success bi bi-magic">{{ _("Build schedule") }}</button>
+      <button id="publish-button" type="button" class="btn btn-outline-primary bi bi-send">{{ _("Publish to teachers") }}</button>
     </div>
   </div>
 
   <!-- What to expect while the schedule generator is still being tested -->
   <div class="alert alert-warning small" role="note">
-    <div class="fw-semibold bi bi-flask"> Beta notes</div>
+    <div class="fw-semibold bi bi-flask"> {{ _("Beta notes") }}</div>
     <ul class="mb-0 ps-3">
-      <li>This is new and still being tested. Look over the timetable before you publish it.</li>
-      <li>Building again makes a different timetable and replaces the current one, including your swaps.</li>
-      <li>There are six periods a day, 6:00 to 11:15. Afternoon periods are not available yet.</li>
-      <li>You can not download or print the timetable yet.</li>
-      <li>Teachers see only their own schedule, and only after you publish. Link each teacher to their account for that.</li>
-      <li>Tell us what is wrong or missing, such as a rule you need.</li>
+      <li>{{ _("This is new and still being tested. Look over the timetable before you publish it.") }}</li>
+      <li>{{ _("Building again makes a different timetable and replaces the current one, including your swaps.") }}</li>
+      <li>{{ _("There are six periods a day, 6:00 to 11:15. Afternoon periods are not available yet.") }}</li>
+      <li>{{ _("You can not download or print the timetable yet.") }}</li>
+      <li>{{ _("Teachers see only their own schedule, and only after you publish. Link each teacher to their account for that.") }}</li>
+      <li>{{ _("Tell us what is wrong or missing, such as a rule you need.") }}</li>
     </ul>
   </div>
 
@@ -36,8 +36,8 @@
   <!-- 1. Sections -->
   <div class="card mb-3">
     <div class="card-header d-flex justify-content-between align-items-center">
-      <span class="fw-semibold">1. Sections</span>
-      <button id="add-section-button" type="button" class="btn btn-sm btn-outline-success bi bi-plus-lg">Add section</button>
+      <span class="fw-semibold">{{ _("1. Sections") }}</span>
+      <button id="add-section-button" type="button" class="btn btn-sm btn-outline-success bi bi-plus-lg">{{ _("Add section") }}</button>
     </div>
     <div id="section-list" class="list-group list-group-flush"></div>
   </div>
@@ -45,17 +45,17 @@
   <!-- 2. Teachers -->
   <div class="card mb-3">
     <div class="card-header d-flex justify-content-between align-items-center">
-      <span class="fw-semibold">2. Teachers</span>
-      <button id="add-teacher-button" type="button" class="btn btn-sm btn-outline-success bi bi-plus-lg">Add teacher</button>
+      <span class="fw-semibold">{{ _("2. Teachers") }}</span>
+      <button id="add-teacher-button" type="button" class="btn btn-sm btn-outline-success bi bi-plus-lg">{{ _("Add teacher") }}</button>
     </div>
     <div id="teacher-list" class="list-group list-group-flush"></div>
   </div>
 
   <!-- 3. Subjects of a section: who teaches it and how many periods a week -->
   <div class="card mb-3">
-    <div class="card-header fw-semibold">3. Subjects of a section</div>
+    <div class="card-header fw-semibold">{{ _("3. Subjects of a section") }}</div>
     <div class="card-body">
-      <label for="assignment-section" class="form-label">Section</label>
+      <label for="assignment-section" class="form-label">{{ _("Section") }}</label>
       <select id="assignment-section" class="form-select mb-3"></select>
       <div id="assignment-list"></div>
     </div>
@@ -63,28 +63,28 @@
 
   <!-- 4. Rules -->
   <div class="card mb-3">
-    <div class="card-header fw-semibold">4. Rules</div>
+    <div class="card-header fw-semibold">{{ _("4. Rules") }}</div>
     <form id="rules-form" class="card-body" novalidate>
       <div class="row g-3">
         <div class="col-sm-6">
-          <label for="rule-gap" class="form-label">Longest gap in a teacher's day (periods)</label>
+          <label for="rule-gap" class="form-label">{{ _("Longest gap in a teacher's day (periods)") }}</label>
           <input id="rule-gap" type="number" min="0" max="6" class="form-control">
-          <div class="form-text">Idle periods between two classes. The health break does not count.</div>
+          <div class="form-text">{{ _("Idle periods between two classes. The health break does not count.") }}</div>
         </div>
         <div class="col-sm-6">
-          <label for="rule-day" class="form-label">Most periods a teacher teaches in a day</label>
-          <input id="rule-day" type="number" min="1" max="6" class="form-control" placeholder="No limit">
+          <label for="rule-day" class="form-label">{{ _("Most periods a teacher teaches in a day") }}</label>
+          <input id="rule-day" type="number" min="1" max="6" class="form-control" placeholder="{{ _("No limit") }}">
         </div>
       </div>
-      <button id="rules-button" type="submit" class="btn btn-outline-success mt-3 bi bi-check-lg">Save rules</button>
+      <button id="rules-button" type="submit" class="btn btn-outline-success mt-3 bi bi-check-lg">{{ _("Save rules") }}</button>
     </form>
   </div>
 
   <!-- 5. The built timetable -->
   <div class="card mb-3">
-    <div class="card-header fw-semibold">5. Timetable</div>
+    <div class="card-header fw-semibold">{{ _("5. Timetable") }}</div>
     <div class="card-body">
-      <label for="view-select" class="form-label">Show</label>
+      <label for="view-select" class="form-label">{{ _("Show") }}</label>
       <select id="view-select" class="form-select mb-2"></select>
       <div id="view-note" class="small text-body-secondary mb-2"></div>
       <div id="swap-result" class="alert alert-warning py-2 d-none" role="status"></div>
@@ -103,34 +103,34 @@
   <div class="modal-dialog modal-dialog-centered">
     <form id="section-form" class="modal-content" novalidate>
       <div class="modal-header">
-        <h2 class="modal-title fs-5" id="section-modal-title">Add section</h2>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h2 class="modal-title fs-5" id="section-modal-title">{{ _("Add section") }}</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ _("Close") }}"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
-          <label for="section-name" class="form-label">Section name</label>
+          <label for="section-name" class="form-label">{{ _("Section name") }}</label>
           <input id="section-name" class="form-control" maxlength="100" autocomplete="off" placeholder="12-STEM Ingenuity">
         </div>
         <div class="row g-2 mb-3">
           <div class="col-6">
-            <label for="section-grade" class="form-label">Grade</label>
+            <label for="section-grade" class="form-label">{{ _("Grade") }}</label>
             <input id="section-grade" class="form-control" maxlength="30" autocomplete="off" placeholder="12">
           </div>
           <div class="col-6">
-            <label for="section-room" class="form-label">Room</label>
+            <label for="section-room" class="form-label">{{ _("Room") }}</label>
             <input id="section-room" class="form-control" maxlength="30" autocomplete="off" placeholder="102">
           </div>
         </div>
         <div class="mb-3">
-          <label for="section-adviser" class="form-label">Adviser <span class="text-body-secondary">(optional)</span></label>
+          <label for="section-adviser" class="form-label">{{ _("Adviser") }} <span class="text-body-secondary">{{ _("(optional)") }}</span></label>
           <input id="section-adviser" class="form-control" maxlength="100" autocomplete="off">
         </div>
         <div id="section-form-error" class="alert alert-danger py-2 mb-0 d-none" role="alert"></div>
       </div>
       <div class="modal-footer">
-        <button id="section-delete" type="button" class="btn btn-outline-danger me-auto bi bi-trash d-none">Delete</button>
-        <button type="button" class="btn btn-outline-secondary bi bi-x-lg" data-bs-dismiss="modal">Cancel</button>
-        <button id="section-save" type="submit" class="btn btn-success bi bi-check-lg">Save</button>
+        <button id="section-delete" type="button" class="btn btn-outline-danger me-auto bi bi-trash d-none">{{ _("Delete") }}</button>
+        <button type="button" class="btn btn-outline-secondary bi bi-x-lg" data-bs-dismiss="modal">{{ _("Cancel") }}</button>
+        <button id="section-save" type="submit" class="btn btn-success bi bi-check-lg">{{ _("Save") }}</button>
       </div>
     </form>
   </div>
@@ -141,40 +141,40 @@
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <form id="teacher-form" class="modal-content" novalidate>
       <div class="modal-header">
-        <h2 class="modal-title fs-5" id="teacher-modal-title">Add teacher</h2>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h2 class="modal-title fs-5" id="teacher-modal-title">{{ _("Add teacher") }}</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ _("Close") }}"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
-          <label for="teacher-name" class="form-label">Name</label>
+          <label for="teacher-name" class="form-label">{{ _("Name") }}</label>
           <input id="teacher-name" class="form-control" maxlength="100" autocomplete="off">
         </div>
         <div class="mb-3">
-          <label for="teacher-account" class="form-label">MyGuro account</label>
+          <label for="teacher-account" class="form-label">{{ _("MyGuro account") }}</label>
           <select id="teacher-account" class="form-select"></select>
-          <div class="form-text">Link it so the teacher can see their own schedule.</div>
+          <div class="form-text">{{ _("Link it so the teacher can see their own schedule.") }}</div>
         </div>
         <div class="row g-2 mb-3">
           <div class="col-6">
-            <label for="teacher-gap" class="form-label">Longest gap</label>
-            <input id="teacher-gap" type="number" min="0" max="6" class="form-control" placeholder="School rule">
+            <label for="teacher-gap" class="form-label">{{ _("Longest gap") }}</label>
+            <input id="teacher-gap" type="number" min="0" max="6" class="form-control" placeholder="{{ _("School rule") }}">
           </div>
           <div class="col-6">
-            <label for="teacher-day" class="form-label">Most periods a day</label>
-            <input id="teacher-day" type="number" min="1" max="6" class="form-control" placeholder="School rule">
+            <label for="teacher-day" class="form-label">{{ _("Most periods a day") }}</label>
+            <input id="teacher-day" type="number" min="1" max="6" class="form-control" placeholder="{{ _("School rule") }}">
           </div>
         </div>
-        <div class="mb-2 fw-semibold">Cannot teach</div>
+        <div class="mb-2 fw-semibold">{{ _("Cannot teach") }}</div>
         <div class="table-responsive">
           <table class="table table-sm table-bordered text-center mb-1" id="blocked-table"></table>
         </div>
-        <div class="form-text mb-3">Tick the periods this teacher is not available.</div>
+        <div class="form-text mb-3">{{ _("Tick the periods this teacher is not available.") }}</div>
         <div id="teacher-form-error" class="alert alert-danger py-2 mb-0 d-none" role="alert"></div>
       </div>
       <div class="modal-footer">
-        <button id="teacher-delete" type="button" class="btn btn-outline-danger me-auto bi bi-trash d-none">Delete</button>
-        <button type="button" class="btn btn-outline-secondary bi bi-x-lg" data-bs-dismiss="modal">Cancel</button>
-        <button id="teacher-save" type="submit" class="btn btn-success bi bi-check-lg">Save</button>
+        <button id="teacher-delete" type="button" class="btn btn-outline-danger me-auto bi bi-trash d-none">{{ _("Delete") }}</button>
+        <button type="button" class="btn btn-outline-secondary bi bi-x-lg" data-bs-dismiss="modal">{{ _("Cancel") }}</button>
+        <button id="teacher-save" type="submit" class="btn btn-success bi bi-check-lg">{{ _("Save") }}</button>
       </div>
     </form>
   </div>

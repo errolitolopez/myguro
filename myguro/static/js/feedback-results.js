@@ -43,7 +43,7 @@ function questionCard(question) {
   title.textContent = question.text;
   const sub = document.createElement("div");
   sub.className = "small text-body-secondary";
-  sub.textContent = question.count === 0 ? "Nobody rated this yet" : `${plural(question.count, "rating")}`;
+  sub.textContent = question.count === 0 ? t("Nobody rated this yet") : `${plural(question.count, "rating")}`;
   left.append(title, sub);
 
   const score = document.createElement("div");
@@ -77,15 +77,15 @@ async function loadSummary() {
     const data = await response.json();
     if (!response.ok) {
       list.replaceChildren();
-      showError("feedback-error", data.error || "Could not load the feedback.");
+      showError("feedback-error", data.error || t("Could not load the feedback."));
       return;
     }
     document.getElementById("feedback-count").textContent = data.respondents === 0
-      ? "Nobody has given feedback yet." : `${plural(data.respondents, "person", "people")} gave feedback`;
+      ? t("Nobody has given feedback yet.") : `${plural(data.respondents, "person", "people")} gave feedback`;
     list.replaceChildren(...data.questions.map(questionCard));
   } catch {
     list.replaceChildren();
-    showError("feedback-error", "Cannot reach the server. Check your connection.");
+    showError("feedback-error", t("Cannot reach the server. Check your connection."));
   }
 }
 

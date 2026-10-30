@@ -26,8 +26,10 @@ def test_every_server_message_has_a_taglish_entry():
     os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     found, dynamic = messages()
     # The database upgrade (migrations.py) talks to the person who runs the server, not to a user of the pages.
+    # "support_message" is a settings key that looks like a message to the finder, not a sentence
     missing = sorted(text for text, places in found.items()
-                     if text not in TAGLISH and not all(place.startswith("myguro/migrations.py") for place in places))
+                     if text not in TAGLISH and text != "support_message"
+                     and not all(place.startswith("myguro/migrations.py") for place in places))
     assert not missing, f"no Taglish for these server messages: {missing}"
     unknown = [item for item in dynamic if (item[0], item[2][:80]) not in KNOWN_DYNAMIC and (item[0], item[2]) not in KNOWN_DYNAMIC]
     assert not unknown, f"new messages built at run time (list them in KNOWN_DYNAMIC or make them literal): {unknown}"

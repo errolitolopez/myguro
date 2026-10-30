@@ -46,13 +46,13 @@ supportForm.addEventListener("submit", async (event) => {
     if (!response) return;
     const data = await response.json();
     if (!response.ok) {
-      showError("support-error", data.error || "Could not save.");
+      showError("support-error", data.error || t("Could not save."));
       return;
     }
     showSupport(data.settings.support);
-    supportStatus.textContent = "Saved. Shown from the next page you open.";
+    supportStatus.textContent = t("Saved. Shown from the next page you open.");
   } catch {
-    showError("support-error", "Cannot reach the server. Check your connection.");
+    showError("support-error", t("Cannot reach the server. Check your connection."));
   } finally {
     stopLoading();
   }
@@ -91,7 +91,7 @@ function showSettings(settings) {
 
 // Sends the change and shows what the server saved (or puts the switches back on an error).
 async function save(body) {
-  status.textContent = "Saving...";
+  status.textContent = t("Saving...");
   const fields = [gradesSwitch, feedbackPopup, chatbotSwitch, ...gradeList.querySelectorAll("input")];
   fields.forEach((field) => (field.disabled = true));
   try {
@@ -103,14 +103,14 @@ async function save(body) {
     if (!response) return;
     const data = await response.json();
     if (!response.ok) {
-      status.textContent = data.error || "Could not save.";
+      status.textContent = data.error || t("Could not save.");
       await loadSettings(false);
       return;
     }
     showSettings(data.settings);
-    status.textContent = "Saved";
+    status.textContent = t("Saved");
   } catch {
-    status.textContent = "Cannot reach the server.";
+    status.textContent = t("Cannot reach the server.");
     await loadSettings(false);
   } finally {
     fields.forEach((field) => (field.disabled = false));
@@ -131,14 +131,14 @@ async function loadSettings(clearStatus = true) {
     const response = await apiFetch("/api/settings");
     if (!response) return;
     if (!response.ok) {
-      showError("settings-error", "Could not load the settings.");
+      showError("settings-error", t("Could not load the settings."));
       return;
     }
     hideError("settings-error");
     showSettings((await response.json()).settings);
     if (clearStatus) status.textContent = "";
   } catch {
-    showError("settings-error", "Cannot reach the server. Check your connection.");
+    showError("settings-error", t("Cannot reach the server. Check your connection."));
   }
 }
 
@@ -162,14 +162,14 @@ document.getElementById("tip-preview").addEventListener("click", () => {
   const tips = [...(all.teacher || []), ...(all.student || [])];
   if (!tips.length) return;
   const strong = document.createElement("strong");
-  strong.textContent = "Tip: ";
+  strong.textContent = t("Tip: ");
   const text = document.createElement("span");
   text.textContent = tips[previewIndex % tips.length];
   previewIndex += 1;
   const close = document.createElement("button");
   close.type = "button";
   close.className = "btn-close";
-  close.setAttribute("aria-label", "Close tip");
+  close.setAttribute("aria-label", t("Close tip"));
   const box = document.createElement("div");
   box.className = "alert alert-info alert-dismissible mb-0 small";
   box.setAttribute("role", "status");
@@ -188,7 +188,7 @@ const yearList = document.getElementById("year-list");
 const yearForm = document.getElementById("year-form");
 const yearName = document.getElementById("year-name");
 const yearStart = document.getElementById("year-start");
-let confirmingYear = false; // the second tap on "Start new school year" confirms
+let confirmingYear = false; // the second tap on t("Start new school year") confirms
 
 // Every year, newest first, the current one marked.
 function showYears(years) {
@@ -201,7 +201,7 @@ function showYears(years) {
     if (year.current) {
       const badge = document.createElement("span");
       badge.className = "badge text-bg-success";
-      badge.textContent = "Current";
+      badge.textContent = t("Current");
       item.append(badge);
     }
     return item;
@@ -217,13 +217,13 @@ async function loadYears() {
     if (!response) return;
     showYears((await response.json()).years);
   } catch {
-    showError("year-error", "Cannot reach the server. Check your connection.");
+    showError("year-error", t("Cannot reach the server. Check your connection."));
   }
 }
 
 yearName.addEventListener("input", () => {
   confirmingYear = false;
-  yearStart.textContent = "Start new school year";
+  yearStart.textContent = t("Start new school year");
   yearStart.classList.replace("btn-danger", "btn-success");
 });
 
@@ -233,7 +233,7 @@ yearForm.addEventListener("submit", async (event) => {
   // Starting a year cannot be undone, so the first tap asks and the second one does it.
   if (!confirmingYear) {
     confirmingYear = true;
-    yearStart.textContent = "Tap again: last year becomes read-only";
+    yearStart.textContent = t("Tap again: last year becomes read-only");
     yearStart.classList.replace("btn-success", "btn-danger");
     return;
   }
@@ -249,19 +249,19 @@ yearForm.addEventListener("submit", async (event) => {
     if (!response) return;
     const data = await response.json();
     if (!response.ok) {
-      showError("year-error", data.error || "Could not start the school year.");
+      showError("year-error", data.error || t("Could not start the school year."));
       return;
     }
     yearName.value = "";
-    document.getElementById("year-status").textContent = "New school year started.";
+    document.getElementById("year-status").textContent = t("New school year started.");
     // Reload so the account menu and every page use the new current year.
     window.location.reload();
   } catch {
-    showError("year-error", "Cannot reach the server. Check your connection.");
+    showError("year-error", t("Cannot reach the server. Check your connection."));
   } finally {
     stopLoading();
     confirmingYear = false;
-    yearStart.textContent = "Start new school year";
+    yearStart.textContent = t("Start new school year");
     yearStart.classList.replace("btn-danger", "btn-success");
   }
 });

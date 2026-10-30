@@ -50,7 +50,7 @@ function logChartFor(data) {
         toFilter.value = picked === day ? "" : day;
         search(1);
       },
-      hint: picked ? "Showing one day. Tap its bar again to go back." : "Entries per day. Tap a bar to see only that day.",
+      hint: picked ? t("Showing one day. Tap its bar again to go back.") : t("Entries per day. Tap a bar to see only that day."),
     };
   }
   const filter = data.view === "category" ? categoryFilter : roleFilter;
@@ -65,7 +65,7 @@ function logChartFor(data) {
       filter.value = filter.value === data.items[index].key ? "" : data.items[index].key;
       search(1);
     },
-    hint: `Entries per ${data.view}. Tap a bar to see only that ${data.view}; tap it again to show all.`,
+    hint: t("Entries per {view}. Tap a bar to see only that {view}; tap it again to show all.", { view: data.view }),
   };
 }
 
@@ -79,7 +79,7 @@ function drawLogChart(view) {
 // Loads the counts for the filters now chosen and draws them. Called by log.js on every new search.
 async function loadLogChart() {
   if (typeof Chart === "undefined") {
-    showError("log-chart-error", "The chart could not load. Check your internet connection.");
+    showError("log-chart-error", t("The chart could not load. Check your internet connection."));
     return;
   }
   const params = filterParams();
@@ -90,13 +90,13 @@ async function loadLogChart() {
     if (!response || mine !== logChartRequest) return;
     const data = await response.json();
     if (!response.ok) {
-      showError("log-chart-error", data.error || "Could not load the chart.");
+      showError("log-chart-error", data.error || t("Could not load the chart."));
       return;
     }
     hideError("log-chart-error");
     drawLogChart(logChartFor(data));
   } catch {
-    showError("log-chart-error", "Cannot reach the server. Check your connection.");
+    showError("log-chart-error", t("Cannot reach the server. Check your connection."));
   }
 }
 

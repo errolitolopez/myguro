@@ -27,13 +27,13 @@ async function send(url, method, body, errorId) {
     if (!response) return null;
     const answer = await response.json();
     if (!response.ok) {
-      showError(errorId, answer.error || "Something went wrong.");
+      showError(errorId, answer.error || t("Something went wrong."));
       return null;
     }
     hideError(errorId);
     return answer;
   } catch {
-    showError(errorId, "Cannot reach the server. Check your connection.");
+    showError(errorId, t("Cannot reach the server. Check your connection."));
     return null;
   }
 }
@@ -61,14 +61,14 @@ async function load() {
     const response = await apiFetch("/api/schedule");
     if (!response) return;
     if (!response.ok) {
-      showError("schedule-error", "Could not load the schedule.");
+      showError("schedule-error", t("Could not load the schedule."));
       return;
     }
     hideError("schedule-error");
     data = await response.json();
     renderAll();
   } catch {
-    showError("schedule-error", "Cannot reach the server. Check your connection.");
+    showError("schedule-error", t("Cannot reach the server. Check your connection."));
   }
 }
 
@@ -77,8 +77,8 @@ function renderAll() {
   byId("schedule-status").textContent =
     `${plural(data.sections.length, "section")} · ${plural(data.teachers.length, "teacher")} · ${state}`;
   byId("publish-button").disabled = !data.built;
-  byId("publish-button").lastChild.textContent = data.published ? "Take back from teachers" : "Publish to teachers";
-  if (data.problems.length) showResult("The timetable breaks these rules:", data.problems);
+  byId("publish-button").lastChild.textContent = data.published ? t("Take back from teachers") : t("Publish to teachers");
+  if (data.problems.length) showResult(t("The timetable breaks these rules:"), data.problems);
   renderSections();
   renderTeachers();
   renderAssignmentSection();
@@ -105,7 +105,7 @@ function emptyRow(text) {
 
 function renderSections() {
   if (!data.sections.length) {
-    byId("section-list").replaceChildren(emptyRow("No sections yet. Tap Add section."));
+    byId("section-list").replaceChildren(emptyRow(t("No sections yet. Tap Add section.")));
     return;
   }
   byId("section-list").replaceChildren(...data.sections.map((section) => {
@@ -113,7 +113,7 @@ function renderSections() {
     row.type = "button";
     const left = el("div");
     left.append(el("div", "fw-semibold", section.name),
-      el("div", "small text-body-secondary", [section.grade && `Grade ${section.grade}`, section.room && `Room ${section.room}`,
+      el("div", "small text-body-secondary", [section.grade && t("Grade {grade}", { grade: section.grade }), section.room && t("Room {room}", { room: section.room }),
         section.adviser].filter(Boolean).join(" · ")));
     const total = periodsOf(section.id);
     const badge = el("span", `badge ${total > SLOTS_A_WEEK() ? "text-bg-danger" : "text-bg-secondary"}`,
@@ -128,7 +128,7 @@ const sectionModal = () => bootstrap.Modal.getOrCreateInstance(byId("section-mod
 
 function openSectionForm(section) {
   editingSection = section;
-  byId("section-modal-title").textContent = section ? "Edit section" : "Add section";
+  byId("section-modal-title").textContent = section ? t("Edit section") : t("Add section");
   byId("section-name").value = section ? section.name : "";
   byId("section-grade").value = section ? section.grade : "";
   byId("section-room").value = section ? section.room : "";
@@ -154,7 +154,7 @@ byId("section-form").addEventListener("submit", (event) => {
 });
 
 byId("section-delete").addEventListener("click", () => {
-  if (!window.confirm("Delete this section and its subjects and timetable?")) return;
+  if (!window.confirm(t("Delete this section and its subjects and timetable?"))) return;
   run(byId("section-delete"), async () => {
     if (!await send(`/api/schedule/sections/${editingSection.id}`, "DELETE", undefined, "section-form-error")) return;
     sectionModal().hide();
@@ -166,7 +166,7 @@ byId("section-delete").addEventListener("click", () => {
 
 function renderTeachers() {
   if (!data.teachers.length) {
-    byId("teacher-list").replaceChildren(emptyRow("No teachers yet. Tap Add teacher."));
+    byId("teacher-list").replaceChildren(emptyRow(t("No teachers yet. Tap Add teacher.")));
     return;
   }
   byId("teacher-list").replaceChildren(...data.teachers.map((teacher) => {
@@ -175,7 +175,7 @@ function renderTeachers() {
     const account = data.accounts.find((item) => item.id === teacher.user_id);
     const left = el("div");
     left.append(el("div", "fw-semibold", teacher.name),
-      el("div", "small text-body-secondary", [account ? `Account ${account.username}` : "No account linked",
+      el("div", "small text-body-secondary", [account ? t("Account {username}", { username: account.username }) : t("No account linked"),
         teacher.blocked.length ? `${plural(teacher.blocked.length, "period")} unavailable` : ""].filter(Boolean).join(" · ")));
     const load = data.assignments.filter((a) => a.teacher_id === teacher.id).reduce((sum, a) => sum + a.per_week, 0);
     row.append(left, el("span", "badge text-bg-secondary", `${load} periods`));
@@ -188,7 +188,7 @@ const teacherModal = () => bootstrap.Modal.getOrCreateInstance(byId("teacher-mod
 
 function openTeacherForm(teacher) {
   editingTeacher = teacher;
-  byId("teacher-modal-title").textContent = teacher ? "Edit teacher" : "Add teacher";
+  byId("teacher-modal-title").textContent = teacher ? t("Edit teacher") : t("Add teacher");
   byId("teacher-name").value = teacher ? teacher.name : "";
   byId("teacher-gap").value = teacher && teacher.max_gap !== null ? teacher.max_gap : "";
   byId("teacher-day").value = teacher && teacher.max_per_day !== null ? teacher.max_per_day : "";
@@ -196,7 +196,7 @@ function openTeacherForm(teacher) {
   // The accounts not linked to another teacher
   const taken = new Set(data.teachers.filter((item) => !teacher || item.id !== teacher.id).map((item) => item.user_id));
   const select = byId("teacher-account");
-  select.replaceChildren(new Option("No account", ""),
+  select.replaceChildren(new Option(t("No account"), ""),
     ...data.accounts.filter((account) => !taken.has(account.id)).map((account) => new Option(`${account.name} (${account.username})`, account.id)));
   select.value = teacher && teacher.user_id ? String(teacher.user_id) : "";
 
@@ -249,7 +249,7 @@ byId("teacher-form").addEventListener("submit", (event) => {
 });
 
 byId("teacher-delete").addEventListener("click", () => {
-  if (!window.confirm("Delete this teacher?")) return;
+  if (!window.confirm(t("Delete this teacher?"))) return;
   run(byId("teacher-delete"), async () => {
     if (!await send(`/api/schedule/teachers/${editingTeacher.id}`, "DELETE", undefined, "teacher-form-error")) return;
     teacherModal().hide();
@@ -273,22 +273,22 @@ function assignmentRow(assignment) {
   const row = el("div", "row g-2 align-items-center mb-2");
   const subject = el("input", "form-control");
   subject.maxLength = 30;
-  subject.placeholder = "Subject";
-  subject.setAttribute("aria-label", "Subject");
+  subject.placeholder = t("Subject");
+  subject.setAttribute("aria-label", t("Subject"));
   subject.value = assignment ? assignment.subject : "";
   subject.disabled = Boolean(assignment); // the subject is the key; delete it to rename
   const teacher = el("select", "form-select");
-  teacher.setAttribute("aria-label", "Teacher");
-  teacher.append(new Option("Teacher", ""), ...data.teachers.map((item) => new Option(item.name, item.id)));
+  teacher.setAttribute("aria-label", t("Teacher"));
+  teacher.append(new Option(t("Teacher"), ""), ...data.teachers.map((item) => new Option(item.name, item.id)));
   teacher.value = assignment ? String(assignment.teacher_id) : "";
   const perWeek = el("input", "form-control");
   perWeek.type = "number";
   perWeek.min = 1;
   perWeek.max = SLOTS_A_WEEK();
-  perWeek.placeholder = "Periods";
-  perWeek.setAttribute("aria-label", "Periods a week");
+  perWeek.placeholder = t("Periods");
+  perWeek.setAttribute("aria-label", t("Periods a week"));
   perWeek.value = assignment ? assignment.per_week : "";
-  const save = el("button", `btn btn-outline-success bi ${assignment ? "bi-check-lg" : "bi-plus-lg"}`, assignment ? "Save" : "Add");
+  const save = el("button", `btn btn-outline-success bi ${assignment ? "bi-check-lg" : "bi-plus-lg"}`, assignment ? t("Save") : t("Add"));
   save.type = "button";
   save.addEventListener("click", () => run(save, async () => {
     const body = { section_id: chosenSection(), subject: subject.value, teacher_id: Number(teacher.value) || null,
@@ -308,7 +308,7 @@ function assignmentRow(assignment) {
   if (assignment) {
     const remove = el("button", "btn btn-outline-danger bi bi-trash");
     remove.type = "button";
-    remove.setAttribute("aria-label", `Remove ${assignment.subject}`);
+    remove.setAttribute("aria-label", t("Remove {subject}", { subject: assignment.subject }));
     remove.addEventListener("click", () => run(remove, async () => {
       if (!await send(`/api/schedule/assignments/${assignment.id}`, "DELETE", undefined, "schedule-error")) return;
       await load();
@@ -322,7 +322,7 @@ function assignmentRow(assignment) {
 function renderAssignments() {
   const sectionId = chosenSection();
   if (!sectionId) {
-    byId("assignment-list").replaceChildren(el("div", "text-body-secondary", "Add a section first."));
+    byId("assignment-list").replaceChildren(el("div", "text-body-secondary", t("Add a section first.")));
     return;
   }
   const mine = data.assignments.filter((assignment) => assignment.section_id === sectionId);
@@ -343,18 +343,18 @@ byId("rules-form").addEventListener("submit", (event) => {
     const answer = await send("/api/schedule/rules", "PUT",
       { max_gap: byId("rule-gap").value === "" ? null : Number(byId("rule-gap").value), max_per_day: day === "" ? null : Number(day) },
       "schedule-error");
-    if (answer) showResult("Rules saved. Build the schedule again to use them.");
+    if (answer) showResult(t("Rules saved. Build the schedule again to use them."));
   });
 });
 
 byId("generate-button").addEventListener("click", () => {
-  if (data.built && !window.confirm("Build a new schedule? The current one, with any swaps, is replaced.")) return;
+  if (data.built && !window.confirm(t("Build a new schedule? The current one, with any swaps, is replaced."))) return;
   run(byId("generate-button"), async () => {
     const answer = await send("/api/schedule/generate", "POST", {}, "schedule-error");
     if (!answer) return;
     await load();
-    const lines = [...answer.unplaced.map((line) => `Not placed: ${line}`), ...answer.problems];
-    showResult(`Built: ${plural(answer.placed, "period")} placed.` + (lines.length ? " Check these:" : ""), lines);
+    const lines = [...answer.unplaced.map((line) => t("Not placed: {line}", { line })), ...answer.problems];
+    showResult(t("Built: {periods} placed.", { periods: plural(answer.placed, "period") }) + (lines.length ? t(" Check these:") : ""), lines);
   });
 });
 
@@ -368,9 +368,9 @@ byId("publish-button").addEventListener("click", () => run(byId("publish-button"
 function renderViewSelect() {
   const select = byId("view-select");
   const keep = select.value;
-  const sections = data.sections.map((section) => new Option(`Section: ${section.name}`, `s:${section.id}`));
-  const teachers = data.teachers.map((teacher) => new Option(`Teacher: ${teacher.name}`, `t:${teacher.id}`));
-  select.replaceChildren(new Option(data.built ? "Choose a section or a teacher" : "Build the schedule first", ""), ...sections, ...teachers);
+  const sections = data.sections.map((section) => new Option(t("Section: {name}", { name: section.name }), `s:${section.id}`));
+  const teachers = data.teachers.map((teacher) => new Option(t("Teacher: {name}", { name: teacher.name }), `t:${teacher.id}`));
+  select.replaceChildren(new Option(data.built ? t("Choose a section or a teacher") : t("Build the schedule first"), ""), ...sections, ...teachers);
   if ([...select.options].some((option) => option.value === keep)) select.value = keep;
   showTimetable();
 }
@@ -381,7 +381,7 @@ function sectionCell(cell, day, period) {
   td.style.cursor = "pointer";
   if (picked && picked.day === day && picked.period === period) td.classList.add("table-primary");
   if (cell) td.append(el("div", "fw-semibold", cell.subject), el("div", "text-body-secondary", cell.teacher));
-  else td.append(el("span", "text-body-secondary", "Free"));
+  else td.append(el("span", "text-body-secondary", t("Free")));
   td.addEventListener("click", () => tapCell(day, period));
   return td;
 }
@@ -405,7 +405,7 @@ async function tapCell(day, period) {
   const box = byId("swap-result");
   box.replaceChildren();
   if (answer && answer.warnings.length) {
-    box.append(el("div", "fw-semibold", "Swapped. These rules are now broken:"));
+    box.append(el("div", "fw-semibold", t("Swapped. These rules are now broken:")));
     const list = el("ul", "mb-0");
     list.append(...answer.warnings.map((line) => el("li", "", line)));
     box.append(list);
@@ -427,13 +427,13 @@ async function showTimetable() {
     if (!response) return;
     const grid = await response.json();
     if (!response.ok) {
-      showError("schedule-error", grid.error || "Could not load the timetable.");
+      showError("schedule-error", grid.error || t("Could not load the timetable."));
       return;
     }
-    byId("view-note").textContent = [grid.details, isSection ? "Tap two periods to swap them." : ""].filter(Boolean).join(" · ");
+    byId("view-note").textContent = [grid.details, isSection ? t("Tap two periods to swap them.") : ""].filter(Boolean).join(" · ");
     scheduleGrid(grid, isSection ? sectionCell : teacherCell);
   } catch {
-    showError("schedule-error", "Cannot reach the server. Check your connection.");
+    showError("schedule-error", t("Cannot reach the server. Check your connection."));
   }
 }
 

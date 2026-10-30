@@ -7,32 +7,30 @@
 
 <main class="container py-3" style="max-width: 760px;">
   <div id="settings-error" class="alert alert-danger d-none" role="alert"></div>
-  <h1 class="h4 mb-3">Settings</h1>
+  <h1 class="h4 mb-3">{{ _("Settings") }}</h1>
 
   <div class="card">
     <div class="card-body">
       <div class="form-check form-switch">
         <input id="grades-high-to-low" class="form-check-input" type="checkbox" role="switch" disabled>
-        <label for="grades-high-to-low" class="form-check-label fw-semibold">Show grades from highest to lowest</label>
+        <label for="grades-high-to-low" class="form-check-label fw-semibold">{{ _("Show grades from highest to lowest") }}</label>
       </div>
       <div class="form-text">
-        On: Grade 12 first, Kinder last. Off: Kinder first, Grade 12 last. Applies to every grade
-        dropdown for everyone. Takes effect the next time a page is opened.
+        {{ _("On: Grade 12 first, Kinder last. Off: Kinder first, Grade 12 last. Applies to every grade dropdown for everyone. Takes effect the next time a page is opened.") }}
       </div>
     </div>
   </div>
 
   <div class="card mt-3">
     <div class="card-body">
-      <label for="feedback-popup" class="form-label fw-semibold">Feedback pop-up</label>
+      <label for="feedback-popup" class="form-label fw-semibold">{{ _("Feedback pop-up") }}</label>
       <select id="feedback-popup" class="form-select w-auto" disabled>
-        <option value="off">Never</option>
-        <option value="login">Once each time they log in</option>
-        <option value="daily">Once a day</option>
+        <option value="off">{{ _("Never") }}</option>
+        <option value="login">{{ _("Once each time they log in") }}</option>
+        <option value="daily">{{ _("Once a day") }}</option>
       </select>
       <div class="form-text">
-        Asks teachers and students who have not sent feedback yet to rate MyGuro. It stops for each person
-        once they send it. Never on the answer page.
+        {{ _("Asks teachers and students who have not sent feedback yet to rate MyGuro. It stops for each person once they send it. Never on the answer page.") }}
       </div>
     </div>
   </div>
@@ -41,34 +39,30 @@
     <div class="card-body">
       <div class="form-check form-switch">
         <input id="chatbot-enabled" class="form-check-input" type="checkbox" role="switch" disabled>
-        <label for="chatbot-enabled" class="form-check-label fw-semibold">GuroBot, the navigation chatbot (teachers)</label>
+        <label for="chatbot-enabled" class="form-check-label fw-semibold">{{ _("GuroBot, the navigation chatbot (teachers)") }}</label>
       </div>
       <div class="form-text">
-        A chat bubble that helps teachers find a page. It only opens pages: it cannot read or change
-        anything. Each question a teacher types is sent to an outside AI service, and no student or class
-        data is sent. Off by default.
+        {{ _("A chat bubble that helps teachers find a page. It only opens pages: it cannot read or change anything. Each question a teacher types is sent to an outside AI service, and no student or class data is sent. Off by default.") }}
       </div>
     </div>
   </div>
 
   <div class="card mt-3">
     <div class="card-body">
-      <h2 class="h6 fw-semibold mb-1">School years</h2>
+      <h2 class="h6 fw-semibold mb-1">{{ _("School years") }}</h2>
       <div class="form-text mb-2">
-        Classes and the work given to them belong to a school year. When you start a new year it
-        becomes the current one: teachers and students begin with no classes, and past years can
-        only be looked at (the year picker is in the account menu).
+        {{ _("Classes and the work given to them belong to a school year. When you start a new year it becomes the current one: teachers and students begin with no classes, and past years can only be looked at (the year picker is in the account menu).") }}
       </div>
       <ul id="year-list" class="list-group mb-3"></ul>
       <form id="year-form" class="d-flex flex-wrap gap-2 align-items-center" novalidate>
-        <label class="visually-hidden" for="year-name">New school year</label>
+        <label class="visually-hidden" for="year-name">{{ _("New school year") }}</label>
         <input id="year-name" class="form-control w-auto" maxlength="9" placeholder="2027-2028"
                autocomplete="off" inputmode="numeric">
         <div class="form-check mb-0">
           <input id="year-copy" class="form-check-input" type="checkbox" checked>
-          <label class="form-check-label small" for="year-copy">Copy last year's classes (without students)</label>
+          <label class="form-check-label small" for="year-copy">{{ _("Copy last year's classes (without students)") }}</label>
         </div>
-        <button id="year-start" type="submit" class="btn btn-success bi bi-plus-lg">Start new school year</button>
+        <button id="year-start" type="submit" class="btn btn-success bi bi-plus-lg">{{ _("Start new school year") }}</button>
       </form>
       <div id="year-error" class="alert alert-danger py-2 mt-2 d-none" role="alert"></div>
       <div id="year-status" class="small text-body-secondary mt-2"></div>
@@ -77,11 +71,9 @@
 
   <div class="card mt-3">
     <div class="card-body">
-      <h2 class="h6 fw-semibold mb-1">Grades in use</h2>
+      <h2 class="h6 fw-semibold mb-1">{{ _("Grades in use") }}</h2>
       <div class="form-text mb-2">
-        Turn off the grades your school doesn't have. A disabled grade is hidden from the dropdowns
-        and can't be given to a student or a class. Students who already have it keep it, and the
-        Students filter still lists it so you can move them.
+        {{ _("Turn off the grades your school doesn't have. A disabled grade is hidden from the dropdowns and can't be given to a student or a class. Students who already have it keep it, and the Students filter still lists it so you can move them.") }}
       </div>
       <div id="grade-list" class="row row-cols-2 row-cols-sm-3 g-2"></div>
     </div>
@@ -89,57 +81,56 @@
 
   <div class="card mt-3">
     <div class="card-body">
-      <h2 class="h6 fw-semibold mb-1">Support link</h2>
+      <h2 class="h6 fw-semibold mb-1">{{ _("Support link") }}</h2>
       <div class="form-text mb-3">
-        A small "support" note at the bottom of each page for admin and teachers. Its button opens a
-        window with the ways to give that you fill in below (Ko-fi, GCash). Students never see it.
+        {{ _("A small \"support\" note at the bottom of each page for admin and teachers. Its button opens a window with the ways to give that you fill in below (Ko-fi, GCash). Students never see it.") }}
       </div>
       <form id="support-form" novalidate>
         <div class="form-check form-switch mb-3">
           <input id="support-enabled" class="form-check-input" type="checkbox" role="switch">
-          <label for="support-enabled" class="form-check-label fw-semibold">Show the support link</label>
+          <label for="support-enabled" class="form-check-label fw-semibold">{{ _("Show the support link") }}</label>
         </div>
         <div class="mb-3">
-          <label for="support-url" class="form-label">Ko-fi link <span class="text-body-secondary">(optional)</span></label>
+          <label for="support-url" class="form-label">{{ _("Ko-fi link") }} <span class="text-body-secondary">{{ _("(optional)") }}</span></label>
           <input id="support-url" type="url" class="form-control" maxlength="300" autocomplete="off"
                  placeholder="https://ko-fi.com/yourname">
         </div>
         <div class="row g-2 mb-3">
           <div class="col-12 col-md-5">
-            <label for="support-gcash-number" class="form-label">GCash number <span class="text-body-secondary">(optional)</span></label>
+            <label for="support-gcash-number" class="form-label">{{ _("GCash number") }} <span class="text-body-secondary">{{ _("(optional)") }}</span></label>
             <input id="support-gcash-number" type="tel" class="form-control" maxlength="20" autocomplete="off"
                    placeholder="0917 123 4567">
           </div>
           <div class="col-12 col-md-7">
-            <label for="support-gcash-name" class="form-label">GCash account name <span class="text-body-secondary">(optional)</span></label>
+            <label for="support-gcash-name" class="form-label">{{ _("GCash account name") }} <span class="text-body-secondary">{{ _("(optional)") }}</span></label>
             <input id="support-gcash-name" class="form-control" maxlength="60" autocomplete="off"
                    placeholder="Juan D.">
           </div>
         </div>
         <div class="row g-2 mb-3">
           <div class="col-12 col-md-8">
-            <label for="support-message" class="form-label">Message</label>
+            <label for="support-message" class="form-label">{{ _("Message") }}</label>
             <input id="support-message" class="form-control" maxlength="200" autocomplete="off"
                    placeholder="Enjoying MyGuro? Help keep it running.">
           </div>
           <div class="col-12 col-md-4">
-            <label for="support-label" class="form-label">Button text</label>
+            <label for="support-label" class="form-label">{{ _("Button text") }}</label>
             <input id="support-label" class="form-control" maxlength="30" autocomplete="off"
                    placeholder="Support MyGuro">
           </div>
         </div>
         <div class="mb-3">
-          <label for="support-popup" class="form-label">Pop-up for teachers</label>
+          <label for="support-popup" class="form-label">{{ _("Pop-up for teachers") }}</label>
           <select id="support-popup" class="form-select w-auto">
-            <option value="off">Never (only the footer button)</option>
-            <option value="login">Once each time they log in</option>
-            <option value="daily">Once a day</option>
-            <option value="always">On every page</option>
+            <option value="off">{{ _("Never (only the footer button)") }}</option>
+            <option value="login">{{ _("Once each time they log in") }}</option>
+            <option value="daily">{{ _("Once a day") }}</option>
+            <option value="always">{{ _("On every page") }}</option>
           </select>
-          <div class="form-text">Opens the support window by itself. Only teachers see it, never students.</div>
+          <div class="form-text">{{ _("Opens the support window by itself. Only teachers see it, never students.") }}</div>
         </div>
         <div id="support-error" class="alert alert-danger py-2 d-none" role="alert"></div>
-        <button id="support-save" type="submit" class="btn btn-success bi bi-check-lg">Save</button>
+        <button id="support-save" type="submit" class="btn btn-success bi bi-check-lg">{{ _("Save") }}</button>
         <span id="support-status" class="small text-body-secondary ms-2"></span>
       </form>
     </div>
@@ -147,16 +138,15 @@
 
   <div class="card mt-3">
     <div class="card-body">
-      <h2 class="h6 fw-semibold mb-1">Tips preview</h2>
+      <h2 class="h6 fw-semibold mb-1">{{ _("Tips preview") }}</h2>
       <div class="form-text mb-3">
-        Teachers and students see one of these in a closable box under the menu, a new one every 3 days.
-        They can close it or turn tips off. Never shown on the answer page.
+        {{ _("Teachers and students see one of these in a closable box under the menu, a new one every 3 days. They can close it or turn tips off. Never shown on the answer page.") }}
       </div>
-      <h3 class="small fw-semibold text-body-secondary mb-1">Teachers</h3>
+      <h3 class="small fw-semibold text-body-secondary mb-1">{{ _("Teachers") }}</h3>
       <ul id="tips-teacher" class="list-group mb-3"></ul>
-      <h3 class="small fw-semibold text-body-secondary mb-1">Students</h3>
+      <h3 class="small fw-semibold text-body-secondary mb-1">{{ _("Students") }}</h3>
       <ul id="tips-student" class="list-group"></ul>
-      <button id="tip-preview" type="button" class="btn btn-outline-secondary btn-sm bi bi-eye mt-3">Preview a tip</button>
+      <button id="tip-preview" type="button" class="btn btn-outline-secondary btn-sm bi bi-eye mt-3">{{ _("Preview a tip") }}</button>
       <div id="tip-preview-box" class="mt-2"></div>
     </div>
   </div>

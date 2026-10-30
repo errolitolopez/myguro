@@ -33,6 +33,14 @@ def messages():
                 name = func.id if isinstance(func, ast.Name) else getattr(func, "attr", "")
                 if name.endswith("Error") and node.exc.args:
                     call = node.exc.args[0]
+            elif isinstance(node, ast.Dict):  # {"kind": ..., "message": "..."}: the schedule's problems
+                for key, value in zip(node.keys, node.values):
+                    if isinstance(key, ast.Constant) and key.value == "message":
+                        for branch in ([value.body, value.orelse] if isinstance(value, ast.IfExp) else [value]):
+                            text = render(branch)
+                            if text is not None:
+                                found.setdefault(text, []).append(f"{path}:{node.lineno}")
+                continue
             elif isinstance(node, ast.Call) and getattr(node.func, "id", "") in ("fail", "problem") and len(node.args) >= 2:
                 call = node.args[1]  # fail(item, message) and problem(where, message) in the Word import
             elif isinstance(node, ast.Call):

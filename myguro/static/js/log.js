@@ -125,20 +125,20 @@ async function search(wantedPage) {
     if (!response || mine !== requestNumber) return;
     const data = await response.json();
     if (!response.ok) {
-      showError("log-error", data.error || "Could not load the log.");
+      showError("log-error", data.error || t("Could not load the log."));
       return;
     }
     hideError("log-error");
     page = data.page;
     pages = data.pages;
-    list.replaceChildren(...(data.entries.length ? data.entries.map(entryItem) : [messageItem("No entries match.")]));
+    list.replaceChildren(...(data.entries.length ? data.entries.map(entryItem) : [messageItem(t("No entries match."))]));
     document.getElementById("log-summary").textContent = plural(data.total, "entry", "entries");
     document.getElementById("pager").classList.toggle("d-none", pages <= 1);
-    document.getElementById("page-info").textContent = `Page ${page} of ${pages}`;
+    document.getElementById("page-info").textContent = t("Page {page} of {pages}", { page, pages });
     document.getElementById("prev-page").disabled = page <= 1;
     document.getElementById("next-page").disabled = page >= pages;
   } catch {
-    showError("log-error", "Cannot reach the server. Check your connection.");
+    showError("log-error", t("Cannot reach the server. Check your connection."));
   }
 }
 

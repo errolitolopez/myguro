@@ -6,16 +6,16 @@
 {% include "_navbar.html" %}
 
 <main class="container py-3">
-  <h1 class="h4 mb-3">Activity log</h1>
+  <h1 class="h4 mb-3">{{ _("Activity log") }}</h1>
   <div id="log-error" class="alert alert-danger d-none" role="alert"></div>
 
   <div class="d-flex flex-wrap gap-2 mb-3">
     <input id="search" type="search" class="form-control flex-grow-1" style="min-width: 12rem; width: auto;"
-           placeholder="Search person or action" aria-label="Search the log" autocomplete="off">
+           placeholder="{{ _("Search person or action") }}" aria-label="{{ _("Search the log") }}" autocomplete="off">
     <button id="filter-toggle" type="button" class="btn btn-outline-secondary text-nowrap bi bi-funnel"
             data-bs-toggle="collapse" data-bs-target="#advanced-filter" aria-expanded="false"
             aria-controls="advanced-filter">
-      Filters<span id="filter-count" class="badge text-bg-success ms-1 d-none"></span>
+      {{ _("Filters") }}<span id="filter-count" class="badge text-bg-success ms-1 d-none"></span>
     </button>
   </div>
 
@@ -24,29 +24,29 @@
     <div class="card card-body mb-3">
       <div class="row g-2 align-items-end">
         <div class="col-6 col-md-3">
-          <label for="role-filter" class="form-label small mb-1">Role</label>
+          <label for="role-filter" class="form-label small mb-1">{{ _("Role") }}</label>
           <select id="role-filter" class="form-select">
-            <option value="">All roles</option>
+            <option value="">{{ _("All roles") }}</option>
             {% for role in roles %}<option value="{{ role }}">{{ role|capitalize }}</option>{% endfor %}
           </select>
         </div>
         <div class="col-6 col-md-3">
-          <label for="category-filter" class="form-label small mb-1">Category</label>
+          <label for="category-filter" class="form-label small mb-1">{{ _("Category") }}</label>
           <select id="category-filter" class="form-select">
-            <option value="">All categories</option>
+            <option value="">{{ _("All categories") }}</option>
             {% for category in categories %}<option value="{{ category }}">{{ category|capitalize }}</option>{% endfor %}
           </select>
         </div>
         <div class="col-6 col-md-2">
-          <label for="from-filter" class="form-label small mb-1">From</label>
+          <label for="from-filter" class="form-label small mb-1">{{ _("From") }}</label>
           <input id="from-filter" type="date" class="form-control">
         </div>
         <div class="col-6 col-md-2">
-          <label for="to-filter" class="form-label small mb-1">To</label>
+          <label for="to-filter" class="form-label small mb-1">{{ _("To") }}</label>
           <input id="to-filter" type="date" class="form-control">
         </div>
         <div class="col-12 col-md-2">
-          <button id="filter-clear" type="button" class="btn btn-outline-secondary w-100 bi bi-x-circle">Clear filters</button>
+          <button id="filter-clear" type="button" class="btn btn-outline-secondary w-100 bi bi-x-circle">{{ _("Clear filters") }}</button>
         </div>
       </div>
     </div>
@@ -57,7 +57,7 @@
     <span class="badge text-bg-secondary fs-6 fw-normal">
       <span id="person-chip-name"></span>
       <button id="person-chip-clear" type="button" class="btn-close btn-close-white ms-1" style="font-size: 0.6rem;"
-              aria-label="Show everyone"></button>
+              aria-label="{{ _("Show everyone") }}"></button>
     </span>
   </div>
 
@@ -65,28 +65,28 @@
   <div class="card mb-3">
     <div class="card-body">
       <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
-        <h2 class="h5 mb-0 bi bi-bar-chart-line"> Activity</h2>
-        <div class="btn-group btn-group-sm" role="group" aria-label="Group the chart by">
+        <h2 class="h5 mb-0 bi bi-bar-chart-line"> {{ _("Activity") }}</h2>
+        <div class="btn-group btn-group-sm" role="group" aria-label="{{ _("Group the chart by") }}">
           <input type="radio" class="btn-check" name="log-chart-view" id="view-day" value="day" autocomplete="off" checked>
-          <label class="btn btn-toggle" for="view-day">By day</label>
+          <label class="btn btn-toggle" for="view-day">{{ _("By day") }}</label>
           <input type="radio" class="btn-check" name="log-chart-view" id="view-category" value="category" autocomplete="off">
-          <label class="btn btn-toggle" for="view-category">By category</label>
+          <label class="btn btn-toggle" for="view-category">{{ _("By category") }}</label>
           <input type="radio" class="btn-check" name="log-chart-view" id="view-role" value="role" autocomplete="off">
-          <label class="btn btn-toggle" for="view-role">By role</label>
+          <label class="btn btn-toggle" for="view-role">{{ _("By role") }}</label>
         </div>
       </div>
       <div id="log-chart-error" class="alert alert-danger d-none" role="alert"></div>
       <div id="log-chart-sub" class="small text-body-secondary mb-2"></div>
       <div class="position-relative" style="height: 14rem;">
-        <canvas id="log-chart" role="img" aria-label="Bar chart of log entries"></canvas>
+        <canvas id="log-chart" role="img" aria-label="{{ _("Bar chart of log entries") }}"></canvas>
       </div>
       <!-- The same numbers as a table for screen readers (the tooltip is never the only way to a value). -->
       <!-- A table ignores the 1px width and clip of visually-hidden and pushes the page wider than a phone,
            so the class is on a div around it. -->
       <div class="visually-hidden">
         <table>
-          <caption>Log entries counted</caption>
-          <thead><tr><th scope="col">Name</th><th scope="col">Entries</th></tr></thead>
+          <caption>{{ _("Log entries counted") }}</caption>
+          <thead><tr><th scope="col">{{ _("Name") }}</th><th scope="col">{{ _("Entries") }}</th></tr></thead>
           <tbody id="log-chart-table"></tbody>
         </table>
       </div>
@@ -94,16 +94,16 @@
   </div>
 
   <div id="log-summary" class="small text-body-secondary"></div>
-  <div class="small text-body-secondary mb-2">Keeps the latest {{ "{:,}".format(max_entries) }} entries. Older ones are removed.</div>
+  <div class="small text-body-secondary mb-2">{{ _("Keeps the latest {count} entries. Older ones are removed.", count="{:,}".format(max_entries)) }}</div>
   <div id="log-list" class="list-group">
     {% include "_skeleton.html" %}
   </div>
 
   <!-- Page controls (hidden when everything fits on one page) -->
-  <nav id="pager" class="d-flex justify-content-between align-items-center mt-3 d-none" aria-label="Pages">
-    <button id="prev-page" type="button" class="btn btn-outline-success btn-sm">‹ Prev</button>
+  <nav id="pager" class="d-flex justify-content-between align-items-center mt-3 d-none" aria-label="{{ _("Pages") }}">
+    <button id="prev-page" type="button" class="btn btn-outline-success btn-sm">{{ _("‹ Prev") }}</button>
     <span id="page-info" class="small text-body-secondary"></span>
-    <button id="next-page" type="button" class="btn btn-outline-success btn-sm">Next ›</button>
+    <button id="next-page" type="button" class="btn btn-outline-success btn-sm">{{ _("Next ›") }}</button>
   </nav>
 </main>
 {% endblock %}
