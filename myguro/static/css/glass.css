@@ -674,8 +674,12 @@ main { animation: page-in 0.35s ease both; }
 }
 .bento > * { min-width: 0; }
 .bento-wide { grid-column: span 2; }
+/* .bento-half: two tiles share a row even on a phone (one column of the two), and still take half of the
+   row on a wide screen (two of the four columns). */
+.bento-half { grid-column: span 1; }
 @media (min-width: 768px) {
   .bento { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .bento-half { grid-column: span 2; }
 }
 /* The admin's five counts are the same size: five columns on a wide screen. On a phone the fifth tile
    takes the whole row. .bento-full is a tile that takes a whole row (the backup card). */
@@ -693,7 +697,7 @@ main { animation: page-in 0.35s ease both; }
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-.bento-wide .stat-number { font-size: 2.4rem !important; /* beats Bootstrap's fs-3 */ }
+.bento-wide .stat-number, .bento-half .stat-number { font-size: 2.4rem !important; /* beats Bootstrap's fs-3 */ }
 
 /* Score ring: a circle filled by --pct (0-100) with the percent in the middle. conic-gradient draws the
    arc; the mask cuts the middle out, so the track and arc stay a ring on any background. */

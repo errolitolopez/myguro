@@ -67,6 +67,8 @@ class StudentWorkService(Service):
                 "paper": bool(row["last_paper"]),
                 # Submitted at least once (stays true while trying again)
                 "done": row["last_id"] is not None,
+                # When the attempt that counts was submitted (UTC), for the dashboard's score trend
+                "submitted_at": row["last_submitted_at"],
                 "scores_released": bool(row["scores_released"]),
                 # The score that counts: the latest submitted attempt. Hidden until the teacher
                 # releases the scores.

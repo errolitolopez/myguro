@@ -180,3 +180,12 @@ def test_my_activities_says_how_many_questions_are_answered(teacher):
     assert row()["status"] == "in_progress" and row()["answered"] == 2
     student.put(f"/api/my-activities/{assignment_id}/answers", json={"answers": {str(q[1]): None}})  # cleared
     assert row()["answered"] == 1
+
+
+def test_the_activity_list_tells_when_the_counting_attempt_was_submitted(teacher):
+    # The dashboard's score trend puts the released scores in the order they were submitted.
+    assignment_id, _, q, students = setup(teacher)
+    student = login(students[0]["username"])
+    assert student.get("/api/my-activities").get_json()["activities"][0]["submitted_at"] is None
+    student.post(f"/api/my-activities/{assignment_id}/submit", json={"answers": {str(q[0]): 1}})
+    assert student.get("/api/my-activities").get_json()["activities"][0]["submitted_at"]
