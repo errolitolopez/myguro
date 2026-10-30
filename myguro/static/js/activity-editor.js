@@ -17,12 +17,12 @@ const saveButton = document.getElementById("save-button");
 const saveStatus = document.getElementById("save-status");
 
 const QUESTION_TYPES = {
-  multiple_choice: "Multiple choice",
-  true_false: "True or False",
-  identification: "Identification",
-  fill_blank: "Fill in the blank",
-  matching: "Matching",
-  short_answer: "Short answer",
+  multiple_choice: t("Multiple choice"),
+  true_false: t("True or False"),
+  identification: t("Identification"),
+  fill_blank: t("Fill in the blank"),
+  matching: t("Matching"),
+  short_answer: t("Short answer"),
 };
 // Short answers are worth more than a one-word item by default.
 const DEFAULT_POINTS = { short_answer: 5 };
@@ -62,9 +62,9 @@ function smallButton(label, title, onClick, disabled = false) {
 function moveButtons(list, index, what) {
   const group = el("div", "btn-group");
   group.append(
-    smallButton("↑", `Move ${what} up`, () => move(list, index, -1), index === 0),
-    smallButton("↓", `Move ${what} down`, () => move(list, index, 1), index === list.length - 1),
-    smallButton("✕", `Delete ${what}`, () => {
+    smallButton("↑", t("Move {what} up", { what }), () => move(list, index, -1), index === 0),
+    smallButton("↓", t("Move {what} down", { what }), () => move(list, index, 1), index === list.length - 1),
+    smallButton("✕", t("Delete {what}", { what }), () => {
       list.splice(index, 1);
       changed();
     }),
@@ -146,11 +146,11 @@ function richToPlain(html) {
 }
 
 const FORMAT_BUTTONS = [
-  ["B", "Bold", "bold", "fw-bold"],
-  ["I", "Italic", "italic", "fst-italic"],
-  ["U", "Underline", "underline", "text-decoration-underline"],
-  ["• List", "Bulleted list", "insertUnorderedList", ""],
-  ["1. List", "Numbered list", "insertOrderedList", ""],
+  ["B", t("Bold"), "bold", "fw-bold"],
+  ["I", t("Italic"), "italic", "fst-italic"],
+  ["U", t("Underline"), "underline", "text-decoration-underline"],
+  [t("• List"), t("Bulleted list"), "insertUnorderedList", ""],
+  [t("1. List"), t("Numbered list"), "insertOrderedList", ""],
 ];
 
 function richEditor(id, section, placeholder) {
@@ -195,13 +195,13 @@ function descriptionField(section, id, activity) {
     : "At the end of this lesson, you will be able to...";
 
   const top = el("div", "d-flex justify-content-between align-items-end mb-1");
-  const label = el("label", "form-label small mb-0", activity ? "Directions (optional)" : "Description");
+  const label = el("label", "form-label small mb-0", activity ? t("Directions (optional)") : t("Description"));
   label.htmlFor = `${id}-description`;
   const toggle = el("div", "btn-group btn-group-sm");
-  for (const [format, name] of [["plain", "Plain text"], ["rich", "Formatted"]]) {
+  for (const [format, name] of [["plain", t("Plain text")], ["rich", t("Formatted")]]) {
     const button = el("button", `btn btn-toggle ${format === section.descriptionFormat ? "active" : ""}`, name);
     button.type = "button";
-    button.title = format === "rich" ? "Bold, italic, lists" : "Typed text only";
+    button.title = format === "rich" ? t("Bold, italic, lists") : t("Typed text only");
     button.addEventListener("click", () => {
       if (format === section.descriptionFormat) return;
       section.description = format === "rich" ? plainToRich(section.description) : richToPlain(section.description);
@@ -230,7 +230,7 @@ function descriptionField(section, id, activity) {
 function markUnsaved() {
   unsaved = true;
   saveButton.disabled = false;
-  saveStatus.textContent = "Unsaved changes";
+  saveStatus.textContent = t("Unsaved changes");
   saveStatus.className = "small text-warning-emphasis fw-semibold";
   showTotals();
 }
@@ -238,7 +238,7 @@ function markUnsaved() {
 function markSaved() {
   unsaved = false;
   saveButton.disabled = true;
-  saveStatus.textContent = "All changes saved";
+  saveStatus.textContent = t("All changes saved");
   saveStatus.className = "small text-body-secondary";
   showTotals();
 }
@@ -370,7 +370,7 @@ function blankCount(text) {
 
 function multipleChoiceFields(question, id) {
   const wrapper = el("div", "mb-2");
-  wrapper.append(el("div", "form-label small mb-1", "Choices (tap the circle of the correct answer)"));
+  wrapper.append(el("div", "form-label small mb-1", t("Choices (tap the circle of the correct answer)")));
 
   question.choices.forEach((choice, index) => {
     const row = el("div", "input-group input-group-sm mb-1");
@@ -390,14 +390,14 @@ function multipleChoiceFields(question, id) {
     const input = el("input", "form-control");
     input.id = `${id}-choice-${index}`;
     input.maxLength = 200;
-    input.placeholder = `Choice ${LETTERS[index]}`;
+    input.placeholder = t("Choice {letter}", { letter: LETTERS[index] });
     input.value = choice;
     input.addEventListener("input", () => {
       question.choices[index] = input.value;
       markUnsaved();
     });
 
-    const remove = smallButton("✕", `Remove choice ${LETTERS[index]}`, () => {
+    const remove = smallButton("✕", t("Remove choice {letter}", { letter: LETTERS[index] }), () => {
       question.choices.splice(index, 1);
       if (question.answer === index) question.answer = null;
       else if (question.answer > index) question.answer -= 1;
@@ -409,7 +409,7 @@ function multipleChoiceFields(question, id) {
   });
 
   if (question.choices.length < MAX_CHOICES) {
-    const add = el("button", "btn btn-sm btn-link px-0", "+ Add choice");
+    const add = el("button", "btn btn-sm btn-link px-0", t("+ Add choice"));
     add.type = "button";
     add.addEventListener("click", () => {
       question.choices.push("");
@@ -425,19 +425,19 @@ function multipleChoiceFields(question, id) {
 function matchingFields(question, id) {
   const wrapper = el("div", "mb-2");
 
-  wrapper.append(el("div", "form-label small mb-1", "Column B: the choices (may have extra ones)"));
+  wrapper.append(el("div", "form-label small mb-1", t("Column B: the choices (may have extra ones)")));
   question.choices.forEach((choice, index) => {
     const row = el("div", "input-group input-group-sm mb-1");
     const input = el("input", "form-control");
     input.id = `${id}-choice-${index}`;
     input.maxLength = 200;
-    input.placeholder = `Choice ${LETTERS[index]}`;
+    input.placeholder = t("Choice {letter}", { letter: LETTERS[index] });
     input.value = choice;
     input.addEventListener("input", () => {
       question.choices[index] = input.value;
       markUnsaved();
     });
-    const remove = smallButton("✕", `Remove choice ${LETTERS[index]}`, () => {
+    const remove = smallButton("✕", t("Remove choice {letter}", { letter: LETTERS[index] }), () => {
       question.choices.splice(index, 1);
       for (const pair of question.items) {
         if (pair.match === index) pair.match = null;
@@ -449,7 +449,7 @@ function matchingFields(question, id) {
     wrapper.append(row);
   });
   if (question.choices.length < MAX_MATCH_CHOICES) {
-    const add = el("button", "btn btn-sm btn-link px-0 mb-2", "+ Add choice");
+    const add = el("button", "btn btn-sm btn-link px-0 mb-2", t("+ Add choice"));
     add.type = "button";
     add.addEventListener("click", () => {
       question.choices.push("");
@@ -459,13 +459,13 @@ function matchingFields(question, id) {
     wrapper.append(add);
   }
 
-  wrapper.append(el("div", "form-label small mb-1", "Column A: the items, and the letter each one matches"));
+  wrapper.append(el("div", "form-label small mb-1", t("Column A: the items, and the letter each one matches")));
   question.items.forEach((pair, index) => {
     const row = el("div", "input-group input-group-sm mb-1");
     const input = el("input", "form-control");
     input.id = `${id}-item-${index}`;
     input.maxLength = 200;
-    input.placeholder = `Item ${index + 1}`;
+    input.placeholder = t("Item {number}", { number: index + 1 });
     input.value = pair.item;
     input.addEventListener("input", () => {
       pair.item = input.value;
@@ -474,7 +474,7 @@ function matchingFields(question, id) {
     const select = el("select", "form-select flex-grow-0");
     select.style.width = "5.5rem";
     select.setAttribute("aria-label", `Match of item ${index + 1}`);
-    select.append(new Option("Match", ""));
+    select.append(new Option(t("Match"), ""));
     question.choices.forEach((_, choiceIndex) =>
       select.append(new Option(LETTERS[choiceIndex], String(choiceIndex))));
     select.value = pair.match === null ? "" : String(pair.match);
@@ -482,7 +482,7 @@ function matchingFields(question, id) {
       pair.match = select.value === "" ? null : Number(select.value);
       markUnsaved();
     });
-    const remove = smallButton("✕", `Remove item ${index + 1}`, () => {
+    const remove = smallButton("✕", t("Remove item {number}", { number: index + 1 }), () => {
       question.items.splice(index, 1);
       changed();
     }, question.items.length <= 2);
@@ -490,7 +490,7 @@ function matchingFields(question, id) {
     wrapper.append(row);
   });
   if (question.items.length < MAX_MATCH_ITEMS) {
-    const add = el("button", "btn btn-sm btn-link px-0", "+ Add item");
+    const add = el("button", "btn btn-sm btn-link px-0", t("+ Add item"));
     add.type = "button";
     add.addEventListener("click", () => {
       question.items.push({ item: "", match: null });
@@ -500,16 +500,16 @@ function matchingFields(question, id) {
     wrapper.append(add);
   }
   wrapper.append(el("div", "form-text mt-0",
-    "Each correct match is worth an equal share of the points."));
+    t("Each correct match is worth an equal share of the points.")));
   return wrapper;
 }
 
 function trueFalseFields(question) {
   const wrapper = el("div", "mb-2");
-  wrapper.append(el("div", "form-label small mb-1", "Correct answer"));
+  wrapper.append(el("div", "form-label small mb-1", t("Correct answer")));
   const group = el("div", "btn-group");
   group.setAttribute("role", "group");
-  for (const [value, label] of [[true, "True"], [false, "False"]]) {
+  for (const [value, label] of [[true, t("True")], [false, t("False")]]) {
     const radio = el("input", "btn-check");
     radio.type = "radio";
     radio.name = `correct-${question.key}`;
@@ -527,21 +527,21 @@ function trueFalseFields(question) {
   return wrapper;
 }
 
-const ANSWER_HINT = "Accept other answers too: separate them with /";
+const ANSWER_HINT = t("Accept other answers too: separate them with /");
 
 function identificationFields(question, id) {
-  const field = textField(`${id}-answer`, "Correct answer", question.answerText, "Taoism / Daoism",
+  const field = textField(`${id}-answer`, t("Correct answer"), question.answerText, "Taoism / Daoism",
     (value) => (question.answerText = value), { maxLength: 500 });
-  field.append(el("div", "form-text mt-0", `${ANSWER_HINT}. Capital letters don't matter.`));
+  field.append(el("div", "form-text mt-0", t("{ANSWER_HINT}. Capital letters don't matter.", { ANSWER_HINT })));
   return field;
 }
 
 function shortAnswerFields(question, id) {
-  const field = textField(`${id}-guide`, "Guide for checking (optional, only you see this)",
+  const field = textField(`${id}-guide`, t("Guide for checking (optional, only you see this)"),
     question.answerText, "Key points to look for: chooses one question, explains why...",
     (value) => (question.answerText = value), { multiline: true, maxLength: 20000 });
   field.append(el("div", "form-text mt-0",
-    "Students write their own answer. You read it and give a score from 0 to the points."));
+    t("Students write their own answer. You read it and give a score from 0 to the points.")));
   return field;
 }
 
@@ -550,15 +550,15 @@ function blankAnswerFields(question, id, container) {
   const count = blankCount(question.prompt);
   container.replaceChildren();
   if (count === 0) {
-    container.append(el("div", "form-text mb-2", "Type ___ (three underscores) in the question where each blank goes."));
+    container.append(el("div", "form-text mb-2", t("Type ___ (three underscores) in the question where each blank goes.")));
     return;
   }
   for (let index = 0; index < count; index++) {
-    container.append(textField(`${id}-blank-${index}`, `Blank ${index + 1} answer`,
+    container.append(textField(`${id}-blank-${index}`, t("Blank {number} answer", { number: index + 1 }),
       question.blankAnswers[index] || "", "India",
       (value) => (question.blankAnswers[index] = value), { maxLength: 500 }));
   }
-  container.append(el("div", "form-text mt-0 mb-2", `${ANSWER_HINT}. Capital letters don't matter.`));
+  container.append(el("div", "form-text mt-0 mb-2", t("{ANSWER_HINT}. Capital letters don't matter.", { ANSWER_HINT })));
 }
 
 function questionCard(section, question, index) {
@@ -575,7 +575,7 @@ function questionCard(section, question, index) {
   points.max = 100;
   points.style.width = "4.5rem";
   points.value = question.points;
-  points.setAttribute("aria-label", "Points");
+  points.setAttribute("aria-label", t("Points"));
   points.addEventListener("input", () => {
     question.points = points.value;
     markUnsaved();
@@ -590,7 +590,7 @@ function questionCard(section, question, index) {
     matching: "Match Column A with Column B. Write the letter of the correct answer.",
     short_answer: "Which of the four questions above is the MOST important? Explain why.",
   };
-  const prompt = textField(`${id}-prompt`, "Question", question.prompt,
+  const prompt = textField(`${id}-prompt`, t("Question"), question.prompt,
     placeholders[question.type] || "Which tradition originated in India?",
     (value) => (question.prompt = value), { multiline: true, maxLength: 20000 });
   card.append(prompt);
@@ -608,7 +608,7 @@ function questionCard(section, question, index) {
   } else {
     // Insert a blank at the cursor, then show one answer box per blank.
     const textarea = prompt.querySelector("textarea");
-    const insert = el("button", "btn btn-sm btn-outline-secondary mb-2", "Insert blank ___");
+    const insert = el("button", "btn btn-sm btn-outline-secondary mb-2", t("Insert blank ___"));
     insert.type = "button";
     const answers = el("div");
     insert.addEventListener("click", () => {
@@ -638,13 +638,13 @@ function sectionCard(section, index) {
   const card = el("div", `card border-start border-4 ${activity ? "border-primary" : "border-success"}`);
 
   const header = el("div", "card-header d-flex justify-content-between align-items-center py-2");
-  const label = el("span", "fw-semibold text-body-secondary", `Section ${index + 1} · `);
-  label.append(el("span", activity ? "text-primary" : "text-success", activity ? "Activity" : "Text"));
+  const label = el("span", "fw-semibold text-body-secondary", t("Section {number} · ", { number: index + 1 }));
+  label.append(el("span", activity ? "text-primary" : "text-success", activity ? t("Activity") : t("Text")));
   header.append(label, moveButtons(sections, index, "section"));
 
   const body = el("div", "card-body");
   const id = `section-${index}`;
-  body.append(textField(`${id}-title`, "Title", section.title,
+  body.append(textField(`${id}-title`, t("Title"), section.title,
     activity ? "III. Pre-test" : "I. Title of the Lesson", (value) => (section.title = value)));
   body.append(descriptionField(section, id, activity));
 
@@ -653,7 +653,7 @@ function sectionCard(section, index) {
     section.questions.forEach((question, questionIndex) =>
       questions.append(questionCard(section, question, questionIndex)));
     if (section.questions.length === 0) {
-      questions.append(el("div", "small text-body-secondary", "No questions yet. Add one below."));
+      questions.append(el("div", "small text-body-secondary", t("No questions yet. Add one below.")));
     }
     body.append(questions);
 
@@ -695,7 +695,7 @@ document.getElementById("add-activity-button").addEventListener("click", () => a
 // --- Load and save ---------------------------------------------------------------
 
 function showActivity(activity) {
-  document.title = `${activity.title} · MyGuro`;
+  document.title = t("{title} · MyGuro", { title: activity.title });
   titleInput.value = activity.title;
   subjectInput.value = activity.subject;
   subjectPick.sync();
@@ -710,7 +710,7 @@ function showActivity(activity) {
 const maxAttemptsSelect = document.getElementById("max-attempts");
 maxAttemptsSelect.addEventListener("change", async () => {
   const status = document.getElementById("max-attempts-status");
-  status.textContent = "Saving...";
+  status.textContent = t("Saving...");
   try {
     const response = await apiFetch(`/api/activities/${activityId}/settings`, {
       method: "PUT",
@@ -721,9 +721,9 @@ maxAttemptsSelect.addEventListener("change", async () => {
     });
     if (!response) return;
     const data = await response.json();
-    status.textContent = response.ok ? "Saved" : data.error || "Could not save.";
+    status.textContent = response.ok ? t("Saved") : data.error || t("Could not save.");
   } catch {
-    status.textContent = "Cannot reach the server.";
+    status.textContent = t("Cannot reach the server.");
   }
 });
 
@@ -731,16 +731,16 @@ maxAttemptsSelect.addEventListener("change", async () => {
 async function saveTitleSubject() {
   if (!sheetLocked) return;
   if (!titleInput.value.trim()) {
-    saveStatus.textContent = "Title is required.";
+    saveStatus.textContent = t("Title is required.");
     titleInput.focus();
     return;
   }
   if (!subjectInput.value.trim()) {
-    saveStatus.textContent = "Subject is required.";
+    saveStatus.textContent = t("Subject is required.");
     subjectInput.focus();
     return;
   }
-  saveStatus.textContent = "Saving...";
+  saveStatus.textContent = t("Saving...");
   try {
     const response = await apiFetch(`/api/activities/${activityId}/settings`, {
       method: "PUT",
@@ -750,13 +750,13 @@ async function saveTitleSubject() {
     if (!response) return;
     const data = await response.json();
     if (!response.ok) {
-      saveStatus.textContent = data.error || "Could not save.";
+      saveStatus.textContent = data.error || t("Could not save.");
       return;
     }
-    document.title = `${data.activity.title} · MyGuro`;
-    saveStatus.textContent = "Locked · title and subject saved";
+    document.title = t("{title} · MyGuro", { title: data.activity.title });
+    saveStatus.textContent = t("Locked · title and subject saved");
   } catch {
-    saveStatus.textContent = "Cannot reach the server.";
+    saveStatus.textContent = t("Cannot reach the server.");
   }
 }
 titleInput.addEventListener("change", saveTitleSubject);
@@ -779,7 +779,7 @@ function lockEditor() {
   editorArea.querySelectorAll("#add-text-button, #add-activity-button")
     .forEach((button) => button.classList.add("d-none"));
   saveButton.classList.add("d-none");
-  saveStatus.textContent = "Locked";
+  saveStatus.textContent = t("Locked");
 }
 
 async function loadActivity() {
@@ -791,31 +791,31 @@ async function loadActivity() {
       return;
     }
     if (!response.ok) {
-      showEditorError("Could not load the activity.");
+      showEditorError(t("Could not load the activity."));
       return;
     }
     markSaved();
-    showActivity((await response.json()).activity); // after markSaved, so "Locked" stays shown
+    showActivity((await response.json()).activity); // after markSaved, so t("Locked") stays shown
   } catch {
-    showEditorError("Cannot reach the server. Check your connection.");
+    showEditorError(t("Cannot reach the server. Check your connection."));
   }
 }
 
 async function save() {
   hideError("editor-error");
   if (!titleInput.value.trim()) {
-    showEditorError("Title is required.");
+    showEditorError(t("Title is required."));
     titleInput.focus();
     return;
   }
   if (!subjectInput.value.trim()) {
-    showEditorError("Subject is required.");
+    showEditorError(t("Subject is required."));
     subjectInput.focus();
     return;
   }
 
   saveButton.disabled = true;
-  saveStatus.textContent = "Saving...";
+  saveStatus.textContent = t("Saving...");
   try {
     const response = await apiFetch(`/api/activities/${activityId}`, {
       method: "PUT",
@@ -829,14 +829,14 @@ async function save() {
     if (!response) return;
     const data = await response.json();
     if (!response.ok) {
-      showEditorError(data.error || "Could not save.");
+      showEditorError(data.error || t("Could not save."));
       markUnsaved();
       return;
     }
     showActivity(data.activity);
     markSaved();
   } catch {
-    showEditorError("Cannot reach the server. Check your connection.");
+    showEditorError(t("Cannot reach the server. Check your connection."));
     markUnsaved();
   }
 }
@@ -888,7 +888,7 @@ function previewQuestion(question) {
     item.append(choices);
   } else if (question.type === "true_false") {
     const choices = el("div", "answer-choices mt-2");
-    choices.append(previewChoice("True"), previewChoice("False"));
+    choices.append(previewChoice(t("True")), previewChoice(t("False")));
     item.append(choices);
   } else if (question.type === "identification") {
     item.append(el("div", "blank-line mt-1"));
@@ -903,7 +903,7 @@ function previewQuestion(question) {
     item.append(columns);
   } else if (question.type === "short_answer") {
     // An empty box with room for a few lines, like the "Answer: ____" lines on paper.
-    const box = el("div", "border rounded mt-1 p-2 text-body-secondary small", "Answer:");
+    const box = el("div", "border rounded mt-1 p-2 text-body-secondary small", t("Answer:"));
     box.style.minHeight = "5rem";
     item.append(box);
   }
@@ -916,7 +916,7 @@ document.getElementById("preview-button").addEventListener("click", () => {
 
   const body = document.getElementById("preview-body");
   body.replaceChildren();
-  if (sections.length === 0) body.append(el("p", "text-body-secondary", "No sections yet."));
+  if (sections.length === 0) body.append(el("p", "text-body-secondary", t("No sections yet.")));
   for (const section of sections) {
     const block = el("section", "mb-4");
     if (section.title.trim()) block.append(el("h3", "h5", section.title.trim()));
@@ -960,7 +960,7 @@ protectForm.addEventListener("submit", (event) => {
   if (protectForm.elements.password.value.length < MIN_FILE_PASSWORD) {
     event.preventDefault();
     const error = document.getElementById("protect-error");
-    error.textContent = `Type a password of at least ${MIN_FILE_PASSWORD} characters.`;
+    error.textContent = t("Type a password of at least {MIN_FILE_PASSWORD} characters.", { MIN_FILE_PASSWORD });
     error.classList.remove("d-none");
     return;
   }
@@ -972,7 +972,7 @@ protectForm.addEventListener("submit", (event) => {
 const copyButton = document.getElementById("copy-button");
 copyButton.addEventListener("click", async () => {
   if (unsaved) {
-    showEditorError("Save your changes first, then make a copy.");
+    showEditorError(t("Save your changes first, then make a copy."));
     return;
   }
   const stopLoading = startLoading(copyButton);
@@ -982,12 +982,12 @@ copyButton.addEventListener("click", async () => {
     if (!response) return;
     const data = await response.json();
     if (!response.ok) {
-      showEditorError(data.error || "Could not copy the activity.");
+      showEditorError(data.error || t("Could not copy the activity."));
       return;
     }
     window.location.href = `/activities/${data.activity.id}`;
   } catch {
-    showEditorError("Cannot reach the server. Check your connection.");
+    showEditorError(t("Cannot reach the server. Check your connection."));
   } finally {
     stopLoading();
   }
@@ -1000,8 +1000,8 @@ document.getElementById("delete-button").addEventListener("click", () => {
   // An assigned sheet is archived, not erased: say what happens to the students.
   const given = assignClasses.some((item) => item.assignment) || assignDirect !== null;
   document.getElementById("delete-message").textContent = given
-    ? "Delete this activity? Students will lose access. You can restore it from Deleted on the Activities page."
-    : "Delete this activity with all its sections and questions? This can't be undone.";
+    ? t("Delete this activity? Students will lose access. You can restore it from Deleted on the Activities page.")
+    : t("Delete this activity with all its sections and questions? This can't be undone.");
   deleteConfirm.classList.remove("d-none");
 });
 document.getElementById("delete-no").addEventListener("click", () => deleteConfirm.classList.add("d-none"));
@@ -1013,14 +1013,14 @@ document.getElementById("delete-yes").addEventListener("click", async (event) =>
     if (!response) return;
     if (!response.ok) {
       const data = await response.json();
-      showEditorError(data.error || "Could not delete the activity.");
+      showEditorError(data.error || t("Could not delete the activity."));
       deleteConfirm.classList.add("d-none");
       return;
     }
-    unsaved = false; // don't ask "Leave site?" after deleting
+    unsaved = false; // don't ask t("Leave site?") after deleting
     window.location.href = "/activities";
   } catch {
-    showEditorError("Cannot reach the server. Check your connection.");
+    showEditorError(t("Cannot reach the server. Check your connection."));
   } finally {
     stopLoading();
   }

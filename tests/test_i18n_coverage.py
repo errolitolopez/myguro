@@ -30,6 +30,8 @@ TRANSLATED_FILES = [
     # Teacher pages: Activities list and the Word import window
     "myguro/templates/activities.html", "myguro/templates/_import_sheet_modal.html",
     "myguro/static/js/activities.js", "myguro/static/js/activity-import.js",
+    # Activity editor
+    "myguro/templates/activity_editor.html", "myguro/static/js/activity-editor.js",
 ]
 
 PLACEHOLDER = re.compile(r"\{(\w+)\}")
