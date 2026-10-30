@@ -34,18 +34,36 @@
   apply(saved());
   dark.addEventListener("change", () => apply(saved()));
 
+  // Saves a choice, draws it, and brings every picker on the page (the Display page's box, the navbar menu)
+  // in line with it.
+  function choose(choice) {
+    choice = CHOICES.includes(choice) ? choice : "auto";
+    try {
+      localStorage.setItem(KEY, choice);
+    } catch {
+      // Private window or blocked storage: the choice only lasts for this page.
+    }
+    apply(choice);
+    showChoice(choice);
+  }
+
+  function showChoice(choice) {
+    document.querySelectorAll("[data-theme-select]").forEach((select) => (select.value = choice));
+    document.querySelectorAll("[data-theme-choice]").forEach((button) => {
+      const current = button.dataset.themeChoice === choice;
+      button.classList.toggle("active", current);
+      button.setAttribute("aria-current", current ? "true" : "false");
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
+    showChoice(saved());
     document.querySelectorAll("[data-theme-select]").forEach((select) => {
-      select.value = saved();
-      select.addEventListener("change", () => {
-        const choice = CHOICES.includes(select.value) ? select.value : "auto";
-        try {
-          localStorage.setItem(KEY, choice);
-        } catch {
-          // Private window or blocked storage: the choice only lasts for this page.
-        }
-        apply(choice);
-      });
+      select.addEventListener("change", () => choose(select.value));
+    });
+    // The quick menu in the navbar: one button per theme.
+    document.querySelectorAll("[data-theme-choice]").forEach((button) => {
+      button.addEventListener("click", () => choose(button.dataset.themeChoice));
     });
   });
 })();

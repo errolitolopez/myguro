@@ -125,3 +125,10 @@ def test_hidden_chart_tables_do_not_widen_the_page():
     # The class must be on a div around the table.
     for path in ("myguro/templates/_dashboard_chart.html", "myguro/templates/log.html"):
         assert '<table class="visually-hidden"' not in open(path).read()
+
+
+def test_the_navbar_has_a_quick_theme_menu_before_the_search_button(teacher):
+    page = teacher.get("/dashboard").get_data(as_text=True)
+    for theme in ("auto", "light", "dark", "darcula", "solarized", "neon"):
+        assert f'data-theme-choice="{theme}"' in page
+    assert page.index('aria-label="Change theme"') < page.index('id="palette-button"')
