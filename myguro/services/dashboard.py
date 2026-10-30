@@ -24,7 +24,7 @@ class DashboardService(Service):
                 "role": "student",
                 "classes": [dict(row) for row in self.classes.classes_of_student(self.user["id"], year_id)],
                 "submitted": self.submissions.count_submitted_by_student(self.user["id"], year_id),
-                "to_do": sum(1 for item in StudentWorkService(self.db, self.user).list() if not item["done"]),
+                "to_do": sum(1 for item in StudentWorkService(self.db, self.user).list() if not item["done"] or item["status"] == "in_progress"),
             }
         teacher_id = self.user["id"]
         return {

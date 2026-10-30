@@ -30,7 +30,7 @@
 
   // What the student can still answer, soonest due first; no due date goes last.
   const nextDue = (activities) => activities
-    .filter((activity) => !activity.done && !activity.closed)
+    .filter((activity) => (!activity.done || activity.status === "in_progress") && !activity.closed)
     .sort((a, b) => (a.due_date || "9999").localeCompare(b.due_date || "9999"));
 
   const showNextDue = (activities, today) => {

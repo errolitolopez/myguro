@@ -106,15 +106,20 @@ function subjectLabel(key, teacherId) {
   return `${label} · ${mine[0] ? mine[0].teacher : ""}`;
 }
 
+// isTodo(activity) -> true when there is still something to answer: never submitted, or trying again
+function isTodo(activity) {
+  return !activity.done || activity.status === "in_progress";
+}
+
 function render() {
   const showDone = document.getElementById("show-done").checked;
-  // Once submitted it stays under Submitted, even while trying again.
+  // Once submitted it is under Submitted; Try again moves it back to To do until it is submitted again.
   const subject = chosenSubject(); // null = the list of subjects
   const teacher = chosenTeacher();
   const inSubject = activities.filter((activity) => subject === null
     || (subjectKey(activity.subject) === subject && (teacher === null || activity.teacher_id === teacher)));
-  const todo = inSubject.filter((activity) => !activity.done);
-  const done = inSubject.filter((activity) => activity.done);
+  const todo = inSubject.filter(isTodo);
+  const done = inSubject.filter((activity) => !isTodo(activity));
   document.getElementById("count-todo").textContent = `(${todo.length})`;
   document.getElementById("count-done").textContent = `(${done.length})`;
 
