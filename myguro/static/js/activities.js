@@ -19,7 +19,7 @@ function formatDate(value) {
   });
 }
 
-const STATUS_LABELS = { not_started: "not started", open: "open", closed: "closed" };
+const STATUS_LABELS = { not_started: t("not started"), open: t("open"), closed: t("closed") };
 
 // statusBadge("Rizal · open", "open") -> a green badge; closed is dark, not started is grey
 function statusBadge(text, status) {
@@ -44,7 +44,7 @@ function activityItem(activity) {
     activity.subject,
     plural(activity.sections, "section"),
     plural(activity.questions, "question"),
-    `edited ${formatDate(activity.updated_at)}`,
+    t("edited {date}", { date: formatDate(activity.updated_at) }),
   ].filter(Boolean).join(" · ");
   left.append(title, details);
 
@@ -53,7 +53,7 @@ function activityItem(activity) {
   const givenTo = document.createElement("div");
   givenTo.className = "d-flex flex-wrap gap-1 mt-1";
   if (activity.given_to.length === 0) {
-    givenTo.append(statusBadge("Not given yet", "not_started"));
+    givenTo.append(statusBadge(t("Not given yet"), "not_started"));
   } else {
     givenTo.append(...activity.given_to.map((given) => statusBadge(`${given.name} · ${STATUS_LABELS[given.status]}`, given.status)));
   }
@@ -88,16 +88,16 @@ function render() {
     (activity) => activity.title.toLowerCase().includes(query) || activity.subject.toLowerCase().includes(query),
   );
   if (activities.length === 0) {
-    list.replaceChildren(messageItem("No activities yet. Tap + New activity to write your first one."));
+    list.replaceChildren(messageItem(t("No activities yet. Tap + New activity to write your first one.")));
   } else if (subject !== null) {
     // One subject's page: its activities (the search narrows them)
     const inSubject = matches.filter((activity) => subjectKey(activity.subject) === subject);
-    const label = groupBySubject(activities).find((group) => group.key === subject)?.label || "No subject";
+    const label = groupBySubject(activities).find((group) => group.key === subject)?.label || t("No subject");
     list.replaceChildren(subjectHeaderElement(label),
-      inSubject.length ? activityListElement(inSubject) : messageItem("No activity matches your search."));
+      inSubject.length ? activityListElement(inSubject) : messageItem(t("No activity matches your search.")));
   } else if (query) {
     // Searching on the subjects page lists the matches from every subject
-    list.replaceChildren(matches.length ? activityListElement(matches) : messageItem("No activity matches your search."));
+    list.replaceChildren(matches.length ? activityListElement(matches) : messageItem(t("No activity matches your search.")));
   } else {
     list.replaceChildren(subjectListElement(groupBySubject(activities)));
   }
@@ -119,13 +119,13 @@ function deletedItem(activity) {
   title.textContent = activity.title;
   const details = document.createElement("div");
   details.className = "small text-body-secondary";
-  details.textContent = [activity.subject, `deleted ${formatDate(activity.deleted_at)}`].filter(Boolean).join(" · ");
+  details.textContent = [activity.subject, t("deleted {date}", { date: formatDate(activity.deleted_at) })].filter(Boolean).join(" · ");
   left.append(title, details);
 
   const button = document.createElement("button");
   button.type = "button";
   button.className = "btn btn-sm btn-outline-primary text-nowrap bi bi-arrow-counterclockwise";
-  button.textContent = "Restore";
+  button.textContent = t("Restore");
   button.addEventListener("click", async () => {
     const stopLoading = startLoading(button);
     if (!stopLoading) return;
@@ -134,12 +134,12 @@ function deletedItem(activity) {
       const response = await apiFetch(`/api/activities/${activity.id}/restore`, { method: "POST" });
       if (!response) return;
       if (!response.ok) {
-        showError("activities-error", (await response.json()).error || "Could not restore the activity.");
+        showError("activities-error", (await response.json()).error || t("Could not restore the activity."));
         return;
       }
       await loadActivities();
     } catch {
-      showError("activities-error", "Cannot reach the server. Check your connection.");
+      showError("activities-error", t("Cannot reach the server. Check your connection."));
     } finally {
       stopLoading();
     }
@@ -150,7 +150,7 @@ function deletedItem(activity) {
 
 function renderDeleted() {
   deletedToggle.classList.toggle("d-none", deletedActivities.length === 0);
-  deletedToggle.textContent = `Deleted (${deletedActivities.length})`;
+  deletedToggle.textContent = t("Deleted ({count})", { count: deletedActivities.length });
   if (deletedActivities.length === 0) deletedList.classList.add("d-none");
   deletedList.replaceChildren(...deletedActivities.map(deletedItem));
 }
@@ -165,7 +165,7 @@ async function loadActivities() {
     const response = await apiFetch("/api/activities");
     if (!response) return;
     if (!response.ok) {
-      showError("activities-error", "Could not load your activities.");
+      showError("activities-error", t("Could not load your activities."));
       return;
     }
     hideError("activities-error");
@@ -177,7 +177,7 @@ async function loadActivities() {
       renderDeleted();
     }
   } catch {
-    showError("activities-error", "Cannot reach the server. Check your connection.");
+    showError("activities-error", t("Cannot reach the server. Check your connection."));
   }
 }
 
@@ -188,12 +188,12 @@ form.addEventListener("submit", async (event) => {
   hideError("new-activity-error");
   const title = titleInput.value.trim();
   if (!title) {
-    showError("new-activity-error", "Title is required.");
+    showError("new-activity-error", t("Title is required."));
     titleInput.focus();
     return;
   }
   if (!subjectInput.value.trim()) {
-    showError("new-activity-error", "Subject is required.");
+    showError("new-activity-error", t("Subject is required."));
     subjectInput.focus();
     return;
   }
@@ -209,12 +209,12 @@ form.addEventListener("submit", async (event) => {
     if (!response) return;
     const data = await response.json();
     if (!response.ok) {
-      showError("new-activity-error", data.error || "Could not create the activity.");
+      showError("new-activity-error", data.error || t("Could not create the activity."));
       return;
     }
     window.location.href = `/activities/${data.activity.id}`;
   } catch {
-    showError("new-activity-error", "Cannot reach the server. Check your connection.");
+    showError("new-activity-error", t("Cannot reach the server. Check your connection."));
   } finally {
     stopLoading();
   }

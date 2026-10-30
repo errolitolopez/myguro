@@ -9,20 +9,20 @@
   <div id="activities-error" class="alert alert-danger d-none" role="alert"></div>
 
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h4 mb-0">Activities</h1>
+    <h1 class="h4 mb-0">{{ _("Activities") }}</h1>
     <div class="d-flex gap-2">
       <button class="btn btn-outline-success text-nowrap bi bi-file-earmark-arrow-up" data-bs-toggle="modal" data-bs-target="#import-sheet-modal">
-        Import from Word
+        {{ _("Import from Word") }}
       </button>
       <button class="btn btn-success text-nowrap bi bi-plus-lg" data-bs-toggle="modal" data-bs-target="#new-activity-modal">
-        New activity
+        {{ _("New activity") }}
       </button>
     </div>
   </div>
 
   <div class="d-flex flex-column flex-sm-row gap-2 mb-3">
-    <input id="search" type="search" class="form-control" placeholder="Search title or subject"
-           aria-label="Search activities" autocomplete="off">
+    <input id="search" type="search" class="form-control" placeholder="{{ _("Search title or subject") }}"
+           aria-label="{{ _("Search activities") }}" autocomplete="off">
   </div>
 
   <div id="activity-list">
@@ -34,7 +34,7 @@
   <!-- Deleted sheets: hidden from students, work kept, can be restored -->
   <div class="mt-4">
     <button id="deleted-toggle" type="button" class="btn btn-link p-0 bi bi-trash d-none"
-            aria-expanded="false" aria-controls="deleted-list">Deleted (0)</button>
+            aria-expanded="false" aria-controls="deleted-list">{{ _("Deleted (0)") }}</button>
     <div id="deleted-list" class="list-group mt-2 d-none"></div>
   </div>
 </main>
@@ -44,24 +44,24 @@
   <div class="modal-dialog modal-dialog-centered">
     <form id="new-activity-form" class="modal-content" novalidate>
       <div class="modal-header">
-        <h2 class="modal-title fs-5" id="new-activity-title">New activity</h2>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h2 class="modal-title fs-5" id="new-activity-title">{{ _("New activity") }}</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ _("Close") }}"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
-          <label for="new-title" class="form-label">Title</label>
+          <label for="new-title" class="form-label">{{ _("Title") }}</label>
           <input id="new-title" class="form-control" maxlength="150" autocomplete="off"
                  placeholder="The Parts of a Cell" required>
         </div>
         <div class="mb-3">
-          <label for="new-subject" class="form-label">Subject</label>
+          <label for="new-subject" class="form-label">{{ _("Subject") }}</label>
           <input id="new-subject" class="form-control" maxlength="100" required autocomplete="off" placeholder="Science">
         </div>
         <div id="new-activity-error" class="alert alert-danger py-2 mb-0 d-none" role="alert"></div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary bi bi-x-lg" data-bs-dismiss="modal">Cancel</button>
-        <button id="new-activity-button" type="submit" class="btn btn-success bi bi-pencil-square">Create and edit</button>
+        <button type="button" class="btn btn-outline-secondary bi bi-x-lg" data-bs-dismiss="modal">{{ _("Cancel") }}</button>
+        <button id="new-activity-button" type="submit" class="btn btn-success bi bi-pencil-square">{{ _("Create and edit") }}</button>
       </div>
     </form>
   </div>

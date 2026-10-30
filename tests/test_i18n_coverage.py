@@ -27,6 +27,9 @@ TRANSLATED_FILES = [
     "myguro/templates/_reading_settings.html",
     # The error page (its title and message come from errors.py and are translated there)
     "myguro/templates/error.html",
+    # Teacher pages: Activities list and the Word import window
+    "myguro/templates/activities.html", "myguro/templates/_import_sheet_modal.html",
+    "myguro/static/js/activities.js", "myguro/static/js/activity-import.js",
 ]
 
 PLACEHOLDER = re.compile(r"\{(\w+)\}")

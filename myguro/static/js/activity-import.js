@@ -31,7 +31,7 @@ async function sendSheet(dryRun) {
   if (!response) return null;
   const data = await response.json();
   if (!response.ok) {
-    showError("import-sheet-error", data.error || "Could not read the file.");
+    showError("import-sheet-error", data.error || t("Could not read the file."));
     return null;
   }
   return data;
@@ -59,11 +59,11 @@ function sheetRow(values) {
 sheetCheckButton.addEventListener("click", async () => {
   resetSheetCheck();
   if (!sheetFile.files.length) {
-    showError("import-sheet-error", "Choose the Word file first.");
+    showError("import-sheet-error", t("Choose the Word file first."));
     return;
   }
   if (!sheetTitle.value.trim()) {
-    showError("import-sheet-error", "Type the title of the activity.");
+    showError("import-sheet-error", t("Type the title of the activity."));
     return;
   }
   const stopLoading = startLoading(sheetCheckButton);
@@ -77,15 +77,15 @@ sheetCheckButton.addEventListener("click", async () => {
     }
     const questions = data.sections.reduce((sum, section) => sum + section.questions, 0);
     document.getElementById("import-sheet-preview-text").textContent =
-      `${plural(data.sections.length, "section")} and ${plural(questions, "question")} will be added. ` +
-      "Check them, then press Import.";
+      t("{sections} and {questions} will be added. Check them, then press Import.",
+        { sections: plural(data.sections.length, "section"), questions: plural(questions, "question") });
     document.getElementById("import-sheet-preview-rows").replaceChildren(...data.sections.map((section, index) =>
       sheetRow([index + 1, section.title, section.kind,
         section.kind === "activity" ? section.questions : "", section.kind === "activity" ? section.points : ""])));
     sheetPart("import-sheet-preview", true);
     sheetConfirmButton.classList.remove("d-none");
   } catch {
-    showError("import-sheet-error", "Cannot reach the server. Check your connection.");
+    showError("import-sheet-error", t("Cannot reach the server. Check your connection."));
   } finally {
     stopLoading();
   }
@@ -106,7 +106,7 @@ sheetConfirmButton.addEventListener("click", async () => {
     }
     window.location.href = `/activities/${data.activity.id}`;
   } catch {
-    showError("import-sheet-error", "Cannot reach the server. Check your connection.");
+    showError("import-sheet-error", t("Cannot reach the server. Check your connection."));
   } finally {
     stopLoading();
   }
@@ -117,11 +117,11 @@ const copyPromptButton = document.getElementById("import-sheet-copy-prompt");
 copyPromptButton.addEventListener("click", async () => {
   try {
     await navigator.clipboard.writeText(document.getElementById("import-sheet-prompt").value);
-    copyPromptButton.textContent = "Copied!";
+    copyPromptButton.textContent = t("Copied!");
   } catch {
-    copyPromptButton.textContent = "Can't copy: select the text and copy it";
+    copyPromptButton.textContent = t("Can't copy: select the text and copy it");
   }
-  setTimeout(() => (copyPromptButton.textContent = "Copy prompt"), 2000);
+  setTimeout(() => (copyPromptButton.textContent = t("Copy prompt")), 2000);
 });
 
 // Each time the popup opens: start again.

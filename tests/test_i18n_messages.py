@@ -15,6 +15,8 @@ KNOWN_DYNAMIC = {
     ("myguro/imports.py", "too_many_message"),  # given by the caller: the student import and its header help
     ("myguro/services/chat.py", "rules.CHAT_FULL_MESSAGE"),  # a constant
     ("myguro/services/results.py", "message"),  # a parameter: "Not found." and the like
+    ("myguro/domain/docx_import.py", "message"), ("myguro/domain/docx_import.py", "failure.message"),
+    ("myguro/domain/docx_import.py", "failure.message.removeprefix('Question: ')"),  # the messages of clean_question (listed)
     ("myguro/services/schedule.py", "self.describe(refused[0], names)"),  # the schedule's own problem texts
 }
 
@@ -34,3 +36,25 @@ def test_the_most_specific_pattern_wins():
     assert translate_message("Title can be at most 150 characters.", TAGLISH) == "Ang title ay hanggang 150 na characters lang."
     assert translate_message("Section 2, question 3: type the question.", TAGLISH) == "Section 2, tanong 3: i-type ang tanong."
     assert translate_message("Last name is required.", TAGLISH) == "Kailangan ang apelyido."
+
+
+def test_word_import_problems_follow_the_language_cookie(teacher):
+    from docx import Document
+    import io
+
+    document = Document()
+    document.add_heading("I. Lesson", level=1)
+    document.add_paragraph("Type: Multiple Choice")
+    document.add_paragraph("1. A question")
+    data = io.BytesIO()
+    document.save(data)
+    form = {"file": (io.BytesIO(data.getvalue()), "las.docx"), "title": "Philo", "subject": "Philosophy", "dry_run": "1"}
+    english = teacher.post("/api/activities/import", data=dict(form, file=(io.BytesIO(data.getvalue()), "las.docx")),
+                           content_type="multipart/form-data").get_json()["errors"]
+    teacher.set_cookie("myguro-lang", "tl")
+    taglish = teacher.post("/api/activities/import", data=dict(form, file=(io.BytesIO(data.getvalue()), "las.docx")),
+                           content_type="multipart/form-data").get_json()["errors"]
+    assert english and len(english) == len(taglish)
+    assert english[0]["message"] != taglish[0]["message"]  # the message is in Taglish, the data around it is the same
+    assert english[0]["row"] == taglish[0]["row"]
+    assert any("sagot" in problem["message"].lower() or "ANSWER KEY" in problem["message"] for problem in taglish)

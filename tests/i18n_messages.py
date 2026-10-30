@@ -7,14 +7,15 @@ def render(node):
     if isinstance(node, ast.Constant) and isinstance(node.value, str):
         return node.value
     if isinstance(node, ast.JoinedStr):
-        out = []
+        out, used = [], {}
         for part in node.values:
             if isinstance(part, ast.Constant):
                 out.append(part.value)
             else:
                 expr = part.value
                 name = expr.id if isinstance(expr, ast.Name) else (expr.attr if isinstance(expr, ast.Attribute) else "value")
-                out.append("{" + name + "}")
+                used[name] = used.get(name, 0) + 1
+                out.append("{" + (name if used[name] == 1 else f"{name}{used[name]}") + "}")  # the same name twice must differ
         return "".join(out)
     if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
         left, right = render(node.left), render(node.right)
@@ -32,6 +33,8 @@ def messages():
                 name = func.id if isinstance(func, ast.Name) else getattr(func, "attr", "")
                 if name.endswith("Error") and node.exc.args:
                     call = node.exc.args[0]
+            elif isinstance(node, ast.Call) and getattr(node.func, "id", "") in ("fail", "problem") and len(node.args) >= 2:
+                call = node.args[1]  # fail(item, message) and problem(where, message) in the Word import
             elif isinstance(node, ast.Call):
                 func = node.func
                 if isinstance(func, ast.Name) and func.id == "error_response" or getattr(func, "attr", "") == "error_response":
@@ -41,9 +44,11 @@ def messages():
                         call = kw.value
             if call is None:
                 continue
-            text = render(call)
-            if text is None:
-                dynamic.append((path, node.lineno, ast.unparse(call)[:80]))
-            else:
-                found.setdefault(text, []).append(f"{path}:{node.lineno}")
+            branches = [call.body, call.orelse] if isinstance(call, ast.IfExp) else [call]
+            for branch in branches:
+                text = render(branch)
+                if text is None:
+                    dynamic.append((path, node.lineno, ast.unparse(branch)[:80]))
+                else:
+                    found.setdefault(text, []).append(f"{path}:{node.lineno}")
     return found, dynamic

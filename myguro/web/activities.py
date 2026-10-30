@@ -7,7 +7,7 @@ from flask import Blueprint, jsonify, redirect, render_template, request, send_f
 
 from myguro.database import get_db
 from myguro.domain.file_password import clean_file_password
-from myguro.errors import ValidationError
+from myguro.errors import ValidationError, say
 from myguro.exports import sheet_pdf_bytes
 from myguro.docx_files import protect_docx, read_docx_lines, sheet_docx_bytes, sheet_template_docx_bytes
 from myguro.services import ActivityService, AssignmentService
@@ -125,7 +125,11 @@ def api_import():
     except ValidationError as error:
         service().log_failed_import(data["title"], error.message.rstrip("."))  # the file was refused: say so in the log
         raise
-    return jsonify(service().import_docx_sheet(lines, data, dry_run=dry_run))
+    result = service().import_docx_sheet(lines, data, dry_run=dry_run)
+    for problem in result["errors"]:  # the problems are data, not raised errors: say them in the person's language
+        problem["message"] = say(problem["message"])
+        problem["where"] = say(problem["where"])
+    return jsonify(result)
 
 
 @bp.get("/api/activities/<int:activity_id>")
