@@ -1,5 +1,12 @@
 // Helpers shared by the logged-in pages.
 
+// t("{count} to do", { count: 3 }) -> "3 pa ang gagawin" in Taglish, "3 to do" in English. The English sentence is
+// the key; window.TEXT holds the Taglish (empty in English), and a sentence with no entry stays English.
+function t(text, values = {}) {
+  const found = (window.TEXT && window.TEXT[text]) || text;
+  return found.replace(/\{(\w+)\}/g, (match, name) => (name in values ? String(values[name]) : match));
+}
+
 function showError(elementId, message) {
   const box = document.getElementById(elementId);
   box.textContent = message;
