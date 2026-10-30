@@ -9,7 +9,7 @@ const list = document.getElementById("activity-list");
 
 // progressText({answered: 3, questions: 10}) -> "3 / 10 answered"
 function progressText(activity) {
-  return `${activity.answered} / ${activity.questions} answered`;
+  return t("{answered} / {questions} answered", { answered: activity.answered, questions: activity.questions });
 }
 
 // The badge on the right: due date / overdue, or the score once submitted.
@@ -23,27 +23,27 @@ function statusBadges(activity) {
     badges.append(badge);
   };
 
-  if (activity.closed) add("text-bg-dark", "Closed");
+  if (activity.closed) add("text-bg-dark", t("Closed"));
   if (activity.done) {
     const score = activity.score;
     if (score) {
       add("text-bg-success", `${score.earned} / ${score.possible - score.pending}`);
-      if (score.pending) add("text-bg-light border", `+${score.pending} pts to check`);
+      if (score.pending) add("text-bg-light border", t("+{pending} pts to check", { pending: score.pending }));
     } else {
-      add("text-bg-success", "Submitted");
-      add("text-bg-light border", "Score not released yet");
+      add("text-bg-success", t("Submitted"));
+      add("text-bg-light border", t("Score not released yet"));
     }
-    if (activity.paper) add("text-bg-secondary", "Paper");
-    if (activity.late) add("text-bg-warning", "Late");
-    if (activity.status === "in_progress") add("text-bg-info", `Trying again · attempt ${activity.attempt} · ${progressText(activity)}`);
-    else if (activity.can_retry) add("text-bg-light border", "Can try again");
+    if (activity.paper) add("text-bg-secondary", t("Paper"));
+    if (activity.late) add("text-bg-warning", t("Late"));
+    if (activity.status === "in_progress") add("text-bg-info", t("Trying again · attempt {attempt} · {progress}", { attempt: activity.attempt, progress: progressText(activity) }));
+    else if (activity.can_retry) add("text-bg-light border", t("Can try again"));
     return badges;
   }
-  if (activity.overdue) add("text-bg-danger", `Overdue · was due ${formatDay(activity.due_date)}`);
-  else if (activity.due_date === today) add("text-bg-warning", "Due today");
-  else if (activity.due_date) add("text-bg-light border", `Due ${formatDay(activity.due_date)}`);
-  if (activity.status === "in_progress") add("text-bg-info", `In progress · ${progressText(activity)}`);
-  else add("text-bg-light border", "Not started yet");
+  if (activity.overdue) add("text-bg-danger", t("Overdue · was due {day}", { day: formatDay(activity.due_date) }));
+  else if (activity.due_date === today) add("text-bg-warning", t("Due today"));
+  else if (activity.due_date) add("text-bg-light border", t("Due {day}", { day: formatDay(activity.due_date) }));
+  if (activity.status === "in_progress") add("text-bg-info", t("In progress · {progress}", { progress: progressText(activity) }));
+  else add("text-bg-light border", t("Not started yet"));
   return badges;
 }
 
@@ -102,7 +102,7 @@ function teacherGroupsElement(items, showQuery) {
 // The subject's name as the first activity wrote it ("No subject" when it has none), with the teacher.
 function subjectLabel(key, teacherId) {
   const mine = activities.filter((activity) => activity.teacher_id === teacherId);
-  const label = groupBySubject(mine).find((group) => group.key === key)?.label || "No subject";
+  const label = groupBySubject(mine).find((group) => group.key === key)?.label || t("No subject");
   return `${label} · ${mine[0] ? mine[0].teacher : ""}`;
 }
 
@@ -126,7 +126,7 @@ function render() {
     box.className = "list-group";
     const empty = document.createElement("div");
     empty.className = "list-group-item text-body-secondary";
-    empty.textContent = showDone ? "Nothing submitted yet." : "Nothing to do. Great job!";
+    empty.textContent = showDone ? t("Nothing submitted yet.") : t("Nothing to do. Great job!");
     box.append(empty);
     list.replaceChildren(...(subject === null ? [] : [subjectHeaderElement(subjectLabel(subject, teacher), extraQuery)]), box);
   } else if (subject === null) {
@@ -144,7 +144,7 @@ async function loadActivities() {
     const response = await apiFetch("/api/my-activities");
     if (!response) return;
     if (!response.ok) {
-      showError("list-error", "Could not load your activities.");
+      showError("list-error", t("Could not load your activities."));
       return;
     }
     hideError("list-error");
@@ -153,7 +153,7 @@ async function loadActivities() {
     today = data.today;
     render();
   } catch {
-    showError("list-error", "Cannot reach the server. Check your connection.");
+    showError("list-error", t("Cannot reach the server. Check your connection."));
   }
 }
 

@@ -135,7 +135,7 @@ function groupBySubject(items) {
   for (const item of items) {
     const key = subjectKey(item.subject);
     if (!groups.has(key)) {
-      groups.set(key, { key, label: key ? item.subject.trim().replace(/\s+/g, " ") : "No subject", items: [] });
+      groups.set(key, { key, label: key ? item.subject.trim().replace(/\s+/g, " ") : t("No subject"), items: [] });
     }
     groups.get(key).items.push(item);
   }
@@ -184,7 +184,7 @@ function subjectHeaderElement(label, extraQuery = "") {
   const back = document.createElement("a");
   back.href = extraQuery ? `?${extraQuery.slice(1)}` : window.location.pathname;
   back.className = "small bi bi-chevron-left text-decoration-none";
-  back.textContent = "All subjects";
+  back.textContent = t("All subjects");
   const title = document.createElement("h2");
   title.className = "h5 mt-1 mb-0";
   title.textContent = label;

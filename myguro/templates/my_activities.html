@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}My activities · MyGuro{% endblock %}
+{% block title %}{{ _("My activities") }} · MyGuro{% endblock %}
 
 {% block content %}
 {% include "_navbar.html" %}
@@ -9,12 +9,12 @@
   <div id="list-error" class="alert alert-danger d-none" role="alert"></div>
 
   <div class="d-flex justify-content-between align-items-center mb-3 gap-2">
-    <h1 class="h4 mb-0">My activities</h1>
-    <div class="btn-group btn-group-sm" role="group" aria-label="Show">
+    <h1 class="h4 mb-0">{{ _("My activities") }}</h1>
+    <div class="btn-group btn-group-sm" role="group" aria-label="{{ _("Show") }}">
       <input type="radio" class="btn-check" name="show" id="show-todo" value="todo" checked>
-      <label class="btn btn-toggle" for="show-todo">To do <span id="count-todo"></span></label>
+      <label class="btn btn-toggle" for="show-todo">{{ _("To do") }} <span id="count-todo"></span></label>
       <input type="radio" class="btn-check" name="show" id="show-done" value="done">
-      <label class="btn btn-toggle" for="show-done">Submitted <span id="count-done"></span></label>
+      <label class="btn btn-toggle" for="show-done">{{ _("Submitted") }} <span id="count-done"></span></label>
     </div>
   </div>
 

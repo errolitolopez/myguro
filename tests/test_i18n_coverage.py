@@ -18,6 +18,8 @@ TRANSLATED_FILES = [
     # Student dashboard
     "myguro/templates/dashboard.html", "myguro/templates/_dashboard_chart.html",
     "myguro/static/js/student-widgets.js", "myguro/static/js/dashboard-chart.js", "myguro/static/js/tips.js",
+    # My activities
+    "myguro/templates/my_activities.html", "myguro/static/js/my-activities.js",
 ]
 
 PLACEHOLDER = re.compile(r"\{(\w+)\}")
@@ -50,3 +52,9 @@ def test_every_sentence_has_a_taglish_entry(path):
 def test_taglish_keeps_the_same_placeholders():
     for english, taglish in TAGLISH.items():
         assert set(PLACEHOLDER.findall(english)) == set(PLACEHOLDER.findall(taglish)), english
+
+
+def test_no_sentence_is_wrapped_twice():
+    # A template sentence wrapped inside another (_("{{ _("To do") }}")) draws as broken text and fails the page.
+    for path in [p for p in TRANSLATED_FILES if p.endswith(".html")]:
+        assert '_("{{' not in open(path).read(), path
