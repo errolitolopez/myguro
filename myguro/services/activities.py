@@ -59,6 +59,16 @@ class ActivityService(Service):
         """An activity log entry about one sheet (row: the sheet, with id and title)."""
         self.log(action, "activities", summary, ("activity", row["id"], row["title"]))
 
+    def log_failed_import(self, title, reason):
+        """A log entry for an upload that was refused (nothing is imported): the title the teacher typed and
+        the reason, never the file or its contents. It is saved here, because the refusal that follows
+        saves nothing."""
+        name = " ".join(str(title or "").split())[:MAX_TITLE_LENGTH]
+        self.log("activity.import_failed", "activities",
+                 f"A file for the activity {name or '(no title)'} could not be imported: {reason}.",
+                 ("activity", None, name))
+        self.commit()
+
     def import_docx_sheet(self, lines, data, dry_run):
         """Make a new draft sheet from the lines of a Word file (see domain/docx_import.py), with the
         title and subject in data. All or nothing: with any bad item nothing is created and every
@@ -71,6 +81,7 @@ class ActivityService(Service):
     def finish_import(self, sections, errors, data, dry_run):
         title, subject = clean_title_subject(data)
         if errors:
+            self.log_failed_import(title, f"{len(errors)} {'problem' if len(errors) == 1 else 'problems'} found")
             return {"imported": False, "activity": None, "sections": [], "errors": errors}
         preview = [{"kind": section.kind, "title": section.title or section.description[:60],
                     "questions": len(section.questions),

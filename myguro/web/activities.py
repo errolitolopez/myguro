@@ -114,11 +114,18 @@ def api_import():
     """Make a draft sheet from an uploaded .docx (form fields "file", "title", "subject").
     dry_run=1 only checks it."""
     upload = request.files.get("file")
-    if upload is None or not upload.filename.lower().endswith(".docx"):
+    if upload is None:
         raise ValidationError("Choose a Word (.docx) file.")
     data = {"title": request.form.get("title"), "subject": request.form.get("subject")}
     dry_run = request.form.get("dry_run") == "1"
-    return jsonify(service().import_docx_sheet(read_docx_lines(upload.read()), data, dry_run=dry_run))
+    try:
+        if not upload.filename.lower().endswith(".docx"):
+            raise ValidationError("Choose a Word (.docx) file.")
+        lines = read_docx_lines(upload.read())
+    except ValidationError as error:
+        service().log_failed_import(data["title"], error.message.rstrip("."))  # the file was refused: say so in the log
+        raise
+    return jsonify(service().import_docx_sheet(lines, data, dry_run=dry_run))
 
 
 @bp.get("/api/activities/<int:activity_id>")

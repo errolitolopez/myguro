@@ -271,3 +271,33 @@ def test_failed_activity_and_checking_actions_write_nothing(admin, teacher, othe
     assert other_teacher.put("/api/submissions/1/points", json={"points": {}}).status_code == 404
     assert teacher.post("/api/activities", json={"title": ""}).status_code == 400
     assert len(log_of(admin)) == before
+
+
+def test_a_refused_upload_is_logged_without_the_file(admin, teacher):
+    from test_docx_import import upload
+
+    def failures():
+        return [(item["action"], item["summary"], item["target"]["name"])
+                for item in log_of(admin, category="activities") if item["action"] == "activity.import_failed"]
+
+    # Not a Word file: refused before it is read
+    assert upload(teacher, b"not a word file", title="Philo", name="las.txt").status_code == 400
+    # A .docx name but not a real Word file
+    assert upload(teacher, b"not a word file", title="Philo").status_code == 400
+    # A real Word file that has no activity items (no Type: lines): every problem is listed, nothing is made
+    from docx import Document
+    document = Document()
+    document.add_heading("I. Lesson", level=1)
+    document.add_paragraph("Type: Multiple Choice")
+    document.add_paragraph("1. A question with no answer in the key")
+    data = io.BytesIO()
+    document.save(data)
+    response = upload(teacher, data.getvalue(), title="Philo")
+    assert response.status_code == 200 and response.get_json()["errors"]
+
+    found = failures()
+    assert len(found) == 3 and all(name == "Philo" for _, _, name in found)
+    assert "Word" in found[0][1] and "problem" in found[2][1]
+    assert all("las.txt" not in summary and "not a word file" not in summary.lower() for _, summary, _ in found)
+    # A good upload still logs only the import
+    assert "activity.imported" not in [item["action"] for item in log_of(admin, category="activities")]
