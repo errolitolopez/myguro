@@ -8,7 +8,7 @@ function scheduleGrid(grid, makeCell) {
   const body = document.getElementById("schedule-body");
   const headRow = document.createElement("tr");
   const corner = document.createElement("th");
-  corner.textContent = "Time";
+  corner.textContent = t("Time");
   headRow.append(corner);
   grid.days.forEach((day) => {
     const th = document.createElement("th");
@@ -32,7 +32,7 @@ function scheduleGrid(grid, makeCell) {
       const label = document.createElement("td");
       label.colSpan = grid.days.length + 1;
       label.className = "text-body-secondary small py-0";
-      label.textContent = "Health break";
+      label.textContent = t("Health break");
       pause.append(label);
       rows.push(pause);
     }
@@ -49,7 +49,7 @@ function teacherCell(cell) {
   subject.textContent = cell.subject;
   const where = document.createElement("div");
   where.className = "text-body-secondary";
-  where.textContent = [cell.section, cell.room && `Room ${cell.room}`].filter(Boolean).join(" · ");
+  where.textContent = [cell.section, cell.room && t("Room {room}", { room: cell.room })].filter(Boolean).join(" · ");
   td.append(subject, where);
   return td;
 }

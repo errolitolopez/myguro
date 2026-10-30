@@ -49,7 +49,7 @@ function toCheckRow(item) {
   title.textContent = item.title;
   const details = document.createElement("div");
   details.className = "small text-body-secondary";
-  details.textContent = `${item.class_name} · ${item.submitted} of ${plural(item.students, "student")} submitted`;
+  details.textContent = t("{class_name} · {submitted} of {students} submitted", { class_name: item.class_name, submitted: item.submitted, students: plural(item.students, "student") });
   left.append(title, details);
 
   const badge = document.createElement("span");
@@ -78,7 +78,7 @@ async function loadToCheck() {
     const data = await response.json();
     if (!response.ok) {
       list.replaceChildren();
-      showError("to-check-error", data.error || "Could not load what to check.");
+      showError("to-check-error", data.error || t("Could not load what to check."));
       return;
     }
     const waiting = data.assignments.filter((item) => item.to_check > 0);
@@ -86,17 +86,17 @@ async function loadToCheck() {
     total.textContent = `${points} pts`;
     total.classList.toggle("d-none", waiting.length === 0);
     if (waiting.length === 0) {
-      list.replaceChildren(message("Nothing to check. You are all caught up."));
+      list.replaceChildren(message(t("Nothing to check. You are all caught up.")));
       return;
     }
     const rows = waiting.slice(0, MAX_TO_CHECK_ROWS).map(toCheckRow);
     if (waiting.length > MAX_TO_CHECK_ROWS) {
-      rows.push(message(`And ${plural(waiting.length - MAX_TO_CHECK_ROWS, "more activity", "more activities")} to check.`));
+      rows.push(message(t("And {more} to check.", { more: plural(waiting.length - MAX_TO_CHECK_ROWS, "more activity", "more activities") })));
     }
     list.replaceChildren(...rows);
   } catch {
     list.replaceChildren();
-    showError("to-check-error", "Cannot reach the server. Check your connection.");
+    showError("to-check-error", t("Cannot reach the server. Check your connection."));
   }
 }
 
@@ -107,7 +107,7 @@ async function loadDashboard() {
     if (!response) return;
     const data = await response.json();
     if (!response.ok) {
-      showError("dashboard-error", data.error || "Could not load the dashboard.");
+      showError("dashboard-error", data.error || t("Could not load the dashboard."));
       return;
     }
 
@@ -129,7 +129,7 @@ async function loadDashboard() {
       showClasses(data.classes, "teacher");
     }
   } catch {
-    showError("dashboard-error", "Cannot reach the server. Check your connection.");
+    showError("dashboard-error", t("Cannot reach the server. Check your connection."));
   }
 }
 

@@ -49,7 +49,7 @@
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header border-0 pb-0">
-          <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal" aria-label="{{ _("Close") }}"></button>
         </div>
         <div class="modal-body pt-2">
           <div class="text-center mb-3">
@@ -57,7 +57,7 @@
             <h2 class="h4 mb-1" id="support-modal-title">{{ SUPPORT.label }}</h2>
             <p class="text-body-secondary mb-0">{{ SUPPORT.message }}</p>
           </div>
-          <div class="small text-body-secondary mb-2">Choose how you want to give:</div>
+          <div class="small text-body-secondary mb-2">{{ _("Choose how you want to give:") }}</div>
           <div class="d-grid gap-2">
             {% for option in SUPPORT.options %}
             <div class="support-option">
@@ -83,7 +83,7 @@
                  rel="noopener noreferrer">Open {{ option.title }}</a>
               {% elif option.kind == "number" %}
               <button type="button" class="btn btn-sm btn-success text-nowrap support-copy bi bi-clipboard"
-                      data-number="{{ option.number }}">Copy number</button>
+                      data-number="{{ option.number }}">{{ _("Copy number") }}</button>
               {% endif %}
             </div>
             {% endfor %}
@@ -116,7 +116,7 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header border-0 pb-0">
-          <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal" aria-label="{{ _("Close") }}"></button>
         </div>
         <div class="modal-body pt-2 text-center">
           <div class="modal-badge" aria-hidden="true"><i class="bi bi-star-fill"></i></div>
@@ -146,23 +146,23 @@
         <div class="d-flex align-items-center gap-2">
           <span id="chat-left" class="small text-body-secondary"></span>
           <button id="chat-size" type="button" class="btn btn-sm btn-outline-secondary bi bi-arrows-angle-expand"
-                  aria-label="Make the chat window bigger" title="Make the chat window bigger"></button>
+                  aria-label="{{ _("Make the chat window bigger") }}" title="{{ _("Make the chat window bigger") }}"></button>
           <button id="chat-clear" type="button" class="btn btn-sm btn-outline-secondary bi bi-trash"
-                  aria-label="Clear the chat history" title="Clear the chat history"></button>
+                  aria-label="{{ _("Clear the chat history") }}" title="{{ _("Clear the chat history") }}"></button>
           <button id="chat-close" type="button" class="btn btn-sm btn-outline-secondary bi bi-dash-lg"
-                  aria-label="Minimize the chat" title="Minimize the chat"></button>
+                  aria-label="{{ _("Minimize the chat") }}" title="{{ _("Minimize the chat") }}"></button>
         </div>
       </div>
       <div id="chat-messages" class="chat-messages" role="log" aria-live="polite"></div>
       <form id="chat-form" class="d-flex gap-2 p-2 border-top" novalidate>
         <input id="chat-input" class="form-control" maxlength="300" autocomplete="off"
-               placeholder="Ask where a page is or how to do something" aria-label="Ask where a page is or how to do something">
-        <button id="chat-send" type="submit" class="btn btn-success bi bi-send" aria-label="Send"></button>
+               placeholder="{{ _("Ask where a page is or how to do something") }}" aria-label="{{ _("Ask where a page is or how to do something") }}">
+        <button id="chat-send" type="submit" class="btn btn-success bi bi-send" aria-label="{{ _("Send") }}"></button>
       </form>
     </section>
     <button id="chat-toggle" type="button"
             class="chat-toggle btn btn-success rounded-circle p-0 d-flex align-items-center justify-content-center"
-            aria-label="Ask GuroBot" aria-expanded="false" aria-controls="chat-panel">
+            aria-label="{{ _("Ask GuroBot") }}" aria-expanded="false" aria-controls="chat-panel">
       {% with size=34 %}{% include "_chat_robot.html" %}{% endwith %}
     </button>
   </div>

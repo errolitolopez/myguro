@@ -39,7 +39,7 @@
 
   // In an empty chat: the greeting and, under it, the suggestions. Tapping one sends it as the question.
   const showGreeting = () => {
-    addMessage("Hi, I'm GuroBot! Ask me where a page is or how to do something in MyGuro.", false);
+    addMessage(t("Hi, I'm GuroBot! Ask me where a page is or how to do something in MyGuro."), false);
     if (!suggestions.length) return;
     const list = document.createElement("div");
     list.className = "chat-suggestions d-flex flex-wrap gap-2";
@@ -78,16 +78,16 @@
   // teacher to delete the chat and start a new one (the same as the trash button).
   const setLeft = (left) => {
     full = left === 0;
-    leftLabel.textContent = full ? "Chat full" : `${left} ${left === 1 ? "question" : "questions"} left`;
+    leftLabel.textContent = full ? t("Chat full") : (left === 1 ? t("1 question left") : t("{count} questions left", { count: left }));
     input.disabled = full;
     send.disabled = full;
     if (full && !messages.querySelector(".chat-full")) {
-      const notice = addMessage("This chat is full. Delete it and start a new chat.", false);
+      const notice = addMessage(t("This chat is full. Delete it and start a new chat."), false);
       notice.classList.add("chat-full");
       const button = document.createElement("button");
       button.type = "button";
       button.className = "btn btn-sm btn-success bi bi-plus-circle d-block mt-2";
-      button.textContent = " Delete and start a new chat";
+      button.textContent = t(" Delete and start a new chat");
       button.addEventListener("click", clearChat);
       notice.append(button);
     }
@@ -212,7 +212,7 @@
     if (!visibilityItem) return;
     visibilityItem.classList.toggle("bi-eye-slash", !hidden);
     visibilityItem.classList.toggle("bi-eye", hidden);
-    visibilityItem.textContent = hidden ? " Show GuroBot" : " Hide GuroBot";
+    visibilityItem.textContent = hidden ? t(" Show GuroBot") : t(" Hide GuroBot");
   };
   // Hidden until the teacher chooses Show GuroBot: only a saved "0" (shown) keeps it on the page.
   let startHidden = true;
@@ -237,7 +237,7 @@
     panel.classList.toggle("chat-panel-large", large);
     sizeButton.classList.toggle("bi-arrows-angle-expand", !large);
     sizeButton.classList.toggle("bi-arrows-angle-contract", large);
-    const label = large ? "Make the chat window smaller" : "Make the chat window bigger";
+    const label = large ? t("Make the chat window smaller") : t("Make the chat window bigger");
     sizeButton.setAttribute("aria-label", label);
     sizeButton.title = label;
     messages.scrollTop = messages.scrollHeight;
@@ -324,7 +324,7 @@
       }
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        waiting.textContent = data.error || "The chatbot is not available right now.";
+        waiting.textContent = data.error || t("The chatbot is not available right now.");
         if (data.questions_left === 0) {
           waiting.remove();
           setLeft(0);
@@ -335,7 +335,7 @@
       addLink(waiting, data.link);
       setLeft(data.questions_left);
     } catch {
-      waiting.textContent = "Cannot reach the server. Check your connection.";
+      waiting.textContent = t("Cannot reach the server. Check your connection.");
     } finally {
       bubbleBox.classList.remove("chat-thinking");
       send.disabled = full;

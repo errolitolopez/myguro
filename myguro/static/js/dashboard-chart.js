@@ -58,7 +58,7 @@ const showEmpty = (message) => {
 const showClassView = () => {
   const activities = gradebook.activities;
   if (activities.length === 0) {
-    showEmpty("No activities have been given to this class yet.");
+    showEmpty(t("No activities have been given to this class yet."));
     return;
   }
   showEmpty(null);
@@ -69,14 +69,14 @@ const showClassView = () => {
     gradebook.students.filter((student) => student.cells[index] && student.cells[index].status === "submitted").length);
   const average = metric === "average";
   document.getElementById("chart-sub").textContent = average
-    ? "Average score of the class on each activity. Tap a bar to open its results."
-    : `Students who submitted each activity (${plural(total, "student")} in the class). Tap a bar to open its results.`;
+    ? t("Average score of the class on each activity. Tap a bar to open its results.")
+    : t("Students who submitted each activity ({students} in the class). Tap a bar to open its results.", { students: plural(total, "student") });
   drawChart({
     labels: activities.map((activity) => shorten(activity.title, 12)),
     values: activities.map((activity, index) => (average ? activity.average || 0 : submitted[index])),
     titles: activities.map((activity) => activity.title),
     details: activities.map((activity, index) => average
-      ? (activity.average === null ? "No scores yet" : `Average ${activity.average}%`)
+      ? (activity.average === null ? t("No scores yet") : t("Average {average}%", { average: activity.average }))
       : `${submitted[index]} of ${total} submitted`),
     max: average ? 100 : Math.max(total, 1),
     suffix: average ? "%" : "",
@@ -107,7 +107,7 @@ async function startTeacher() {
     if (!response.ok) throw new Error(data.error);
     if (data.classes.length === 0) {
       classSelect.classList.add("d-none");
-      showEmpty("No classes yet. Create a class to see its results here.");
+      showEmpty(t("No classes yet. Create a class to see its results here."));
       return;
     }
     classSelect.replaceChildren(...data.classes.map((item) => {

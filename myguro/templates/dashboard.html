@@ -21,31 +21,31 @@
   <div class="bento bento-5">
     <div>
       <a class="card h-100 text-decoration-none" href="{{ url_for('accounts.teachers_page') }}"><div class="card-body">
-        <div class="text-body-secondary small">Teachers</div>
+        <div class="text-body-secondary small">{{ _("Teachers") }}</div>
         <div class="fs-3 fw-bold stat-number" id="stat-teachers">–</div>
       </div></a>
     </div>
     <div>
       <a class="card h-100 text-decoration-none" href="{{ url_for('accounts.students_page') }}"><div class="card-body">
-        <div class="text-body-secondary small">Students</div>
+        <div class="text-body-secondary small">{{ _("Students") }}</div>
         <div class="fs-3 fw-bold stat-number" id="stat-students">–</div>
       </div></a>
     </div>
     <div>
       <a class="card h-100 text-decoration-none" href="{{ url_for('accounts.supervisors_page') }}"><div class="card-body">
-        <div class="text-body-secondary small">Supervisors</div>
+        <div class="text-body-secondary small">{{ _("Supervisors") }}</div>
         <div class="fs-3 fw-bold stat-number" id="stat-supervisors">–</div>
       </div></a>
     </div>
     <div>
       <div class="card h-100"><div class="card-body">
-        <div class="text-body-secondary small">Classes</div>
+        <div class="text-body-secondary small">{{ _("Classes") }}</div>
         <div class="fs-3 fw-bold stat-number" id="stat-classes">–</div>
       </div></div>
     </div>
     <div>
       <div class="card h-100"><div class="card-body">
-        <div class="text-body-secondary small">Activities</div>
+        <div class="text-body-secondary small">{{ _("Activities") }}</div>
         <div class="fs-3 fw-bold stat-number" id="stat-activities">–</div>
       </div></div>
     </div>
@@ -54,12 +54,12 @@
       <div class="card h-100 {{ 'border-warning' if backup.stale else '' }}" {% if backup.stale %}id="backup-warning"{% endif %}>
         <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-2">
           <div>
-            <div class="fw-semibold bi bi-shield-check"> Backup</div>
+            <div class="fw-semibold bi bi-shield-check"> {{ _("Backup") }}</div>
             <div class="small {{ 'text-warning-emphasis' if backup.stale else 'text-body-secondary' }}">
-              Last backup: {% if backup.days is none %}never{% elif backup.days == 0 %}today{% elif backup.days == 1 %}1 day ago{% else %}{{ backup.days }} days ago{% endif %}
+              {{ _("Last backup: never") if backup.days is none else (_("Last backup: today") if backup.days == 0 else (_("Last backup: 1 day ago") if backup.days == 1 else _("Last backup: {days} days ago", days=backup.days))) }}
             </div>
           </div>
-          <a href="{{ url_for('backup.download') }}" class="btn btn-outline-secondary bi bi-download"> Download backup</a>
+          <a href="{{ url_for('backup.download') }}" class="btn btn-outline-secondary bi bi-download"> {{ _("Download backup") }}</a>
         </div>
       </div>
     </div>
@@ -118,31 +118,31 @@
   <div class="bento mb-4">
     <div>
       <div class="card h-100"><div class="card-body">
-        <div class="text-body-secondary small">Students</div>
+        <div class="text-body-secondary small">{{ _("Students") }}</div>
         <div class="fs-3 fw-bold stat-number" id="stat-students">–</div>
       </div></div>
     </div>
     <div>
       <a class="card h-100 text-decoration-none" href="{{ url_for('activities.list_page') }}"><div class="card-body">
-        <div class="text-body-secondary small">Not started activities</div>
+        <div class="text-body-secondary small">{{ _("Not started activities") }}</div>
         <div class="fs-3 fw-bold stat-number" id="stat-not-started">–</div>
       </div></a>
     </div>
     <div class="bento-wide">
       <a class="card h-100 text-decoration-none" href="{{ url_for('activities.list_page') }}"><div class="card-body">
-        <div class="text-body-secondary small">Open activities</div>
+        <div class="text-body-secondary small">{{ _("Open activities") }}</div>
         <div class="fs-3 fw-bold stat-number" id="stat-open">–</div>
       </div></a>
     </div>
     <div class="bento-wide">
       <a class="card h-100 text-decoration-none" href="{{ url_for('activities.list_page') }}"><div class="card-body">
-        <div class="text-body-secondary small">Closed activities</div>
+        <div class="text-body-secondary small">{{ _("Closed activities") }}</div>
         <div class="fs-3 fw-bold stat-number" id="stat-closed">–</div>
       </div></a>
     </div>
     <div class="bento-wide">
       <div class="card h-100"><div class="card-body">
-        <div class="text-body-secondary small">Answers submitted</div>
+        <div class="text-body-secondary small">{{ _("Answers submitted") }}</div>
         <div class="fs-3 fw-bold stat-number" id="stat-submissions">–</div>
       </div></div>
     </div>
@@ -152,7 +152,7 @@
   <div class="card mb-4" id="to-check-card">
     <div class="card-body">
       <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
-        <h2 class="h5 mb-0 bi bi-check2-square"> To check</h2>
+        <h2 class="h5 mb-0 bi bi-check2-square"> {{ _("To check") }}</h2>
         <span id="to-check-total" class="badge text-bg-warning d-none"></span>
       </div>
       <div id="to-check-error" class="alert alert-danger d-none" role="alert"></div>
@@ -163,12 +163,12 @@
   {% with role="teacher" %}{% include "_dashboard_chart.html" %}{% endwith %}
 
   <div class="d-flex justify-content-between align-items-center mb-2">
-    <h2 class="h5 mb-0">My classes</h2>
-    <a class="btn btn-sm btn-outline-success bi bi-people" href="{{ url_for('classes.list_page') }}">Manage classes</a>
+    <h2 class="h5 mb-0">{{ _("My classes") }}</h2>
+    <a class="btn btn-sm btn-outline-success bi bi-people" href="{{ url_for('classes.list_page') }}">{{ _("Manage classes") }}</a>
   </div>
   <div id="class-list" class="list-group"></div>
   <p id="no-classes" class="text-body-secondary d-none">
-    No classes yet. <a href="{{ url_for('classes.list_page') }}">Create your first class</a>.
+    {{ _("No classes yet.") }} <a href="{{ url_for('classes.list_page') }}">{{ _("Create your first class") }}</a>.
   </p>
   {% endif %}
 </main>

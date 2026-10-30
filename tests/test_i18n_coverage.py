@@ -39,6 +39,9 @@ TRANSLATED_FILES = [
     "myguro/templates/class.html", "myguro/static/js/class.js", "myguro/templates/results.html",
     "myguro/static/js/results.js", "myguro/templates/gradebook.html", "myguro/static/js/gradebook.js",
     "myguro/templates/attendance.html", "myguro/static/js/attendance.js",
+    # Teacher dashboard, schedule view, GuroBot, shared bits
+    "myguro/templates/my_schedule.html", "myguro/static/js/dashboard.js", "myguro/static/js/dashboard-chart.js",
+    "myguro/static/js/chat.js", "myguro/static/js/my-schedule.js", "myguro/static/js/schedule-grid.js",
 ]
 
 PLACEHOLDER = re.compile(r"\{(\w+)\}")

@@ -6,9 +6,9 @@
 {% include "_navbar.html" %}
 
 <main class="container py-3">
-  <h1 class="h4 mb-1">My schedule <span class="badge text-bg-warning align-middle fs-6">Beta</span></h1>
+  <h1 class="h4 mb-1">{{ _("My schedule") }} <span class="badge text-bg-warning align-middle fs-6">{{ _("Beta") }}</span></h1>
   <div class="small text-body-secondary mb-3" id="schedule-details"></div>
-  <p class="small text-body-secondary">Beta: this schedule is new. If a class looks wrong, tell the admin.</p>
+  <p class="small text-body-secondary">{{ _("Beta: this schedule is new. If a class looks wrong, tell the admin.") }}</p>
   <div id="schedule-error" class="alert alert-danger d-none" role="alert"></div>
   <div id="schedule-empty" class="alert alert-info d-none" role="status"></div>
   <div class="table-responsive">

@@ -20,7 +20,7 @@
 <nav class="navbar bg-success">
   <div class="container">
     <!-- The logo goes to the first page of the role (the dashboard; a supervisor only has the log). -->
-    <a class="navbar-brand d-flex align-items-center" href="{{ url_for(tabs[0][0]) }}" aria-label="MyGuro home">
+    <a class="navbar-brand d-flex align-items-center" href="{{ url_for(tabs[0][0]) }}" aria-label="{{ _("MyGuro home") }}">
       {% with height=30 %}{% include "_logo.html" %}{% endwith %}
     </a>
     <div class="d-flex align-items-center gap-2">
@@ -72,7 +72,7 @@
         <li><a class="dropdown-item bi bi-palette {{ 'active' if request.endpoint == 'display.page' }}" href="{{ url_for('display.page') }}"> {{ _("Display") }}</a></li>
         {% if CHATBOT %}
         <!-- chat.js sets the text and the icon (Hide or Show GuroBot); the choice is kept in this browser. -->
-        <li><button id="chat-visibility" class="dropdown-item bi bi-eye-slash" type="button"> Hide GuroBot</button></li>
+        <li><button id="chat-visibility" class="dropdown-item bi bi-eye-slash" type="button"> {{ _("Hide GuroBot") }}</button></li>
         {% endif %}
         {% if user.role in ("admin", "teacher", "student") %}
         <li><a class="dropdown-item bi bi-star {{ 'active' if request.endpoint == 'feedback.page' }}" href="{{ url_for('feedback.page') }}"> {{ _("Feedback") }}</a></li>
@@ -102,7 +102,7 @@
 </nav>
 
 <!-- Phones: the same pages as a bar at the bottom, within reach of the thumb. -->
-<nav class="tabbar d-md-none" aria-label="Main">
+<nav class="tabbar d-md-none" aria-label="{{ _("Main") }}">
   {% for endpoint, actives, label, icon in tabs %}
   <a class="tab-link {{ 'active' if request.endpoint in actives }}" href="{{ url_for(endpoint) }}"
      {% if request.endpoint in actives %}aria-current="page"{% endif %}>
