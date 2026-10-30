@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Activity · MyGuro{% endblock %}
+{% block title %}{{ _("Activity") }} · MyGuro{% endblock %}
 
 {% block head %}
 <style>
@@ -14,18 +14,18 @@
 {% include "_navbar.html" %}
 
 <main data-reading class="container py-3 pb-5 mb-5" style="max-width: 760px;" data-assignment-id="{{ assignment_id }}">
-  <a href="{{ url_for('student.activities_page') }}" class="small">‹ My activities</a>
+  <a href="{{ url_for('student.activities_page') }}" class="small">‹ {{ _("My activities") }}</a>
   <div id="answer-error" class="alert alert-danger mt-2 d-none" role="alert"></div>
 
   <header class="mt-2 mb-3">
-    <h1 class="h4 mb-1" id="activity-title">Loading...</h1>
+    <h1 class="h4 mb-1" id="activity-title">{{ _("Loading...") }}</h1>
     <div class="small text-body-secondary" id="activity-details"></div>
     <div class="small mt-1" id="activity-due"></div>
   </header>
 
   <!-- Shown when the teacher closed the activity: it can be read again, not answered -->
   <div id="closed-banner" class="alert alert-dark small mb-4 d-none">
-    This activity is closed. You can read the questions again to review, but you can't change your answers.
+    {{ _("This activity is closed. You can read the questions again to review, but you can't change your answers.") }}
   </div>
 
   <!-- Shown after submitting -->
@@ -33,18 +33,18 @@
     <div class="card-body">
       <div class="d-flex justify-content-between align-items-center gap-2">
         <div>
-          <div class="small text-body-secondary" id="result-label">Your score</div>
+          <div class="small text-body-secondary" id="result-label">{{ _("Your score") }}</div>
           <div class="fs-3 fw-semibold" id="result-score"></div>
         </div>
         <div class="d-flex align-items-center gap-2">
-          <span id="result-late" class="badge text-bg-warning d-none">Submitted late</span>
+          <span id="result-late" class="badge text-bg-warning d-none">{{ _("Submitted late") }}</span>
           <span id="result-ring"></span>
         </div>
       </div>
       <div class="small text-body-secondary" id="result-note"></div>
       <div class="d-flex justify-content-between align-items-center gap-2 mt-2 pt-2 border-top">
         <span class="small" id="result-attempts"></span>
-        <button id="retry-button" type="button" class="btn btn-sm btn-outline-primary d-none bi bi-arrow-repeat">Try again</button>
+        <button id="retry-button" type="button" class="btn btn-sm btn-outline-primary d-none bi bi-arrow-repeat">{{ _("Try again") }}</button>
       </div>
     </div>
   </div>
@@ -54,7 +54,7 @@
 
   <!-- Shown on a submitted sheet: the questions stay, the answers are not shown back -->
   <div id="answers-hidden-note" class="alert alert-secondary small mb-4 d-none">
-    Your answers are hidden after you submit. You can still read the questions below.
+    {{ _("Your answers are hidden after you submit. You can still read the questions below.") }}
   </div>
 
   <div id="sections" class="d-grid gap-4"></div>
@@ -68,8 +68,8 @@
       <div id="save-status" class="small text-body-secondary"></div>
     </div>
     <div class="d-flex gap-2">
-      <button id="save-button" type="button" class="btn btn-outline-primary bi bi-floppy">Save progress</button>
-      <button id="submit-button" type="button" class="btn btn-success bi bi-send">Submit</button>
+      <button id="save-button" type="button" class="btn btn-outline-primary bi bi-floppy">{{ _("Save progress") }}</button>
+      <button id="submit-button" type="button" class="btn btn-success bi bi-send">{{ _("Submit") }}</button>
     </div>
   </div>
 </div>
@@ -79,16 +79,16 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 class="modal-title fs-5" id="submit-title">Submit your answers?</h2>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h2 class="modal-title fs-5" id="submit-title">{{ _("Submit your answers?") }}</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ _("Close") }}"></button>
       </div>
       <div class="modal-body">
         <p id="submit-warning" class="text-danger-emphasis fw-semibold d-none"></p>
-        <p class="mb-0" id="submit-note">You can't change your answers after submitting.</p>
+        <p class="mb-0" id="submit-note">{{ _("You can't change your answers after submitting.") }}</p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary bi bi-arrow-left" data-bs-dismiss="modal">Not yet</button>
-        <button id="confirm-submit-button" type="button" class="btn btn-success bi bi-send">Submit</button>
+        <button type="button" class="btn btn-outline-secondary bi bi-arrow-left" data-bs-dismiss="modal">{{ _("Not yet") }}</button>
+        <button id="confirm-submit-button" type="button" class="btn btn-success bi bi-send">{{ _("Submit") }}</button>
       </div>
     </div>
   </div>

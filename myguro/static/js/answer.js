@@ -32,9 +32,9 @@ function el(tag, className = "", text = "") {
 // The student's own answer written out, for the review next to a remark:
 // "B. Hinduism", "True", "1) India   2) China", "Item → B. Choice" (one line per matching item)
 function answerText(question, value) {
-  if (value === null || value === undefined) return "No answer";
+  if (value === null || value === undefined) return t("No answer");
   if (question.type === "multiple_choice") return `${LETTERS[value]}. ${question.choices[value]}`;
-  if (question.type === "true_false") return value ? "True" : "False";
+  if (question.type === "true_false") return value ? t("True") : t("False");
   if (question.type === "fill_blank") return value.map((item, index) => `${index + 1}) ${item || "—"}`).join("   ");
   if (question.type === "matching") {
     return value.map((pick, index) =>
@@ -59,7 +59,7 @@ function allQuestions() {
 function showProgress() {
   const questions = allQuestions();
   const answered = questions.filter((question) => isAnswered(answers[question.id])).length;
-  document.getElementById("progress").textContent = `${answered} of ${questions.length} answered`;
+  document.getElementById("progress").textContent = t("{answered} of {questions} answered", { answered, questions: questions.length });
 }
 
 // --- Saving as they go -------------------------------------------------------------
@@ -68,14 +68,14 @@ function setAnswer(questionId, value) {
   answers[questionId] = value;
   changedIds.add(questionId);
   showProgress();
-  saveStatus.textContent = "Not saved yet...";
+  saveStatus.textContent = t("Not saved yet...");
   clearTimeout(saveTimer);
   saveTimer = setTimeout(saveAnswers, SAVE_DELAY);
 }
 
 // savedText() -> "Saved at 3:42 PM"
 function savedText() {
-  return `Saved at ${new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
+  return t("Saved at {time}", { time: new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) });
 }
 
 // Sends only the changed answers. Empty answers are sent as null (removes them).
@@ -86,7 +86,7 @@ async function saveAnswers() {
   const sending = {};
   for (const id of changedIds) sending[id] = isAnswered(answers[id]) ? answers[id] : null;
   changedIds = new Set();
-  saveStatus.textContent = "Saving...";
+  saveStatus.textContent = t("Saving...");
 
   saving = (async () => {
     try {
@@ -99,7 +99,7 @@ async function saveAnswers() {
       if (!response) return false;
       if (!response.ok) {
         const data = await response.json();
-        saveStatus.textContent = data.error || "Could not save.";
+        saveStatus.textContent = data.error || t("Could not save.");
         return false;
       }
       saveStatus.textContent = savedText();
@@ -107,7 +107,7 @@ async function saveAnswers() {
     } catch {
       // Try again with the next change; keep these answers marked as not saved.
       Object.keys(sending).forEach((id) => changedIds.add(Number(id)));
-      saveStatus.textContent = "Not saved — check your connection";
+      saveStatus.textContent = t("Not saved — check your connection");
       return false;
     }
   })();
@@ -181,7 +181,7 @@ function growBlank(input) {
 
 function questionItem(question, locked) {
   const item = el("li", "answer-question mb-4");
-  const points = el("span", "badge rounded-pill bg-body-secondary text-body-secondary fw-normal ms-1", plural(question.points, "pt", "pts"));
+  const points = el("span", "badge rounded-pill bg-body-secondary text-body-secondary fw-normal ms-1", question.points === 1 ? t("1 pt") : t("{points} pts", { points: question.points }));
 
   if (question.type === "fill_blank") {
     // The sentence with a text box for each ___.
@@ -195,7 +195,7 @@ function questionItem(question, locked) {
         growBlank(blank);
         blank.disabled = locked;
         blank.maxLength = 200;
-        blank.setAttribute("aria-label", `Blank ${index}`);
+        blank.setAttribute("aria-label", t("Blank {number}", { number: index }));
         blank.addEventListener("input", () => {
           growBlank(blank);
           value[index - 1] = blank.value;
@@ -225,7 +225,7 @@ function questionItem(question, locked) {
       const select = el("select", "form-select form-select-sm flex-grow-0");
       select.style.width = "5rem";
       select.disabled = locked;
-      select.setAttribute("aria-label", `Answer for item ${index + 1}`);
+      select.setAttribute("aria-label", t("Answer for item {number}", { number: index + 1 }));
       select.append(new Option("—", ""));
       question.choices.forEach((_, choiceIndex) =>
         select.append(new Option(LETTERS[choiceIndex], String(choiceIndex))));
@@ -246,7 +246,7 @@ function questionItem(question, locked) {
     item.append(choiceQuestion(question,
       question.choices.map((choice, index) => [index, `${LETTERS[index]}. ${choice}`]), locked));
   } else if (question.type === "true_false") {
-    item.append(choiceQuestion(question, [[true, "True"], [false, "False"]], locked));
+    item.append(choiceQuestion(question, [[true, t("True")], [false, t("False")]], locked));
   } else {
     const short = question.type === "short_answer";
     // Identification is a box too, so a long answer wraps and can be read back while typing. It is one line
@@ -255,8 +255,8 @@ function questionItem(question, locked) {
     input.value = answers[question.id] || "";
     input.disabled = locked;
     input.maxLength = short ? 5000 : 200;
-    input.placeholder = short ? "Write your answer here..." : "Your answer";
-    input.setAttribute("aria-label", "Your answer");
+    input.placeholder = short ? t("Write your answer here...") : t("Your answer");
+    input.setAttribute("aria-label", t("Your answer"));
     input.rows = short ? 4 : 2;
     if (!short) {
       input.addEventListener("keydown", (event) => {
@@ -293,12 +293,12 @@ function sectionBlock(section, locked) {
   const card = el("section", "card");
   const body = el("div", "card-body");
   const header = el("div", "d-flex justify-content-between align-items-start gap-2");
-  header.append(el("h2", "h5", section.title || "Activity"));
+  header.append(el("h2", "h5", section.title || t("Activity")));
   // Section scores only on the submitted (read-only) sheet, not while trying again.
   const score = activity.submitted_at && activity.score && activity.score.sections[section.id];
   if (score) {
     const text = `${score.earned} / ${score.possible - score.pending}` +
-      (score.pending ? ` (+${score.pending} to check)` : "");
+      (score.pending ? ` ${t("(+{pending} to check)", { pending: score.pending })}` : "");
     header.append(el("span", "badge text-bg-success text-nowrap", text));
   }
   body.append(header);
@@ -315,7 +315,7 @@ function sectionBlock(section, locked) {
     const remark = locked && activity.feedback && activity.feedback[question.id];
     if (remark) {
       const box = el("div", "alert alert-info py-2 px-3 mt-2 mb-0 small preserve-lines");
-      box.append(el("strong", "", "Teacher's remark: "), remark);
+      box.append(el("strong", "", t("Teacher's remark: ")), remark);
       item.append(box);
     }
     list.append(item);
@@ -328,11 +328,12 @@ function sectionBlock(section, locked) {
 // "Attempt 2 of 3", "Attempt 2 (unlimited)"
 function attemptText() {
   return activity.max_attempts === null
-    ? `Attempt ${activity.attempt} (no limit)` : `Attempt ${activity.attempt} of ${activity.max_attempts}`;
+    ? t("Attempt {attempt} (no limit)", { attempt: activity.attempt })
+    : t("Attempt {attempt} of {max}", { attempt: activity.attempt, max: activity.max_attempts });
 }
 
 function scoreText(total) {
-  return `${total.earned} / ${total.possible - total.pending} points`;
+  return t("{earned} / {possible} points", { earned: total.earned, possible: total.possible - total.pending });
 }
 
 function showResult() {
@@ -341,8 +342,8 @@ function showResult() {
   // Working on another attempt: remind them of the score that counts now.
   banner.classList.toggle("d-none", Boolean(activity.submitted_at) || !activity.score);
   if (!activity.submitted_at && activity.score) {
-    banner.textContent = `${attemptText()}. Your last submitted score: ${scoreText(activity.score.total)}. ` +
-      "Submitting again replaces it — your latest submission counts.";
+    banner.textContent = t("{attempt}. Your last submitted score: {score}. Submitting again replaces it — your latest submission counts.",
+      { attempt: attemptText(), score: scoreText(activity.score.total) });
   }
   if (!activity.submitted_at) {
     card.classList.add("d-none");
@@ -351,15 +352,17 @@ function showResult() {
   card.classList.remove("d-none");
   const total = activity.score && activity.score.total;
   // The score stays hidden until the teacher releases the scores.
-  document.getElementById("result-label").textContent = total ? "Your score" : "Submitted";
-  document.getElementById("result-score").textContent = total ? scoreText(total) : "Score not released yet";
+  document.getElementById("result-label").textContent = total ? t("Your score") : t("Submitted");
+  document.getElementById("result-score").textContent = total ? scoreText(total) : t("Score not released yet");
   document.getElementById("result-note").textContent = !total
-    ? "Your teacher will show the scores when everyone is done."
+    ? t("Your teacher will show the scores when everyone is done.")
     : activity.paper
-      ? "Scored by your teacher from your paper." + (activity.note ? ` ${activity.note}` : "")
+      ? t("Scored by your teacher from your paper.") + (activity.note ? ` ${activity.note}` : "")
       : total.pending
-        ? `${plural(total.pending, "more point")} from short answers: waiting for your teacher to check.`
-        : "Everything is checked.";
+        ? (total.pending === 1
+          ? t("1 more point from short answers: waiting for your teacher to check.")
+          : t("{count} more points from short answers: waiting for your teacher to check.", { count: total.pending }))
+        : t("Everything is checked.");
   document.getElementById("result-late").classList.toggle("d-none", !activity.late);
   // The ring only shows once the score is released; it is empty before.
   const checkable = total ? total.possible - total.pending : 0;
@@ -368,8 +371,10 @@ function showResult() {
   const triesLeft = activity.max_attempts === null ? null : activity.max_attempts - activity.attempt;
   document.getElementById("result-attempts").textContent = activity.max_attempts === 1 ? ""
     : activity.can_retry
-      ? `${attemptText()} · ${triesLeft === null ? "you can try again" : `${plural(triesLeft, "try", "tries")} left`}`
-      : `${attemptText()} · no tries left`;
+      ? (triesLeft === null ? t("{attempt} · you can try again", { attempt: attemptText() })
+        : triesLeft === 1 ? t("{attempt} · 1 try left", { attempt: attemptText() })
+        : t("{attempt} · {count} tries left", { attempt: attemptText(), count: triesLeft }))
+      : t("{attempt} · no tries left", { attempt: attemptText() });
   document.getElementById("retry-button").classList.toggle("d-none", !activity.can_retry);
 }
 
@@ -381,7 +386,7 @@ function render() {
   document.getElementById("activity-details").textContent =
     [activity.subject, activity.class_name, activity.teacher].filter(Boolean).join(" · ");
   document.getElementById("activity-due").textContent = activity.due_date
-    ? `Due ${formatDay(activity.due_date)}` : "";
+    ? t("Due {day}", { day: formatDay(activity.due_date) }) : "";
 
   document.getElementById("closed-banner").classList.toggle("d-none", !activity.closed);
   showResult();
@@ -402,7 +407,7 @@ function render() {
   document.getElementById("answer-bar").classList.toggle("d-none", locked || !hasQuestions);
   if (!locked) {
     showProgress();
-    saveStatus.textContent = Object.keys(answers).length ? "All answers saved" : "";
+    saveStatus.textContent = Object.keys(answers).length ? t("All answers saved") : "";
   }
 }
 
@@ -415,14 +420,14 @@ async function loadActivity() {
       return;
     }
     if (!response.ok) {
-      showError("answer-error", "Could not load the activity.");
+      showError("answer-error", t("Could not load the activity."));
       return;
     }
     activity = (await response.json()).activity;
     answers = activity.answers;
     render();
   } catch {
-    showError("answer-error", "Cannot reach the server. Check your connection.");
+    showError("answer-error", t("Cannot reach the server. Check your connection."));
   }
 }
 
@@ -433,10 +438,12 @@ document.getElementById("submit-button").addEventListener("click", () => {
   const warning = document.getElementById("submit-warning");
   const triesAfter = activity.max_attempts === null ? null : activity.max_attempts - activity.attempt;
   document.getElementById("submit-note").textContent = triesAfter === 0
-    ? "This is your last try: you can't change your answers after submitting."
-    : `After submitting you can still try again (${triesAfter === null ? "no limit" : plural(triesAfter, "more try", "more tries")}); your latest submission counts.`;
+    ? t("This is your last try: you can't change your answers after submitting.")
+    : triesAfter === null ? t("After submitting you can still try again (no limit); your latest submission counts.")
+    : triesAfter === 1 ? t("After submitting you can still try again (1 more try); your latest submission counts.")
+    : t("After submitting you can still try again ({count} more tries); your latest submission counts.", { count: triesAfter });
   warning.textContent = unanswered
-    ? `${plural(unanswered, "question")} ${unanswered === 1 ? "has" : "have"} no answer yet.` : "";
+    ? (unanswered === 1 ? t("1 question has no answer yet.") : t("{count} questions have no answer yet.", { count: unanswered })) : "";
   warning.classList.toggle("d-none", !unanswered);
   submitModal.show();
 });
@@ -461,7 +468,7 @@ document.getElementById("confirm-submit-button").addEventListener("click", async
     const data = await response.json();
     submitModal.hide();
     if (!response.ok) {
-      showError("answer-error", data.error || "Could not submit.");
+      showError("answer-error", data.error || t("Could not submit."));
       window.scrollTo({ top: 0 });
       return;
     }
@@ -477,7 +484,7 @@ document.getElementById("confirm-submit-button").addEventListener("click", async
     }
   } catch {
     submitModal.hide();
-    showError("answer-error", "Cannot reach the server. Your answers are kept here; try again.");
+    showError("answer-error", t("Cannot reach the server. Your answers are kept here; try again."));
   } finally {
     stopLoading();
   }
@@ -494,7 +501,7 @@ document.getElementById("retry-button").addEventListener("click", async (event) 
     if (!response) return;
     const data = await response.json();
     if (!response.ok) {
-      showError("answer-error", data.error || "Could not start again.");
+      showError("answer-error", data.error || t("Could not start again."));
       return;
     }
     activity = data.activity;
@@ -502,7 +509,7 @@ document.getElementById("retry-button").addEventListener("click", async (event) 
     render();
     window.scrollTo({ top: 0, behavior: "smooth" });
   } catch {
-    showError("answer-error", "Cannot reach the server. Check your connection.");
+    showError("answer-error", t("Cannot reach the server. Check your connection."));
   } finally {
     stopLoading();
   }

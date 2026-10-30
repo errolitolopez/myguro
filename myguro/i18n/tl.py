@@ -203,4 +203,66 @@ TAGLISH = {
     "Nothing submitted yet.": "Wala pang na-submit.",
     "Nothing to do. Great job!": "Wala nang gagawin. Galing!",
     "All subjects": "Lahat ng subjects",
+    # --- The answer page ---
+    "Activity": "Activity",
+    "No answer": "Walang sagot",
+    "True": "True",
+    "False": "False",
+    "Blank {number}": "Blank {number}",
+    "Answer for item {number}": "Sagot para sa item {number}",
+    "Write your answer here...": "Isulat dito ang sagot mo...",
+    "Your answer": "Ang sagot mo",
+    "Teacher's remark: ": "Remark ng teacher: ",
+    "Not saved yet...": "Hindi pa na-save...",
+    "Saved at {time}": "Na-save noong {time}",
+    "Saving...": "Sine-save...",
+    "Could not save.": "Hindi na-save.",
+    "Not saved — check your connection": "Hindi na-save — tingnan ang connection mo",
+    "1 pt": "1 pt",
+    "{points} pts": "{points} pts",
+    "(+{pending} to check)": "(+{pending} susuriin pa)",
+    "Attempt {attempt} (no limit)": "Attempt {attempt} (walang limit)",
+    "Attempt {attempt} of {max}": "Attempt {attempt} sa {max}",
+    "{earned} / {possible} points": "{earned} / {possible} points",
+    "{attempt}. Your last submitted score: {score}. Submitting again replaces it — your latest submission counts.":
+        "{attempt}. Ang huli mong na-submit na score: {score}. Kapag nag-submit ka ulit, mapapalitan ito — ang pinakabago mong submission ang binibilang.",
+    "Your score": "Score mo",
+    "Your teacher will show the scores when everyone is done.": "Ipapakita ng teacher mo ang mga score kapag tapos na ang lahat.",
+    "Scored by your teacher from your paper.": "Na-score ng teacher mo mula sa paper mo.",
+    "1 more point from short answers: waiting for your teacher to check.":
+        "1 pang point mula sa short answers: hinihintay na masuri ng teacher mo.",
+    "{count} more points from short answers: waiting for your teacher to check.":
+        "{count} pang points mula sa short answers: hinihintay na masuri ng teacher mo.",
+    "Everything is checked.": "Tapos nang suriin ang lahat.",
+    "{attempt} · you can try again": "{attempt} · puwede kang umulit",
+    "{attempt} · 1 try left": "{attempt} · 1 try na lang",
+    "{attempt} · {count} tries left": "{attempt} · {count} tries pa",
+    "{attempt} · no tries left": "{attempt} · wala nang natitirang try",
+    "All answers saved": "Na-save na ang lahat ng sagot",
+    "Could not load the activity.": "Hindi na-load ang activity.",
+    "This is your last try: you can't change your answers after submitting.":
+        "Ito na ang huli mong try: hindi mo na mababago ang mga sagot mo pagkatapos mag-submit.",
+    "After submitting you can still try again (no limit); your latest submission counts.":
+        "Pagkatapos mag-submit, puwede ka pang umulit (walang limit); ang pinakabago mong submission ang binibilang.",
+    "After submitting you can still try again (1 more try); your latest submission counts.":
+        "Pagkatapos mag-submit, puwede ka pang umulit (1 pang try); ang pinakabago mong submission ang binibilang.",
+    "After submitting you can still try again ({count} more tries); your latest submission counts.":
+        "Pagkatapos mag-submit, puwede ka pang umulit ({count} pang tries); ang pinakabago mong submission ang binibilang.",
+    "1 question has no answer yet.": "1 tanong ang wala pang sagot.",
+    "{count} questions have no answer yet.": "{count} tanong ang wala pang sagot.",
+    "Could not submit.": "Hindi na-submit.",
+    "Cannot reach the server. Your answers are kept here; try again.":
+        "Hindi maabot ang server. Nakatabi pa rito ang mga sagot mo; subukan ulit.",
+    "Could not start again.": "Hindi nasimulan ulit.",
+    "Submitted late": "Na-submit nang late",
+    "Try again": "Ulitin",
+    "This activity is closed. You can read the questions again to review, but you can't change your answers.":
+        "Sarado na ang activity na ito. Puwede mong basahin ulit ang mga tanong para mag-review, pero hindi mo na mababago ang mga sagot mo.",
+    "Your answers are hidden after you submit. You can still read the questions below.":
+        "Nakatago ang mga sagot mo pagkatapos mong mag-submit. Mababasa mo pa rin ang mga tanong sa ibaba.",
+    "Save progress": "I-save ang progress",
+    "Submit": "Submit",
+    "Submit your answers?": "I-submit na ba ang mga sagot mo?",
+    "You can't change your answers after submitting.": "Hindi mo na mababago ang mga sagot mo pagkatapos mag-submit.",
+    "Not yet": "Hindi pa",
 }
