@@ -6,10 +6,10 @@ const assignmentId = document.querySelector("main").dataset.assignmentId;
 let results = null; // from /api/assignments/<id>/results
 
 const STATUS = {
-  not_started: ["Not started", "text-bg-light border"],
-  in_progress: ["Answering", "text-bg-info"],
-  submitted: ["Submitted", "text-bg-success"],
-  excluded: ["Excluded", "text-bg-secondary"],
+  not_started: [t("Not started"), "text-bg-light border"],
+  in_progress: [t("Answering"), "text-bg-info"],
+  submitted: [t("Submitted"), "text-bg-success"],
+  excluded: [t("Excluded"), "text-bg-secondary"],
 };
 
 // The search and filter come back from the checking page's "Back to results" link.
@@ -35,7 +35,7 @@ function scoreCell(score) {
     return cell;
   }
   cell.append(el("span", "fw-semibold", `${score.earned} / ${score.possible - score.pending}`));
-  if (score.pending) cell.append(el("div", "small text-warning-emphasis", `+${score.pending} to check`));
+  if (score.pending) cell.append(el("div", "small text-warning-emphasis", t("+{pending} to check", { pending: score.pending })));
   return cell;
 }
 
@@ -60,7 +60,7 @@ function excludeCell(student) {
   if (!student.excluded && student.attempts > 0) return cell;
   const button = el("button",
     `btn btn-sm text-nowrap bi ${student.excluded ? "btn-outline-primary bi-person-plus" : "btn-outline-secondary bi-person-dash"}`,
-    student.excluded ? "Add back" : "Exclude");
+    student.excluded ? t("Add back") : t("Exclude"));
   button.type = "button";
   // The row opens the checking page: keep a click or Enter on the button from doing that too.
   button.addEventListener("keydown", (event) => event.stopPropagation());
@@ -77,12 +77,12 @@ function excludeCell(student) {
       });
       if (!response) return;
       if (!response.ok) {
-        showError("results-error", (await response.json()).error || "Could not save.");
+        showError("results-error", (await response.json()).error || t("Could not save."));
         return;
       }
       await loadResults(); // the totals change too
     } catch {
-      showError("results-error", "Cannot reach the server. Check your connection.");
+      showError("results-error", t("Cannot reach the server. Check your connection."));
     } finally {
       stopLoading();
     }
@@ -93,7 +93,7 @@ function excludeCell(student) {
 
 function render() {
   const { assignment, sections, students, summary } = results;
-  document.title = `${assignment.title} · Results · MyGuro`;
+  document.title = t("{title} · Results · MyGuro", { title: assignment.title });
   document.getElementById("results-title").textContent = assignment.title;
   document.getElementById("results-details").textContent = [
     assignment.class_name,
@@ -105,7 +105,7 @@ function render() {
   const back = document.getElementById("back-link");
   // A direct assignment has no class page: go back to the activities list.
   back.href = assignment.class_id === null ? "/activities" : `/classes/${assignment.class_id}`;
-  back.textContent = assignment.class_id === null ? "‹ Activities" : `‹ ${assignment.class_name}`;
+  back.textContent = assignment.class_id === null ? t("‹ Activities") : `‹ ${assignment.class_name}`;
   document.getElementById("edit-link").href = `/activities/${assignment.activity_id}`;
 
   // Not started / Open / Closed: students answer only while it is open for this class or group.
@@ -113,19 +113,19 @@ function render() {
   document.getElementById("open-button").textContent = action.label;
   document.getElementById("open-button").className = `btn btn-sm text-nowrap bi ${action.icon} ${action.className}`;
   document.getElementById("open-note").textContent = {
-    not_started: "Not started: students can't see this activity yet. Open it when they may answer.",
-    open: "Open: students can see and answer this activity.",
-    closed: "Closed: all work was submitted as it was. Students can only read the questions. " +
-      "Re-open it to let unfinished students continue.",
+    not_started: t("Not started: students can't see this activity yet. Open it when they may answer."),
+    open: t("Open: students can see and answer this activity."),
+    closed: t("Closed: all work was submitted as it was. Students can only read the questions. ") +
+      t("Re-open it to let unfinished students continue."),
   }[assignment.status];
 
   const released = assignment.scores_released;
-  document.getElementById("release-button").textContent = released ? "Hide scores" : "Release scores";
+  document.getElementById("release-button").textContent = released ? t("Hide scores") : t("Release scores");
   document.getElementById("release-button").className =
     `btn btn-sm text-nowrap ${released ? "btn-outline-secondary" : "btn-primary"}`;
   document.getElementById("release-note").textContent = released
-    ? "Students can see their scores."
-    : "Students can't see their scores yet. Release them when everyone is done.";
+    ? t("Students can see their scores.")
+    : t("Students can't see their scores yet. Release them when everyone is done.");
   document.getElementById("stat-submitted").textContent = `${summary.submitted} / ${summary.students}`;
   document.getElementById("stat-not-started").textContent = summary.not_started;
   document.getElementById("stat-late").textContent = summary.late;
@@ -135,9 +135,9 @@ function render() {
   document.getElementById("stat-to-check").textContent = summary.to_check;
 
   const head = document.getElementById("results-head");
-  head.replaceChildren(el("th", "", "Student"), el("th", "", "Status"), el("th", "", "Score"),
-    ...sections.map((section) => el("th", "small fw-normal", section.title)), el("th", "", "Tries"),
-    el("th", "visually-hidden", "Actions"));
+  head.replaceChildren(el("th", "", t("Student")), el("th", "", t("Status")), el("th", "", t("Score")),
+    ...sections.map((section) => el("th", "small fw-normal", section.title)), el("th", "", t("Tries")),
+    el("th", "visually-hidden", t("Actions")));
 
   const query = document.getElementById("search").value.trim().toLowerCase();
   const filter = document.getElementById("filter").value;
@@ -154,7 +154,7 @@ function render() {
   if (shown.length === 0) {
     const row = el("tr");
     const cell = el("td", "text-body-secondary",
-      students.length ? "No student matches." : "No students in this assignment.");
+      students.length ? t("No student matches.") : t("No students in this assignment."));
     cell.colSpan = 5 + sections.length;
     row.append(cell);
     body.replaceChildren(row);
@@ -174,15 +174,15 @@ function render() {
     const status = el("td");
     const [label, style] = STATUS[student.status];
     status.append(el("span", `badge ${style}`, label));
-    if (student.paper) status.append(" ", el("span", "badge text-bg-secondary", "Paper"));
-    if (student.late) status.append(" ", el("span", "badge text-bg-warning", "Late"));
+    if (student.paper) status.append(" ", el("span", "badge text-bg-secondary", t("Paper")));
+    if (student.late) status.append(" ", el("span", "badge text-bg-warning", t("Late")));
 
     // When they started and handed in; a close submits unfinished work, so then there is no real time spent
-    if (student.started_at) status.append(el("div", "small text-body-secondary", `Started ${formatDateTime(student.started_at)}`));
+    if (student.started_at) status.append(el("div", "small text-body-secondary", t("Started {time}", { time: formatDateTime(student.started_at) })));
     if (student.submitted_at && !student.paper) {
       status.append(el("div", "small text-body-secondary", student.auto_submitted
-        ? `Submitted by close ${formatDateTime(student.submitted_at)}`
-        : `Submitted ${formatDateTime(student.submitted_at)} · ${durationText(student.started_at, student.submitted_at)}`));
+        ? t("Submitted by close {time}", { time: formatDateTime(student.submitted_at) })
+        : t("Submitted {time} · {duration}", { time: formatDateTime(student.submitted_at), duration: durationText(student.started_at, student.submitted_at) })));
     }
 
     row.append(name, status, scoreCell(student.score),
@@ -202,14 +202,14 @@ async function loadResults() {
       return;
     }
     if (!response.ok) {
-      showError("results-error", "Could not load the results.");
+      showError("results-error", t("Could not load the results."));
       return;
     }
     hideError("results-error");
     results = await response.json();
     render();
   } catch {
-    showError("results-error", "Cannot reach the server. Check your connection.");
+    showError("results-error", t("Cannot reach the server. Check your connection."));
   }
 }
 
@@ -222,12 +222,12 @@ document.getElementById("open-button").addEventListener("click", async (event) =
       results.assignment.class_name);
     if (!response) return;
     if (!response.ok) {
-      showError("results-error", (await response.json()).error || "Could not save.");
+      showError("results-error", (await response.json()).error || t("Could not save."));
       return;
     }
     await loadResults();  // a close or re-open changes the students' rows too
   } catch {
-    showError("results-error", "Cannot reach the server. Check your connection.");
+    showError("results-error", t("Cannot reach the server. Check your connection."));
   } finally {
     stopLoading();
   }
@@ -245,13 +245,13 @@ document.getElementById("release-button").addEventListener("click", async (event
     });
     if (!response) return;
     if (!response.ok) {
-      showError("results-error", (await response.json()).error || "Could not save.");
+      showError("results-error", (await response.json()).error || t("Could not save."));
       return;
     }
     results.assignment.scores_released = (await response.json()).scores_released;
     render();
   } catch {
-    showError("results-error", "Cannot reach the server. Check your connection.");
+    showError("results-error", t("Cannot reach the server. Check your connection."));
   } finally {
     stopLoading();
   }

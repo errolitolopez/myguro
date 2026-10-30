@@ -26,7 +26,7 @@ function scoreCell(student, cell, activity) {
     return td;
   }
   if (cell.status === "excluded") {
-    td.append(el("span", "badge text-bg-secondary", "Excluded"));
+    td.append(el("span", "badge text-bg-secondary", t("Excluded")));
     return td;
   }
   if (cell.status === "not_started") {
@@ -37,8 +37,8 @@ function scoreCell(student, cell, activity) {
   link.href = `/results/${activity.assignment_id}/students/${student.id}`;
   if (cell.earned === null) {
     const answering = el("span", "badge text-bg-info", "…");
-    answering.title = "Answering";
-    answering.setAttribute("aria-label", "Answering");
+    answering.title = t("Answering");
+    answering.setAttribute("aria-label", t("Answering"));
     link.append(answering);
   } else {
     // One line: "8/10" (the percent beside it from a tablet up, to keep phone columns narrow)
@@ -46,8 +46,8 @@ function scoreCell(student, cell, activity) {
     if (cell.percent !== null) link.append(el("span", "d-none d-sm-inline small text-body-secondary ms-1", `${cell.percent}%`));
     if (cell.late) {
       const late = el("span", "badge text-bg-warning ms-1", "L");
-      late.title = "Late";
-      late.setAttribute("aria-label", "Late");
+      late.title = t("Late");
+      late.setAttribute("aria-label", t("Late"));
       link.append(late);
     }
   }
@@ -60,7 +60,7 @@ function render() {
   const students = book.students.filter((student) =>
     [student.name, student.username, student.grade, student.section].some((text) => text.toLowerCase().includes(query)));
 
-  head.replaceChildren(el("th", "", "Student"));
+  head.replaceChildren(el("th", "", t("Student")));
   book.activities.forEach((activity) => {
     const th = el("th", "text-center");
     const link = el("a", "text-decoration-none d-inline-block gb-title", activity.title);
@@ -69,15 +69,15 @@ function render() {
     head.append(th);
   });
   // "Done" is left out on a phone: the average is what the teacher looks for
-  head.append(el("th", "text-center d-none d-sm-table-cell", "Done"), el("th", "text-center", "Avg"));
+  head.append(el("th", "text-center d-none d-sm-table-cell", t("Done")), el("th", "text-center", t("Avg")));
 
   if (!book.activities.length) {
-    body.replaceChildren(rowMessage("No activity has been given to this class yet.", 1));
+    body.replaceChildren(rowMessage(t("No activity has been given to this class yet."), 1));
     foot.replaceChildren();
     return;
   }
   if (!students.length) {
-    body.replaceChildren(rowMessage(book.students.length ? "No student matches your search." : "No students in this class yet.",
+    body.replaceChildren(rowMessage(book.students.length ? t("No student matches your search.") : t("No students in this class yet."),
       book.activities.length + 3));
     foot.replaceChildren();
     return;
@@ -100,7 +100,7 @@ function render() {
   }));
 
   const total = el("tr", "fw-semibold");
-  total.append(el("td", "", "Class avg"));
+  total.append(el("td", "", t("Class avg")));
   book.activities.forEach((activity) =>
     total.append(el("td", "text-center", activity.average === null ? "–" : `${activity.average}%`)));
   total.append(el("td", "d-none d-sm-table-cell"), el("td"));
@@ -120,7 +120,7 @@ async function loadGradebook() {
     const response = await apiFetch(`/api/classes/${classId}/gradebook`);
     if (!response) return;
     if (!response.ok) {
-      showError("gradebook-error", "Could not load the gradebook.");
+      showError("gradebook-error", t("Could not load the gradebook."));
       return;
     }
     hideError("gradebook-error");
@@ -131,7 +131,7 @@ async function loadGradebook() {
     ].filter(Boolean).join(" · ");
     render();
   } catch {
-    showError("gradebook-error", "Cannot reach the server. Check your connection.");
+    showError("gradebook-error", t("Cannot reach the server. Check your connection."));
   }
 }
 

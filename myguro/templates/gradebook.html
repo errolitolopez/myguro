@@ -39,36 +39,34 @@
 {% include "_navbar.html" %}
 
 <main class="container px-2 px-sm-3 py-2 py-sm-3" data-class-id="{{ class_id }}">
-  <a id="back-link" href="{{ url_for('classes.detail_page', class_id=class_id) }}" class="small">‹ Class</a>
+  <a id="back-link" href="{{ url_for('classes.detail_page', class_id=class_id) }}" class="small">{{ _("‹ Class") }}</a>
   <div id="gradebook-error" class="alert alert-danger mt-2 d-none" role="alert"></div>
 
   <header class="d-flex justify-content-between align-items-start gap-2 mt-2 mb-2">
     <div>
-      <h1 class="h4 mb-1">Gradebook</h1>
-      <div class="small text-body-secondary" id="gradebook-details">Loading...</div>
+      <h1 class="h4 mb-1">{{ _("Gradebook") }}</h1>
+      <div class="small text-body-secondary" id="gradebook-details">{{ _("Loading...") }}</div>
     </div>
     <div class="d-flex flex-wrap justify-content-end gap-2">
       <a class="btn btn-sm btn-outline-success text-nowrap bi bi-file-earmark-excel"
-         href="{{ url_for('classes.gradebook_export', class_id=class_id, kind='xlsx') }}">Export Excel</a>
+         href="{{ url_for('classes.gradebook_export', class_id=class_id, kind='xlsx') }}">{{ _("Export Excel") }}</a>
       <a class="btn btn-sm btn-outline-danger text-nowrap bi bi-file-earmark-pdf"
-         href="{{ url_for('classes.gradebook_export', class_id=class_id, kind='pdf') }}">Export PDF</a>
+         href="{{ url_for('classes.gradebook_export', class_id=class_id, kind='pdf') }}">{{ _("Export PDF") }}</a>
     </div>
   </header>
 
-  <input id="search" type="search" class="form-control form-control-sm mb-2" placeholder="Search name, username or section"
-         aria-label="Search students" autocomplete="off">
+  <input id="search" type="search" class="form-control form-control-sm mb-2" placeholder="{{ _("Search name, username or section") }}"
+         aria-label="{{ _("Search students") }}" autocomplete="off">
 
   <div class="gb-scroll border rounded mb-2">
     <table class="table table-sm mb-0 align-middle bg-body small" id="gradebook-table">
       <thead><tr id="gradebook-head"></tr></thead>
-      <tbody id="gradebook-body"><tr><td class="text-body-secondary">Loading...</td></tr></tbody>
+      <tbody id="gradebook-body"><tr><td class="text-body-secondary">{{ _("Loading...") }}</td></tr></tbody>
       <tfoot id="gradebook-foot"></tfoot>
     </table>
   </div>
   <p class="small text-body-secondary">
-    Scores are points earned out of the activity's total. * means short answers are not checked yet.
-    L = late, … = still answering, – = not started, · = not given to this student.
-    Tap a score to check that student's answers, or an activity name to see all its results.
+    {{ _("Scores are points earned out of the activity's total. * means short answers are not checked yet. L = late, … = still answering, – = not started, · = not given to this student. Tap a score to check that student's answers, or an activity name to see all its results.") }}
   </p>
 </main>
 {% endblock %}

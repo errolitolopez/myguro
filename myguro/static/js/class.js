@@ -28,7 +28,7 @@ function showClass(item) {
 }
 
 classModalElement.addEventListener("show.bs.modal", () => {
-  document.getElementById("class-modal-title").textContent = "Edit class";
+  document.getElementById("class-modal-title").textContent = t("Edit class");
   // "Grade 6 - Rizal" -> grade + section. Names that fit no grade stay selectable as they are.
   classNameInput.querySelector("[data-legacy]")?.remove();
   const name = currentClass ? currentClass.name : "";
@@ -56,12 +56,12 @@ classForm.addEventListener("submit", async (event) => {
   hideError("class-form-error");
   const name = joinClassName(classNameInput.value, classSectionInput.value);
   if (!classNameInput.value) {
-    showError("class-form-error", "Select a grade.");
+    showError("class-form-error", t("Select a grade."));
     classNameInput.focus();
     return;
   }
   if (!classSectionInput.value.trim()) {
-    showError("class-form-error", "Section is required.");
+    showError("class-form-error", t("Section is required."));
     classSectionInput.focus();
     return;
   }
@@ -76,13 +76,13 @@ classForm.addEventListener("submit", async (event) => {
     if (!response) return;
     const data = await response.json();
     if (!response.ok) {
-      showError("class-form-error", data.error || "Could not save the class.");
+      showError("class-form-error", data.error || t("Could not save the class."));
       return;
     }
     showClass(data.class);
     classModal.hide();
   } catch {
-    showError("class-form-error", "Cannot reach the server. Check your connection.");
+    showError("class-form-error", t("Cannot reach the server. Check your connection."));
   } finally {
     stopLoading();
   }
@@ -106,7 +106,7 @@ function studentDetails(student) {
 function showActivities(activities) {
   const list = document.getElementById("activity-list");
   if (activities.length === 0) {
-    list.replaceChildren(messageItem("No activities yet. Open one in Activities and tap Assign to classes."));
+    list.replaceChildren(messageItem(t("No activities yet. Open one in Activities and tap Assign to classes.")));
     return;
   }
   list.replaceChildren(...activities.map((activity) => {
@@ -120,7 +120,7 @@ function showActivities(activities) {
     details.className = "small text-body-secondary";
     details.textContent = [
       activity.subject,
-      activity.everyone ? "All students" : plural(activity.selected, "student"),
+      activity.everyone ? t("All students") : plural(activity.selected, "student"),
       activity.due_date ? `due ${formatDay(activity.due_date)}` : "no due date",
     ].filter(Boolean).join(" · ");
     row.append(title, details);
@@ -145,7 +145,7 @@ function studentItem(student) {
   box.type = "checkbox";
   box.className = "form-check-input mt-0 flex-shrink-0";
   box.checked = chosen.has(student.id);
-  box.setAttribute("aria-label", `Select ${student.name}`);
+  box.setAttribute("aria-label", t("Select {name}", { name: student.name }));
   box.addEventListener("click", (event) => event.stopPropagation());
   box.addEventListener("change", () => {
     if (box.checked) chosen.add(student.id);
@@ -163,13 +163,13 @@ function studentItem(student) {
   if (!student.active) {
     const badge = document.createElement("span");
     badge.className = "badge text-bg-secondary";
-    badge.textContent = "Deactivated";
+    badge.textContent = t("Deactivated");
     row.append(badge);
   } else if (student.must_change_password) {
     const badge = document.createElement("span");
     badge.className = "badge text-bg-warning";
-    badge.textContent = "Not logged in yet";
-    badge.title = "Still using the temporary password";
+    badge.textContent = t("Not logged in yet");
+    badge.title = t("Still using the temporary password");
     row.append(badge);
   }
 
@@ -233,9 +233,9 @@ function render() {
   const shown = shownStudents();
 
   if (students.length === 0) {
-    list.replaceChildren(messageItem("No students yet. Tap + Add students to pick them from the school list."));
+    list.replaceChildren(messageItem(t("No students yet. Tap + Add students to pick them from the school list.")));
   } else if (shown.length === 0) {
-    list.replaceChildren(messageItem("No student matches your search."));
+    list.replaceChildren(messageItem(t("No student matches your search.")));
   } else {
     list.replaceChildren(...shown.map(studentItem));
   }
@@ -255,7 +255,7 @@ async function loadClass() {
       return;
     }
     if (!response.ok) {
-      showError("class-error", "Could not load the class.");
+      showError("class-error", t("Could not load the class."));
       return;
     }
     hideError("class-error");
@@ -268,7 +268,7 @@ async function loadClass() {
     for (const id of chosen) if (!ids.has(id)) chosen.delete(id);
     render();
   } catch {
-    showError("class-error", "Cannot reach the server. Check your connection.");
+    showError("class-error", t("Cannot reach the server. Check your connection."));
   }
 }
 
@@ -295,11 +295,11 @@ function resultItem(student) {
   button.type = "button";
   if (student.in_class) {
     button.className = "btn btn-sm btn-outline-secondary";
-    button.textContent = "In class";
+    button.textContent = t("In class");
     button.disabled = true;
   } else {
     button.className = "btn btn-sm btn-success";
-    button.textContent = "Add";
+    button.textContent = t("Add");
     button.addEventListener("click", () => addStudent(student, button));
   }
 
@@ -311,7 +311,7 @@ const gradeFilter = document.getElementById("grade-filter");
 const sectionFilter = document.getElementById("section-filter");
 const addAllButton = document.getElementById("add-all-button");
 let sections = []; // grade + section pairs that exist, for the section dropdown
-let addable = []; // search results not in the class yet (for "Add all")
+let addable = []; // search results not in the class yet (for t("Add all"))
 
 // Section dropdown: the sections of the chosen grade (or of all grades), plus "No section".
 function fillSectionFilter() {
@@ -322,9 +322,9 @@ function fillSectionFilter() {
       .map((item) => item.section),
   )].sort((a, b) => a.localeCompare(b));
 
-  const options = [new Option("All sections", "*")];
+  const options = [new Option(t("All sections"), "*")];
   for (const name of names) options.push(new Option(name, name));
-  options.push(new Option("No section", ""));
+  options.push(new Option(t("No section"), ""));
   sectionFilter.replaceChildren(...options);
   sectionFilter.value = [...sectionFilter.options].some((o) => o.value === chosen) ? chosen : "*";
 }
@@ -338,7 +338,7 @@ async function searchStudents() {
     const response = await apiFetch(`/api/classes/${classId}/student-search?${params}`);
     if (!response || thisSearch !== searchNumber) return;
     if (!response.ok) {
-      showError("add-student-error", "Could not search the students.");
+      showError("add-student-error", t("Could not search the students."));
       return;
     }
     hideError("add-student-error");
@@ -349,7 +349,7 @@ async function searchStudents() {
     const filtered = studentSearch.value.trim() || gradeFilter.value || sectionFilter.value !== "*";
     if (data.students.length === 0) {
       results.replaceChildren(messageItem(
-        filtered ? "No student matches." : "There are no student accounts yet.",
+        filtered ? t("No student matches.") : t("There are no student accounts yet."),
       ));
     } else {
       results.replaceChildren(...data.students.map(resultItem));
@@ -357,12 +357,12 @@ async function searchStudents() {
 
     addable = data.students.filter((student) => !student.in_class);
     document.getElementById("result-summary").textContent = data.students.length
-      ? `${data.students.length}${data.more ? "+" : ""} shown · ${addable.length} not in class`
+      ? t("{shown} shown · {addable} not in class", { shown: `${data.students.length}${data.more ? "+" : ""}`, addable: addable.length })
       : "";
-    addAllButton.textContent = `Add all ${addable.length}`;
+    addAllButton.textContent = t("Add all {count}", { count: addable.length });
     addAllButton.classList.toggle("d-none", addable.length < 2);
   } catch {
-    showError("add-student-error", "Cannot reach the server. Check your connection.");
+    showError("add-student-error", t("Cannot reach the server. Check your connection."));
   }
 }
 
@@ -378,13 +378,13 @@ async function sendAdd(studentIds) {
     if (!response) return false;
     if (!response.ok) {
       const data = await response.json();
-      showError("add-student-error", data.error || "Could not add the students.");
+      showError("add-student-error", data.error || t("Could not add the students."));
       return false;
     }
     loadClass();
     return true;
   } catch {
-    showError("add-student-error", "Cannot reach the server. Check your connection.");
+    showError("add-student-error", t("Cannot reach the server. Check your connection."));
     return false;
   }
 }
@@ -394,9 +394,9 @@ async function addStudent(student, button) {
   button.disabled = true;
   if (await sendAdd([student.id])) {
     button.className = "btn btn-sm btn-outline-secondary";
-    button.textContent = "Added";
+    button.textContent = t("Added");
     addable = addable.filter((item) => item.id !== student.id);
-    addAllButton.textContent = `Add all ${addable.length}`;
+    addAllButton.textContent = t("Add all {count}", { count: addable.length });
     addAllButton.classList.toggle("d-none", addable.length < 2);
   } else {
     button.disabled = false;
@@ -428,7 +428,7 @@ addModalElement.addEventListener("show.bs.modal", () => {
   gradeFilter.value = "";
   sectionFilter.value = "*";
   hideError("add-student-error");
-  results.replaceChildren(messageItem("Loading..."));
+  results.replaceChildren(messageItem(t("Loading...")));
   searchStudents();
 });
 addModalElement.addEventListener("shown.bs.modal", () => studentSearch.focus());
@@ -444,7 +444,7 @@ function openStudent(student) {
   document.getElementById("student-modal-title").textContent = student.name;
   document.getElementById("student-username").textContent = student.username;
   document.getElementById("student-grade-section").textContent =
-    gradeSection(student) || "No grade or section (irregular)";
+    gradeSection(student) || t("No grade or section (irregular)");
   removeButtons.classList.remove("d-none");
   confirmRemove.classList.add("d-none");
   hideError("student-error");
@@ -453,7 +453,7 @@ function openStudent(student) {
 
 document.getElementById("remove-button").addEventListener("click", () => {
   document.getElementById("confirm-text").textContent =
-    `Remove ${selected.name} from this class? Their account is kept.`;
+    t("Remove {name} from this class? Their account is kept.", { name: selected.name });
   removeButtons.classList.add("d-none");
   confirmRemove.classList.remove("d-none");
 });
@@ -472,13 +472,13 @@ document.getElementById("confirm-yes").addEventListener("click", async (event) =
     if (!response) return;
     if (!response.ok) {
       const data = await response.json();
-      showError("student-error", data.error || "Could not remove the student.");
+      showError("student-error", data.error || t("Could not remove the student."));
       return;
     }
     studentModal.hide();
     await loadClass();
   } catch {
-    showError("student-error", "Cannot reach the server. Check your connection.");
+    showError("student-error", t("Cannot reach the server. Check your connection."));
   } finally {
     stopLoading();
   }
@@ -492,7 +492,7 @@ const removeConfirm = document.getElementById("remove-confirm");
 
 removeModalElement.addEventListener("show.bs.modal", () => {
   document.getElementById("remove-who").textContent =
-    `Remove ${plural(chosen.size, "student")} from this class?`;
+    t("Remove {students} from this class?", { students: plural(chosen.size, "student") });
   hideError("remove-error");
 });
 
@@ -509,14 +509,14 @@ removeConfirm.addEventListener("click", async () => {
     if (!response) return;
     const data = await response.json();
     if (!response.ok) {
-      showError("remove-error", data.error || "Could not remove the students.");
+      showError("remove-error", data.error || t("Could not remove the students."));
       return;
     }
     chosen.clear();
     removeModal.hide();
     await loadClass();
   } catch {
-    showError("remove-error", "Cannot reach the server. Check your connection.");
+    showError("remove-error", t("Cannot reach the server. Check your connection."));
   } finally {
     stopLoading();
   }

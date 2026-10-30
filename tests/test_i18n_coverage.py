@@ -34,6 +34,11 @@ TRANSLATED_FILES = [
     "myguro/templates/activity_editor.html", "myguro/static/js/activity-editor.js",
     # Assign window, checking one student
     "myguro/static/js/assign.js", "myguro/static/js/check.js", "myguro/templates/check.html",
+    # Classes, results, gradebook, attendance
+    "myguro/templates/classes.html", "myguro/templates/_class_modal.html", "myguro/static/js/classes.js",
+    "myguro/templates/class.html", "myguro/static/js/class.js", "myguro/templates/results.html",
+    "myguro/static/js/results.js", "myguro/templates/gradebook.html", "myguro/static/js/gradebook.js",
+    "myguro/templates/attendance.html", "myguro/static/js/attendance.js",
 ]
 
 PLACEHOLDER = re.compile(r"\{(\w+)\}")
@@ -80,3 +85,12 @@ def test_every_feedback_question_has_a_taglish_entry():
 
     missing = [text for _, text in QUESTIONS if text not in TAGLISH]
     assert not missing, f"no Taglish for the feedback questions: {missing}"
+
+
+def test_translated_text_is_never_compared_or_used_as_a_key():
+    # t("Enter") === event.key would break a page: text for people is shown, never compared against.
+    import glob
+
+    for path in glob.glob("myguro/static/js/*.js"):
+        code = open(path).read()
+        assert not re.search(r'(===|!==|==|!=)\s*t\(|\bt\([^)]*\)\s*(===|!==)|case\s+t\(', code), path

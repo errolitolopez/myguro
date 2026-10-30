@@ -2,7 +2,7 @@
 // is saved by itself a moment later, so a lost connection or a closed tab never loses a whole class.
 
 const classId = document.querySelector("main").dataset.classId;
-const STATUS_LABELS = { present: "Present", late: "Late", absent: "Absent", excused: "Excused" };
+const STATUS_LABELS = { present: t("Present"), late: t("Late"), absent: t("Absent"), excused: t("Excused") };
 // The colour of a chosen mark; the others stay outlined
 const STATUS_COLORS = { present: "success", late: "warning", absent: "danger", excused: "info" };
 
@@ -47,7 +47,7 @@ function studentRow(student) {
 
   const group = el("div", "btn-group w-100");
   group.setAttribute("role", "group");
-  group.setAttribute("aria-label", `Attendance of ${student.name}`);
+  group.setAttribute("aria-label", t("Attendance of {name}", { name: student.name }));
   sheet.statuses.forEach((status) => {
     const button = el("button", "btn btn-sm", STATUS_LABELS[status]);
     button.type = "button";
@@ -66,7 +66,7 @@ function render() {
   dayInput.max = todayText();
   document.getElementById("day-next").disabled = sheet.day >= todayText();
   if (!sheet.students.length) {
-    const empty = el("div", "list-group-item text-body-secondary", "No students in this class yet.");
+    const empty = el("div", "list-group-item text-body-secondary", t("No students in this class yet."));
     list.replaceChildren(empty);
   } else {
     list.replaceChildren(...sheet.students.map(studentRow));
@@ -75,7 +75,7 @@ function render() {
   Object.values(marks).forEach((status) => { if (status) counts[status] += 1; });
   const marked = Object.values(counts).reduce((sum, n) => sum + n, 0);
   document.getElementById("day-summary").textContent =
-    `${marked} of ${sheet.students.length} marked · ${counts.present} present · ${counts.late} late · ${counts.absent} absent · ${counts.excused} excused`;
+    t("{marked} of {count} marked · {present} present · {late} late · {absent} absent · {excused} excused", { marked, count: sheet.students.length, present: counts.present, late: counts.late, absent: counts.absent, excused: counts.excused });
 }
 
 async function loadDay(day) {
@@ -84,7 +84,7 @@ async function loadDay(day) {
     if (!response) return;
     const data = await response.json();
     if (!response.ok) {
-      showError("attendance-error", data.error || "Could not load the attendance.");
+      showError("attendance-error", data.error || t("Could not load the attendance."));
       if (sheet) dayInput.value = sheet.day;
       return;
     }
@@ -98,7 +98,7 @@ async function loadDay(day) {
     ].filter(Boolean).join(" · ");
     render();
   } catch {
-    showError("attendance-error", "Cannot reach the server. Check your connection.");
+    showError("attendance-error", t("Cannot reach the server. Check your connection."));
   }
 }
 
@@ -113,7 +113,7 @@ function setMark(studentId, status) {
   marks[studentId] = status;
   pending[studentId] = status;
   render();
-  showSaveStatus("Saving...");
+  showSaveStatus(t("Saving..."));
   clearTimeout(saveTimer);
   saveTimer = setTimeout(flush, 500);
 }
@@ -139,10 +139,10 @@ async function sendPending() {
       if (!response.ok) {
         if (response.status >= 500) throw new Error("server");
         // The server refused (for example a past school year): show why and go back to what is saved
-        showError("attendance-error", data.error || "Could not save the attendance.");
-        showSaveStatus("Not saved", "danger");
+        showError("attendance-error", data.error || t("Could not save the attendance."));
+        showSaveStatus(t("Not saved"), "danger");
         await loadDay(sheet.day);
-        showSaveStatus("Not saved", "danger");
+        showSaveStatus(t("Not saved"), "danger");
         return false;
       }
       hideError("attendance-error");
@@ -156,19 +156,19 @@ async function sendPending() {
       render();
     } catch {
       // No connection: keep the taps and try again soon
-      showSaveStatus("Not saved yet. Trying again...", "danger");
+      showSaveStatus(t("Not saved yet. Trying again..."), "danger");
       saveTimer = setTimeout(flush, 3000);
       return false;
     }
   }
-  showSaveStatus("All changes saved", "success");
+  showSaveStatus(t("All changes saved"), "success");
   return true;
 }
 
 // Save what is waiting before showing another day; if that fails, ask before dropping it.
 async function changeDay(day) {
   if (Object.keys(pending).length && !(await flush())
-      && !window.confirm("Some marks could not be saved. Change the day anyway?")) {
+      && !window.confirm(t("Some marks could not be saved. Change the day anyway?"))) {
     dayInput.value = sheet.day;
     return;
   }
@@ -187,7 +187,7 @@ document.getElementById("mark-all-present").addEventListener("click", () => {
   unmarked.forEach((student) => { marks[student.id] = "present"; pending[student.id] = "present"; });
   render();
   if (unmarked.length) {
-    showSaveStatus("Saving...");
+    showSaveStatus(t("Saving..."));
     clearTimeout(saveTimer);
     saveTimer = setTimeout(flush, 500);
   }

@@ -31,7 +31,7 @@ async function loadClasses() {
     const response = await apiFetch("/api/classes");
     if (!response) return;
     if (!response.ok) {
-      showError("classes-error", "Could not load your classes.");
+      showError("classes-error", t("Could not load your classes."));
       return;
     }
     hideError("classes-error");
@@ -39,13 +39,13 @@ async function loadClasses() {
     if (classes.length === 0) {
       const empty = document.createElement("div");
       empty.className = "list-group-item text-body-secondary";
-      empty.textContent = "No classes yet. Tap + New class to create one.";
+      empty.textContent = t("No classes yet. Tap + New class to create one.");
       list.replaceChildren(empty);
     } else {
       list.replaceChildren(...classes.map(classItem));
     }
   } catch {
-    showError("classes-error", "Cannot reach the server. Check your connection.");
+    showError("classes-error", t("Cannot reach the server. Check your connection."));
   }
 }
 
@@ -55,12 +55,12 @@ form.addEventListener("submit", async (event) => {
 
   const name = joinClassName(nameInput.value, sectionInput.value);
   if (!nameInput.value) {
-    showError("class-form-error", "Select a grade.");
+    showError("class-form-error", t("Select a grade."));
     nameInput.focus();
     return;
   }
   if (!sectionInput.value.trim()) {
-    showError("class-form-error", "Section is required.");
+    showError("class-form-error", t("Section is required."));
     sectionInput.focus();
     return;
   }
@@ -76,13 +76,13 @@ form.addEventListener("submit", async (event) => {
     if (!response) return;
     const data = await response.json();
     if (!response.ok) {
-      showError("class-form-error", data.error || "Could not save the class.");
+      showError("class-form-error", data.error || t("Could not save the class."));
       return;
     }
     // Open the new class right away so the teacher can add students.
     window.location.href = `/classes/${data.class.id}`;
   } catch {
-    showError("class-form-error", "Cannot reach the server. Check your connection.");
+    showError("class-form-error", t("Cannot reach the server. Check your connection."));
   } finally {
     stopLoading();
   }

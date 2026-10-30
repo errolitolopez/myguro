@@ -6,17 +6,17 @@
 {% include "_navbar.html" %}
 
 <main class="container py-3" data-class-id="{{ class_id }}">
-  <a href="{{ url_for('classes.detail_page', class_id=class_id) }}" class="small">‹ Class</a>
+  <a href="{{ url_for('classes.detail_page', class_id=class_id) }}" class="small">{{ _("‹ Class") }}</a>
   <div id="attendance-error" class="alert alert-danger mt-2 d-none" role="alert"></div>
 
   <header class="d-flex justify-content-between align-items-start gap-2 mt-2 mb-3">
     <div>
-      <h1 class="h4 mb-1">Attendance</h1>
-      <div class="small text-body-secondary" id="attendance-details">Loading...</div>
+      <h1 class="h4 mb-1">{{ _("Attendance") }}</h1>
+      <div class="small text-body-secondary" id="attendance-details">{{ _("Loading...") }}</div>
     </div>
     <div class="d-flex flex-wrap justify-content-end gap-2">
       <button class="btn btn-sm btn-outline-secondary text-nowrap bi bi-download" data-bs-toggle="collapse"
-              data-bs-target="#export-panel" aria-expanded="false" aria-controls="export-panel">Export</button>
+              data-bs-target="#export-panel" aria-expanded="false" aria-controls="export-panel">{{ _("Export") }}</button>
     </div>
   </header>
 
@@ -25,11 +25,11 @@
     <div class="card card-body mb-3">
       <div class="d-flex flex-wrap align-items-end gap-2">
         <div>
-          <label for="export-from" class="form-label small mb-1">From</label>
+          <label for="export-from" class="form-label small mb-1">{{ _("From") }}</label>
           <input id="export-from" type="date" class="form-control form-control-sm">
         </div>
         <div>
-          <label for="export-to" class="form-label small mb-1">To</label>
+          <label for="export-to" class="form-label small mb-1">{{ _("To") }}</label>
           <input id="export-to" type="date" class="form-control form-control-sm">
         </div>
         <a id="export-xlsx" class="btn btn-sm btn-outline-success text-nowrap bi bi-file-earmark-excel"
@@ -37,21 +37,21 @@
         <a id="export-pdf" class="btn btn-sm btn-outline-danger text-nowrap bi bi-file-earmark-pdf"
            href="{{ url_for('classes.attendance_export', class_id=class_id, kind='pdf') }}">PDF</a>
       </div>
-      <div class="form-text">Both days are included. Clear them to export every day.</div>
+      <div class="form-text">{{ _("Both days are included. Clear them to export every day.") }}</div>
     </div>
   </div>
 
   <!-- The day being recorded. Type in the marks from your paper record, then Save. -->
   <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-    <button id="day-previous" type="button" class="btn btn-outline-secondary bi bi-chevron-left" aria-label="Previous day"></button>
-    <input id="day" type="date" class="form-control w-auto" aria-label="Day">
-    <button id="day-next" type="button" class="btn btn-outline-secondary bi bi-chevron-right" aria-label="Next day"></button>
-    <button id="mark-all-present" type="button" class="btn btn-outline-success ms-sm-auto bi bi-check2-all">All present</button>
+    <button id="day-previous" type="button" class="btn btn-outline-secondary bi bi-chevron-left" aria-label="{{ _("Previous day") }}"></button>
+    <input id="day" type="date" class="form-control w-auto" aria-label="{{ _("Day") }}">
+    <button id="day-next" type="button" class="btn btn-outline-secondary bi bi-chevron-right" aria-label="{{ _("Next day") }}"></button>
+    <button id="mark-all-present" type="button" class="btn btn-outline-success ms-sm-auto bi bi-check2-all">{{ _("All present") }}</button>
   </div>
 
   <div class="card mb-3">
     <div class="card-header d-flex align-items-center gap-2">
-      <span class="fw-semibold me-auto">Students</span>
+      <span class="fw-semibold me-auto">{{ _("Students") }}</span>
       <span id="day-summary" class="text-body-secondary small"></span>
     </div>
     <div id="student-list" class="list-group list-group-flush">
@@ -62,8 +62,7 @@
   <!-- Every tap is saved by itself a moment later; this line says where it stands -->
   <div id="save-status" class="small" role="status" aria-live="polite"></div>
   <p class="small text-body-secondary mt-2 mb-0">
-    Marks are saved as you tap. The numbers under each name are the days that student was present, late,
-    absent or excused in this class. Tap a mark again to clear it.
+    {{ _("Marks are saved as you tap. The numbers under each name are the days that student was present, late, absent or excused in this class. Tap a mark again to clear it.") }}
   </p>
 </main>
 {% endblock %}

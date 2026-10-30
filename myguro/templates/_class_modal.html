@@ -3,33 +3,33 @@
   <div class="modal-dialog modal-dialog-centered">
     <form id="class-form" class="modal-content" novalidate>
       <div class="modal-header">
-        <h2 class="modal-title fs-5" id="class-modal-title">New class</h2>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h2 class="modal-title fs-5" id="class-modal-title">{{ _("New class") }}</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ _("Close") }}"></button>
       </div>
       <div class="modal-body">
         <div class="row g-2 mb-3">
           <div class="col-6">
-            <label for="class-name" class="form-label">Grade</label>
+            <label for="class-name" class="form-label">{{ _("Grade") }}</label>
             <select id="class-name" class="form-select" required>
-              <option value="">Select a grade</option>
+              <option value="">{{ _("Select a grade") }}</option>
               {% for grade in GRADES %}<option>{{ grade }}</option>{% endfor %}
             </select>
           </div>
           <div class="col-6">
-            <label for="class-section" class="form-label">Section</label>
+            <label for="class-section" class="form-label">{{ _("Section") }}</label>
             <input id="class-section" class="form-control" maxlength="50" autocomplete="off"
                    placeholder="Rizal" required>
           </div>
         </div>
         <div class="mb-3">
-          <label for="class-subject" class="form-label">Subject <span class="text-body-secondary">(optional)</span></label>
+          <label for="class-subject" class="form-label">{{ _("Subject") }} <span class="text-body-secondary">{{ _("(optional)") }}</span></label>
           <input id="class-subject" class="form-control" maxlength="100" autocomplete="off" placeholder="Science">
         </div>
         <div id="class-form-error" class="alert alert-danger py-2 mb-0 d-none" role="alert"></div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary bi bi-x-lg" data-bs-dismiss="modal">Cancel</button>
-        <button id="class-save-button" type="submit" class="btn btn-success bi bi-check-lg">Save</button>
+        <button type="button" class="btn btn-outline-secondary bi bi-x-lg" data-bs-dismiss="modal">{{ _("Cancel") }}</button>
+        <button id="class-save-button" type="submit" class="btn btn-success bi bi-check-lg">{{ _("Save") }}</button>
       </div>
     </form>
   </div>
