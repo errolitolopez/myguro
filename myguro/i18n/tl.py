@@ -310,6 +310,8 @@ TAGLISH = {
     "Go to MyGuro": "Pumunta sa MyGuro",
 }
 
+_PAGES = dict(TAGLISH)  # the student and shared sentences, before the other files are added
+
 # The server's messages (error answers) are in their own file because there are so many.
 from myguro.i18n.tl_messages import MESSAGES  # noqa: E402
 from myguro.i18n.tl_teacher import TEACHER  # noqa: E402
@@ -318,3 +320,16 @@ from myguro.i18n.tl_admin import ADMIN  # noqa: E402
 TAGLISH.update(MESSAGES)
 TAGLISH.update(TEACHER)
 TAGLISH.update(ADMIN)
+
+# What a page's JavaScript needs: everything except the messages only the server says (they are not sent to the
+# browser). A sentence both the server and a page use is in the other files too, so it is kept.
+# Sentences from tl_messages.py that a page's JavaScript says as well (tests/test_i18n_coverage.py fails when a
+# script uses a server-only sentence that is not listed here).
+ALSO_IN_BROWSER = {
+    "Choose a grade or section to change.", "Individual students", "Last name is required.", "Periods a week",
+    "Subject", "Teacher", "Subject is required.", "Title is required.", "The chatbot is not available right now.",
+    "Username must be 3 to 30 letters, numbers, dots, dashes or underscores, with no spaces.",
+}
+CLIENT_TEXT = {english: taglish for english, taglish in TAGLISH.items()
+               if english not in MESSAGES or english in ALSO_IN_BROWSER or english in TEACHER or english in ADMIN
+               or english in _PAGES}

@@ -17,7 +17,7 @@ from myguro.domain.feedback import POPUP_ROLES as FEEDBACK_POPUP_ROLES
 from myguro.domain.i18n import LANGUAGE_COOKIE, language_from_cookie, translate
 from myguro.domain.support import popup_due
 from myguro.errors import register_error_handlers
-from myguro.i18n.tl import TAGLISH
+from myguro.i18n.tl import CLIENT_TEXT, TAGLISH
 from myguro.repositories import FeedbackRepository
 from myguro.services import LoginThrottle, SchoolYearService, SettingsService
 from myguro.web import BLUEPRINTS
@@ -54,7 +54,7 @@ def create_app(test_config=None):
         the page's JavaScript needs for t(): the whole Taglish dictionary, or nothing in English."""
         chosen = language_from_cookie(request.cookies.get(LANGUAGE_COOKIE))
         dictionary = TAGLISH if chosen == "tl" else {}
-        return {"LANG": chosen, "TEXT_JSON": dictionary,
+        return {"LANG": chosen, "TEXT_JSON": CLIENT_TEXT if chosen == "tl" else {},
                 "_": lambda text, **values: translate(text, dictionary, values)}
 
     @app.context_processor

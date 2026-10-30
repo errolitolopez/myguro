@@ -52,8 +52,10 @@ def test_template_text_fills_placeholders(monkeypatch):
 
 
 def test_the_page_carries_the_dictionary_only_in_taglish(monkeypatch):
-    monkeypatch.setitem(TAGLISH, "Display", "Itsura")
-    monkeypatch.setitem(TAGLISH, "Bad", "</script><b>x")
+    from myguro.i18n.tl import CLIENT_TEXT
+
+    monkeypatch.setitem(CLIENT_TEXT, "Display", "Itsura")  # CLIENT_TEXT is what the page's JavaScript gets
+    monkeypatch.setitem(CLIENT_TEXT, "Bad", "</script><b>x")
     with flask_app.test_request_context("/login", headers={"Cookie": "myguro-lang=tl"}):
         page = render_template("login.html")
     assert '"Display": "Itsura"' in page
@@ -132,3 +134,12 @@ def test_an_error_answer_follows_the_language_cookie(monkeypatch):
         == "Mali ang username o password."
     other = flask_app.test_client()  # no cookie: English
     assert other.post("/api/login", json={"username": "nobody", "password": "wrong-password"}).get_json()["error"] == message
+
+
+def test_messages_only_the_server_says_are_not_sent_to_the_browser():
+    from myguro.i18n.tl import CLIENT_TEXT, MESSAGES
+
+    assert "Wrong username or password." in TAGLISH and "Wrong username or password." not in CLIENT_TEXT
+    assert "Could not save the paper score." in CLIENT_TEXT  # a page uses this one too
+    assert all(english in TAGLISH for english in CLIENT_TEXT) and len(CLIENT_TEXT) < len(TAGLISH)
+    assert "Last name is required." in MESSAGES

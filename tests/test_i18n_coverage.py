@@ -4,7 +4,7 @@ import re
 
 import pytest
 
-from myguro.i18n.tl import TAGLISH
+from myguro.i18n.tl import CLIENT_TEXT, TAGLISH
 
 # The files whose text is translated so far. Each translating task adds its files here.
 TRANSLATED_FILES = [
@@ -77,7 +77,9 @@ def test_the_helper_reads_a_sentence_with_an_escaped_quote():
 
 @pytest.mark.parametrize("path", TRANSLATED_FILES)
 def test_every_sentence_has_a_taglish_entry(path):
-    missing = sorted(sentence for sentence in sentences_of(path) if sentence not in TAGLISH)
+    # A script only gets CLIENT_TEXT in the browser (not the messages only the server says)
+    known = CLIENT_TEXT if path.endswith(".js") else TAGLISH
+    missing = sorted(sentence for sentence in sentences_of(path) if sentence not in known)
     assert not missing, f"{path} has no Taglish for: {missing}"
 
 
