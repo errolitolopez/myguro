@@ -165,6 +165,12 @@ function choiceQuestion(question, options, locked) {
   return group;
 }
 
+// fitHeight(box) -> the box is as tall as its text (never smaller than its rows), so nothing needs scrolling
+function fitHeight(box) {
+  box.style.height = "auto";
+  box.style.height = `${box.scrollHeight + 2}px`; // + the border
+}
+
 const BLANK_MIN_WIDTH = 8; // characters: how wide an empty blank is
 
 // growBlank(input) -> the blank is as wide as its text (at least BLANK_MIN_WIDTH characters), so a long
@@ -243,14 +249,28 @@ function questionItem(question, locked) {
     item.append(choiceQuestion(question, [[true, "True"], [false, "False"]], locked));
   } else {
     const short = question.type === "short_answer";
-    const input = el(short ? "textarea" : "input", "form-control mt-2");
+    // Identification is a box too, so a long answer wraps and can be read back while typing. It is one line
+    // of text: Enter does nothing, and pasted line breaks become spaces.
+    const input = el("textarea", "form-control mt-2");
     input.value = answers[question.id] || "";
     input.disabled = locked;
     input.maxLength = short ? 5000 : 200;
     input.placeholder = short ? "Write your answer here..." : "Your answer";
     input.setAttribute("aria-label", "Your answer");
-    if (short) input.rows = 4;
-    input.addEventListener("input", () => setAnswer(question.id, input.value));
+    input.rows = short ? 4 : 2;
+    if (!short) {
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") event.preventDefault();
+      });
+    }
+    input.addEventListener("input", () => {
+      if (!short) {
+        input.value = input.value.replace(/\s*\n\s*/g, " ");
+        fitHeight(input);
+      }
+      setAnswer(question.id, input.value);
+    });
+    if (!short) setTimeout(() => fitHeight(input)); // after it is on the page, so the size can be measured
     item.append(input);
   }
   return item;
