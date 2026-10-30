@@ -8,6 +8,9 @@ DEFAULT_LANGUAGE = "en"
 LANGUAGE_COOKIE = "myguro-lang"
 
 PLACEHOLDER = re.compile(r"\{(\w+)\}")
+# Values of these placeholders are words and places the server wrote ("Section 2, question 3", "Last name"), so they
+# are translated too; every other value (a title, a name, a number) is kept exactly as it is.
+TRANSLATED_VALUES = ("where", "label", "class_label", "DIRECT_CLASS_NAME", "verb")
 
 
 def language_from_cookie(value):
@@ -44,15 +47,24 @@ def message_pattern(key):
 
 def translate_message(text, dictionary):
     """A message the server wrote (an error answer) in the dictionary's language. The exact sentence first;
-    else the first key with {placeholders} that fits the whole message, so a message with a value in it
-    ("Password must be at least 6 characters.") is found without the raise site changing, and the value is
-    kept exactly. No match: the English text."""
+    else the key with {placeholders} that fits the whole message and has the most fixed text (so "Title can be at
+    most {MAX_TITLE_LENGTH} characters." wins over "{label} can be at most {limit} characters."), so a message
+    with a value in it ("Password must be at least 6 characters.") is found without the raise site changing, and
+    the value is kept exactly. No match: the English text."""
     if text in dictionary:
         return translate(text, dictionary)
+    best = None
     for key in dictionary:
         if "{" not in key:
             continue
         match = message_pattern(key).match(text)
         if match:
-            return translate(key, dictionary, match.groupdict())
-    return text
+            fixed = len(PLACEHOLDER.sub("", key))
+            if best is None or fixed > best[0]:
+                best = (fixed, key, match)
+    if best is None:
+        return text
+    _, key, match = best
+    values = {name: translate_message(value, dictionary) if name in TRANSLATED_VALUES else value
+              for name, value in match.groupdict().items()}
+    return translate(key, dictionary, values)

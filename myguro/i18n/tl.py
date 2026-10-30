@@ -309,3 +309,8 @@ TAGLISH = {
     "Relaxed": "Maluwag",
     "Go to MyGuro": "Pumunta sa MyGuro",
 }
+
+# The server's messages (error answers) are in their own file because there are so many.
+from myguro.i18n.tl_messages import MESSAGES  # noqa: E402
+
+TAGLISH.update(MESSAGES)
