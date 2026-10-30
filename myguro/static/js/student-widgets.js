@@ -60,13 +60,22 @@
       row.append(text, right);
       return row;
     });
+    const box = document.getElementById("next-due-list");
     if (rows.length === 0) {
-      const empty = document.createElement("div");
-      empty.className = "list-group-item text-body-secondary";
-      empty.textContent = t("You're all caught up. Nothing to do right now.");
-      rows.push(empty);
+      // Nothing to do: a centred message that fills the card (the card is as tall as its neighbours), not a
+      // thin list row with empty space under it.
+      const icon = document.createElement("i");
+      icon.className = "bi bi-check-circle fs-1 text-success";
+      icon.setAttribute("aria-hidden", "true");
+      const message = document.createElement("div");
+      message.className = "text-body-secondary";
+      message.textContent = t("You're all caught up. Nothing to do right now.");
+      box.className = "d-flex flex-column align-items-center justify-content-center text-center gap-2 p-4 flex-grow-1";
+      box.replaceChildren(icon, message);
+      return;
     }
-    document.getElementById("next-due-list").replaceChildren(...rows);
+    box.className = "list-group list-group-flush";
+    box.replaceChildren(...rows);
   };
 
   // Progress: activities submitted out of everything given this school year, and how many this week.
