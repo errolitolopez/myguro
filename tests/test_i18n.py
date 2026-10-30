@@ -65,3 +65,18 @@ def test_the_page_carries_the_dictionary_only_in_taglish(monkeypatch):
 def test_javascript_has_the_same_text_helper():
     script = open("myguro/static/js/common.js").read()
     assert "function t(" in script and "window.TEXT" in script
+
+
+def test_language_buttons_are_on_the_navbar_display_and_login_pages(teacher):
+    page = teacher.get("/dashboard").get_data(as_text=True)
+    assert 'data-language-choice="en"' in page and 'data-language-choice="tl"' in page
+    assert page.index('aria-label="Change language"') < page.index('aria-label="Change theme"')  # first in the row
+    assert "data-language-select" in teacher.get("/display").get_data(as_text=True)
+    for path in ("/login", "/forgot-password"):
+        assert "data-language-select" in flask_app.test_client().get(path).get_data(as_text=True)
+
+
+def test_the_language_script_keeps_the_choice_in_a_cookie_only():
+    script = open("myguro/static/js/language.js").read()
+    assert 'COOKIE = "myguro-lang"' in script and "SameSite=Lax" in script and "ONE_YEAR = 31536000" in script
+    assert "location.reload()" in script and "localStorage" not in script

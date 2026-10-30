@@ -24,6 +24,7 @@
   <!-- The Taglish text for t() in the page's JavaScript (empty in English). tojson keeps a "</script>" in a string from ending this tag. -->
   <script>window.TEXT = {{ TEXT_JSON|tojson }};</script>
   <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/language.js') }}"></script>
   <script src="{{ url_for('static', filename='js/reading.js') }}"></script>
   {% block head %}{% endblock %}
 </head>

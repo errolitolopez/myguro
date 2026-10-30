@@ -24,7 +24,17 @@
       {% with height=30 %}{% include "_logo.html" %}{% endwith %}
     </a>
     <div class="d-flex align-items-center gap-2">
-    <!-- Quick theme menu, first in the row. theme.js saves the choice and marks the current one. -->
+    <!-- Quick language menu, first in the row, before the theme menu. language.js saves the choice (a cookie) and reloads. -->
+    <div class="dropdown">
+      <button class="btn btn-outline-secondary bi bi-translate" type="button" data-bs-toggle="dropdown"
+              aria-expanded="false" aria-label="Change language" title="Change language"></button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><h6 class="dropdown-header">Language</h6></li>
+        <li><button class="dropdown-item" type="button" data-language-choice="en">English</button></li>
+        <li><button class="dropdown-item" type="button" data-language-choice="tl">Taglish</button></li>
+      </ul>
+    </div>
+    <!-- Quick theme menu. theme.js saves the choice and marks the current one. -->
     <div class="dropdown">
       <button class="btn btn-outline-secondary bi bi-circle-half" type="button" data-bs-toggle="dropdown"
               aria-expanded="false" aria-label="Change theme" title="Change theme"></button>
