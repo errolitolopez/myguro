@@ -2,15 +2,15 @@
      Set "prefix" before including: ids become <prefix>-grade and <prefix>-section. -->
 <div class="row g-2 mb-3">
   <div class="col-6">
-    <label for="{{ prefix }}-grade" class="form-label">Grade <span class="text-body-secondary">(optional)</span></label>
+    <label for="{{ prefix }}-grade" class="form-label">{{ _("Grade") }} <span class="text-body-secondary">{{ _("(optional)") }}</span></label>
     <select id="{{ prefix }}-grade" class="form-select">
       <option value="">—</option>
       {% for grade in GRADES %}<option>{{ grade }}</option>{% endfor %}
     </select>
   </div>
   <div class="col-6">
-    <label for="{{ prefix }}-section" class="form-label">Section <span class="text-body-secondary">(optional)</span></label>
+    <label for="{{ prefix }}-section" class="form-label">{{ _("Section") }} <span class="text-body-secondary">{{ _("(optional)") }}</span></label>
     <input id="{{ prefix }}-section" class="form-control" maxlength="50" autocomplete="off" placeholder="Rizal">
   </div>
-  <div class="col-12 form-text mt-1">Leave empty for irregular students.</div>
+  <div class="col-12 form-text mt-1">{{ _("Leave empty for irregular students.") }}</div>
 </div>

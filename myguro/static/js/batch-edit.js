@@ -30,7 +30,7 @@ function selectionBox(user) {
   const box = document.createElement("input");
   box.type = "checkbox";
   box.className = "form-check-input mt-0 flex-shrink-0";
-  box.setAttribute("aria-label", `Select ${user.name}`);
+  box.setAttribute("aria-label", t("Select {name}", { name: user.name }));
   box.checked = Boolean(allMatching) || selected.has(user.id);
   box.disabled = Boolean(allMatching);
   box.addEventListener("click", (event) => event.stopPropagation());
@@ -53,7 +53,7 @@ function showSelection() {
   const count = selectedCount();
   selectionBar.classList.toggle("d-none", count === 0);
   document.getElementById("selection-text").textContent = allMatching
-    ? `All ${plural(allMatching.total, "student")} matching the search are selected.`
+    ? t("All {students} matching the search are selected.", { students: plural(allMatching.total, "student") })
     : `${plural(count, "student")} selected.`;
 
   const pageIds = shownData ? shownData.users.map((user) => user.id) : [];
@@ -66,7 +66,7 @@ function showSelection() {
   const more = shownData && !allMatching && onPage === pageIds.length && pageIds.length > 0
     && shownData.total > pageIds.length;
   selectMatching.classList.toggle("d-none", !more);
-  if (more) selectMatching.textContent = `Select all ${shownData.total} matching`;
+  if (more) selectMatching.textContent = t("Select all {total} matching", { total: shownData.total });
 }
 
 // Draws the rows again (from users.js) with their boxes checked or not.
@@ -116,8 +116,8 @@ document.getElementById("batch-modal").addEventListener("show.bs.modal", () => {
   batchForm.reset();
   hideError("batch-error");
   document.getElementById("batch-who").textContent = allMatching
-    ? `Change all ${plural(allMatching.total, "student")} matching the search.`
-    : `Change ${plural(selected.size, "selected student")}.`;
+    ? t("Change all {students} matching the search.", { students: plural(allMatching.total, "student") })
+    : t("Change {selected_students}.", { selected_students: plural(selected.size, "selected student") });
 });
 
 // Typing a section picks "Set to".
@@ -137,7 +137,7 @@ batchForm.addEventListener("submit", async (event) => {
   const mode = batchForm.querySelector('input[name="batch-section-mode"]:checked').value;
   if (mode === "set") {
     if (!sectionInput.value.trim()) {
-      showError("batch-error", "Type the section, or choose another option.");
+      showError("batch-error", t("Type the section, or choose another option."));
       sectionInput.focus();
       return;
     }
@@ -146,7 +146,7 @@ batchForm.addEventListener("submit", async (event) => {
     body.section = "";
   }
   if (!("grade" in body) && !("section" in body)) {
-    showError("batch-error", "Choose a grade or section to change.");
+    showError("batch-error", t("Choose a grade or section to change."));
     return;
   }
 
@@ -162,7 +162,7 @@ batchForm.addEventListener("submit", async (event) => {
     if (!response) return;
     const data = await response.json();
     if (!response.ok) {
-      showError("batch-error", data.error || "Could not save.");
+      showError("batch-error", data.error || t("Could not save."));
       return;
     }
     batchModal.hide();
@@ -172,7 +172,7 @@ batchForm.addEventListener("submit", async (event) => {
     setTimeout(() => notice.classList.add("d-none"), 4000);
     clearSelection();
   } catch {
-    showError("batch-error", "Cannot reach the server. Check your connection.");
+    showError("batch-error", t("Cannot reach the server. Check your connection."));
   } finally {
     stopLoading();
   }
@@ -185,8 +185,8 @@ const deleteModal = bootstrap.Modal.getOrCreateInstance(document.getElementById(
 document.getElementById("delete-modal").addEventListener("show.bs.modal", () => {
   hideError("delete-error");
   document.getElementById("delete-who").textContent = allMatching
-    ? `Delete all ${plural(allMatching.total, "student")} matching the search?`
-    : `Delete ${plural(selected.size, "selected student")}?`;
+    ? t("Delete all {students} matching the search?", { students: plural(allMatching.total, "student") })
+    : t("Delete {selected_students}?", { selected_students: plural(selected.size, "selected student") });
 });
 
 document.getElementById("delete-confirm").addEventListener("click", async (event) => {
@@ -207,18 +207,18 @@ document.getElementById("delete-confirm").addEventListener("click", async (event
     if (!response) return;
     const data = await response.json();
     if (!response.ok) {
-      showError("delete-error", data.error || "Could not delete.");
+      showError("delete-error", data.error || t("Could not delete."));
       return;
     }
     deleteModal.hide();
     const notice = document.getElementById("users-notice");
     notice.textContent = `${plural(data.deleted, "student")} deleted.` +
-      (data.skipped ? ` ${plural(data.skipped, "student")} skipped: already activated once.` : "");
+      (data.skipped ? t(" {students} skipped: already activated once.", { students: plural(data.skipped, "student") }) : "");
     notice.classList.remove("d-none");
     setTimeout(() => notice.classList.add("d-none"), 6000);
     clearSelection();
   } catch {
-    showError("delete-error", "Cannot reach the server. Check your connection.");
+    showError("delete-error", t("Cannot reach the server. Check your connection."));
   } finally {
     stopLoading();
   }
@@ -244,17 +244,17 @@ document.getElementById("batch-activate").addEventListener("click", async (event
     if (!response) return;
     const data = await response.json();
     if (!response.ok) {
-      showError("users-error", data.error || "Could not activate.");
+      showError("users-error", data.error || t("Could not activate."));
       return;
     }
     hideError("users-error");
     notice.textContent = `${plural(data.activated, "student")} activated.` +
-      (data.skipped ? ` ${plural(data.skipped, "student")} skipped: already active.` : "");
+      (data.skipped ? t(" {students} skipped: already active.", { students: plural(data.skipped, "student") }) : "");
     notice.classList.remove("d-none");
     setTimeout(() => notice.classList.add("d-none"), 6000);
     clearSelection();
   } catch {
-    showError("users-error", "Cannot reach the server. Check your connection.");
+    showError("users-error", t("Cannot reach the server. Check your connection."));
   } finally {
     stopLoading();
   }
@@ -274,8 +274,8 @@ passwordModal.addEventListener("show.bs.modal", () => {
   document.getElementById("password-done-part").classList.add("d-none");
   passwordConfirmButton.classList.remove("d-none");
   document.getElementById("password-who").textContent = allMatching
-    ? `Make new passwords for all ${plural(allMatching.total, "student")} matching the search?`
-    : `Make new passwords for ${plural(selected.size, "selected student")}?`;
+    ? t("Make new passwords for all {students} matching the search?", { students: plural(allMatching.total, "student") })
+    : t("Make new passwords for {selected_students}?", { selected_students: plural(selected.size, "selected student") });
 });
 
 passwordConfirmButton.addEventListener("click", async () => {
@@ -295,7 +295,7 @@ passwordConfirmButton.addEventListener("click", async () => {
     if (!response) return;
     const data = await response.json();
     if (!response.ok) {
-      showError("password-error", data.error || "Could not make new passwords.");
+      showError("password-error", data.error || t("Could not make new passwords."));
       return;
     }
     newPasswords = data.students;
@@ -314,7 +314,7 @@ passwordConfirmButton.addEventListener("click", async () => {
     document.getElementById("password-done-part").classList.remove("d-none");
     passwordConfirmButton.classList.add("d-none");
   } catch {
-    showError("password-error", "Cannot reach the server. Check your connection.");
+    showError("password-error", t("Cannot reach the server. Check your connection."));
   } finally {
     stopLoading();
   }

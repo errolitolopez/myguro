@@ -3,23 +3,23 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 class="modal-title fs-5" id="login-details-title">Login details</h2>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h2 class="modal-title fs-5" id="login-details-title">{{ _("Login details") }}</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ _("Close") }}"></button>
       </div>
       <div class="modal-body">
-        <p>Give these to <strong id="details-name"></strong>. The password is shown only now.</p>
+        <p>{{ _("Give these to") }} <strong id="details-name"></strong>{{ _(". The password is shown only now.") }}</p>
         <dl class="row mb-2">
-          <dt class="col-4">Username</dt>
+          <dt class="col-4">{{ _("Username") }}</dt>
           <dd class="col-8 font-monospace" id="details-username"></dd>
-          <dt class="col-4">Password</dt>
+          <dt class="col-4">{{ _("Password") }}</dt>
           <dd class="col-8 font-monospace fs-5" id="details-password"></dd>
         </dl>
-        <p id="details-disabled" class="small text-danger d-none">This account is disabled. Enable it first, or they cannot log in.</p>
-        <p class="small text-body-secondary mb-0">They will be asked to choose their own password when they log in.</p>
+        <p id="details-disabled" class="small text-danger d-none">{{ _("This account is disabled. Enable it first, or they cannot log in.") }}</p>
+        <p class="small text-body-secondary mb-0">{{ _("They will be asked to choose their own password when they log in.") }}</p>
       </div>
       <div class="modal-footer">
-        <button id="copy-details-button" type="button" class="btn btn-outline-secondary bi bi-clipboard">Copy</button>
-        <button type="button" class="btn btn-success bi bi-check-lg" data-bs-dismiss="modal">Done</button>
+        <button id="copy-details-button" type="button" class="btn btn-outline-secondary bi bi-clipboard">{{ _("Copy") }}</button>
+        <button type="button" class="btn btn-success bi bi-check-lg" data-bs-dismiss="modal">{{ _("Done") }}</button>
       </div>
     </div>
   </div>

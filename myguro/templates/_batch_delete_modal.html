@@ -3,20 +3,19 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 class="modal-title fs-5" id="delete-title">Delete students</h2>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h2 class="modal-title fs-5" id="delete-title">{{ _("Delete students") }}</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ _("Close") }}"></button>
       </div>
       <div class="modal-body">
         <p id="delete-who" class="mb-2"></p>
         <p class="mb-0 text-body-secondary small">
-          Only students who were never activated are deleted. A student who was activated once is kept,
-          even if deactivated now. This cannot be undone.
+          {{ _("Only students who were never activated are deleted. A student who was activated once is kept, even if deactivated now. This cannot be undone.") }}
         </p>
         <div id="delete-error" class="alert alert-danger py-2 mt-3 mb-0 d-none" role="alert"></div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary bi bi-x-lg" data-bs-dismiss="modal">Cancel</button>
-        <button id="delete-confirm" type="button" class="btn btn-danger bi bi-trash">Delete</button>
+        <button type="button" class="btn btn-outline-secondary bi bi-x-lg" data-bs-dismiss="modal">{{ _("Cancel") }}</button>
+        <button id="delete-confirm" type="button" class="btn btn-danger bi bi-trash">{{ _("Delete") }}</button>
       </div>
     </div>
   </div>

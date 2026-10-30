@@ -6,7 +6,7 @@ from flask import Blueprint, jsonify, render_template, request, send_file
 
 from myguro.database import get_db
 from myguro.domain.accounts import ACCOUNT_ROLES
-from myguro.errors import ValidationError
+from myguro.errors import ValidationError, say
 from myguro.exports import login_details_xlsx_bytes
 from myguro.imports import read_student_rows, template_xlsx_bytes
 from myguro.services import AccountService
@@ -139,5 +139,8 @@ def api_import_students():
     if upload is None or not upload.filename:
         raise ValidationError("Choose an Excel file (.xlsx).")
     rows = read_student_rows(upload.read())
-    return jsonify(service().import_students(rows, dry_run=request.form.get("dry_run") == "1"))
+    result = service().import_students(rows, dry_run=request.form.get("dry_run") == "1")
+    for problem in result["errors"]:  # the row problems are data, not raised errors: say them in the person's language
+        problem["message"] = say(problem["message"])
+    return jsonify(result)
 

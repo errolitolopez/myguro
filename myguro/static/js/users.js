@@ -8,7 +8,7 @@ let page = 1; // the page shown
 let pages = 1; // how many pages the current search has
 let loadNumber = 0; // only the newest request updates the list (typing fast sends several)
 let editing = null; // the person open in the edit popup
-let confirmAction = null; // what "Yes" does in the confirm box
+let confirmAction = null; // what t("Yes") does in the confirm box
 
 const list = document.getElementById("user-list");
 const searchInput = document.getElementById("search");
@@ -65,14 +65,14 @@ function userItem(user) {
   const badge = document.createElement("span");
   if (!user.active) {
     badge.className = "badge text-bg-secondary";
-    badge.textContent = "Deactivated";
+    badge.textContent = t("Deactivated");
   } else if (user.must_change_password) {
     badge.className = "badge text-bg-warning";
-    badge.textContent = "Not logged in yet";
-    badge.title = "Still using the temporary password";
+    badge.textContent = t("Not logged in yet");
+    badge.title = t("Still using the temporary password");
   } else {
     badge.className = "badge text-bg-success";
-    badge.textContent = "Active";
+    badge.textContent = t("Active");
   }
 
   if (typeof selectionBox === "function") row.append(selectionBox(user)); // students page
@@ -111,22 +111,22 @@ function render(data) {
     filterCount.classList.toggle("d-none", inUse === 0);
   }
   if (data.all_count === 0) {
-    list.replaceChildren(messageItem(`No ${noun}s yet. Tap + Add ${noun} to create an account.`));
+    list.replaceChildren(messageItem(t("No {noun}s yet. Tap + Add {noun} to create an account.", { noun })));
   } else if (data.users.length === 0) {
-    list.replaceChildren(messageItem(`No ${noun} matches your search.`));
+    list.replaceChildren(messageItem(t("No {noun} matches your search.", { noun })));
   } else {
     list.replaceChildren(...data.users.map(userItem));
   }
 
   document.getElementById("user-summary").textContent = searching
     ? `${data.total} found`
-    : `${data.all_count} total · ${data.active_count} active`;
+    : t("{all_count} total · {active_count} active", { all_count: data.all_count, active_count: data.active_count });
 
   // ‹ Prev · Page 2 of 3 · Next ›
   page = data.page;
   pages = data.pages;
   document.getElementById("pager").classList.toggle("d-none", pages <= 1);
-  document.getElementById("page-info").textContent = `Page ${page} of ${pages}`;
+  document.getElementById("page-info").textContent = t("Page {page} of {pages}", { page, pages });
   document.getElementById("prev-page").disabled = page <= 1;
   document.getElementById("next-page").disabled = page >= pages;
   if (typeof selectionShown === "function") selectionShown(data); // students page
@@ -146,13 +146,13 @@ async function loadUsers() {
     const response = await apiFetch(`/api/users?${params}`);
     if (!response || thisLoad !== loadNumber) return; // a newer search is on its way
     if (!response.ok) {
-      showError("users-error", `Could not load the ${noun}s.`);
+      showError("users-error", t("Could not load the {noun}s.", { noun }));
       return;
     }
     hideError("users-error");
     render(await response.json());
   } catch {
-    showError("users-error", "Cannot reach the server. Check your connection.");
+    showError("users-error", t("Cannot reach the server. Check your connection."));
   }
 }
 
@@ -229,12 +229,12 @@ addForm.addEventListener("submit", async (event) => {
   }
   if (!/^[a-z0-9._-]{3,30}$/.test(username)) {
     showError("add-user-error",
-      "Username must be 3 to 30 letters, numbers, dots, dashes or underscores, with no spaces.");
+      t("Username must be 3 to 30 letters, numbers, dots, dashes or underscores, with no spaces."));
     addUsername.focus();
     return;
   }
   if (password && password.length < 6) {
-    showError("add-user-error", "Password must be at least 6 characters, or leave it empty.");
+    showError("add-user-error", t("Password must be at least 6 characters, or leave it empty."));
     addPassword.focus();
     return;
   }
@@ -250,7 +250,7 @@ addForm.addEventListener("submit", async (event) => {
     if (!response) return;
     const data = await response.json();
     if (!response.ok) {
-      showError("add-user-error", data.error || "Could not create the account.");
+      showError("add-user-error", data.error || t("Could not create the account."));
       return;
     }
     addModal.hide();
@@ -258,7 +258,7 @@ addForm.addEventListener("submit", async (event) => {
     await loadUsers();
     showLoginDetails(data.user, data.temp_password);
   } catch {
-    showError("add-user-error", "Cannot reach the server. Check your connection.");
+    showError("add-user-error", t("Cannot reach the server. Check your connection."));
   } finally {
     stopLoading();
   }
@@ -291,7 +291,7 @@ function openEdit(user) {
     gradeSelect.value = user.grade;
     document.getElementById("edit-section").value = user.section;
   }
-  activeButton.textContent = user.active ? "Deactivate" : "Activate";
+  activeButton.textContent = user.active ? t("Deactivate") : t("Activate");
   activeButton.className = user.active ? "btn btn-outline-danger" : "btn btn-outline-success";
   resetButton.disabled = !user.active;
   confirmBox.classList.add("d-none");
@@ -311,13 +311,13 @@ async function updateUser(changes) {
     if (!response) return null;
     const data = await response.json();
     if (!response.ok) {
-      showError("edit-user-error", data.error || "Could not save.");
+      showError("edit-user-error", data.error || t("Could not save."));
       return null;
     }
     await loadUsers();
     return data;
   } catch {
-    showError("edit-user-error", "Cannot reach the server. Check your connection.");
+    showError("edit-user-error", t("Cannot reach the server. Check your connection."));
     return null;
   }
 }
@@ -348,8 +348,8 @@ function askConfirm(text, yesLabel, action, withPassword = false) {
 
 resetButton.addEventListener("click", () => {
   askConfirm(
-    `Set a new temporary password for ${editing.name}? Their current password will stop working.`,
-    "Reset password",
+    t("Set a new temporary password for {name}? Their current password will stop working.", { name: editing.name }),
+    t("Reset password"),
     async () => {
       const data = await updateUser({ reset_password: true, password: resetPassword.value });
       if (!data) return;
@@ -372,10 +372,10 @@ activeButton.addEventListener("click", () => {
     return;
   }
   askConfirm(
-    `Deactivate ${editing.name}? They won't be able to log in. ` +
-      (role === "teacher" ? "Their classes and activities are kept."
-        : role === "supervisor" ? "They can be enabled again later." : "Their classes and answers are kept."),
-    "Deactivate",
+    t("Deactivate {name}? They won't be able to log in. ", { name: editing.name }) +
+      (role === "teacher" ? t("Their classes and activities are kept.")
+        : role === "supervisor" ? t("They can be enabled again later.") : t("Their classes and answers are kept.")),
+    t("Deactivate"),
     async () => {
       if (await updateUser({ active: false })) editModal.hide();
     },

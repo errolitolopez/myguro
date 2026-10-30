@@ -2,19 +2,19 @@
      Set "prefix" before including: ids become <prefix>-last, <prefix>-first, <prefix>-middle. -->
 <div class="row g-2 mb-3">
   <div class="col-12 col-sm-5">
-    <label for="{{ prefix }}-last" class="form-label">Last name</label>
+    <label for="{{ prefix }}-last" class="form-label">{{ _("Last name") }}</label>
     <input id="{{ prefix }}-last" class="form-control" maxlength="50" autocomplete="off"
            placeholder="Bautista" required>
   </div>
   <div class="col-8 col-sm-5">
-    <label for="{{ prefix }}-first" class="form-label">First name</label>
+    <label for="{{ prefix }}-first" class="form-label">{{ _("First name") }}</label>
     <input id="{{ prefix }}-first" class="form-control" maxlength="50" autocomplete="off"
            placeholder="Ana Marie" required>
   </div>
   <div class="col-4 col-sm-2">
     <label for="{{ prefix }}-middle" class="form-label text-nowrap">M.I.</label>
     <input id="{{ prefix }}-middle" class="form-control text-uppercase" maxlength="2" autocomplete="off"
-           placeholder="M" aria-label="Middle initial (optional)">
+           placeholder="M" aria-label="{{ _("Middle initial (optional)") }}">
   </div>
-  <div class="col-12 form-text mt-1">Shown as: Last name, First name M. — the middle initial is optional.</div>
+  <div class="col-12 form-text mt-1">{{ _("Shown as: Last name, First name M. — the middle initial is optional.") }}</div>
 </div>

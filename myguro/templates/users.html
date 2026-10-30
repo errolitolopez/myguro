@@ -13,10 +13,10 @@
 
   <div class="d-flex flex-wrap gap-2 mb-3">
     <!-- One Users tab: the role picks the list (the page reloads with ?role=) -->
-    <select id="role-select" class="form-select w-auto" aria-label="Role">
-      <option value="teacher" {{ 'selected' if role == 'teacher' }}>Teachers</option>
-      <option value="student" {{ 'selected' if role == 'student' }}>Students</option>
-      <option value="supervisor" {{ 'selected' if role == 'supervisor' }}>Supervisors</option>
+    <select id="role-select" class="form-select w-auto" aria-label="{{ _("Role") }}">
+      <option value="teacher" {{ 'selected' if role == 'teacher' }}>{{ _("Teachers") }}</option>
+      <option value="student" {{ 'selected' if role == 'student' }}>{{ _("Students") }}</option>
+      <option value="supervisor" {{ 'selected' if role == 'supervisor' }}>{{ _("Supervisors") }}</option>
     </select>
     <input id="search" type="search" class="form-control flex-grow-1" style="min-width: 12rem; width: auto;"
            placeholder="Search name, username{{ ' or section' if role == 'student' }}"
@@ -25,15 +25,15 @@
     <button id="filter-toggle" type="button" class="btn btn-outline-secondary text-nowrap bi bi-funnel"
             data-bs-toggle="collapse" data-bs-target="#advanced-filter" aria-expanded="false"
             aria-controls="advanced-filter">
-      Filters<span id="filter-count" class="badge text-bg-success ms-1 d-none"></span>
+      {{ _("Filters") }}<span id="filter-count" class="badge text-bg-success ms-1 d-none"></span>
     </button>
     {% endif %}
     <button class="btn btn-success text-nowrap bi bi-plus-lg" data-bs-toggle="modal" data-bs-target="#add-user-modal">
-      Add {{ noun }}
+      {{ _("Add {noun}", noun=noun) }}
     </button>
     {% if role == "student" %}
     <button class="btn btn-outline-success text-nowrap bi bi-file-earmark-arrow-up" data-bs-toggle="modal" data-bs-target="#import-modal">
-      Import from Excel
+      {{ _("Import from Excel") }}
     </button>
     {% endif %}
   </div>
@@ -44,34 +44,34 @@
     <div class="card card-body mb-3">
       <div class="row g-2 align-items-end">
         <div class="col-12 col-md-4">
-          <label for="name-filter" class="form-label small mb-1">Full name</label>
+          <label for="name-filter" class="form-label small mb-1">{{ _("Full name") }}</label>
           <input id="name-filter" type="search" class="form-control" autocomplete="off"
                  placeholder="e.g. Bautista Ana">
         </div>
         <div class="col-6 col-md-2">
-          <label for="grade-filter" class="form-label small mb-1">Grade</label>
+          <label for="grade-filter" class="form-label small mb-1">{{ _("Grade") }}</label>
           <select id="grade-filter" class="form-select">
-            <option value="*">All grades</option>
+            <option value="*">{{ _("All grades") }}</option>
             {% for grade in ALL_GRADES %}<option>{{ grade }}</option>{% endfor %}
-            <option value="">No grade</option>
+            <option value="">{{ _("No grade") }}</option>
           </select>
         </div>
         <div class="col-6 col-md-2">
-          <label for="section-filter" class="form-label small mb-1">Section</label>
+          <label for="section-filter" class="form-label small mb-1">{{ _("Section") }}</label>
           <input id="section-filter" type="search" class="form-control" autocomplete="off"
                  placeholder="e.g. Rizal">
         </div>
         <div class="col-6 col-md-2">
-          <label for="status-filter" class="form-label small mb-1">Status</label>
+          <label for="status-filter" class="form-label small mb-1">{{ _("Status") }}</label>
           <select id="status-filter" class="form-select">
-            <option value="">All statuses</option>
-            <option value="active">Active</option>
-            <option value="pending">Not logged in yet</option>
-            <option value="deactivated">Deactivated</option>
+            <option value="">{{ _("All statuses") }}</option>
+            <option value="active">{{ _("Active") }}</option>
+            <option value="pending">{{ _("Not logged in yet") }}</option>
+            <option value="deactivated">{{ _("Deactivated") }}</option>
           </select>
         </div>
         <div class="col-12 col-md-2">
-          <button id="filter-clear" type="button" class="btn btn-outline-secondary w-100 bi bi-x-circle">Clear filters</button>
+          <button id="filter-clear" type="button" class="btn btn-outline-secondary w-100 bi bi-x-circle">{{ _("Clear filters") }}</button>
         </div>
       </div>
     </div>
@@ -85,37 +85,37 @@
     <span id="selection-text" class="me-auto"></span>
     <button id="select-matching" type="button" class="btn btn-sm btn-link p-0 d-none"></button>
     <button type="button" class="btn btn-sm btn-primary bi bi-pencil" data-bs-toggle="modal" data-bs-target="#batch-modal">
-      Edit grade &amp; section
+      {{ _("Edit grade & section") }}
     </button>
-    <button id="batch-activate" type="button" class="btn btn-sm btn-success bi bi-person-check">Activate</button>
+    <button id="batch-activate" type="button" class="btn btn-sm btn-success bi bi-person-check">{{ _("Activate") }}</button>
     <button type="button" class="btn btn-sm btn-warning bi bi-key" data-bs-toggle="modal" data-bs-target="#password-modal">
-      New passwords
+      {{ _("New passwords") }}
     </button>
     <button type="button" class="btn btn-sm btn-outline-danger bi bi-trash" data-bs-toggle="modal" data-bs-target="#delete-modal">
-      Delete
+      {{ _("Delete") }}
     </button>
-    <button id="selection-clear" type="button" class="btn btn-sm btn-outline-secondary bi bi-x-circle">Clear</button>
+    <button id="selection-clear" type="button" class="btn btn-sm btn-outline-secondary bi bi-x-circle">{{ _("Clear") }}</button>
   </div>
   {% endif %}
 
   <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center gap-2">
       {% if role == "student" %}
-      <input id="select-page" type="checkbox" class="form-check-input mt-0" aria-label="Select all on this page">
+      <input id="select-page" type="checkbox" class="form-check-input mt-0" aria-label="{{ _("Select all on this page") }}">
       {% endif %}
       <span class="fw-semibold me-auto">{{ nouns }}</span>
       <span id="user-summary" class="text-body-secondary small"></span>
     </div>
     <div id="user-list" class="list-group list-group-flush">
-      <div class="list-group-item text-body-secondary">Loading...</div>
+      <div class="list-group-item text-body-secondary">{{ _("Loading...") }}</div>
     </div>
   </div>
 
   <!-- Page controls (hidden when everything fits on one page) -->
-  <nav id="pager" class="d-flex justify-content-between align-items-center mt-3 d-none" aria-label="Pages">
-    <button id="prev-page" type="button" class="btn btn-outline-success btn-sm">‹ Prev</button>
+  <nav id="pager" class="d-flex justify-content-between align-items-center mt-3 d-none" aria-label="{{ _("Pages") }}">
+    <button id="prev-page" type="button" class="btn btn-outline-success btn-sm">{{ _("‹ Prev") }}</button>
     <span id="page-info" class="small text-body-secondary"></span>
-    <button id="next-page" type="button" class="btn btn-outline-success btn-sm">Next ›</button>
+    <button id="next-page" type="button" class="btn btn-outline-success btn-sm">{{ _("Next ›") }}</button>
   </nav>
 </main>
 
@@ -124,33 +124,33 @@
   <div class="modal-dialog modal-dialog-centered">
     <form id="add-user-form" class="modal-content" novalidate>
       <div class="modal-header">
-        <h2 class="modal-title fs-5" id="add-user-title">Add {{ noun }}</h2>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h2 class="modal-title fs-5" id="add-user-title">{{ _("Add {noun}", noun=noun) }}</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ _("Close") }}"></button>
       </div>
       <div class="modal-body">
         {% with prefix="add" %}{% include "_person_name_fields.html" %}{% endwith %}
         <div class="mb-3">
-          <label for="add-username" class="form-label">Username</label>
+          <label for="add-username" class="form-label">{{ _("Username") }}</label>
           <input id="add-username" class="form-control" maxlength="30" autocomplete="off"
                  autocapitalize="none" spellcheck="false" placeholder="abautista" required>
-          <div class="form-text">Used to log in. Letters, numbers, dots, dashes or underscores.</div>
+          <div class="form-text">{{ _("Used to log in. Letters, numbers, dots, dashes or underscores.") }}</div>
         </div>
         {% if role == "student" %}
         {% with prefix="add" %}{% include "_grade_section_fields.html" %}{% endwith %}
         {% endif %}
         <div class="mb-3">
           <label for="add-password" class="form-label">
-            Temporary password <span class="text-body-secondary">(optional)</span>
+            {{ _("Temporary password") }} <span class="text-body-secondary">{{ _("(optional)") }}</span>
           </label>
           <input id="add-password" class="form-control font-monospace" autocomplete="off"
-                 spellcheck="false" placeholder="Leave empty to make one">
-          <div class="form-text">At least 6 characters. The {{ noun }} changes it on first login.</div>
+                 spellcheck="false" placeholder="{{ _("Leave empty to make one") }}">
+          <div class="form-text">{{ _("At least 6 characters. The {noun} changes it on first login.", noun=noun) }}</div>
         </div>
         <div id="add-user-error" class="alert alert-danger py-2 mb-0 d-none" role="alert"></div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary bi bi-x-lg" data-bs-dismiss="modal">Cancel</button>
-        <button id="add-user-button" type="submit" class="btn btn-success bi bi-person-plus">Create account</button>
+        <button type="button" class="btn btn-outline-secondary bi bi-x-lg" data-bs-dismiss="modal">{{ _("Cancel") }}</button>
+        <button id="add-user-button" type="submit" class="btn btn-success bi bi-person-plus">{{ _("Create account") }}</button>
       </div>
     </form>
   </div>
@@ -162,22 +162,22 @@
     <div class="modal-content">
       <div class="modal-header">
         <h2 class="modal-title fs-5" id="edit-user-title">{{ noun|capitalize }}</h2>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ _("Close") }}"></button>
       </div>
       <div class="modal-body">
         <form id="edit-name-form" class="mb-3" novalidate>
           {% with prefix="edit" %}{% include "_person_name_fields.html" %}{% endwith %}
-          <div class="form-text mt-n2 mb-3">Username: <span id="edit-username" class="font-monospace"></span></div>
+          <div class="form-text mt-n2 mb-3">{{ _("Username:") }} <span id="edit-username" class="font-monospace"></span></div>
           {% if role == "student" %}
           {% with prefix="edit" %}{% include "_grade_section_fields.html" %}{% endwith %}
           {% endif %}
-          <button id="edit-name-button" type="submit" class="btn btn-success w-100 bi bi-check-lg">Save changes</button>
+          <button id="edit-name-button" type="submit" class="btn btn-success w-100 bi bi-check-lg">{{ _("Save changes") }}</button>
         </form>
         <hr>
 
         <div class="d-grid gap-2">
-          <button id="reset-button" type="button" class="btn btn-outline-warning bi bi-key">Reset password</button>
-          <button id="active-button" type="button" class="btn btn-outline-danger bi bi-person-slash">Deactivate</button>
+          <button id="reset-button" type="button" class="btn btn-outline-warning bi bi-key">{{ _("Reset password") }}</button>
+          <button id="active-button" type="button" class="btn btn-outline-danger bi bi-person-slash">{{ _("Deactivate") }}</button>
         </div>
 
         <!-- Asks before resetting or deactivating -->
@@ -186,15 +186,15 @@
           <!-- Reset password only: type the new password, or leave empty to make one -->
           <div id="reset-password-field" class="mb-2 d-none">
             <label for="reset-password" class="form-label">
-              New temporary password <span class="text-body-secondary">(optional)</span>
+              {{ _("New temporary password") }} <span class="text-body-secondary">{{ _("(optional)") }}</span>
             </label>
             <input id="reset-password" class="form-control font-monospace" autocomplete="off"
-                   spellcheck="false" placeholder="Leave empty to make one">
-            <div class="form-text">At least 6 characters. The {{ noun }} changes it on first login.</div>
+                   spellcheck="false" placeholder="{{ _("Leave empty to make one") }}">
+            <div class="form-text">{{ _("At least 6 characters. The {noun} changes it on first login.", noun=noun) }}</div>
           </div>
           <div class="d-flex gap-2 justify-content-end">
-            <button id="confirm-no" type="button" class="btn btn-sm btn-outline-secondary">Cancel</button>
-            <button id="confirm-yes" type="button" class="btn btn-sm btn-warning">Yes</button>
+            <button id="confirm-no" type="button" class="btn btn-sm btn-outline-secondary">{{ _("Cancel") }}</button>
+            <button id="confirm-yes" type="button" class="btn btn-sm btn-warning">{{ _("Yes") }}</button>
           </div>
         </div>
 

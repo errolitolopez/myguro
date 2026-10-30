@@ -313,6 +313,8 @@ TAGLISH = {
 # The server's messages (error answers) are in their own file because there are so many.
 from myguro.i18n.tl_messages import MESSAGES  # noqa: E402
 from myguro.i18n.tl_teacher import TEACHER  # noqa: E402
+from myguro.i18n.tl_admin import ADMIN  # noqa: E402
 
 TAGLISH.update(MESSAGES)
 TAGLISH.update(TEACHER)
+TAGLISH.update(ADMIN)

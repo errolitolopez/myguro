@@ -42,6 +42,12 @@ TRANSLATED_FILES = [
     # Teacher dashboard, schedule view, GuroBot, shared bits
     "myguro/templates/my_schedule.html", "myguro/static/js/dashboard.js", "myguro/static/js/dashboard-chart.js",
     "myguro/static/js/chat.js", "myguro/static/js/my-schedule.js", "myguro/static/js/schedule-grid.js",
+    # Admin: users, batch windows, student import
+    "myguro/templates/users.html", "myguro/templates/_batch_delete_modal.html", "myguro/templates/_batch_edit_modal.html",
+    "myguro/templates/_batch_password_modal.html", "myguro/templates/_import_students_modal.html",
+    "myguro/templates/_login_details_modal.html", "myguro/templates/_person_name_fields.html",
+    "myguro/templates/_grade_section_fields.html", "myguro/static/js/users.js", "myguro/static/js/batch-edit.js",
+    "myguro/static/js/student-import.js",
 ]
 
 PLACEHOLDER = re.compile(r"\{(\w+)\}")
@@ -97,3 +103,10 @@ def test_translated_text_is_never_compared_or_used_as_a_key():
     for path in glob.glob("myguro/static/js/*.js"):
         code = open(path).read()
         assert not re.search(r'(===|!==|==|!=)\s*t\(|\bt\([^)]*\)\s*(===|!==)|case\s+t\(', code), path
+
+
+def test_template_sentences_have_no_html_entities():
+    # _("Save &amp; next") would be shown as "&amp;amp;": write the plain & (the template escapes it)
+    for path in [p for p in TRANSLATED_FILES if p.endswith(".html")]:
+        for sentence in sentences_of(path):
+            assert not re.search(r"&[a-z#0-9]+;", sentence), f"{path}: {sentence}"

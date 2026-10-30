@@ -15,6 +15,7 @@ KNOWN_DYNAMIC = {
     ("myguro/imports.py", "too_many_message"),  # given by the caller: the student import and its header help
     ("myguro/services/chat.py", "rules.CHAT_FULL_MESSAGE"),  # a constant
     ("myguro/services/results.py", "message"),  # a parameter: "Not found." and the like
+    ("myguro/domain/accounts.py", "NAME_FORMAT_HELP"),
     ("myguro/domain/docx_import.py", "message"), ("myguro/domain/docx_import.py", "failure.message"),
     ("myguro/domain/docx_import.py", "failure.message.removeprefix('Question: ')"),  # the messages of clean_question (listed)
     ("myguro/services/schedule.py", "self.describe(refused[0], names)"),  # the schedule's own problem texts

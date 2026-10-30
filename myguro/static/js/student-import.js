@@ -31,7 +31,7 @@ async function sendFile(dryRun) {
   if (!response) return null;
   const data = await response.json();
   if (!response.ok) {
-    showError("import-error", data.error || "Could not read the file.");
+    showError("import-error", data.error || t("Could not read the file."));
     return null;
   }
   return data;
@@ -50,7 +50,7 @@ function showExisting(existing) {
 function showProblems(errors) {
   document.getElementById("import-problem-list").replaceChildren(...errors.map((problem) => {
     const item = document.createElement("li");
-    item.textContent = `Row ${problem.row}: ${problem.message}`;
+    item.textContent = t("Row {row}: {message}", { row: problem.row, message: problem.message });
     return item;
   }));
   importPart("import-problems", true);
@@ -62,7 +62,7 @@ checkButton.addEventListener("click", async () => {
   importPart("import-preview", false);
   confirmButton.classList.add("d-none");
   if (!importFile.files.length) {
-    showError("import-error", "Choose the Excel file first.");
+    showError("import-error", t("Choose the Excel file first."));
     return;
   }
   checkButton.disabled = true;
@@ -77,18 +77,18 @@ checkButton.addEventListener("click", async () => {
     const hasNew = data.students.length > 0;
     importPart("import-new-table", hasNew);
     document.getElementById("import-preview-text").textContent = hasNew
-      ? `${plural(data.students.length, "student")} will be added. Check the usernames, then press Import.`
-      : "Nobody new to add. Every student in this file already exists.";
+      ? t("{students} will be added. Check the usernames, then press Import.", { students: plural(data.students.length, "student") })
+      : t("Nobody new to add. Every student in this file already exists.");
     document.getElementById("import-preview-rows").replaceChildren(...data.students.map((student) =>
       tableRow([student.row, student.name, student.username, student.grade, student.section,
         student.password_given ? "from the file" : "will be made"])));
     importPart("import-preview", true);
     if (hasNew) {
-      confirmButton.textContent = `Import ${plural(data.students.length, "student")}`;
+      confirmButton.textContent = t("Import {students}", { students: plural(data.students.length, "student") });
       confirmButton.classList.remove("d-none");
     }
   } catch {
-    showError("import-error", "Cannot reach the server. Check your connection.");
+    showError("import-error", t("Cannot reach the server. Check your connection."));
   } finally {
     checkButton.disabled = false;
   }
@@ -112,7 +112,7 @@ confirmButton.addEventListener("click", async () => {
     importPart("import-preview", false);
     confirmButton.classList.add("d-none");
     document.getElementById("import-done-text").textContent =
-      `${plural(data.students.length, "student")} added, disabled: enable them first so they can log in.` +
+      t("{students} added, disabled: enable them first so they can log in.", { students: plural(data.students.length, "student") }) +
       (data.existing.length ? ` ${plural(data.existing.length, "student")} already existed and were skipped.` : "");
     document.getElementById("import-done-rows").replaceChildren(...data.students.map((student) =>
       tableRow([student.name, student.username, student.password, student.grade, student.section])));
@@ -120,7 +120,7 @@ confirmButton.addEventListener("click", async () => {
     page = 1; // users.js: show the list from the start
     loadUsers();
   } catch {
-    showError("import-error", "Cannot reach the server. Check your connection.");
+    showError("import-error", t("Cannot reach the server. Check your connection."));
   } finally {
     confirmButton.disabled = false;
   }
