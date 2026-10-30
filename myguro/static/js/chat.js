@@ -203,7 +203,7 @@
   toggle.addEventListener("pointercancel", endDrag);
 
   // Account menu → Hide / Show GuroBot. Hidden, the bubble and its window are gone from every page until the
-  // teacher shows it again; the choice is kept in this browser only (a hidden chat keeps its history).
+  // teacher shows it again (it starts hidden); the choice is kept in this browser only (a hidden chat keeps its history).
   const HIDDEN_KEY = "chat-hidden";
   const visibilityItem = document.getElementById("chat-visibility");
   const setHidden = (hidden) => {
@@ -214,11 +214,12 @@
     visibilityItem.classList.toggle("bi-eye", hidden);
     visibilityItem.textContent = hidden ? " Show GuroBot" : " Hide GuroBot";
   };
-  let startHidden = false;
+  // Hidden until the teacher chooses Show GuroBot: only a saved "0" (shown) keeps it on the page.
+  let startHidden = true;
   try {
-    startHidden = localStorage.getItem(HIDDEN_KEY) === "1";
+    startHidden = localStorage.getItem(HIDDEN_KEY) !== "0";
   } catch {
-    startHidden = false;
+    startHidden = true;
   }
   visibilityItem?.addEventListener("click", () => {
     const hidden = !bubbleBox.hidden;
