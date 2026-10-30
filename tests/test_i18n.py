@@ -91,3 +91,44 @@ def test_the_login_page_shows_taglish_when_the_cookie_says_so():
     assert ">Forgot your password?<" in english and ">Nakalimutan mo ba ang password mo?<" not in english
     assert ">Nakalimutan mo ba ang password mo?<" in taglish and ">Forgot your password?<" not in taglish
     assert '"Forgot your password?": "Nakalimutan mo ba ang password mo?"' in taglish
+
+
+# --- Server messages: matched by pattern, so the raise sites do not change -----------------
+
+from myguro.domain.i18n import translate_message  # noqa: E402
+
+
+def test_a_server_message_is_translated_exactly_or_by_pattern():
+    dictionary = {
+        "Class name is required.": "Kailangan ang pangalan ng class.",
+        "Password must be at least {min} characters.": "Ang password ay dapat hindi bababa sa {min} na characters.",
+        "{field} is required.": "Kailangan ang {field}.",
+        "There is already a class called {name} in {year}.": "May class na tinatawag na {name} sa {year}.",
+    }
+    assert translate_message("Class name is required.", dictionary) == "Kailangan ang pangalan ng class."
+    assert translate_message("Password must be at least 6 characters.", dictionary) == \
+        "Ang password ay dapat hindi bababa sa 6 na characters."
+    assert translate_message("Title is required.", dictionary) == "Kailangan ang Title."  # the first pattern that fits
+    # user text inside the message is kept exactly, even with punctuation, braces and quotes
+    assert translate_message('There is already a class called "Grade {6}, A" in 2026-2027.', dictionary) == \
+        'May class na tinatawag na "Grade {6}, A" sa 2026-2027.'
+    assert translate_message("Something nobody wrote a Taglish for.", dictionary) == "Something nobody wrote a Taglish for."
+    assert translate_message("Anything", {}) == "Anything"  # English: no dictionary
+
+
+def test_the_same_name_twice_in_a_pattern_must_match_the_same_text():
+    dictionary = {"{a} and {a} again": "{a} at {a} ulit"}
+    assert translate_message("x and x again", dictionary) == "x at x ulit"
+    assert translate_message("x and y again", dictionary) == "x and y again"
+
+
+def test_an_error_answer_follows_the_language_cookie(monkeypatch):
+    client = flask_app.test_client()
+    english = client.post("/api/login", json={"username": "nobody", "password": "wrong-password"})
+    message = english.get_json()["error"]
+    monkeypatch.setitem(TAGLISH, message, "Mali ang username o password.")
+    client.set_cookie("myguro-lang", "tl")
+    assert client.post("/api/login", json={"username": "nobody", "password": "wrong-password"}).get_json()["error"] \
+        == "Mali ang username o password."
+    other = flask_app.test_client()  # no cookie: English
+    assert other.post("/api/login", json={"username": "nobody", "password": "wrong-password"}).get_json()["error"] == message

@@ -307,4 +307,5 @@ TAGLISH = {
     "Justified": "Justified",
     "Line spacing": "Pagitan ng linya",
     "Relaxed": "Maluwag",
+    "Go to MyGuro": "Pumunta sa MyGuro",
 }

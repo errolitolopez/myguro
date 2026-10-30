@@ -14,10 +14,10 @@
       <div class="d-flex justify-content-center gap-2">
         {% if status == 500 %}
         {# An empty address reloads this page #}
-        <a href="" class="btn btn-outline-secondary bi bi-arrow-clockwise">Try again</a>
+        <a href="" class="btn btn-outline-secondary bi bi-arrow-clockwise">{{ _("Try again") }}</a>
         {% endif %}
         <!-- "/" sends a logged-in person to their first page and everyone else to the login page -->
-        <a href="/" class="btn btn-success bi bi-house">Go to MyGuro</a>
+        <a href="/" class="btn btn-success bi bi-house">{{ _("Go to MyGuro") }}</a>
       </div>
     </div>
   </div>

@@ -3,6 +3,16 @@ JSON answers like {"error": "Title is required."} with the right HTTP status."""
 
 from flask import jsonify, render_template, request
 
+from myguro.domain.i18n import LANGUAGE_COOKIE, language_from_cookie, translate_message
+from myguro.i18n.tl import TAGLISH
+
+
+def say(message):
+    """A message for the person who made this request, in the language their browser chose (English when there
+    is no cookie). Taglish is matched by pattern, so a message with a value in it is found too."""
+    chosen = language_from_cookie(request.cookies.get(LANGUAGE_COOKIE))
+    return translate_message(message, TAGLISH if chosen == "tl" else {})
+
 
 class AppError(Exception):
     status = 400
@@ -66,7 +76,7 @@ def register_error_handlers(app):
     @app.errorhandler(AppError)
     def handle_app_error(error):
         # Nothing of a failed request is saved: the connection closes without commit.
-        return jsonify(error=error.message, **error.extra), error.status
+        return jsonify(error=say(error.message), **error.extra), error.status
 
 
 # Shown if even the error page cannot be drawn (for example the database is the thing that broke).
@@ -78,8 +88,8 @@ PLAIN_PAGE = ("<!doctype html><meta charset=utf-8><meta name=viewport content='w
 def error_response(status, title, message, api_message):
     """The answer for an error: JSON for the /api/ calls the pages make, a MyGuro page for a person."""
     if request.path.startswith("/api/"):
-        return jsonify(error=api_message), status
+        return jsonify(error=say(api_message)), status
     try:
-        return render_template("error.html", status=status, title=title, message=message), status
+        return render_template("error.html", status=status, title=say(title), message=say(message)), status
     except Exception:
         return PLAIN_PAGE, status
