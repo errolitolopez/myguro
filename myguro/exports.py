@@ -514,28 +514,34 @@ def attendance_pdf_bytes(data, teacher, exported_at, timezone_info):
 
 LETTERS = "ABCDEFGHIJKL"
 WRITE_LINES = 3  # ruled lines under a short answer
+# The sheet is made compact on purpose, to save paper: Times-style text (Liberation Serif has the same letter
+# widths as Times New Roman and is free to bundle), tight lines and small margins.
+SHEET_LINE_HEIGHT = 0.42  # mm per point of text size, about 1.2 times the text size
+SHEET_MARGIN = 12  # mm
+WRITE_LINE_GAP = 6  # mm between the ruled lines of a short answer
+INLINE_CHOICES_MAX = 95  # characters: choices that fit on one line are printed side by side
 
 
 class SheetPDF(FPDF):
     def __init__(self):
         super().__init__(orientation="portrait", unit="mm", format="A4")
-        self.set_margins(15, 15, 15)
-        self.set_auto_page_break(auto=True, margin=15)
-        self.add_font("DejaVu", "", os.path.join(FONTS_DIR, "DejaVuSans.ttf"))
-        self.add_font("DejaVu", "B", os.path.join(FONTS_DIR, "DejaVuSans-Bold.ttf"))
+        self.set_margins(SHEET_MARGIN, SHEET_MARGIN, SHEET_MARGIN)
+        self.set_auto_page_break(auto=True, margin=SHEET_MARGIN)
+        self.add_font("Serif", "", os.path.join(FONTS_DIR, "LiberationSerif-Regular.ttf"))
+        self.add_font("Serif", "B", os.path.join(FONTS_DIR, "LiberationSerif-Bold.ttf"))
 
-    def text_style(self, size=10, bold=False, grey=False):
-        self.set_font("DejaVu", "B" if bold else "", size)
+    def text_style(self, size=11, bold=False, grey=False):
+        self.set_font("Serif", "B" if bold else "", size)
         self.set_text_color(*(GREY if grey else BLACK))
 
-    def paragraph(self, text, size=10, bold=False, grey=False, indent=0):
+    def paragraph(self, text, size=11, bold=False, grey=False, indent=0):
         """A wrapped paragraph; indent moves it right (mm) from the left margin."""
         self.text_style(size, bold, grey)
         self.set_x(self.l_margin + indent)
-        self.multi_cell(0, size * 0.5, text, new_x="LMARGIN", new_y="NEXT")
+        self.multi_cell(0, size * SHEET_LINE_HEIGHT, text, new_x="LMARGIN", new_y="NEXT")
 
     def footer(self):
-        self.set_y(-10)
+        self.set_y(-9)
         self.text_style(8, grey=True)
         self.cell(0, 4, GENERATED_BY, align="C")
         self.set_x(self.l_margin)  # the same line again, for the page number on the right
@@ -563,34 +569,38 @@ def print_question(pdf, number, question, with_key):
     """One question: its prompt, the choices or a place to write, and (answer key) the answer."""
     kind = question["type"]
     points = f" ({question['points']} {'pt' if question['points'] == 1 else 'pts'})"
-    if pdf.will_page_break(30):
+    if pdf.will_page_break(20):
         pdf.add_page()  # keep a question together with its first lines when it is near the page end
     if kind == "matching":
         pdf.paragraph(f"{number}. {question['prompt']}{points}")
-        pdf.paragraph("Column A", bold=True, indent=6)
+        pdf.paragraph("Column A", bold=True, indent=5)
         for item_number, pair in enumerate(question["answer"], start=1):
-            pdf.paragraph(f"____ {item_number}. {pair['item']}", indent=6)
-        pdf.paragraph("Column B", bold=True, indent=6)
+            pdf.paragraph(f"____ {item_number}. {pair['item']}", indent=5)
+        pdf.paragraph("Column B", bold=True, indent=5)
         for letter, choice in zip(LETTERS, question["choices"]):
-            pdf.paragraph(f"{letter}. {choice}", indent=6)
+            pdf.paragraph(f"{letter}. {choice}", indent=5)
     else:
         blank_prefix = "_______ " if kind == "true_false" else ""
         pdf.paragraph(f"{number}. {blank_prefix}{question['prompt']}{points}")
         if kind == "multiple_choice":
-            for letter, choice in zip(LETTERS, question["choices"]):
-                pdf.paragraph(f"{letter}. {choice}", indent=8)
+            lines = [f"{letter}. {choice}" for letter, choice in zip(LETTERS, question["choices"])]
+            if len("      ".join(lines)) <= INLINE_CHOICES_MAX:
+                pdf.paragraph("      ".join(lines), indent=6)  # short choices share one line
+            else:
+                for line in lines:
+                    pdf.paragraph(line, indent=6)
         elif kind == "identification":
-            pdf.paragraph("Answer: ______________________________", indent=8)
+            pdf.paragraph("Answer: ______________________________", indent=6)
         elif kind == "short_answer":
             for _ in range(WRITE_LINES):
-                pdf.ln(8)  # room for handwriting
-                pdf.line(pdf.l_margin + 8, pdf.get_y(), pdf.w - pdf.r_margin, pdf.get_y())
-            pdf.ln(2)
+                pdf.ln(WRITE_LINE_GAP)  # room for handwriting
+                pdf.line(pdf.l_margin + 6, pdf.get_y(), pdf.w - pdf.r_margin, pdf.get_y())
+            pdf.ln(1)
     if with_key:
         answer = question_key_text(question)
         if answer:
-            pdf.paragraph(f"Answer: {answer}", size=9, bold=True, indent=8)
-    pdf.ln(2)
+            pdf.paragraph(f"Answer: {answer}", size=10, bold=True, indent=6)
+    pdf.ln(1)
 
 
 def sheet_pdf_bytes(activity, teacher, with_key):
@@ -599,16 +609,15 @@ def sheet_pdf_bytes(activity, teacher, with_key):
     pdf.set_title(activity["title"])
     pdf.add_page()
 
-    pdf.text_style(15, bold=True)
-    pdf.multi_cell(0, 8, activity["title"], new_x="LMARGIN", new_y="NEXT")
+    pdf.text_style(14, bold=True)
+    pdf.multi_cell(0, 6.5, activity["title"], new_x="LMARGIN", new_y="NEXT")
     total = sum(question["points"] for section in activity["sections"] for question in section["questions"])
-    pdf.paragraph("  ·  ".join(filter(None, [activity["subject"], teacher, f"{total} points"])), size=9, grey=True)
+    pdf.paragraph("  ·  ".join(filter(None, [activity["subject"], teacher, f"{total} points"])), size=10, grey=True)
     if with_key:
-        pdf.paragraph("ANSWER KEY (teacher's copy)", size=10, bold=True)
+        pdf.paragraph("ANSWER KEY (teacher's copy)", size=11, bold=True)
     else:
-        pdf.ln(2)
         pdf.paragraph(f"Name: {'_' * 36}   Date: {'_' * 16}   Score: ______ / {total}")
-    pdf.ln(3)
+    pdf.ln(2)
 
     for section in activity["sections"]:
         if section["title"]:
@@ -617,8 +626,8 @@ def sheet_pdf_bytes(activity, teacher, with_key):
             text = rich_to_text(section["description"]) if section["description_format"] == "rich" \
                 else section["description"]
             pdf.paragraph(text, grey=section["kind"] == "activity")
-        pdf.ln(2)
+        pdf.ln(1)
         for number, question in enumerate(section["questions"], start=1):
             print_question(pdf, number, question, with_key)
-        pdf.ln(2)
+        pdf.ln(1)
     return bytes(pdf.output())
