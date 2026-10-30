@@ -71,9 +71,9 @@ function subjectPicker(input) {
 
   const fill = (subjects) => {
     select.replaceChildren(
-      new Option("Choose a subject", ""),
+      new Option(t("Choose a subject"), ""),
       ...subjects.map((subject) => new Option(subject, subject)),
-      new Option("Other...", OTHER),
+      new Option(t("Other..."), OTHER),
     );
     sync();
   };
@@ -241,7 +241,7 @@ function showRecoveryCode(box, code, username) {
   buttons.append(copy, download);
   const warning = document.createElement("div");
   warning.className = "alert alert-warning small mt-3 mb-0";
-  warning.textContent = t("This code is shown only once and hides itself in {seconds} seconds. Save it now, for example in your phone's notes or a password manager. Anyone who has it can reset your password, so don't share it.",
+  warning.textContent = t(t("This code is shown only once and hides itself in {seconds} seconds. Save it now, for example in your phone's notes or a password manager. Anyone who has it can reset your password, so don't share it."),
     { seconds: RECOVERY_CODE_SHOW_SECONDS });
   // The countdown: a bar that empties, and the seconds left in words.
   const countdown = document.createElement("div");
@@ -409,8 +409,8 @@ function setPersonName(prefix, person) {
 
 // The message for a missing last or first name, or "" when both are there.
 function personNameProblem(values) {
-  if (!values.last_name) return "Last name is required.";
-  if (!values.first_name) return "First name is required.";
+  if (!values.last_name) return t("Last name is required.");
+  if (!values.first_name) return t("First name is required.");
   return "";
 }
 
@@ -434,11 +434,11 @@ if (copyDetailsButton) {
       `Password: ${document.getElementById("details-password").textContent}`;
     try {
       await navigator.clipboard.writeText(text);
-      copyDetailsButton.textContent = "Copied!";
+      copyDetailsButton.textContent = t("Copied!");
     } catch {
-      copyDetailsButton.textContent = "Can't copy";
+      copyDetailsButton.textContent = t("Can't copy");
     }
-    setTimeout(() => (copyDetailsButton.textContent = "Copy"), 1500);
+    setTimeout(() => (copyDetailsButton.textContent = t("Copy")), 1500);
   });
 }
 
@@ -459,7 +459,7 @@ async function downloadLoginDetails(students, button, errorId) {
     });
     if (!response) return;
     if (!response.ok) {
-      showError(errorId, (await response.json()).error || "Could not make the file.");
+      showError(errorId, (await response.json()).error || t("Could not make the file."));
       return;
     }
     const link = document.createElement("a");
@@ -470,7 +470,7 @@ async function downloadLoginDetails(students, button, errorId) {
     link.remove();
     URL.revokeObjectURL(link.href);
   } catch {
-    showError(errorId, "Cannot reach the server. Check your connection.");
+    showError(errorId, t("Cannot reach the server. Check your connection."));
   } finally {
     stopLoading();
   }
@@ -509,22 +509,21 @@ function showDescription(element, section) {
 // An assignment is Not started, Open or Closed. What the teacher's button does next, and how the status looks.
 // STATUS_ACTIONS.open -> { next: "closed", label: "Close", ... }
 const STATUS_ACTIONS = {
-  not_started: { next: "open", label: "Open", className: "btn-success", icon: "bi-door-open" },
-  open: { next: "closed", label: "Close", className: "btn-outline-secondary", icon: "bi-door-closed" },
-  closed: { next: "open", label: "Re-open", className: "btn-primary", icon: "bi-arrow-counterclockwise" },
+  not_started: { next: "open", label: t("Open"), className: "btn-success", icon: "bi-door-open" },
+  open: { next: "closed", label: t("Close"), className: "btn-outline-secondary", icon: "bi-door-closed" },
+  closed: { next: "open", label: t("Re-open"), className: "btn-primary", icon: "bi-arrow-counterclockwise" },
 };
 const STATUS_BADGES = {
-  not_started: ["text-bg-secondary", "Not started"],
-  open: ["text-bg-success", "Open"],
-  closed: ["text-bg-dark", "Closed"],
+  not_started: ["text-bg-secondary", t("Not started")],
+  open: ["text-bg-success", t("Open")],
+  closed: ["text-bg-dark", t("Closed")],
 };
 
 // Open, close or re-open an assignment. A close asks first: it submits everyone's unfinished work.
 // putStatus(12, "closed", "Grade 9 - Rizal") -> the response, or null when cancelled or signed out
 async function putStatus(assignmentId, next, name) {
   if (next === "closed" && !window.confirm(
-    `Close this activity for ${name}? Work not submitted yet is submitted as it is, and students can only ` +
-    "read the questions. You can re-open it later.")) return null;
+    t("Close this activity for {name}? Work not submitted yet is submitted as it is, and students can only read the questions. You can re-open it later.", { name }))) return null;
   return apiFetch(`/api/assignments/${assignmentId}/status`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },

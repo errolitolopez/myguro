@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Activities · MyGuro{% endblock %}
+{% block title %}{{ _("Activities") }} · MyGuro{% endblock %}
 
 {% block content %}
 {% include "_navbar.html" %}
@@ -8,9 +8,9 @@
 <main class="container py-3">
   <div id="activities-error" class="alert alert-danger d-none" role="alert"></div>
 
-  <div class="d-flex justify-content-between align-items-center mb-3">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
     <h1 class="h4 mb-0">{{ _("Activities") }}</h1>
-    <div class="d-flex gap-2">
+    <div class="d-flex flex-wrap gap-2">
       <button class="btn btn-outline-success text-nowrap bi bi-file-earmark-arrow-up" data-bs-toggle="modal" data-bs-target="#import-sheet-modal">
         {{ _("Import from Word") }}
       </button>

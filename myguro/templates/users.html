@@ -3,7 +3,7 @@
 {% set noun = role %}
 {% set nouns = {"teacher": "Teachers", "student": "Students", "supervisor": "Supervisors"}[role] %}
 
-{% block title %}{{ nouns }} · MyGuro{% endblock %}
+{% block title %}{{ _(nouns) }} · MyGuro{% endblock %}
 
 {% block content %}
 {% include "_navbar.html" %}

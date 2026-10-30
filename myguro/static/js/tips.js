@@ -8,16 +8,16 @@
 
   const TIPS = {
     teacher: [
-      "Tap Save in the activity editor often. It warns you if you leave with unsaved changes.",
-      "An activity you give to a class starts as Not started. Tap Open on the Check results card when students may answer. Close it to submit all work and keep it for review.",
-      "An activity students already submitted is locked. Use Make a copy in the editor to change it.",
-      "Scores stay hidden from students until you tap Release scores on the results page.",
-      "You can import a whole activity from Word on the Activities page.",
-      "A student answered on paper? Enter a paper score on the results page.",
-      "A student was absent? Exclude them from the assignment on the results page.",
-      "On the gradebook, swipe the table sideways to see every activity. Turning your phone sideways shows more.",
-      "Need a paper copy? Tap Print in the activity editor for a student copy or an answer key.",
-      "Deleted an assigned activity by mistake? Open Deleted on the Activities page and tap Restore.",
+      t("Tap Save in the activity editor often. It warns you if you leave with unsaved changes."),
+      t("An activity you give to a class starts as Not started. Tap Open on the Check results card when students may answer. Close it to submit all work and keep it for review."),
+      t("An activity students already submitted is locked. Use Make a copy in the editor to change it."),
+      t("Scores stay hidden from students until you tap Release scores on the results page."),
+      t("You can import a whole activity from Word on the Activities page."),
+      t("A student answered on paper? Enter a paper score on the results page."),
+      t("A student was absent? Exclude them from the assignment on the results page."),
+      t("On the gradebook, swipe the table sideways to see every activity. Turning your phone sideways shows more."),
+      t("Need a paper copy? Tap Print in the activity editor for a student copy or an answer key."),
+      t("Deleted an assigned activity by mistake? Open Deleted on the Activities page and tap Restore."),
     ],
     student: [
       t("Your answers save as you go. You can also tap Save progress."),

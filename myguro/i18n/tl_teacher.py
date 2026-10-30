@@ -409,4 +409,28 @@ TEACHER = {
     "Health break": "Health break",
     "Room {room}": "Room {room}",
     "Time": "Oras",
+    # --- Shared helpers (subject picker, status buttons, login details) and the teacher tips ---
+    "Can't copy": "Hindi makopya",
+    "Choose a subject": "Pumili ng subject",
+    "Other...": "Iba pa...",
+    "Close this activity for {name}? Work not submitted yet is submitted as it is, and students can only read the questions. You can re-open it later.":
+        "Isara ang activity na ito para sa {name}? Ang gawang hindi pa na-submit ay isusumite kung ano ito ngayon, at mababasa na lang ng mga estudyante ang mga tanong. Puwede mo itong buksan ulit mamaya.",
+    "Could not make the file.": "Hindi nagawa ang file.",
+    "First name is required.": "Kailangan ang pangalan.",
+    "Re-open": "Buksan ulit",
+    "A student answered on paper? Enter a paper score on the results page.": "May estudyanteng sumagot sa paper? Maglagay ng paper score sa results page.",
+    "A student was absent? Exclude them from the assignment on the results page.": "Absent ang isang estudyante? I-exclude siya sa assignment sa results page.",
+    "An activity students already submitted is locked. Use Make a copy in the editor to change it.": "Naka-lock ang activity na na-submit na ng mga estudyante. Gamitin ang Gumawa ng kopya sa editor para baguhin ito.",
+    "An activity you give to a class starts as Not started. Tap Open on the Check results card when students may answer. Close it to submit all work and keep it for review.":
+        "Nagsisimula bilang Not started ang activity na ibinibigay mo sa class. I-tap ang Open sa Check results card kapag puwede nang sumagot ang mga estudyante. Isara ito para ma-submit ang lahat ng gawa at maitabi para sa review.",
+    "Deleted an assigned activity by mistake? Open Deleted on the Activities page and tap Restore.": "Nakapag-delete ka ng naibigay na activity nang hindi sinasadya? Buksan ang Deleted sa Activities page at i-tap ang Restore.",
+    "Need a paper copy? Tap Print in the activity editor for a student copy or an answer key.": "Kailangan ng paper copy? I-tap ang Print sa activity editor para sa kopya ng estudyante o answer key.",
+    "On the gradebook, swipe the table sideways to see every activity. Turning your phone sideways shows more.": "Sa gradebook, i-swipe pahiga ang table para makita ang bawat activity. Mas marami ang makikita kapag pinahiga mo ang phone.",
+    "Scores stay hidden from students until you tap Release scores on the results page.": "Nakatago sa mga estudyante ang mga score hanggang i-tap mo ang Release scores sa results page.",
+    "Tap Save in the activity editor often. It warns you if you leave with unsaved changes.": "Madalas na i-tap ang Save sa activity editor. Binabalaan ka nito kung aalis ka na may hindi pa na-save na pagbabago.",
+    "You can import a whole activity from Word on the Activities page.": "Puwede kang mag-import ng buong activity mula sa Word sa Activities page.",
+    # --- Page titles ---
+    "Check answers": "Tingnan ang mga sagot",
+    "Edit activity": "I-edit ang activity",
+    "Results": "Mga resulta",
 }
