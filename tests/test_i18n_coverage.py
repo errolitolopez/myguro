@@ -32,6 +32,8 @@ TRANSLATED_FILES = [
     "myguro/static/js/activities.js", "myguro/static/js/activity-import.js",
     # Activity editor
     "myguro/templates/activity_editor.html", "myguro/static/js/activity-editor.js",
+    # Assign window, checking one student
+    "myguro/static/js/assign.js", "myguro/static/js/check.js", "myguro/templates/check.html",
 ]
 
 PLACEHOLDER = re.compile(r"\{(\w+)\}")

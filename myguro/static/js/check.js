@@ -64,10 +64,10 @@ async function loadOrder() {
       next: index >= 0 && index < list.length - 1 ? list[index + 1].id : null,
     };
     document.getElementById("position").textContent =
-      index >= 0 ? `Student ${index + 1} of ${list.length}` : "";
+      index >= 0 ? t("Student {number} of {count}", { number: index + 1, count: list.length }) : "";
     previousButton.disabled = neighbours.previous === null;
     nextButton.disabled = neighbours.next === null;
-    nextButton.title = neighbours.next === null ? "This is the last student of the list." : "";
+    nextButton.title = neighbours.next === null ? t("This is the last student of the list.") : "";
   } catch {
     // The page still works without the order: only the Previous / Next buttons stay off.
   }
@@ -99,7 +99,7 @@ nextButton.addEventListener("click", async (event) => {
 function answerText(question, value) {
   if (value === null || value === undefined) return null;
   if (question.type === "multiple_choice") return `${LETTERS[value]}. ${question.choices[value]}`;
-  if (question.type === "true_false") return value ? "True" : "False";
+  if (question.type === "true_false") return value ? t("True") : t("False");
   if (question.type === "fill_blank") return value.map((item, index) => `${index + 1}) ${item || "—"}`).join("   ");
   if (question.type === "matching") return matchText(question, value);
   return value;
@@ -115,7 +115,7 @@ function matchText(question, picks) {
 // The answer key, written out.
 function keyText(question) {
   if (question.type === "multiple_choice") return `${LETTERS[question.answer]}. ${question.choices[question.answer]}`;
-  if (question.type === "true_false") return question.answer ? "True" : "False";
+  if (question.type === "true_false") return question.answer ? t("True") : t("False");
   if (question.type === "identification") return question.answer.join(" / ");
   if (question.type === "fill_blank") {
     return question.answer.map((accepted, index) => `${index + 1}) ${accepted.join(" / ")}`).join("   ");
@@ -144,11 +144,11 @@ function questionReview(question, number, editable) {
     input.style.width = "4.5rem";
     input.value = question.earned === null ? "" : question.earned;
     input.placeholder = question.type === "short_answer" ? "?" : "0";
-    input.setAttribute("aria-label", `Points for question ${number}`);
+    input.setAttribute("aria-label", t("Points for question {number}", { number }));
     input.addEventListener("input", () => {
       changedPoints[question.id] = input.value === "" ? null : Number(input.value);
       savePointsButton.disabled = false;
-      document.getElementById("points-status").textContent = "Unsaved scores";
+      document.getElementById("points-status").textContent = t("Unsaved scores");
     });
     pointsBox.append(input, el("span", "small text-body-secondary", `/ ${question.points}`));
   } else {
@@ -159,7 +159,7 @@ function questionReview(question, number, editable) {
 
   const given = answerText(question, question.given);
   const answerRow = el("div", "mt-1 small");
-  answerRow.append(el("span", "text-body-secondary", "Answer: "));
+  answerRow.append(el("span", "text-body-secondary", t("Answer: ")));
   answerRow.append(given === null ? el("em", "text-body-secondary", "no answer")
     : el("span", question.type === "short_answer" ? "preserve-lines d-block border rounded p-2 mt-1" : "fw-semibold", given));
   if (question.is_correct === true) answerRow.append(" ", el("span", "badge text-bg-success", "✓"));
@@ -173,7 +173,7 @@ function questionReview(question, number, editable) {
   const key = keyText(question);
   if (key) {
     const keyRow = el("div", "small text-body-secondary mt-1");
-    keyRow.append(question.type === "short_answer" ? "Guide: " : "Key: ", el("span", "preserve-lines", key));
+    keyRow.append(question.type === "short_answer" ? t("Guide: ") : t("Key: "), el("span", "preserve-lines", key));
     item.append(keyRow);
   }
 
@@ -183,16 +183,16 @@ function questionReview(question, number, editable) {
     remark.rows = 2;
     remark.maxLength = 1000;
     remark.value = question.feedback || "";
-    remark.placeholder = "Remark for the student (optional)";
-    remark.setAttribute("aria-label", `Remark for question ${number}`);
+    remark.placeholder = t("Remark for the student (optional)");
+    remark.setAttribute("aria-label", t("Remark for question {number}", { number }));
     remark.addEventListener("input", () => {
       changedFeedback[question.id] = remark.value;
       savePointsButton.disabled = false;
-      document.getElementById("points-status").textContent = "Unsaved scores";
+      document.getElementById("points-status").textContent = t("Unsaved scores");
     });
     item.append(remark);
   } else if (question.feedback) {
-    item.append(el("div", "small mt-2 preserve-lines", `Remark: ${question.feedback}`));
+    item.append(el("div", "small mt-2 preserve-lines", t("Remark: {feedback}", { feedback: question.feedback })));
   }
   return item;
 }
@@ -213,7 +213,7 @@ function renderStudent(data) {
   // Attempt buttons: "Attempt 1", "Attempt 2 ✓ counts", "Attempt 3 (answering)"
   const buttons = document.getElementById("attempt-buttons");
   buttons.replaceChildren(...data.attempts.map((attempt) => {
-    const label = `Attempt ${attempt.attempt}` + (attempt.paper ? " · paper" : "") + (attempt.counts ? " · counts" : "")
+    const label = t("Attempt {attempt}", { attempt: attempt.attempt }) + (attempt.paper ? " · paper" : "") + (attempt.counts ? " · counts" : "")
       + (attempt.submitted_at ? (attempt.late ? " · late" : "") : " · answering");
     const button = el("button", `btn ${detail && detail.attempt === attempt.attempt ? "btn-toggle active" : "btn-toggle"}`, label);
     button.type = "button";
@@ -225,7 +225,7 @@ function renderStudent(data) {
 
   const area = document.getElementById("student-detail");
   if (!detail) {
-    area.replaceChildren(el("p", "text-body-secondary", "This student hasn't started yet."));
+    area.replaceChildren(el("p", "text-body-secondary", t("This student hasn't started yet.")));
     savePointsButton.classList.add("d-none");
     return;
   }
@@ -234,9 +234,9 @@ function renderStudent(data) {
     savePointsButton.classList.add("d-none");
     const card = el("div", "card card-body");
     card.append(el("p", "fw-semibold mb-1",
-      `Paper score: ${detail.score.total.earned} / ${detail.score.total.possible}` + (detail.late ? " · submitted late" : "")));
+      t("Paper score: {earned} / {possible}", { earned: detail.score.total.earned, possible: detail.score.total.possible }) + (detail.late ? " · submitted late" : "")));
     if (detail.note) card.append(el("p", "small text-body-secondary mb-2", detail.note));
-    const edit = el("button", "btn btn-sm btn-outline-secondary align-self-start", "Edit paper score");
+    const edit = el("button", "btn btn-sm btn-outline-secondary align-self-start", t("Edit paper score"));
     edit.type = "button";
     edit.addEventListener("click", () => showPaperForm(detail));
     card.append(edit);
@@ -250,26 +250,26 @@ function renderStudent(data) {
   const parts = [];
   // When this attempt was started and handed in (a close submits unfinished work: then no time spent)
   if (detail.started_at) {
-    const times = [`Started ${formatDateTime(detail.started_at)}`];
+    const times = [t("Started {time}", { time: formatDateTime(detail.started_at) })];
     if (detail.submitted_at) {
       times.push(detail.auto_submitted
-        ? `submitted ${formatDateTime(detail.submitted_at)} when the activity was closed`
-        : `submitted ${formatDateTime(detail.submitted_at)} (${durationText(detail.started_at, detail.submitted_at)})`);
+        ? t("submitted {time} when the activity was closed", { time: formatDateTime(detail.submitted_at) })
+        : t("submitted {time} ({duration})", { time: formatDateTime(detail.submitted_at), duration: durationText(detail.started_at, detail.submitted_at) }));
     }
     parts.push(el("p", "small text-body-secondary mb-2", times.join(" · ")));
   }
   if (detail.score) {
     const total = detail.score.total;
     parts.push(el("p", "fw-semibold",
-      `Score: ${total.earned} / ${total.possible - total.pending}` +
-      (total.pending ? ` (+${total.pending} points to check)` : "") + (detail.late ? " · submitted late" : "")));
+      t("Score: {earned} / {value}", { earned: total.earned, value: total.possible - total.pending }) +
+      (total.pending ? t(" (+{pending} points to check)", { pending: total.pending }) : "") + (detail.late ? " · submitted late" : "")));
   } else {
-    parts.push(el("p", "text-body-secondary", "Still answering — these are the answers saved so far."));
+    parts.push(el("p", "text-body-secondary", t("Still answering — these are the answers saved so far.")));
   }
   detail.sections.filter((section) => section.kind === "activity").forEach((section) => {
     const block = el("section", "mb-3");
     const header = el("div", "d-flex justify-content-between align-items-center");
-    header.append(el("h3", "h6 mb-2", section.title || "Activity"));
+    header.append(el("h3", "h6 mb-2", section.title || t("Activity")));
     const sectionScore = detail.score && detail.score.sections[section.id];
     if (sectionScore) {
       header.append(el("span", "badge text-bg-light border",
@@ -295,13 +295,13 @@ async function loadStudent(attempt) {
     }
     const data = await response.json();
     if (!response.ok) {
-      showError("student-error", data.error || "Could not load the answers.");
+      showError("student-error", data.error || t("Could not load the answers."));
       return false;
     }
     renderStudent(data);
     return true;
   } catch {
-    showError("student-error", "Cannot reach the server. Check your connection.");
+    showError("student-error", t("Cannot reach the server. Check your connection."));
     return false;
   }
 }
@@ -309,7 +309,7 @@ async function loadStudent(attempt) {
 // Another attempt of the same student: ask first when there are unsaved scores.
 function openAttempt(attempt) {
   if (hasUnsaved()) {
-    document.getElementById("points-status").textContent = "Save the scores first.";
+    document.getElementById("points-status").textContent = t("Save the scores first.");
     return;
   }
   loadStudent(attempt);
@@ -325,7 +325,7 @@ async function savePoints() {
   if (!hasUnsaved()) return true;
   hideError("student-error");
   savePointsButton.disabled = true;
-  document.getElementById("points-status").textContent = "Saving...";
+  document.getElementById("points-status").textContent = t("Saving...");
   try {
     const response = await apiFetch(`/api/submissions/${detail.id}/points`, {
       method: "PUT",
@@ -335,7 +335,7 @@ async function savePoints() {
     if (!response) return false;
     const data = await response.json();
     if (!response.ok) {
-      showError("student-error", data.error || "Could not save the scores.");
+      showError("student-error", data.error || t("Could not save the scores."));
       savePointsButton.disabled = false;
       document.getElementById("points-status").textContent = "";
       return false;
@@ -343,11 +343,11 @@ async function savePoints() {
     changedPoints = {};
     changedFeedback = {};
     await loadStudent(data.detail.attempt);
-    document.getElementById("points-status").textContent = "Scores saved";
+    document.getElementById("points-status").textContent = t("Scores saved");
     loadOrder();
     return true;
   } catch {
-    showError("student-error", "Cannot reach the server. Check your connection.");
+    showError("student-error", t("Cannot reach the server. Check your connection."));
     savePointsButton.disabled = false;
     return false;
   }
@@ -368,7 +368,7 @@ const paperForm = document.getElementById("paper-form");
 
 function showPaperForm(paper = null) {
   editingPaper = paper;
-  document.getElementById("paper-form-title").textContent = paper ? "Edit paper score" : "Paper score";
+  document.getElementById("paper-form-title").textContent = paper ? t("Edit paper score") : t("Paper score");
   document.getElementById("paper-score").max = possiblePoints;
   document.getElementById("paper-possible").textContent = `/ ${possiblePoints}`;
   document.getElementById("paper-score").value = paper ? paper.score.total.earned : "";
@@ -399,13 +399,13 @@ async function sendPaper(url, method, body) {
     if (!response) return;
     const data = await response.json();
     if (!response.ok) {
-      showError("student-error", data.error || "Could not save the paper score.");
+      showError("student-error", data.error || t("Could not save the paper score."));
       return;
     }
     renderStudent(data);
     loadOrder();
   } catch {
-    showError("student-error", "Cannot reach the server. Check your connection.");
+    showError("student-error", t("Cannot reach the server. Check your connection."));
   }
 }
 
@@ -413,7 +413,7 @@ paperForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const value = document.getElementById("paper-score").value;
   if (value === "") {
-    showError("student-error", "Type the total score from the paper.");
+    showError("student-error", t("Type the total score from the paper."));
     return;
   }
   const body = {
@@ -447,13 +447,13 @@ document.getElementById("reopen-yes").addEventListener("click", async (event) =>
     if (!response) return;
     const data = await response.json();
     if (!response.ok) {
-      showError("student-error", data.error || "Could not reopen.");
+      showError("student-error", data.error || t("Could not reopen."));
       return;
     }
     renderStudent(data);
     loadOrder();
   } catch {
-    showError("student-error", "Cannot reach the server. Check your connection.");
+    showError("student-error", t("Cannot reach the server. Check your connection."));
   } finally {
     stopLoading();
   }

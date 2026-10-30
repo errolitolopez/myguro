@@ -12,11 +12,11 @@
 {% include "_navbar.html" %}
 
 <main class="container py-3" data-assignment-id="{{ assignment_id }}" data-student-id="{{ student_id }}">
-  <a id="back-link" href="{{ url_for('results.page', assignment_id=assignment_id) }}" class="small">‹ Results</a>
+  <a id="back-link" href="{{ url_for('results.page', assignment_id=assignment_id) }}" class="small">{{ _("‹ Results") }}</a>
 
   <header class="d-flex flex-wrap justify-content-between align-items-start gap-2 mt-2 mb-3">
     <div>
-      <h1 class="h4 mb-1" id="student-title">Loading...</h1>
+      <h1 class="h4 mb-1" id="student-title">{{ _("Loading...") }}</h1>
       <div class="small text-body-secondary" id="student-subtitle"></div>
     </div>
     <div class="small text-body-secondary" id="position"></div>
@@ -25,43 +25,42 @@
   <div id="student-error" class="alert alert-danger py-2 d-none" role="alert"></div>
 
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-    <div id="attempt-buttons" class="btn-group btn-group-sm flex-wrap" role="group" aria-label="Attempts"></div>
+    <div id="attempt-buttons" class="btn-group btn-group-sm flex-wrap" role="group" aria-label="{{ _("Attempts") }}"></div>
     <div class="d-flex gap-2">
-      <button id="paper-button" type="button" class="btn btn-sm btn-outline-secondary bi bi-pencil">Enter paper score</button>
-      <button id="reopen-button" type="button" class="btn btn-sm btn-outline-primary d-none bi bi-arrow-counterclockwise">Give another try</button>
+      <button id="paper-button" type="button" class="btn btn-sm btn-outline-secondary bi bi-pencil">{{ _("Enter paper score") }}</button>
+      <button id="reopen-button" type="button" class="btn btn-sm btn-outline-primary d-none bi bi-arrow-counterclockwise">{{ _("Give another try") }}</button>
     </div>
   </div>
 
   <!-- Paper score: the student answered on paper; the teacher types the total -->
   <form id="paper-form" class="card card-body bg-body-tertiary mb-3 d-none" novalidate>
-    <div class="fw-semibold mb-2" id="paper-form-title">Paper score</div>
+    <div class="fw-semibold mb-2" id="paper-form-title">{{ _("Paper score") }}</div>
     <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-      <label for="paper-score" class="form-label mb-0">Total score</label>
+      <label for="paper-score" class="form-label mb-0">{{ _("Total score") }}</label>
       <input id="paper-score" type="number" min="0" class="form-control form-control-sm" style="width: 6rem;">
       <span class="small text-body-secondary" id="paper-possible"></span>
       <div class="form-check ms-2">
         <input id="paper-late" type="checkbox" class="form-check-input">
-        <label for="paper-late" class="form-check-label small">Submitted late</label>
+        <label for="paper-late" class="form-check-label small">{{ _("Submitted late") }}</label>
       </div>
     </div>
     <input id="paper-note" class="form-control form-control-sm mb-2" maxlength="200"
-           placeholder="Note (optional), e.g. Passed on paper Oct 14">
+           placeholder="{{ _("Note (optional), e.g. Passed on paper Oct 14") }}">
     <div class="d-flex justify-content-between gap-2">
-      <button id="paper-delete" type="button" class="btn btn-sm btn-link link-danger p-0 d-none bi bi-trash">Remove paper score</button>
+      <button id="paper-delete" type="button" class="btn btn-sm btn-link link-danger p-0 d-none bi bi-trash">{{ _("Remove paper score") }}</button>
       <div class="d-flex gap-2 ms-auto">
-        <button id="paper-cancel" type="button" class="btn btn-sm btn-outline-secondary bi bi-x-lg">Cancel</button>
-        <button id="paper-save" type="submit" class="btn btn-sm btn-success bi bi-check-lg">Save</button>
+        <button id="paper-cancel" type="button" class="btn btn-sm btn-outline-secondary bi bi-x-lg">{{ _("Cancel") }}</button>
+        <button id="paper-save" type="submit" class="btn btn-sm btn-success bi bi-check-lg">{{ _("Save") }}</button>
       </div>
     </div>
-    <div class="form-text">Saved as one of the student's submissions. The latest submission counts.</div>
+    <div class="form-text">{{ _("Saved as one of the student's submissions. The latest submission counts.") }}</div>
   </form>
 
   <div id="reopen-confirm" class="alert alert-info d-none">
-    <p class="mb-2">Let this student change their answers and submit again (even past the limit)?
-      Their current score counts until they submit.</p>
+    <p class="mb-2">{{ _("Let this student change their answers and submit again (even past the limit)? Their current score counts until they submit.") }}</p>
     <div class="d-flex gap-2 justify-content-end">
-      <button id="reopen-no" type="button" class="btn btn-sm btn-outline-secondary bi bi-x-lg">Cancel</button>
-      <button id="reopen-yes" type="button" class="btn btn-sm btn-primary bi bi-arrow-counterclockwise">Give another try</button>
+      <button id="reopen-no" type="button" class="btn btn-sm btn-outline-secondary bi bi-x-lg">{{ _("Cancel") }}</button>
+      <button id="reopen-yes" type="button" class="btn btn-sm btn-primary bi bi-arrow-counterclockwise">{{ _("Give another try") }}</button>
     </div>
   </div>
 
@@ -72,10 +71,10 @@
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
       <span id="points-status" class="small text-body-secondary" role="status"></span>
       <div class="d-flex flex-wrap gap-2">
-        <button id="previous-button" type="button" class="btn btn-outline-secondary bi bi-chevron-left" disabled>Previous</button>
-        <button id="save-points-button" type="button" class="btn btn-success bi bi-check-lg" disabled>Save scores</button>
+        <button id="previous-button" type="button" class="btn btn-outline-secondary bi bi-chevron-left" disabled>{{ _("Previous") }}</button>
+        <button id="save-points-button" type="button" class="btn btn-success bi bi-check-lg" disabled>{{ _("Save scores") }}</button>
         <button id="next-button" type="button" class="btn btn-primary" disabled>
-          Save &amp; next student <i class="bi bi-chevron-right"></i>
+          {{ _("Save & next student") }} <i class="bi bi-chevron-right"></i>
         </button>
       </div>
     </div>

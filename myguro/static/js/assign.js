@@ -7,7 +7,7 @@ let assignClasses = []; // the teacher's classes, each with .assignment (null = 
 let assignDirect = null; // the direct assignment (individual students, no class), or null
 let directDraft = null; // popup choices until Save: { due_date, students: Map of student id -> student }
 
-const DIRECT_TITLE = "Individual students";
+const DIRECT_TITLE = t("Individual students");
 const DIRECT_SEARCH_DELAY = 300; // ms after the last key
 
 const assignModal = bootstrap.Modal.getOrCreateInstance(document.getElementById("assign-modal"));
@@ -21,13 +21,13 @@ function checkItem(item) {
   const link = el("a", "flex-grow-1 text-decoration-none text-reset");
   link.href = `/results/${item.id}`;
   const details = [`${item.submitted} of ${item.students} submitted`];
-  if (item.average !== null) details.push(`average ${item.average}%`);
+  if (item.average !== null) details.push(t("average {average}%", { average: item.average }));
   if (item.due_date) details.push(`due ${formatDay(item.due_date)}`);
   link.append(el("div", "fw-semibold", item.class_name), el("div", "small text-body-secondary", details.join(" · ")));
   // Points still to check (short answers) stand out; "Checked" only once someone has submitted
-  const badge = !item.to_check && !item.submitted ? el("span", "badge text-bg-secondary", "No answers yet")
+  const badge = !item.to_check && !item.submitted ? el("span", "badge text-bg-secondary", t("No answers yet"))
     : el("span", item.to_check ? "badge text-bg-warning" : "badge text-bg-success",
-      item.to_check ? `${plural(item.to_check, "point")} to check` : "Checked");
+      item.to_check ? t("{points} to check", { points: plural(item.to_check, "point") }) : t("Checked"));
   badge.classList.add("d-none", "d-sm-inline");  // the buttons matter more on a small phone
 
   // Students answer only while this is open; Close submits everyone's work, Re-open lets them continue.
@@ -49,12 +49,12 @@ async function changeStatus(item, next, button) {
     const response = await putStatus(item.id, next, item.class_name);
     if (!response) return;
     if (!response.ok) {
-      showEditorError((await response.json()).error || "Could not save.");
+      showEditorError((await response.json()).error || t("Could not save."));
       return;
     }
     await loadCheckCard();
   } catch {
-    showEditorError("Cannot reach the server. Check your connection.");
+    showEditorError(t("Cannot reach the server. Check your connection."));
   } finally {
     stopLoading();
   }
@@ -68,13 +68,13 @@ async function loadCheckCard() {
     const response = await apiFetch(`/api/results/to-check?activity_id=${activityId}`);
     if (!response) return;
     if (!response.ok) {
-      list.replaceChildren(message("Could not load the results."));
+      list.replaceChildren(message(t("Could not load the results.")));
       return;
     }
     const items = (await response.json()).assignments;
-    list.replaceChildren(...(items.length ? items.map(checkItem) : [message("Not given to any class or student yet.")]));
+    list.replaceChildren(...(items.length ? items.map(checkItem) : [message(t("Not given to any class or student yet."))]));
   } catch {
-    list.replaceChildren(message("Cannot reach the server."));
+    list.replaceChildren(message(t("Cannot reach the server.")));
   }
 }
 
@@ -83,14 +83,14 @@ async function loadAssignments() {
     const response = await apiFetch(`/api/activities/${activityId}/assignments`);
     if (!response) return;
     if (!response.ok) {
-      showEditorError("Could not load the classes.");
+      showEditorError(t("Could not load the classes."));
       return;
     }
     const data = await response.json();
     assignClasses = data.classes;
     assignDirect = data.direct;
   } catch {
-    showEditorError("Cannot reach the server.");
+    showEditorError(t("Cannot reach the server."));
   }
 }
 
@@ -121,7 +121,7 @@ function assignItem(item) {
   // Due date
   const dueRow = el("div", "d-flex align-items-center gap-2 mb-2");
   const dueId = `due-${item.id}`;
-  const dueLabel = el("label", "small text-nowrap", "Due date");
+  const dueLabel = el("label", "small text-nowrap", t("Due date"));
   dueLabel.htmlFor = dueId;
   const due = el("input", "form-control form-control-sm");
   due.type = "date";
@@ -136,7 +136,7 @@ function assignItem(item) {
   const who = el("div", "mb-1");
   const studentList = el("div", "border rounded p-2 mt-1 overflow-auto");
   studentList.style.maxHeight = "14rem";
-  for (const [value, text] of [[true, "All students"], [false, "Selected students"]]) {
+  for (const [value, text] of [[true, t("All students")], [false, t("Selected students")]]) {
     const option = el("div", "form-check form-check-inline");
     const radio = el("input", "form-check-input");
     radio.type = "radio";
@@ -159,7 +159,7 @@ function assignItem(item) {
   // Student checklist (for "Selected students")
   studentList.classList.toggle("d-none", draft.everyone);
   if (item.students.length === 0) {
-    studentList.append(el("div", "small text-body-secondary", "No students in this class yet."));
+    studentList.append(el("div", "small text-body-secondary", t("No students in this class yet.")));
   }
   // "Select all" sits above the students and follows their ticks: checked when all are
   // ticked, dashed (indeterminate) when only some are.
@@ -185,7 +185,7 @@ function assignItem(item) {
     selectAll.type = "checkbox";
     selectAll.id = `pick-all-${item.id}`;
     selectAll.addEventListener("change", () => setAll(selectAll.checked));
-    const allLabel = el("label", "form-check-label small fw-semibold", "Select all");
+    const allLabel = el("label", "form-check-label small fw-semibold", t("Select all"));
     allLabel.htmlFor = selectAll.id;
     allRow.append(selectAll, allLabel);
     studentList.append(allRow);
@@ -224,11 +224,11 @@ function directBlock() {
   const box = el("div", "border rounded p-2");
   box.append(el("div", "fw-semibold", DIRECT_TITLE));
   box.append(el("div", "small text-body-secondary mb-2",
-    "Give it to students who are not in your classes. Leave it empty for none."));
+    t("Give it to students who are not in your classes. Leave it empty for none.")));
 
   // Due date
   const dueRow = el("div", "d-flex align-items-center gap-2 mb-2");
-  const dueLabel = el("label", "small text-nowrap", "Due date");
+  const dueLabel = el("label", "small text-nowrap", t("Due date"));
   dueLabel.htmlFor = "due-direct";
   const due = el("input", "form-control form-control-sm");
   due.type = "date";
@@ -247,7 +247,7 @@ function directBlock() {
 
   const drawChips = () => {
     if (directDraft.students.size === 0) {
-      chips.replaceChildren(el("span", "small text-body-secondary", "No students chosen yet."));
+      chips.replaceChildren(el("span", "small text-body-secondary", t("No students chosen yet.")));
       return;
     }
     chips.replaceChildren(...[...directDraft.students.values()].map((student) => {
@@ -255,7 +255,7 @@ function directBlock() {
       const remove = el("button", "btn-close btn-close-white");
       remove.type = "button";
       remove.style.fontSize = "0.6rem";
-      remove.setAttribute("aria-label", `Remove ${student.name}`);
+      remove.setAttribute("aria-label", t("Remove {name}", { name: student.name }));
       remove.addEventListener("click", () => {
         directDraft.students.delete(student.id);
         drawChips();
@@ -268,7 +268,7 @@ function directBlock() {
 
   const drawResults = () => {
     if (found.length === 0) {
-      results.replaceChildren(el("div", "small text-body-secondary", "No students found."));
+      results.replaceChildren(el("div", "small text-body-secondary", t("No students found.")));
       return;
     }
     results.replaceChildren(...found.map((student) => {
@@ -276,7 +276,7 @@ function directBlock() {
       const label = el("span", "", student.name);
       const place = gradeSection(student);
       if (place) label.append(el("span", "text-body-secondary", ` · ${place}`));
-      const add = el("button", "btn btn-sm btn-outline-primary py-0 bi bi-plus-lg", "Add");
+      const add = el("button", "btn btn-sm btn-outline-primary py-0 bi bi-plus-lg", t("Add"));
       add.type = "button";
       add.disabled = directDraft.students.has(student.id);
       add.addEventListener("click", () => {
@@ -293,11 +293,11 @@ function directBlock() {
   const searchRow = el("div", "d-flex flex-wrap gap-2 mb-2");
   const search = el("input", "form-control form-control-sm flex-grow-1");
   search.type = "search";
-  search.placeholder = "Search name, username or section";
-  search.setAttribute("aria-label", "Search students");
+  search.placeholder = t("Search name, username or section");
+  search.setAttribute("aria-label", t("Search students"));
   const place = el("select", "form-select form-select-sm w-auto");
-  place.setAttribute("aria-label", "Grade and section");
-  place.append(new Option("All grades and sections", ""));
+  place.setAttribute("aria-label", t("Grade and section"));
+  place.append(new Option(t("All grades and sections"), ""));
   searchRow.append(search, place);
 
   let timer = null;
@@ -314,7 +314,7 @@ function directBlock() {
       const response = await apiFetch(`/api/activities/${activityId}/student-search?${params}`);
       if (!response || ticket !== latest) return;
       if (!response.ok) {
-        results.replaceChildren(el("div", "small text-danger", "Could not search."));
+        results.replaceChildren(el("div", "small text-danger", t("Could not search.")));
         return;
       }
       const data = await response.json();
@@ -322,14 +322,14 @@ function directBlock() {
       // Fill the grade/section dropdown once, keeping the choice.
       if (place.options.length === 1) {
         data.sections.forEach((item) => place.append(
-          new Option(gradeSection(item) || "No grade or section", JSON.stringify([item.grade, item.section]))));
+          new Option(gradeSection(item) || t("No grade or section"), JSON.stringify([item.grade, item.section]))));
       }
       drawResults();
       if (data.more) {
-        results.append(el("div", "small text-body-secondary pt-1", "More students match: search to narrow."));
+        results.append(el("div", "small text-body-secondary pt-1", t("More students match: search to narrow.")));
       }
     } catch {
-      results.replaceChildren(el("div", "small text-danger", "Cannot reach the server."));
+      results.replaceChildren(el("div", "small text-danger", t("Cannot reach the server.")));
     }
   };
   search.addEventListener("input", () => {
@@ -340,14 +340,14 @@ function directBlock() {
 
   box.append(chips, searchRow, results);
   drawChips();
-  results.replaceChildren(el("div", "small text-body-secondary", "Loading..."));
+  results.replaceChildren(el("div", "small text-body-secondary", t("Loading...")));
   runSearch();
   return box;
 }
 
 document.getElementById("assign-button").addEventListener("click", async () => {
   if (unsaved) {
-    showEditorError("Save your changes before assigning.");
+    showEditorError(t("Save your changes before assigning."));
     return;
   }
   hideError("assign-error");
@@ -366,8 +366,8 @@ document.getElementById("assign-button").addEventListener("click", async () => {
     students: new Map((assignDirect ? assignDirect.students : []).map((student) => [student.id, student])),
   };
   if (assignClasses.length === 0) {
-    const empty = el("p", "text-body-secondary mb-0", "You have no classes yet. ");
-    const link = el("a", "", "Create a class");
+    const empty = el("p", "text-body-secondary mb-0", t("You have no classes yet. "));
+    const link = el("a", "", t("Create a class"));
     link.href = "/classes";
     empty.append(link, " first, or choose individual students below.");
     assignList.replaceChildren(empty);
@@ -405,7 +405,7 @@ assignSaveButton.addEventListener("click", async () => {
     if (!response) return;
     const data = await response.json();
     if (!response.ok) {
-      showError("assign-error", data.error || "Could not save.");
+      showError("assign-error", data.error || t("Could not save."));
       return;
     }
     assignClasses = data.classes;
@@ -413,7 +413,7 @@ assignSaveButton.addEventListener("click", async () => {
     loadCheckCard();
     assignModal.hide();
   } catch {
-    showError("assign-error", "Cannot reach the server. Check your connection.");
+    showError("assign-error", t("Cannot reach the server. Check your connection."));
   } finally {
     stopLoading();
   }
