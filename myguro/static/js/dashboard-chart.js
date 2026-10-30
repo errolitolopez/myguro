@@ -94,7 +94,7 @@ async function loadGradebook() {
     gradebook = data;
     showClassView();
   } catch (error) {
-    showError("chart-error", error.message || "Could not load the chart.");
+    showError("chart-error", error.message || t("Could not load the chart."));
   }
 }
 
@@ -118,20 +118,20 @@ async function startTeacher() {
     }));
     await loadGradebook();
   } catch (error) {
-    showError("chart-error", error.message || "Could not load the chart.");
+    showError("chart-error", error.message || t("Could not load the chart."));
   }
 }
 
 // ---- Student ----
 
 // subjectOf(activity) -> the subject, or "No subject" for an older sheet that has none
-const subjectOf = (activity) => activity.subject || "No subject";
+const subjectOf = (activity) => activity.subject || t("No subject");
 
 // The bars of the subjects: average score or number done.
 const showSubjectView = () => {
   const done = activitiesData.filter((activity) => activity.done);
   if (done.length === 0) {
-    showEmpty("Your scores will show here after you submit an activity.");
+    showEmpty(t("Your scores will show here after you submit an activity."));
     return;
   }
   showEmpty(null);
@@ -147,15 +147,15 @@ const showSubjectView = () => {
     };
   });
   document.getElementById("chart-sub").textContent = average
-    ? "Your average score in each subject (only scores your teacher has released). Tap a bar to see its activities."
-    : "Activities you finished in each subject. Tap a bar to see them.";
+    ? t("Your average score in each subject (only scores your teacher has released). Tap a bar to see its activities.")
+    : t("Activities you finished in each subject. Tap a bar to see them.");
   drawChart({
     labels: subjects.map((subject) => shorten(subject, 12)),
     values: stats.map((stat) => (average ? stat.average || 0 : stat.count)),
     titles: subjects,
     details: stats.map((stat) => average
-      ? (stat.average === null ? "No released scores yet" : `Average ${stat.average}%`)
-      : `${plural(stat.count, "activity", "activities")} done`),
+      ? (stat.average === null ? t("No released scores yet") : t("Average {percent}%", { percent: stat.average }))
+      : (stat.count === 1 ? t("1 activity done") : t("{count} activities done", { count: stat.count }))),
     max: average ? 100 : undefined,
     suffix: average ? "%" : "",
     onBarClick: (index) => { shownSubject = subjects[index]; showStudentData(); },
@@ -166,14 +166,14 @@ const showSubjectView = () => {
 const showActivityView = () => {
   const items = activitiesData.filter((activity) => activity.done && subjectOf(activity) === shownSubject);
   showEmpty(null);
-  document.getElementById("chart-sub").textContent = `${shownSubject}: your score on each activity. Tap a bar to open it.`;
+  document.getElementById("chart-sub").textContent = t("{subject}: your score on each activity. Tap a bar to open it.", { subject: shownSubject });
   drawChart({
     labels: items.map((activity) => shorten(activity.title, 12)),
     values: items.map((activity) => percentOf(activity.score) || 0),
     titles: items.map((activity) => activity.title),
     details: items.map((activity) => {
       const percent = percentOf(activity.score);
-      return percent === null ? "Score not released yet" : `${activity.score.earned} / ${activity.score.possible - activity.score.pending} (${percent}%)`;
+      return percent === null ? t("Score not released yet") : `${activity.score.earned} / ${activity.score.possible - activity.score.pending} (${percent}%)`;
     }),
     max: 100,
     suffix: "%",
@@ -186,7 +186,7 @@ function showStudentData() {
   backButton.classList.toggle("d-none", !inSubject);
   // The "Done" count means nothing for a single subject's activities, so the choice hides there.
   document.getElementById("chart-metrics").classList.toggle("d-none", inSubject);
-  document.getElementById("chart-title").textContent = inSubject ? ` ${shownSubject}` : " My scores";
+  document.getElementById("chart-title").textContent = inSubject ? ` ${shownSubject}` : ` ${t("My scores")}`;
   if (inSubject) showActivityView(); else showSubjectView();
 }
 
@@ -200,7 +200,7 @@ async function startStudent() {
     activitiesData = data.activities;
     showStudentData();
   } catch (error) {
-    showError("chart-error", error.message || "Could not load the chart.");
+    showError("chart-error", error.message || t("Could not load the chart."));
   }
 }
 
@@ -219,7 +219,7 @@ new MutationObserver(() => { if (lastView) drawChart(lastView); })
   .observe(document.documentElement, { attributes: true, attributeFilter: ["data-bs-theme", "data-myguro-theme"] });
 
 if (typeof Chart === "undefined") {
-  showError("chart-error", "The chart could not load. Check your internet connection.");
+  showError("chart-error", t("The chart could not load. Check your internet connection."));
 } else if (role === "teacher") {
   startTeacher();
 } else {

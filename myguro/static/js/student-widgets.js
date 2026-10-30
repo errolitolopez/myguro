@@ -15,9 +15,10 @@
   // dueText("2026-11-02", "2026-10-30") -> "Due in 3 days"; "Due today"; "Overdue by 2 days"
   const dueText = (dueDay, today) => {
     const days = dayNumber(dueDay) - dayNumber(today);
-    if (days === 0) return "Due today";
-    if (days === 1) return "Due tomorrow";
-    return days > 0 ? `Due in ${days} days` : `Overdue by ${plural(-days, "day")}`;
+    if (days === 0) return t("Due today");
+    if (days === 1) return t("Due tomorrow");
+    if (days > 0) return t("Due in {days} days", { days });
+    return days === -1 ? t("Overdue by 1 day") : t("Overdue by {days} days", { days: -days });
   };
 
   // percentOf({earned: 8, possible: 12, pending: 2}) -> 80 (of the points checked so far), or null
@@ -44,15 +45,15 @@
       const details = document.createElement("div");
       details.className = "small text-body-secondary";
       details.textContent = [activity.subject, activity.status === "in_progress"
-        ? `${activity.answered} of ${activity.questions} answered` : ""].filter(Boolean).join(" · ");
+        ? t("{answered} of {questions} answered", { answered: activity.answered, questions: activity.questions }) : ""].filter(Boolean).join(" · ");
       text.append(title, details);
       const badge = document.createElement("span");
       const overdue = activity.due_date && activity.due_date < today;
       badge.className = `badge text-nowrap ${overdue ? "text-bg-danger" : activity.due_date === today ? "text-bg-warning" : "text-bg-light border"}`;
-      badge.textContent = activity.due_date ? dueText(activity.due_date, today) : "No due date";
+      badge.textContent = activity.due_date ? dueText(activity.due_date, today) : t("No due date");
       const go = document.createElement("span");
       go.className = "btn btn-sm btn-success";
-      go.textContent = activity.status === "in_progress" ? "Continue" : "Start";
+      go.textContent = activity.status === "in_progress" ? t("Continue") : t("Start");
       const right = document.createElement("div");
       right.className = "d-flex flex-column align-items-end gap-1";
       right.append(badge, go);
@@ -62,7 +63,7 @@
     if (rows.length === 0) {
       const empty = document.createElement("div");
       empty.className = "list-group-item text-body-secondary";
-      empty.textContent = "You're all caught up. Nothing to do right now.";
+      empty.textContent = t("You're all caught up. Nothing to do right now.");
       rows.push(empty);
     }
     document.getElementById("next-due-list").replaceChildren(...rows);
@@ -73,11 +74,13 @@
     const done = activities.filter((activity) => activity.done).length;
     document.getElementById("progress-ring").replaceChildren(scoreRing(done, activities.length));
     document.getElementById("progress-text").textContent = activities.length === 0
-      ? "Nothing given yet" : `${done} of ${plural(activities.length, "activity", "activities")} done`;
+      ? t("Nothing given yet")
+      : activities.length === 1 ? t("{done} of 1 activity done", { done })
+      : t("{done} of {total} activities done", { done, total: activities.length });
     const weekAgo = Date.now() - 7 * 86400000;
     const thisWeek = activities.filter((activity) => activity.submitted_at
       && new Date(`${activity.submitted_at.replace(" ", "T")}Z`).getTime() >= weekAgo).length;
-    document.getElementById("progress-week").textContent = thisWeek ? `${thisWeek} submitted this week` : "";
+    document.getElementById("progress-week").textContent = thisWeek ? t("{count} submitted this week", { count: thisWeek }) : "";
   };
 
   // A small line through the scores, drawn as SVG so it follows the text colour and needs no library.
@@ -90,7 +93,7 @@
     svg.setAttribute("width", "100%");
     svg.setAttribute("height", "100%");
     svg.setAttribute("role", "img");
-    svg.setAttribute("aria-label", `Your last scores: ${percents.map((percent) => `${percent}%`).join(", ")}`);
+    svg.setAttribute("aria-label", t("Your last scores: {scores}", { scores: percents.map((percent) => `${percent}%`).join(", ") }));
     const step = percents.length > 1 ? (width - 8) / (percents.length - 1) : 0;
     const points = percents.map((percent, index) => [4 + index * step, 36 - (percent / 100) * 32]);
     const line = document.createElementNS(SVG, "polyline");
@@ -123,15 +126,16 @@
     const line = document.getElementById("trend-line");
     if (scored.length === 0) {
       latest.textContent = "–";
-      change.textContent = "Scores show here once your teacher releases them.";
+      change.textContent = t("Scores show here once your teacher releases them.");
       line.replaceChildren();
       return;
     }
     latest.textContent = `${scored[scored.length - 1]}%`;
     const difference = scored.length > 1 ? scored[scored.length - 1] - scored[scored.length - 2] : null;
-    change.textContent = difference === null ? "Your latest score"
-      : difference === 0 ? "Same as the one before"
-      : `${difference > 0 ? "Up" : "Down"} ${Math.abs(difference)}% from the one before`;
+    change.textContent = difference === null ? t("Your latest score")
+      : difference === 0 ? t("Same as the one before")
+      : difference > 0 ? t("Up {n}% from the one before", { n: difference })
+      : t("Down {n}% from the one before", { n: -difference });
     line.replaceChildren(scored.length > 1 ? trendLine(scored) : "");
   };
 
@@ -142,7 +146,7 @@
       if (!response) return;
       const data = await response.json();
       if (!response.ok) {
-        showError("next-due-error", data.error || "Could not load your activities.");
+        showError("next-due-error", data.error || t("Could not load your activities."));
         document.getElementById("next-due-list").replaceChildren();
         return;
       }
@@ -151,7 +155,7 @@
       showTrend(data.activities);
     } catch {
       document.getElementById("next-due-list").replaceChildren();
-      showError("next-due-error", "Cannot reach the server. Check your connection.");
+      showError("next-due-error", t("Cannot reach the server. Check your connection."));
     }
   }
 
@@ -164,7 +168,7 @@
     event.preventDefault();
     confetti();
     const label = todoCard.querySelector(".small");
-    label.textContent = "All done, great job!";
-    setTimeout(() => (label.textContent = "To do"), 3000);
+    label.textContent = t("All done, great job!");
+    setTimeout(() => (label.textContent = t("To do")), 3000);
   });
 })();

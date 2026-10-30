@@ -90,7 +90,7 @@
           </div>
         </div>
         <div class="modal-footer border-0 pt-0 justify-content-center">
-          <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Maybe later</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">{{ _("Maybe later") }}</button>
         </div>
       </div>
     </div>
@@ -120,15 +120,14 @@
         </div>
         <div class="modal-body pt-2 text-center">
           <div class="modal-badge" aria-hidden="true"><i class="bi bi-star-fill"></i></div>
-          <h2 class="h4 mb-1" id="feedback-modal-title">How is MyGuro for you?</h2>
+          <h2 class="h4 mb-1" id="feedback-modal-title">{{ _("How is MyGuro for you?") }}</h2>
           <p class="text-body-secondary mb-0">
-            Tell us what you think. It takes less than a minute: a few questions, each rated 1 to 5 stars.
-            Your answers are private.
+            {{ _("Tell us what you think. It takes less than a minute: a few questions, each rated 1 to 5 stars. Your answers are private.") }}
           </p>
         </div>
         <div class="modal-footer border-0 pt-0 justify-content-center">
-          <a href="{{ url_for('feedback.page') }}" class="btn btn-success bi bi-star">Give feedback</a>
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Maybe later</button>
+          <a href="{{ url_for('feedback.page') }}" class="btn btn-success bi bi-star">{{ _("Give feedback") }}</a>
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ _("Maybe later") }}</button>
         </div>
       </div>
     </div>

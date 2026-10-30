@@ -20,11 +20,11 @@
       "Deleted an assigned activity by mistake? Open Deleted on the Activities page and tap Restore.",
     ],
     student: [
-      "Your answers save as you go. You can also tap Save progress.",
-      "You can submit only once per try, so check for unanswered questions first.",
-      "Some activities let you try again after you submit.",
-      "Your score can stay hidden until your teacher releases it.",
-      "Late work is still accepted. It is marked Late.",
+      t("Your answers save as you go. You can also tap Save progress."),
+      t("You can submit only once per try, so check for unanswered questions first."),
+      t("Some activities let you try again after you submit."),
+      t("Your score can stay hidden until your teacher releases it."),
+      t("Late work is still accepted. It is marked Late."),
     ],
   };
 
@@ -81,13 +81,13 @@
     text.textContent = tips[state.index % tips.length];
 
     const strong = document.createElement("strong");
-    strong.textContent = "Tip: ";
+    strong.textContent = t("Tip: ");
 
     const stop = document.createElement("button");
     stop.type = "button";
     // Under the tip on its own line: beside it, on a phone, it wraps badly next to the close button.
     stop.className = "btn btn-link btn-sm p-0 d-block mt-1";
-    stop.textContent = "Don't show tips";
+    stop.textContent = t("Don't show tips");
     stop.addEventListener("click", () => {
       try {
         localStorage.setItem(OFF_KEY, "1");
@@ -100,7 +100,7 @@
     const close = document.createElement("button");
     close.type = "button";
     close.className = "btn-close";
-    close.setAttribute("aria-label", "Close tip");
+    close.setAttribute("aria-label", t("Close tip"));
     close.addEventListener("click", () => {
       save({ ...state, closed: true });
       box.classList.add("d-none");

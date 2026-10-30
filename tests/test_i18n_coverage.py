@@ -15,6 +15,9 @@ TRANSLATED_FILES = [
     "myguro/static/js/login.js", "myguro/static/js/forgot-password.js", "myguro/static/js/change-password.js",
     "myguro/static/js/recovery-code.js", "myguro/static/js/password-toggle.js", "myguro/static/js/palette.js",
     "myguro/static/js/common.js",
+    # Student dashboard
+    "myguro/templates/dashboard.html", "myguro/templates/_dashboard_chart.html",
+    "myguro/static/js/student-widgets.js", "myguro/static/js/dashboard-chart.js", "myguro/static/js/tips.js",
 ]
 
 PLACEHOLDER = re.compile(r"\{(\w+)\}")
