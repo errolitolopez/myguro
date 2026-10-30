@@ -183,6 +183,18 @@
     bootstrap.Modal.getOrCreateInstance(document.getElementById("feedback-modal")).show();
   </script>
   {% endif %}
+  {% if request.endpoint != "student.answer_page" %}
+  <!-- A short notice about the cookies MyGuro sets. They are only the ones the app needs, so this only tells; it
+       asks for nothing. cookie-notice.js shows it until the person taps OK (remembered in this browser). Not on the
+       answer page, so nobody is interrupted mid-activity. -->
+  <div id="cookie-notice" class="cookie-notice card d-none" role="region" aria-label="{{ _("Cookie notice") }}">
+    <div class="card-body d-flex flex-column flex-sm-row align-items-sm-center gap-2 py-2">
+      <div class="small flex-grow-1 bi bi-info-circle"> {{ _("MyGuro uses cookies to improve your experience.") }}</div>
+      <button id="cookie-ok" type="button" class="btn btn-success btn-sm text-nowrap">{{ _("OK, got it") }}</button>
+    </div>
+  </div>
+  <script src="{{ url_for('static', filename='js/cookie-notice.js') }}"></script>
+  {% endif %}
   {% if CHATBOT %}<script src="{{ url_for('static', filename='js/chat.js') }}"></script>{% endif %}
   {% block scripts %}{% endblock %}
 </body>

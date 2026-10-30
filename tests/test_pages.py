@@ -132,3 +132,16 @@ def test_the_navbar_has_a_quick_theme_menu_before_the_search_button(teacher):
     for theme in ("auto", "light", "dark", "darcula", "solarized", "neon"):
         assert f'data-theme-choice="{theme}"' in page
     assert page.index('aria-label="Change theme"') < page.index('id="palette-button"')
+
+
+def test_the_cookie_notice_is_on_every_page_but_the_answer_page(teacher):
+    # The notice only tells about the two cookies the app needs; it asks for nothing.
+    from app import app as flask_app
+
+    assert 'id="cookie-notice"' in flask_app.test_client().get("/login").get_data(as_text=True)
+    assert 'id="cookie-notice"' in teacher.get("/dashboard").get_data(as_text=True)
+    class_id, students = make_class(teacher)
+    activity_id, _ = make_activity(teacher)
+    assignment_id = assign(teacher, activity_id, class_id)
+    student = login(students[0]["username"])
+    assert 'id="cookie-notice"' not in student.get(f"/my-activities/{assignment_id}").get_data(as_text=True)

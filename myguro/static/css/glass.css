@@ -550,6 +550,24 @@ html[data-tab-bar="top"] .web-tabs { display: block !important; }
   }
 }
 
+/* The cookie notice: a small card at the bottom, solid so page text does not show through, above the phone's tab bar. */
+.cookie-notice {
+  --bs-card-bg: var(--glass-solid);
+  position: fixed;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: max(0.75rem, env(safe-area-inset-bottom));
+  max-width: 40rem;
+  margin: 0 auto;
+  z-index: 1040; /* over the page and the chat bubble, under Bootstrap's modals (1055) */
+  box-shadow: var(--glass-shadow);
+}
+@media (max-width: 767.98px) {
+  html:not([data-tab-bar="top"]) body:has(.tabbar) .cookie-notice {
+    bottom: calc(3rem + 0.75rem + env(safe-area-inset-bottom));
+  }
+}
+
 /* Slim scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb { background-color: var(--scroll-thumb); border-radius: 8px; }

@@ -308,6 +308,10 @@ TAGLISH = {
     "Line spacing": "Pagitan ng linya",
     "Relaxed": "Maluwag",
     "Go to MyGuro": "Pumunta sa MyGuro",
+    "Cookie notice": "Abiso tungkol sa cookies",
+    "MyGuro uses cookies to improve your experience.":
+        "Gumagamit ang MyGuro ng cookies para mapabuti ang karanasan mo.",
+    "OK, got it": "OK, sige",
 }
 
 _PAGES = dict(TAGLISH)  # the student and shared sentences, before the other files are added
