@@ -81,11 +81,15 @@
         <canvas id="log-chart" role="img" aria-label="Bar chart of log entries"></canvas>
       </div>
       <!-- The same numbers as a table for screen readers (the tooltip is never the only way to a value). -->
-      <table class="visually-hidden">
-        <caption>Log entries counted</caption>
-        <thead><tr><th scope="col">Name</th><th scope="col">Entries</th></tr></thead>
-        <tbody id="log-chart-table"></tbody>
-      </table>
+      <!-- A table ignores the 1px width and clip of visually-hidden and pushes the page wider than a phone,
+           so the class is on a div around it. -->
+      <div class="visually-hidden">
+        <table>
+          <caption>Log entries counted</caption>
+          <thead><tr><th scope="col">Name</th><th scope="col">Entries</th></tr></thead>
+          <tbody id="log-chart-table"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 

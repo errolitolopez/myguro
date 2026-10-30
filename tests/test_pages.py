@@ -118,3 +118,10 @@ def test_the_error_page_has_a_plain_fallback(app, monkeypatch):
     with app.test_request_context("/somewhere"):
         body, status = errors.error_response(500, "x", "y", "z")
     assert status == 500 and "Something went wrong" in body and "Traceback" not in body
+
+
+def test_hidden_chart_tables_do_not_widen_the_page():
+    # A table ignores the 1px width and clip of "visually-hidden", so it pushed the page wider than a phone.
+    # The class must be on a div around the table.
+    for path in ("myguro/templates/_dashboard_chart.html", "myguro/templates/log.html"):
+        assert '<table class="visually-hidden"' not in open(path).read()
