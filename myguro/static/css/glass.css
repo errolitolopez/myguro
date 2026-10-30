@@ -814,6 +814,33 @@ html[data-text-align="justify"] :is([data-reading], .reading-sample) :is(div, p,
   hyphens: auto;
 }
 
+/* Student answer page: easier to read and to tap on a phone. Everything is scoped to the reading page. */
+[data-reading] { --bs-body-line-height: 1.7; }
+[data-reading] .answer-list { padding-left: 1.5rem; }
+[data-reading] .answer-list > li::marker { font-weight: 600; color: var(--bs-secondary-color); }
+/* A thin line between questions; the last one has none. */
+[data-reading] .answer-question { padding-bottom: 1.25rem; margin-bottom: 1.25rem !important; /* beats .mb-4 */ border-bottom: 1px solid var(--bs-border-color-translucent); }
+[data-reading] .answer-question:last-child { border-bottom: 0; padding-bottom: 0; margin-bottom: 0 !important; }
+/* Choices are rows you can tap anywhere, with a clear highlight on the one picked. */
+[data-reading] .answer-choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin: 0 0 0.5rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+[data-reading] .answer-choice .form-check-input { float: none; flex: none; margin: 0.2rem 0 0; }
+[data-reading] .answer-choice .form-check-label { flex: 1; cursor: pointer; }
+[data-reading] .answer-choice:has(:checked) { border-color: var(--accent-to); background-color: var(--bs-secondary-bg); }
+[data-reading] .answer-choice:has(:focus-visible) { outline: 2px solid var(--accent-to); outline-offset: 2px; }
+[data-reading] .answer-choice:has(:disabled) .form-check-label { cursor: default; }
+/* 1rem inputs: a phone browser zooms the page in when a box is smaller than that. */
+[data-reading] textarea.form-control, [data-reading] input.form-control, [data-reading] .form-select { font-size: 1rem; }
+[data-reading] .blank-input { min-width: 7em; }
+
 /* Star rating on the feedback page: five big buttons in a row, easy to tap on a phone. */
 .star-rating { display: flex; gap: 0.25rem; }
 .star {

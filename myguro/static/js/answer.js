@@ -146,9 +146,10 @@ window.addEventListener("beforeunload", (event) => {
 // --- Questions -----------------------------------------------------------------------
 
 function choiceQuestion(question, options, locked) {
-  const group = el("div", "mt-2");
+  const group = el("div", "answer-choices mt-2");
   options.forEach(([value, label], index) => {
-    const row = el("div", "form-check");
+    // The whole row is the tap target (answer-choice in glass.css), not just the small round button.
+    const row = el("div", "form-check answer-choice");
     const radio = el("input", "form-check-input");
     radio.type = "radio";
     radio.name = `q-${question.id}`;
@@ -165,12 +166,12 @@ function choiceQuestion(question, options, locked) {
 }
 
 function questionItem(question, locked) {
-  const item = el("li", "mb-4");
-  const points = el("span", "small text-body-secondary", ` (${plural(question.points, "pt", "pts")})`);
+  const item = el("li", "answer-question mb-4");
+  const points = el("span", "badge rounded-pill bg-body-secondary text-body-secondary fw-normal ms-1", plural(question.points, "pt", "pts"));
 
   if (question.type === "fill_blank") {
     // The sentence with a text box for each ___.
-    const sentence = el("div", "lh-lg");
+    const sentence = el("div", "fw-medium lh-lg");
     const value = Array.isArray(answers[question.id]) ? [...answers[question.id]]
       : Array(question.blanks).fill("");
     question.prompt.split(BLANK).forEach((part, index) => {
@@ -193,7 +194,7 @@ function questionItem(question, locked) {
     return item;
   }
 
-  const prompt = el("div", "preserve-lines", question.prompt);
+  const prompt = el("div", "preserve-lines fw-medium", question.prompt);
   prompt.append(points);
   item.append(prompt);
 
@@ -272,11 +273,12 @@ function sectionBlock(section, locked) {
   }
   body.append(header);
   if (section.description) {
-    const text = el("div", "preserve-lines fst-italic");
+    // Directions stand out from the questions with a side line, easier to read than slanted text.
+    const text = el("div", "preserve-lines border-start border-3 ps-3 py-1 my-3 text-body-secondary");
     showDescription(text, section);
     body.append(text);
   }
-  const list = el("ol", "mb-0 ps-3");
+  const list = el("ol", "answer-list mb-0 ps-3");
   section.questions.forEach((question) => {
     const item = questionItem(question, locked);
     // The teacher's remark on this question (sent only after the scores are released).
