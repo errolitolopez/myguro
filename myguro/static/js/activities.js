@@ -40,8 +40,9 @@ function activityItem(activity) {
   title.textContent = activity.title;
   const details = document.createElement("div");
   details.className = "small text-body-secondary";
+  // Inside a subject the header already says it; a search across every subject still needs it on each row.
   details.textContent = [
-    activity.subject,
+    chosenSubject() === null ? activity.subject : "",
     plural(activity.sections, "section"),
     plural(activity.questions, "question"),
     t("edited {date}", { date: formatDate(activity.updated_at) }),
