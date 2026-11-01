@@ -4,9 +4,9 @@
    person asked for less transparency, panels are plain and opaque. */
 
 :root {
-  /* Bootstrap reads its text font from this variable. The system fonts are the fallback while Inter loads. */
+  /* Bootstrap reads its text font from this variable. The system fonts are the fallback while Plus Jakarta Sans loads. */
   --bs-body-font-size: 0.9375rem;
-  --bs-body-font-family: Inter, Roboto, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --bs-body-font-family: "Plus Jakarta Sans", Inter, Roboto, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --glass-bg: rgba(255, 255, 255, 0.6);
   --glass-bg-strong: rgba(255, 255, 255, 0.88);
   --glass-border: rgba(226, 232, 240, 0.8);
