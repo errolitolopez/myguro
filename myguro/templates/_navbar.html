@@ -4,6 +4,7 @@
                  ("accounts.users_page", ("accounts.users_page", "accounts.teachers_page", "accounts.students_page",
                                           "accounts.supervisors_page"), _("Users"), "bi-people"),
                  ("schedule.admin_page", ("schedule.admin_page",), _("Schedule"), "bi-calendar-week"),
+                 ("calendar.page", ("calendar.page",), _("Calendar"), "bi-calendar3"),
                  ("log.page", ("log.page",), _("Log"), "bi-clipboard-data")] %}
 {% elif user.role == "supervisor" %}
   {% set tabs = [("log.page", ("log.page",), _("Log"), "bi-clipboard-data")] %}
@@ -11,10 +12,12 @@
   {% set tabs = [("dashboard.page", ("dashboard.page",), _("Dashboard"), "bi-house"),
                  ("activities.list_page", ("activities.list_page", "activities.editor_page"), _("Activities"), "bi-journal-text"),
                  ("classes.list_page", ("classes.list_page", "classes.detail_page"), _("Classes"), "bi-mortarboard"),
-                 ("schedule.my_page", ("schedule.my_page",), _("Schedule"), "bi-calendar-week")] %}
+                 ("schedule.my_page", ("schedule.my_page",), _("Schedule"), "bi-calendar-week"),
+                 ("calendar.page", ("calendar.page",), _("Calendar"), "bi-calendar3")] %}
 {% else %}
   {% set tabs = [("dashboard.page", ("dashboard.page",), _("Dashboard"), "bi-house"),
-                 ("student.activities_page", ("student.activities_page", "student.answer_page"), _("Activities"), "bi-journal-text")] %}
+                 ("student.activities_page", ("student.activities_page", "student.answer_page"), _("Activities"), "bi-journal-text"),
+                 ("calendar.page", ("calendar.page",), _("Calendar"), "bi-calendar3")] %}
 {% endif %}
 
 <nav class="navbar bg-success">

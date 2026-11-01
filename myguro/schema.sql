@@ -307,3 +307,13 @@ CREATE TABLE IF NOT EXISTS chat_messages (
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS chat_messages_user ON chat_messages (user_id, id);
+
+-- Holidays the admin adds on top of the national ones (domain/holidays.py works those out from the year):
+-- a town's founding day, Eid'l Fitr, a day the school declares. One day can hold more than one.
+CREATE TABLE IF NOT EXISTS local_holidays (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    day TEXT NOT NULL,
+    name TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS local_holidays_day ON local_holidays (day);

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _("Calendar") }} · MyGuro{% endblock %}
+
+{% block content %}
+{% include "_navbar.html" %}
+
+<main class="container py-3" id="calendar-page" data-admin="{{ 'yes' if user.role == 'admin' else 'no' }}">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h4 mb-0">{{ _("Calendar") }}</h1>
+    {% if user.role == "admin" %}
+    <button id="add-holiday-button" type="button" class="btn btn-success bi bi-plus-lg"> {{ _("Add local holiday") }}</button>
+    {% endif %}
+  </div>
+
+  <div id="calendar-error" class="alert alert-danger d-none" role="alert"></div>
+
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <button id="previous-month" type="button" class="btn btn-outline-secondary bi bi-chevron-left" aria-label="{{ _("Previous month") }}"></button>
+    <div class="text-center">
+      <h2 id="month-title" class="h5 mb-0"></h2>
+      <button id="today-button" type="button" class="btn btn-link btn-sm p-0">{{ _("Today") }}</button>
+    </div>
+    <button id="next-month" type="button" class="btn btn-outline-secondary bi bi-chevron-right" aria-label="{{ _("Next month") }}"></button>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-bordered bg-body text-center mb-2" style="table-layout: fixed;">
+      <thead><tr id="weekday-row"></tr></thead>
+      <tbody id="month-body"></tbody>
+    </table>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2 small mb-3" aria-label="{{ _("Legend") }}">
+    <span class="badge text-bg-danger">{{ _("Regular holiday") }}</span>
+    <span class="badge text-bg-warning">{{ _("Special non-working day") }}</span>
+    <span class="badge text-bg-info">{{ _("Special working day") }}</span>
+    <span class="badge text-bg-success">{{ _("Local holiday") }}</span>
+  </div>
+
+  <h2 class="h6">{{ _("Holidays this month") }}</h2>
+  <ul id="holiday-list" class="list-group mb-3"></ul>
+  <p class="small text-body-secondary">
+    {{ _("National holidays follow the yearly proclamations. Days announced each year, such as Eid'l Fitr and Eid'l Adha, are added by the admin as local holidays.") }}
+  </p>
+</main>
+
+{% if user.role == "admin" %}
+<div class="modal fade" id="holiday-modal" tabindex="-1" aria-labelledby="holiday-modal-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form id="holiday-form" class="modal-content" novalidate>
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="holiday-modal-title">{{ _("Add local holiday") }}</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ _("Close") }}"></button>
+      </div>
+      <div class="modal-body">
+        <div id="holiday-form-error" class="alert alert-danger d-none" role="alert"></div>
+        <div class="mb-3">
+          <label for="holiday-day" class="form-label">{{ _("Date") }}</label>
+          <input id="holiday-day" class="form-control" type="date" required>
+        </div>
+        <div>
+          <label for="holiday-name" class="form-label">{{ _("Name") }}</label>
+          <input id="holiday-name" class="form-control" type="text" maxlength="100" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary bi bi-x-lg" data-bs-dismiss="modal"> {{ _("Cancel") }}</button>
+        <button id="holiday-save" type="submit" class="btn btn-success bi bi-check-lg"> {{ _("Save") }}</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
+{% endblock %}
