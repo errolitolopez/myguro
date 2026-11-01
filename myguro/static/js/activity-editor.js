@@ -256,7 +256,16 @@ window.addEventListener("beforeunload", (event) => {
 
 let sheetLocked = false; // a student submitted: only title, subject and tries can change
 
-titleInput.addEventListener("input", () => { if (!sheetLocked) markUnsaved(); });
+// The title is a box that grows, so a long title wraps instead of being cut off. It is still one line of
+// text: Enter does nothing, and pasted line breaks become spaces.
+titleInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") event.preventDefault();
+});
+titleInput.addEventListener("input", () => {
+  titleInput.value = titleInput.value.replace(/\s*\n\s*/g, " ");
+  fitHeight(titleInput);
+  if (!sheetLocked) markUnsaved();
+});
 subjectInput.addEventListener("input", () => { if (!sheetLocked) markUnsaved(); });
 
 // The error box is at the top of the page and Save is at the bottom, so scroll to it.
@@ -634,8 +643,8 @@ function questionCard(section, question, index) {
 
 function sectionCard(section, index) {
   const activity = section.kind === "activity";
-  // A coloured side line tells text sections (green) from activity sections (blue) when scrolling a long sheet.
-  const card = el("div", `card border-start border-4 ${activity ? "border-primary" : "border-success"}`);
+  // A plain card: the coloured side line was removed. The header still says Text or Activity, in colour.
+  const card = el("div", "card");
 
   const header = el("div", "card-header d-flex justify-content-between align-items-center py-2");
   const label = el("span", "fw-semibold text-body-secondary", t("Section {number} · ", { number: index + 1 }));
@@ -697,6 +706,7 @@ document.getElementById("add-activity-button").addEventListener("click", () => a
 function showActivity(activity) {
   document.title = t("{title} · MyGuro", { title: activity.title });
   titleInput.value = activity.title;
+  fitHeight(titleInput); // after the text is in, so the box is as tall as the title
   subjectInput.value = activity.subject;
   subjectPick.sync();
   sections = activity.sections.map(fromServer);

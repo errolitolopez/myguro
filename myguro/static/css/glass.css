@@ -835,8 +835,11 @@ main { animation: page-in 0.35s ease both; }
 
 /* Reading pages (the student's answer page: answering and reviewing): no myguro logo and no drifting
    colour behind the text, so nothing pulls the eye while reading. The plain page gradient stays. */
+/* The activity editor (data-plain-background) gets the same plain page, without the reading text rules. */
 body:has([data-reading])::before,
-body:has([data-reading])::after { display: none; }
+body:has([data-reading])::after,
+body:has([data-plain-background])::before,
+body:has([data-plain-background])::after { display: none; }
 
 /* Reading settings (reading.js sets the attributes on <html>, kept per browser). Text size scales
    everything that uses rem (text, buttons, spacing), so the page keeps its proportions. */

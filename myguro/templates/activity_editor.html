@@ -16,7 +16,7 @@
 {% block content %}
 {% include "_navbar.html" %}
 
-<main class="container py-3 pb-5" style="max-width: 860px;" data-activity-id="{{ activity_id }}">
+<main class="container py-3 pb-5" style="max-width: 860px;" data-plain-background data-activity-id="{{ activity_id }}">
   <a href="{{ url_for('activities.list_page') }}" class="small">‹ {{ _("My activities") }}</a>
 
   <div id="editor-error" class="alert alert-danger mt-2 d-none" role="alert"></div>
@@ -30,7 +30,7 @@
       <div class="d-flex justify-content-between align-items-center mb-2">
         <label for="activity-title" class="form-label mb-0 fw-semibold">{{ _("Title") }}</label>
       </div>
-      <input id="activity-title" class="form-control form-control-lg mb-3" maxlength="150" autocomplete="off">
+      <textarea id="activity-title" class="form-control form-control-lg mb-3" rows="1" maxlength="150" autocomplete="off" style="resize: none;"></textarea>
       <label for="activity-subject" class="form-label">{{ _("Subject") }}</label>
       <input id="activity-subject" class="form-control" maxlength="100" required autocomplete="off" placeholder="Science">
       <div class="d-flex align-items-center flex-wrap gap-2 mt-3">
