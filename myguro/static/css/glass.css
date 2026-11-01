@@ -1177,3 +1177,23 @@ body:has(.position-fixed.bottom-0), body:has(.sticky-bottom) { --chat-lift: 3.75
   .chat-bubble.chat-thinking .bot-eye { animation: none; }
   .chat-bubble .bot-eye { translate: none; transition: none; }
 }
+
+/* Matching question: a chip per Column B choice and a slot per Column A row. Only the border and ring change
+   for "picked" and "over", so it works in every theme through the same variables. */
+.match-chip, .match-slot {
+  border: 1px solid var(--glass-border);
+  border-radius: 0.75rem;
+  background: transparent;
+  color: inherit;
+  padding: 0.4rem 0.8rem;
+  text-align: left;
+}
+.match-chip { cursor: grab; }
+.match-chip.is-used { opacity: 0.55; }
+.match-slot { min-height: 2.5rem; border-style: dashed; color: var(--bs-secondary-color); }
+.match-slot.is-filled { border-style: solid; color: inherit; font-weight: 600; }
+.match-chip.is-picked, .match-slot.is-picked, .match-row.is-over .match-slot {
+  border-color: var(--accent-to);
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--accent-to) 30%, transparent);
+}
+@media (min-width: 768px) { .match-slot { min-width: 14rem; } }

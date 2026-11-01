@@ -210,6 +210,11 @@ TAGLISH = {
     "False": "False",
     "Blank {number}": "Blank {number}",
     "Answer for item {number}": "Sagot para sa item {number}",
+    "Tap to choose": "I-tap para pumili",
+    "Choices": "Mga choices",
+    "Clear item {number}": "Burahin ang sagot sa item {number}",
+    "Tap a choice, then tap the item it matches. You can also drag a choice onto an item.":
+        "I-tap ang isang choice, tapos i-tap ang item na kapares nito. Puwede mo ring i-drag ang choice sa item.",
     "Write your answer here...": "Isulat dito ang sagot mo...",
     "Your answer": "Ang sagot mo",
     "Teacher's remark: ": "Remark ng teacher: ",

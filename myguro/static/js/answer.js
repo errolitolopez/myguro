@@ -215,33 +215,7 @@ function questionItem(question, locked) {
   item.append(prompt);
 
   if (question.type === "matching") {
-    // Column B listed with letters; each Column A item has a box to pick its letter.
-    const value = Array.isArray(answers[question.id]) ? [...answers[question.id]]
-      : Array(question.items.length).fill(null);
-    const columns = el("div", "row g-3 mt-1");
-    const columnA = el("div", "col-12 col-md-7");
-    question.items.forEach((text, index) => {
-      const row = el("div", "d-flex align-items-center gap-2 mb-2");
-      const select = el("select", "form-select form-select-sm flex-grow-0");
-      select.style.width = "5rem";
-      select.disabled = locked;
-      select.setAttribute("aria-label", t("Answer for item {number}", { number: index + 1 }));
-      select.append(new Option("—", ""));
-      question.choices.forEach((_, choiceIndex) =>
-        select.append(new Option(LETTERS[choiceIndex], String(choiceIndex))));
-      select.value = value[index] === null || value[index] === undefined ? "" : String(value[index]);
-      select.addEventListener("change", () => {
-        value[index] = select.value === "" ? null : Number(select.value);
-        setAnswer(question.id, [...value]);
-      });
-      row.append(select, el("span", "preserve-lines", `${index + 1}. ${text}`));
-      columnA.append(row);
-    });
-    const columnB = el("div", "col-12 col-md-5");
-    question.choices.forEach((choice, index) =>
-      columnB.append(el("div", "mb-1", `${LETTERS[index]}. ${choice}`)));
-    columns.append(columnA, columnB);
-    item.append(columns);
+    item.append(matchingQuestion(question, locked));
   } else if (question.type === "multiple_choice") {
     item.append(choiceQuestion(question,
       question.choices.map((choice, index) => [index, `${LETTERS[index]}. ${choice}`]), locked));
@@ -274,6 +248,97 @@ function questionItem(question, locked) {
     item.append(input);
   }
   return item;
+}
+
+// A matching question: Column B as chips, Column A as rows with a slot. Tap a chip and then the row it
+// matches (or the row first), or drag a chip onto a row. The answer is the same list of choice numbers as ever,
+// so saving, checking and the teacher's view did not change.
+// matchingQuestion(question, false) -> the whole question body; matchingQuestion(question, true) is read-only
+function matchingQuestion(question, locked) {
+  const value = Array.isArray(answers[question.id]) ? [...answers[question.id]]
+    : Array(question.items.length).fill(null);
+  let pickedChoice = null; // a chip the student tapped and has not placed yet
+  let pickedItem = null;   // a row the student tapped and has not filled yet
+  const box = el("div", "mt-2");
+
+  // Put choice `choice` in row `index`, or empty the row when choice is null.
+  const place = (index, choice) => {
+    value[index] = choice;
+    pickedChoice = null;
+    pickedItem = null;
+    setAnswer(question.id, [...value]);
+    draw();
+  };
+  const tapChoice = (choice) => {
+    if (pickedItem !== null) return place(pickedItem, choice);
+    pickedChoice = pickedChoice === choice ? null : choice;
+    draw();
+  };
+  const tapItem = (index) => {
+    if (pickedChoice !== null) return place(index, pickedChoice);
+    pickedItem = pickedItem === index ? null : index;
+    draw();
+  };
+
+  function draw() {
+    const bank = el("div", "d-flex flex-wrap gap-2 mb-3");
+    question.choices.forEach((choice, index) => {
+      const used = value.includes(index);
+      const chip = el(locked ? "span" : "button",
+        `match-chip${used ? " is-used" : ""}${pickedChoice === index ? " is-picked" : ""}`,
+        `${LETTERS[index]}. ${choice}`);
+      if (!locked) {
+        chip.type = "button";
+        chip.draggable = true;
+        chip.setAttribute("aria-pressed", String(pickedChoice === index));
+        chip.addEventListener("click", () => tapChoice(index));
+        chip.addEventListener("dragstart", (event) => event.dataTransfer.setData("text/plain", String(index)));
+      }
+      bank.append(chip);
+    });
+
+    const rows = question.items.map((text, index) => {
+      const row = el("div", "match-row d-flex flex-column flex-md-row align-items-md-center gap-2 mb-2");
+      const label = el("span", "preserve-lines flex-grow-1", `${index + 1}. ${text}`);
+      const filled = value[index] !== null && value[index] !== undefined;
+      const slot = el(locked ? "span" : "button",
+        `match-slot${filled ? " is-filled" : ""}${pickedItem === index ? " is-picked" : ""}`,
+        filled ? `${LETTERS[value[index]]}. ${question.choices[value[index]]}` : t("Tap to choose"));
+      row.append(label, slot);
+      if (!locked) {
+        slot.type = "button";
+        slot.setAttribute("aria-label", t("Answer for item {number}", { number: index + 1 }));
+        slot.addEventListener("click", () => tapItem(index));
+        if (filled) {
+          const clear = el("button", "btn btn-sm btn-outline-secondary bi bi-x-lg");
+          clear.type = "button";
+          clear.setAttribute("aria-label", t("Clear item {number}", { number: index + 1 }));
+          clear.addEventListener("click", () => place(index, null));
+          row.append(clear);
+        }
+        row.addEventListener("dragover", (event) => {
+          event.preventDefault(); // without this the browser refuses the drop
+          row.classList.add("is-over");
+        });
+        row.addEventListener("dragleave", () => row.classList.remove("is-over"));
+        row.addEventListener("drop", (event) => {
+          event.preventDefault();
+          const choice = Number(event.dataTransfer.getData("text/plain"));
+          if (Number.isInteger(choice) && choice >= 0 && choice < question.choices.length) place(index, choice);
+        });
+      }
+      return row;
+    });
+
+    const parts = [];
+    if (!locked) parts.push(el("div", "text-body-secondary small mb-2",
+      t("Tap a choice, then tap the item it matches. You can also drag a choice onto an item.")));
+    parts.push(el("div", "fw-semibold small mb-1", t("Choices")), bank, ...rows);
+    box.replaceChildren(...parts);
+  }
+
+  draw();
+  return box;
 }
 
 // --- The sheet ------------------------------------------------------------------------
