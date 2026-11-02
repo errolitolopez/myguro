@@ -35,13 +35,19 @@ def page(year=None, month=None, day=None):
             abort(404)
         if not MIN_YEAR <= year <= MAX_YEAR:
             abort(404)
-    return render_template("calendar.html", user=current_user())
+    return render_template("calendar.html", user=current_user(), min_year=MIN_YEAR, max_year=MAX_YEAR)
 
 
 @bp.get("/api/calendar")
 @role_required_api("admin", "teacher", "student")
 def api_year():
     return jsonify(service().year(request.args.get("year", school_today().year)))
+
+
+@bp.get("/api/calendar/search")
+@role_required_api("admin", "teacher", "student")
+def api_search():
+    return jsonify(service().search(request.args.get("q", "")))
 
 
 @bp.post("/api/calendar/holidays")

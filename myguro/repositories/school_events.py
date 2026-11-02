@@ -1,5 +1,6 @@
 """School events on the calendar."""
 
+from myguro.domain.text import like_pattern
 from myguro.repositories.base import Repository
 
 
@@ -10,6 +11,10 @@ class SchoolEventRepository(Repository):
         """The events with at least one day in a calendar year, by first day."""
         return self.all("SELECT * FROM school_events WHERE start_day <= ? AND end_day >= ? ORDER BY start_day, end_day, id",
                         (f"{year:04d}-12-31", f"{year:04d}-01-01"))
+
+    def search(self, text):
+        """The events with this text in their name, in any year."""
+        return self.all("SELECT * FROM school_events WHERE name LIKE ? ESCAPE '\\' ORDER BY start_day, id", (like_pattern(text),))
 
     def get(self, event_id):
         return self.one("SELECT * FROM school_events WHERE id = ?", (event_id,))

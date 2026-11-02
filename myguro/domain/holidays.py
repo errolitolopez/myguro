@@ -8,6 +8,8 @@ MAX_NAME_LENGTH = 100
 MAX_DESCRIPTION_LENGTH = 300  # a few sentences; the admin's note for a local holiday
 MIN_YEAR = 2000  # the calendar page and the API stay inside a sane range
 MAX_YEAR = 2100
+MIN_SEARCH_LENGTH = 2  # one letter matches nearly everything
+MAX_SEARCH_RESULTS = 30  # enough to choose from on a phone
 
 # What kind of day it is. "local" holidays are the ones the admin adds.
 REGULAR = "regular"  # regular holiday: no classes

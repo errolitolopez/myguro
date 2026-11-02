@@ -1,3 +1,4 @@
+from myguro.config import school_today
 from myguro.domain import holidays as rules
 from myguro.errors import NotFoundError, ValidationError
 from myguro.repositories import HolidayRepository, SchoolEventRepository
@@ -24,6 +25,23 @@ class HolidayService(Service):
         events = [{"id": row["id"], "start_day": row["start_day"], "end_day": row["end_day"], "name": row["name"]}
                   for row in self.events.in_year(year)]
         return {"year": year, "holidays": items, "events": events}
+
+    def search(self, query):
+        """Holidays and school events with this text in their name, what is still to come first. National holidays
+        repeat every year and are worked out, so only this year's and next year's are searched."""
+        text = " ".join(query.split())
+        if len(text) < rules.MIN_SEARCH_LENGTH:
+            return {"results": []}
+        today = school_today()
+        results = [{"start_day": holiday["day"], "end_day": holiday["day"], "name": holiday["name"], "kind": holiday["kind"]}
+                   for year in (today.year, today.year + 1) for holiday in rules.national_holidays(year)
+                   if text.lower() in holiday["name"].lower()]
+        results += [{"start_day": row["day"], "end_day": row["day"], "name": row["name"], "kind": rules.LOCAL}
+                    for row in self.holidays.search(text)]
+        results += [{"start_day": row["start_day"], "end_day": row["end_day"], "name": row["name"], "kind": "event"}
+                    for row in self.events.search(text)]
+        results.sort(key=lambda item: (item["end_day"] < today.isoformat(), item["start_day"]))
+        return {"results": results[:rules.MAX_SEARCH_RESULTS]}
 
     def add(self, data):
         """Admin: add a local holiday. Returns its id."""

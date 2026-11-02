@@ -60,6 +60,21 @@ async function loadYear(year) {
   }
 }
 
+// parseDay("2026-09-15") -> that day as a Date, read as a calendar day so time zones cannot shift it
+function parseDay(iso) {
+  const [year, month, day] = iso.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function monthOptions() {
+  document.getElementById("jump-month").replaceChildren(...Array.from({ length: 12 }, (unused, index) => {
+    const option = document.createElement("option");
+    option.value = index;
+    option.textContent = new Date(2026, index, 1).toLocaleDateString(undefined, { month: "long" });
+    return option;
+  }));
+}
+
 function weekdayHeaders() {
   const names = [t("Sun"), t("Mon"), t("Tue"), t("Wed"), t("Thu"), t("Fri"), t("Sat")];
   document.getElementById("weekday-row").replaceChildren(...names.map((name, index) => {
@@ -120,6 +135,8 @@ function dayCell(day, isToday) {
 function drawMonth() {
   const title = new Date(shownYear, shownMonth, 1).toLocaleDateString(undefined, { month: "long", year: "numeric" });
   document.getElementById("month-title").textContent = title;
+  document.getElementById("jump-month").value = shownMonth;
+  document.getElementById("jump-year").value = shownYear;
   const firstWeekday = new Date(shownYear, shownMonth, 1).getDay();
   const daysInMonth = new Date(shownYear, shownMonth + 1, 0).getDate();
   const todayIso = isoDay(today.getFullYear(), today.getMonth(), today.getDate());
@@ -251,6 +268,7 @@ function drawList() {
 function drawDay() {
   document.getElementById("day-title").textContent =
     shownDate.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+  document.getElementById("jump-day").value = dayIso(shownDate);
   const holidays = holidaysOn(dayIso(shownDate));
   drawEvents("day-events", eventsBetween(dayIso(shownDate), dayIso(shownDate)), t("No school events on this day."));
   if (!holidays.length) {
@@ -336,7 +354,10 @@ document.getElementById("today-button").addEventListener("click", () => {
   show();
 });
 
-document.getElementById("view-month").addEventListener("click", () => setView("month"));
+// Already on Month: stay on the month shown, not the month of the last day opened.
+document.getElementById("view-month").addEventListener("click", () => {
+  if (view !== "month") setView("month");
+});
 document.getElementById("view-day").addEventListener("click", () => {
   // From the month grid: today when this is the month of today, else the 1st of the month on screen.
   const thisMonth = shownYear === today.getFullYear() && shownMonth === today.getMonth();
@@ -344,6 +365,102 @@ document.getElementById("view-day").addEventListener("click", () => {
   setView("day");
 });
 window.addEventListener("popstate", () => setView(readAddress()));
+
+// ---- Going to a far date ----
+
+document.getElementById("jump-month").addEventListener("change", (changed) => {
+  shownMonth = Number(changed.target.value);
+  show();
+});
+document.getElementById("jump-year").addEventListener("change", (changed) => {
+  shownYear = Number(changed.target.value);
+  show();
+});
+document.getElementById("jump-day").addEventListener("change", (changed) => {
+  // Empty while the person is still typing the date, or when they cleared it.
+  if (!changed.target.value || !changed.target.checkValidity()) return;
+  shownDate = parseDay(changed.target.value);
+  setView("day");
+});
+
+// ---- Searching holidays and school events ----
+
+const searchInput = document.getElementById("calendar-search");
+const searchResults = document.getElementById("search-results");
+const SEARCH_DELAY_MS = 300; // wait for a pause in the typing, not one request per letter
+const MIN_SEARCH_LENGTH = 2; // the same as the server
+let searchTimer = null;
+let searchNumber = 0; // a slow answer must not replace the answer to newer typing
+
+function hideSearch() {
+  searchResults.classList.add("d-none");
+  searchResults.replaceChildren();
+}
+
+function resultItem(result) {
+  const item = document.createElement("button");
+  item.type = "button";
+  item.className = "list-group-item list-group-item-action d-flex flex-wrap align-items-center gap-2";
+  const text = document.createElement("div");
+  text.className = "flex-grow-1 text-start";
+  text.style.minWidth = "0";
+  const name = document.createElement("div");
+  name.className = "fw-semibold";
+  name.textContent = result.name;
+  const details = document.createElement("div");
+  details.className = "small text-body-secondary";
+  details.textContent = eventDays(result);
+  text.append(name, details);
+  const isEvent = result.kind === "event";
+  const badge = document.createElement("span");
+  badge.className = `badge ${isEvent ? "text-bg-primary" : KIND_BADGE[result.kind]}`;
+  badge.textContent = isEvent ? t("School event") : t(KIND_LABEL[result.kind]);
+  item.append(text, badge);
+  item.addEventListener("click", () => {
+    searchInput.value = "";
+    hideSearch();
+    shownDate = parseDay(result.start_day);
+    setView("day");
+  });
+  return item;
+}
+
+async function runSearch(text, number) {
+  try {
+    const response = await apiFetch(`/api/calendar/search?q=${encodeURIComponent(text)}`);
+    if (!response || number !== searchNumber) return;
+    if (!response.ok) {
+      showError("calendar-error", t("Could not load the calendar."));
+      return;
+    }
+    const { results } = await response.json();
+    if (number !== searchNumber) return;
+    hideError("calendar-error");
+    if (results.length) {
+      searchResults.replaceChildren(...results.map(resultItem));
+    } else {
+      const empty = document.createElement("li");
+      empty.className = "list-group-item text-body-secondary";
+      empty.textContent = t("Nothing found.");
+      searchResults.replaceChildren(empty);
+    }
+    searchResults.classList.remove("d-none");
+  } catch {
+    showError("calendar-error", t("Cannot reach the server. Check your connection."));
+  }
+}
+
+searchInput.addEventListener("input", () => {
+  clearTimeout(searchTimer);
+  searchNumber += 1;
+  const text = searchInput.value.trim();
+  if (text.length < MIN_SEARCH_LENGTH) {
+    hideSearch();
+    return;
+  }
+  const number = searchNumber;
+  searchTimer = setTimeout(() => runSearch(text, number), SEARCH_DELAY_MS);
+});
 
 const copyLinkButton = document.getElementById("copy-link");
 copyLinkButton.addEventListener("click", async () => {
@@ -486,4 +603,5 @@ if (isAdmin) {
 }
 
 weekdayHeaders();
+monthOptions();
 setView(readAddress());

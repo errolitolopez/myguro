@@ -108,3 +108,20 @@ def test_a_shared_link_comes_back_after_login(app):
     response = app.test_client().get("/calendar/2026/09/15")
     assert response.status_code == 302
     assert response.headers["Location"] == "/login?next=/calendar/2026/09/15"
+
+
+def search(client, text):
+    return client.get("/api/calendar/search", query_string={"q": text}).get_json()["results"]
+
+
+def test_search_finds_events_and_holidays(admin, teacher):
+    admin.post("/api/calendar/holidays", json={"day": "2030-03-10", "name": "Town Fiesta"})
+    found = {(item["start_day"], item["kind"]) for item in search(teacher, "brigada")}
+    assert found == {("2026-06-01", "event"), ("2027-06-07", "event")}
+    assert search(teacher, "town")[0]["kind"] == "local"
+    assert {item["kind"] for item in search(teacher, "rizal day")} == {"regular"}
+    assert search(teacher, "z%") == [] and search(teacher, "b") == []  # % is a letter here; one letter is too short
+
+
+def test_search_needs_a_login(app):
+    assert app.test_client().get("/api/calendar/search?q=brigada").status_code == 401

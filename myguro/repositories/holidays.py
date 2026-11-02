@@ -1,3 +1,4 @@
+from myguro.domain.text import like_pattern
 from myguro.repositories.base import Repository
 
 
@@ -7,6 +8,10 @@ class HolidayRepository(Repository):
     def in_year(self, year):
         """The local holidays of a calendar year, by date."""
         return self.all("SELECT * FROM local_holidays WHERE day LIKE ? ORDER BY day, id", (f"{year:04d}-%",))
+
+    def search(self, text):
+        """The local holidays with this text in their name, in any year."""
+        return self.all("SELECT * FROM local_holidays WHERE name LIKE ? ESCAPE '\\' ORDER BY day, id", (like_pattern(text),))
 
     def get(self, holiday_id):
         return self.one("SELECT * FROM local_holidays WHERE id = ?", (holiday_id,))

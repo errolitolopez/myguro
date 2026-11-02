@@ -18,6 +18,12 @@
 
   <div id="calendar-error" class="alert alert-danger d-none" role="alert"></div>
 
+  <div class="mb-3">
+    <label for="calendar-search" class="visually-hidden">{{ _("Search holidays and events") }}</label>
+    <input id="calendar-search" class="form-control" type="search" placeholder="{{ _("Search holidays and events") }}" autocomplete="off">
+    <ul id="search-results" class="list-group mt-2 d-none"></ul>
+  </div>
+
   <!-- Month or one day; calendar.js shows one of the two views below. -->
   <div class="d-flex flex-wrap justify-content-between gap-2 mb-3">
     <div class="btn-group" role="group" aria-label="{{ _("Calendar view") }}">
@@ -35,6 +41,14 @@
       <button id="today-button" type="button" class="btn btn-link btn-sm p-0">{{ _("Today") }}</button>
     </div>
     <button id="next-month" type="button" class="btn btn-outline-secondary bi bi-chevron-right" aria-label="{{ _("Next month") }}"></button>
+  </div>
+
+  <!-- Far months: choosing here is quicker than tapping the arrows many times. -->
+  <div class="d-flex gap-2 mb-2">
+    <select id="jump-month" class="form-select" aria-label="{{ _("Month") }}"></select>
+    <select id="jump-year" class="form-select" aria-label="{{ _("Year") }}">
+      {% for year in range(min_year, max_year + 1) %}<option value="{{ year }}">{{ year }}</option>{% endfor %}
+    </select>
   </div>
 
   <div class="table-responsive">
@@ -73,6 +87,10 @@
         <button id="today-day-button" type="button" class="btn btn-link btn-sm p-0">{{ _("Today") }}</button>
       </div>
       <button id="next-day" type="button" class="btn btn-outline-secondary bi bi-chevron-right" aria-label="{{ _("Next day") }}"></button>
+    </div>
+    <div class="mb-3">
+      <label for="jump-day" class="form-label small">{{ _("Go to date") }}</label>
+      <input id="jump-day" class="form-control" type="date" min="{{ min_year }}-01-01" max="{{ max_year }}-12-31">
     </div>
     <ul id="day-holidays" class="list-group mb-3"></ul>
     <h2 class="h6">{{ _("School events") }}</h2>
