@@ -13,6 +13,17 @@ import pytest
 _DB_DIR = tempfile.mkdtemp(prefix="myguro-tests-")
 os.environ["MYGURO_DATABASE"] = os.path.join(_DB_DIR, "test.db")
 
+# The real password hash (scrypt) takes about 100 ms on purpose, and every test resets and reseeds the database and
+# logs in two or three times, so it was most of the time the suite took. Tests use a one-round hash instead: the
+# app only ever calls generate_password_hash / check_password_hash, and a check reads the method from the stored
+# hash, so nothing else changes. This must run before the app is imported, because the app modules take the
+# function with "from werkzeug.security import generate_password_hash" when they load.
+import werkzeug.security  # noqa: E402
+
+_real_generate_password_hash = werkzeug.security.generate_password_hash
+werkzeug.security.generate_password_hash = lambda password, method="pbkdf2:sha256:1", salt_length=16: (
+    _real_generate_password_hash(password, method=method, salt_length=salt_length))
+
 from app import app as flask_app  # noqa: E402  (must come after setting the database path)
 
 PASSWORD = "1234"  # every sample account (see seed.py)
