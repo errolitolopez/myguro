@@ -227,4 +227,9 @@ MESSAGES = {
     "Something went wrong": "May nangyaring mali",
     "Please try again in a moment. If it keeps happening, tell your admin.": "Subukan ulit pagkalipas ng sandali. Kung patuloy itong nangyayari, sabihin sa admin mo.",
     "Something went wrong. Please try again.": "May nangyaring mali. Subukan ulit.",
+    # --- Maintenance mode ---
+    "MyGuro is down for maintenance. Please try again in a little while.":
+        "Naka-maintenance ang MyGuro ngayon. Subukan ulit pagkalipas ng ilang sandali.",
+    "The message is too long (at most {MAX_MESSAGE_LENGTH} characters).":
+        "Masyadong mahaba ang mensahe (hanggang {MAX_MESSAGE_LENGTH} na characters lang).",
 }

@@ -18,6 +18,8 @@ KNOWN_DYNAMIC = {
     ("myguro/domain/accounts.py", "NAME_FORMAT_HELP"),
     ("myguro/domain/docx_import.py", "message"), ("myguro/domain/docx_import.py", "failure.message"),
     ("myguro/domain/docx_import.py", "failure.message.removeprefix('Question: ')"),  # the messages of clean_question (listed)
+    # The maintenance note: the admin's own words (shown as written) or the default text, which has its own entry
+    ("myguro/web/maintenance.py", "message"),
     ("myguro/services/schedule.py", "self.describe(refused[0], names)"),  # the schedule's own problem texts
 }
 

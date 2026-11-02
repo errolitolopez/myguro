@@ -80,6 +80,16 @@
   </a>
   {% endfor %}
 </nav>
+{# Only the admin gets this far while maintenance mode is on: remind them, with a way to turn it off. #}
+{% if MAINTENANCE %}
+<div class="container mt-2">
+  <div class="alert alert-danger py-2 mb-0 small" role="alert">
+    <i class="bi bi-tools" aria-hidden="true"></i>
+    {{ _("Maintenance mode is on. Only you can use MyGuro.") }}
+    <a class="alert-link" href="{{ url_for('settings.page') }}#maintenance">{{ _("Turn it off") }}</a>
+  </div>
+</div>
+{% endif %}
 {# A past school year can only be looked at: say so on every page. #}
 {% if SCHOOL_YEARS and SCHOOL_YEARS.viewing_id != SCHOOL_YEARS.current_id %}
 <div class="container mt-2">

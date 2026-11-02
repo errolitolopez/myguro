@@ -21,6 +21,7 @@ from myguro.i18n.tl import CLIENT_TEXT, TAGLISH
 from myguro.repositories import FeedbackRepository
 from myguro.services import LoginThrottle, SchoolYearService, SettingsService
 from myguro.web import BLUEPRINTS
+from myguro.web import maintenance as maintenance_page
 from myguro.web.security import current_user
 
 
@@ -39,6 +40,7 @@ def create_app(test_config=None):
     app.extensions["login_throttle"] = LoginThrottle()
 
     register_error_handlers(app)
+    maintenance_page.register(app)
     for blueprint in BLUEPRINTS:
         app.register_blueprint(blueprint)
 
@@ -91,6 +93,8 @@ def create_app(test_config=None):
             "SUPPORT": support,
             "SUPPORT_POPUP": popup,
             "FEEDBACK_POPUP": feedback_popup,
+            # The red banner that tells the admin maintenance mode is on (nobody else can see a page then)
+            "MAINTENANCE": bool(user and user["role"] == "admin" and settings.maintenance()["enabled"]),
             # The navigation chat bubble: teachers only, and only while the admin has it on
             "CHATBOT": bool(user and user["role"] == "teacher" and settings.chatbot_enabled()),
             # The school years for the picker on the Settings page (not on the login page)

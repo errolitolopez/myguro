@@ -269,4 +269,13 @@ ADMIN = {
     "The name can be at most {MAX_NAME_LENGTH} characters.": "Hanggang {MAX_NAME_LENGTH} na characters lang ang pangalan.",
     "This holiday is already on the calendar.": "Nasa calendar na ang holiday na ito.",
     "Holiday not found.": "Hindi nahanap ang holiday.",
+    # --- Maintenance mode ---
+    "Maintenance": "Maintenance",
+    "Maintenance mode": "Maintenance mode",
+    "Message for the maintenance page": "Mensahe para sa maintenance page",
+    "While it is on, teachers, students and supervisors see a maintenance page and cannot log in. Only you can use MyGuro. People who are signed in are not logged out: they can use it again when you turn this off. Turn it on when nobody is answering an activity.":
+        "Habang naka-on ito, maintenance page ang makikita ng mga teacher, estudyante at supervisor, at hindi sila makaka-login. Ikaw lang ang puwedeng gumamit ng MyGuro. Hindi made-logout ang mga naka-sign in na: magagamit nila ulit ito kapag in-off mo ito. I-on lang ito kapag walang sumasagot ng activity.",
+    "Tap again: everyone else is locked out": "I-tap ulit: mala-lock out ang lahat ng iba",
+    "Maintenance mode is on. Only you can use MyGuro.": "Naka-on ang maintenance mode. Ikaw lang ang puwedeng gumamit ng MyGuro.",
+    "Turn it off": "I-off ito",
 }

@@ -49,7 +49,7 @@ TRANSLATED_FILES = [
     "myguro/templates/_grade_section_fields.html", "myguro/static/js/users.js", "myguro/static/js/batch-edit.js",
     "myguro/static/js/student-import.js",
     # Admin: settings, schedule, log, feedback totals
-    "myguro/templates/settings.html", "myguro/static/js/settings.js", "myguro/templates/schedule.html",
+    "myguro/templates/settings.html", "myguro/static/js/settings.js", "myguro/templates/maintenance.html", "myguro/templates/schedule.html",
     "myguro/static/js/schedule.js", "myguro/templates/log.html", "myguro/static/js/log.js",
     "myguro/static/js/log-chart.js", "myguro/templates/calendar.html", "myguro/static/js/calendar.js", "myguro/templates/feedback_results.html", "myguro/static/js/feedback-results.js",
 ]

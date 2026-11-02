@@ -4,6 +4,7 @@ from myguro.domain.accounts import GRADES
 from myguro.domain.feedback import DEFAULT_POPUP as FEEDBACK_DEFAULT_POPUP, POPUP_MODES as FEEDBACK_POPUP_MODES
 from myguro.domain.support import (DEFAULT_LABEL, DEFAULT_MESSAGE, DEFAULT_POPUP, POPUP_MODES, clean_support,
                                    format_gcash_number)
+from myguro.domain.maintenance import DEFAULT_MESSAGE as MAINTENANCE_DEFAULT_MESSAGE, clean_message
 from myguro.errors import ValidationError
 from myguro.services.base import Service
 
@@ -11,6 +12,8 @@ GRADES_HIGH_TO_LOW = "grades_high_to_low"
 DISABLED_GRADES = "disabled_grades"
 FEEDBACK_POPUP = "feedback_popup"
 CHATBOT_ENABLED = "chatbot_enabled"
+MAINTENANCE_ENABLED = "maintenance_enabled"
+MAINTENANCE_MESSAGE = "maintenance_message"
 SUPPORT_KEYS = {"enabled": "support_enabled", "message": "support_message", "label": "support_label",
                 "url": "support_url", "gcash_number": "support_gcash_number", "gcash_name": "support_gcash_name",
                 "popup": "support_popup"}
@@ -90,11 +93,19 @@ class SettingsService(Service):
         goes to an outside AI service."""
         return self.settings.get(CHATBOT_ENABLED) == "1"
 
+    def maintenance(self):
+        """{enabled, message}: while enabled, only the admin can use MyGuro. message is the admin's own note
+        (empty = none); shown_message is what the maintenance page says (the note, else the default text)."""
+        message = self.settings.get(MAINTENANCE_MESSAGE) or ""
+        return {"enabled": self.settings.get(MAINTENANCE_ENABLED) == "1", "message": message,
+                "shown_message": message or MAINTENANCE_DEFAULT_MESSAGE}
+
     def get(self):
         disabled = self.disabled_grades()
         return {
             "feedback_popup": self.feedback_popup_mode(),
             "chatbot_enabled": self.chatbot_enabled(),
+            "maintenance": self.maintenance(),
             "support": self.support(),
             "grades_high_to_low": self.grades_high_to_low(),
             "grades": [{"name": grade, "enabled": grade not in disabled} for grade in self.all_grade_options()],
@@ -126,9 +137,22 @@ class SettingsService(Service):
             cleaned = clean_support(data["support"])
             for name, value in zip(SUPPORT_KEYS, cleaned):
                 self.settings.set(SUPPORT_KEYS[name], ("1" if value else "0") if name == "enabled" else value)
+        before_maintenance = self.maintenance()
+        if "maintenance" in data:
+            sent = data["maintenance"]
+            if not isinstance(sent, dict) or not isinstance(sent.get("enabled"), bool):
+                raise ValidationError("Choose on or off.")
+            self.settings.set(MAINTENANCE_ENABLED, "1" if sent["enabled"] else "0")
+            self.settings.set(MAINTENANCE_MESSAGE, clean_message(sent.get("message")))
+            after = self.maintenance()
+            if after["enabled"] != before_maintenance["enabled"]:
+                self.log("settings.maintenance_on" if after["enabled"] else "settings.maintenance_off", "settings",
+                         "Turned maintenance mode on." if after["enabled"] else "Turned maintenance mode off.")
         changed = [label for key, label in (("grades_high_to_low", "grade order"), ("disabled_grades", "grades in use"),
                                             (FEEDBACK_POPUP, "the feedback pop-up"), (CHATBOT_ENABLED, "the chatbot"),
                                             ("support", "the support link")) if key in data]
+        if "maintenance" in data and self.maintenance()["message"] != before_maintenance["message"]:
+            changed.append("the maintenance message")
         if changed:
             self.log("settings.changed", "settings", f"Changed settings: {', '.join(changed)}.")
         self.commit()

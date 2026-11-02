@@ -16,6 +16,7 @@
     {% if user.role == "admin" %}
     <a class="nav-link py-1" href="#school">{{ _("School") }}</a>
     <a class="nav-link py-1" href="#popups">{{ _("Pop-ups and help") }}</a>
+    <a class="nav-link py-1" href="#maintenance">{{ _("Maintenance") }}</a>
     {% endif %}
   </nav>
 
@@ -257,6 +258,29 @@
       <div id="tip-preview-box" class="mt-2"></div>
     </div>
   </div>
+  </section>
+
+  <section id="maintenance" class="mb-4">
+    <h2 class="h5 mb-3">{{ _("Maintenance") }}</h2>
+    <div class="card mb-3">
+      <div class="card-body">
+        <form id="maintenance-form" novalidate>
+          <div class="form-check form-switch mb-2">
+            <input id="maintenance-enabled" class="form-check-input" type="checkbox" role="switch" disabled>
+            <label for="maintenance-enabled" class="form-check-label fw-semibold">{{ _("Maintenance mode") }}</label>
+          </div>
+          <div class="form-text mb-3">
+            {{ _("While it is on, teachers, students and supervisors see a maintenance page and cannot log in. Only you can use MyGuro. People who are signed in are not logged out: they can use it again when you turn this off. Turn it on when nobody is answering an activity.") }}
+          </div>
+          <label for="maintenance-message" class="form-label">{{ _("Message for the maintenance page") }} <span class="text-body-secondary">{{ _("(optional)") }}</span></label>
+          <input id="maintenance-message" class="form-control mb-3" maxlength="200" autocomplete="off"
+                 placeholder="Back at 3 PM. We are updating MyGuro." disabled>
+          <div id="maintenance-error" class="alert alert-danger py-2 d-none" role="alert"></div>
+          <button id="maintenance-save" type="submit" class="btn btn-success bi bi-check-lg" disabled>{{ _("Save") }}</button>
+          <span id="maintenance-status" class="small text-body-secondary ms-2"></span>
+        </form>
+      </div>
+    </div>
   </section>
   {% endif %}
 

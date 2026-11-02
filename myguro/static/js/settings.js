@@ -58,7 +58,76 @@ supportForm.addEventListener("submit", async (event) => {
   }
 });
 
+// --- Maintenance mode ------------------------------------------------------------------
+
+const maintenanceForm = document.getElementById("maintenance-form");
+const maintenanceEnabled = document.getElementById("maintenance-enabled");
+const maintenanceMessage = document.getElementById("maintenance-message");
+const maintenanceSave = document.getElementById("maintenance-save");
+const maintenanceStatus = document.getElementById("maintenance-status");
+let maintenanceWasOn = false; // what is saved, so the second tap is only asked when turning it ON
+
+function showMaintenance(maintenance) {
+  maintenanceWasOn = maintenance.enabled;
+  maintenanceEnabled.checked = maintenance.enabled;
+  maintenanceMessage.value = maintenance.message;
+  maintenanceEnabled.disabled = false;
+  maintenanceMessage.disabled = false;
+  maintenanceSave.disabled = false;
+  resetMaintenanceButton();
+}
+
+// Turning it on locks everyone else out, so the first tap on Save asks and the second one does it.
+let confirmingMaintenance = false;
+function resetMaintenanceButton() {
+  confirmingMaintenance = false;
+  maintenanceSave.textContent = t("Save");
+  maintenanceSave.classList.replace("btn-danger", "btn-success");
+}
+maintenanceEnabled.addEventListener("change", resetMaintenanceButton);
+maintenanceMessage.addEventListener("input", resetMaintenanceButton);
+
+maintenanceForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  hideError("maintenance-error");
+  maintenanceStatus.textContent = "";
+  if (maintenanceEnabled.checked && !maintenanceWasOn && !confirmingMaintenance) {
+    confirmingMaintenance = true;
+    maintenanceSave.textContent = t("Tap again: everyone else is locked out");
+    maintenanceSave.classList.replace("btn-success", "btn-danger");
+    return;
+  }
+  const stopLoading = startLoading(maintenanceSave);
+  if (!stopLoading) return;
+  try {
+    const response = await apiFetch("/api/settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ maintenance: { enabled: maintenanceEnabled.checked, message: maintenanceMessage.value } }),
+    });
+    if (!response) return;
+    const data = await response.json();
+    if (!response.ok) {
+      showError("maintenance-error", data.error || t("Could not save."));
+      return;
+    }
+    // Reload so the red banner under the menu appears or goes away on this page too.
+    window.location.reload();
+  } catch {
+    showError("maintenance-error", t("Cannot reach the server. Check your connection."));
+  } finally {
+    stopLoading();
+    resetMaintenanceButton();
+  }
+});
+
+let maintenanceLoaded = false; // fill the form once, so saving another setting does not wipe what is being typed
+
 function showSettings(settings) {
+  if (!maintenanceLoaded) {
+    showMaintenance(settings.maintenance);
+    maintenanceLoaded = true;
+  }
   showSupport(settings.support);
   gradesSwitch.checked = settings.grades_high_to_low;
   gradesSwitch.disabled = false;

@@ -1,0 +1,29 @@
+{# Shown to everyone but the admin while maintenance mode is on (see myguro/web/maintenance.py). #}
+{% extends "base.html" %}
+
+{% block title %}{{ _("Maintenance") }} · MyGuro{% endblock %}
+
+{% block content %}
+<main class="container d-flex align-items-center justify-content-center flex-grow-1">
+  <div class="card shadow-sm w-100 text-center" style="max-width: 380px;">
+    <div class="card-body p-4">
+      <h1 class="mb-3">{% with height=48 %}{% include "_logo.html" %}{% endwith %}</h1>
+      <div class="display-4 bi bi-tools" aria-hidden="true"></div>
+      <h2 class="h5 mt-2">{{ _("Maintenance") }}</h2>
+      <p class="text-body-secondary">{{ message }}</p>
+      <div class="d-flex justify-content-center gap-2">
+        {# An empty address reloads this page #}
+        <a href="" class="btn btn-success bi bi-arrow-clockwise">{{ _("Try again") }}</a>
+        {% if user %}
+        {# common.js makes this button log the person out, so they can come back with another account later #}
+        <button id="logout-button" class="btn btn-outline-secondary bi bi-box-arrow-right" type="button">{{ _("Logout") }}</button>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+{% endblock %}
