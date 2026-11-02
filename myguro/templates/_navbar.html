@@ -39,6 +39,23 @@
         {% endfor %}
       </ul>
     </div>
+    {% if user.role == "student" %}
+    <!-- The bell: notes about the student's activities. notifications.js fills it and shows the unread count. -->
+    <div class="dropdown" id="bell">
+      <button id="bell-button" class="btn btn-outline-secondary bi bi-bell position-relative" type="button"
+              data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
+              aria-label="{{ _("Notifications") }}" title="{{ _("Notifications") }}">
+        <span id="bell-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-danger d-none"></span>
+      </button>
+      <div class="dropdown-menu dropdown-menu-end p-0" style="width: 22rem; max-width: 92vw;">
+        <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
+          <h6 class="mb-0">{{ _("Notifications") }}</h6>
+          <button id="bell-read-all" type="button" class="btn btn-link btn-sm p-0">{{ _("Mark all as read") }}</button>
+        </div>
+        <div id="bell-list" class="list-group list-group-flush" style="max-height: 24rem; overflow-y: auto;"></div>
+      </div>
+    </div>
+    {% endif %}
     <button id="palette-button" class="btn btn-outline-secondary bi bi-search" type="button"
             aria-label="{{ _("Quick jump (Ctrl+K)") }}" title="{{ _("Quick jump (Ctrl+K)") }}"></button>
     <!-- One account menu for every screen size: Settings and Logout. -->
@@ -120,3 +137,4 @@
   <div class="palette-hint">{{ _("Arrow keys to move · Enter to open · Esc to close") }}</div>
 </dialog>
 <script src="{{ url_for('static', filename='js/palette.js') }}" defer></script>
+{% if user.role == "student" %}<script src="{{ url_for('static', filename='js/notifications.js') }}" defer></script>{% endif %}

@@ -17,7 +17,7 @@ TRANSLATED_FILES = [
     "myguro/static/js/common.js",
     # Student dashboard
     "myguro/templates/dashboard.html", "myguro/templates/_dashboard_chart.html",
-    "myguro/static/js/student-widgets.js", "myguro/static/js/dashboard-chart.js", "myguro/static/js/tips.js",
+    "myguro/static/js/student-widgets.js", "myguro/static/js/notifications.js", "myguro/static/js/dashboard-chart.js", "myguro/static/js/tips.js",
     # My activities
     "myguro/templates/my_activities.html", "myguro/static/js/my-activities.js",
     # The answer page

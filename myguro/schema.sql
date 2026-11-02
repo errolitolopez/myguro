@@ -330,3 +330,17 @@ CREATE TABLE IF NOT EXISTS school_events (
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS school_events_days ON school_events (start_day, end_day);
+
+-- The bell: a short note for a person about something that happened (a teacher opened an activity...). Only the kind,
+-- the activity and its title are kept; the sentence is made when it is read, in that person's language.
+-- Not part of the activity log. Only the newest MAX_PER_USER of each person are kept (domain/notifications.py).
+CREATE TABLE IF NOT EXISTS notifications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    kind TEXT NOT NULL,
+    assignment_id INTEGER,
+    title TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    read_at TEXT  -- NULL = not read yet
+);
+CREATE INDEX IF NOT EXISTS notifications_user ON notifications (user_id, id);

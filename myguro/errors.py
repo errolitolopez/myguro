@@ -3,7 +3,7 @@ JSON answers like {"error": "Title is required."} with the right HTTP status."""
 
 from flask import jsonify, render_template, request
 
-from myguro.domain.i18n import LANGUAGE_COOKIE, language_from_cookie, translate_message
+from myguro.domain.i18n import LANGUAGE_COOKIE, language_from_cookie, translate, translate_message
 from myguro.i18n.tl import TAGLISH
 
 
@@ -12,6 +12,12 @@ def say(message):
     is no cookie). Taglish is matched by pattern, so a message with a value in it is found too."""
     chosen = language_from_cookie(request.cookies.get(LANGUAGE_COOKIE))
     return translate_message(message, TAGLISH if chosen == "tl" else {})
+
+
+def say_with(key, **values):
+    """A sentence with {name} placeholders in the language of this request, the values filled in."""
+    chosen = language_from_cookie(request.cookies.get(LANGUAGE_COOKIE))
+    return translate(key, TAGLISH if chosen == "tl" else {}, values)
 
 
 class AppError(Exception):

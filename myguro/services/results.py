@@ -3,6 +3,7 @@ from myguro.domain.grading import clean_feedback, teacher_points
 from myguro.domain.work import clean_paper_score
 from myguro.errors import NotFoundError, ValidationError
 from myguro.services.attempts import grade_attempt
+from myguro.repositories import NotificationRepository
 from myguro.services.base import Service
 from myguro.domain.text import plural
 from myguro.services.presenters import class_title, user_json
@@ -58,6 +59,13 @@ class ResultsService(Service):
         """An activity log entry about an assignment (the row from assignments.get_for_teacher)."""
         self.log(action, "giving", summary, ("assignment", assignment["id"],
                                              f"{assignment['title']} - {class_title(assignment['class_name'], assignment['class_subject'])}"))
+
+    def notify_students(self, assignment, kind):
+        """Put a note in the bell of each student who has this assignment (the excluded ones are left out)."""
+        excluded = set(self.assignments.excluded_ids(assignment["id"]))
+        student_ids = [student["id"] for student in self.assignments.students(assignment)
+                       if student["id"] not in excluded and student["active"]]
+        NotificationRepository(self.db).add_many(student_ids, kind, assignment["id"], assignment["title"])
 
     def log_checking(self, action, summary, assignment_id, student_id):
         """An activity log entry about checking one student's work on an assignment."""
@@ -288,6 +296,8 @@ class ResultsService(Service):
             self.log_giving("assignment.released" if released else "assignment.hidden",
                             f"{'Released' if released else 'Hid'} the scores of {assignment['title']} "
                             f"({assignment['class_name']}) {'to' if released else 'from'} the students.", assignment)
+            if released:
+                self.notify_students(assignment, "released")
         self.commit()
         return {"scores_released": released}
 
@@ -318,11 +328,14 @@ class ResultsService(Service):
         if status == "closed":
             self.log_giving("assignment.closed", f"Closed {where}; {plural(changed, 'unfinished attempt')} "
                             "submitted as they were.", assignment)
+            self.notify_students(assignment, "closed")
         elif before == "closed":
             self.log_giving("assignment.reopened", f"Re-opened {where}; {plural(changed, 'attempt')} "
                             "back to in progress.", assignment)
+            self.notify_students(assignment, "reopened")
         else:
             self.log_giving("assignment.opened", f"Opened {where} to the students.", assignment)
+            self.notify_students(assignment, "opened")
         self.commit()
         return {"status": status, "changed": changed}
 
