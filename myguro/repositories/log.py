@@ -6,13 +6,13 @@ class LogRepository(Repository):
     which removes the oldest when the log is over its size limit. Nothing updates a row."""
 
     def add(self, actor, action, category, summary, target_type="", target_id=None, target_name="",
-            address="", at=None):
+            address="", device="", at=None):
         """Add one entry. actor = {id, name, username, role} (id may be None). at is for tests and
         imports ("YYYY-MM-DD HH:MM:SS" UTC); normally the database clock is used. Does not commit."""
         columns = ["actor_id", "actor_name", "actor_username", "actor_role", "action", "category", "target_type",
-                   "target_id", "target_name", "summary", "address"]
+                   "target_id", "target_name", "summary", "address", "device"]
         values = [actor["id"], actor["name"], actor["username"], actor["role"], action, category, target_type,
-                  target_id, target_name, summary, address]
+                  target_id, target_name, summary, address, device]
         if at is not None:
             columns.append("at")
             values.append(at)

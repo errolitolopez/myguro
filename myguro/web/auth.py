@@ -4,7 +4,7 @@ from flask import Blueprint, current_app, jsonify, redirect, render_template, se
 
 from myguro.database import get_db
 from myguro.services import AuthService
-from myguro.web.security import client_address, current_user, json_body
+from myguro.web.security import client_address, client_device, current_user, json_body
 
 bp = Blueprint("auth", __name__)
 
@@ -33,7 +33,7 @@ def change_password_page():
 def api_login():
     data = json_body()
     user = AuthService(get_db()).login(data.get("username"), data.get("password"), client_address(),
-                                       current_app.extensions["login_throttle"])
+                                       current_app.extensions["login_throttle"], client_device())
     session.clear()
     session["user_id"] = user["id"]
     return jsonify(ok=True, must_change_password=bool(user["must_change_password"]))

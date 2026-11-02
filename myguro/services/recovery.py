@@ -54,7 +54,7 @@ class RecoveryService(Service):
         self.recovery.save(user_id, generate_password_hash(rules.clean_code(code)), rules.MAX_USES)
         return code
 
-    def recover(self, username, code, new_password, ip, throttle):
+    def recover(self, username, code, new_password, ip, throttle, device=""):
         """Choose a new password with the username and the recovery code. Each use takes one of the code's
         MAX_USES; at 0 it no longer works and the person makes a new one (so a leaked code cannot be used
         for ever). The answer says how many uses are left. A wrong username, a wrong code and a used-up
@@ -81,10 +81,10 @@ class RecoveryService(Service):
             actor = user if user is not None else {"id": None, "name": typed, "username": typed, "role": ""}
             auth = AuthService(self.db)
             auth.log_sign_in("auth.recovery_failed", "Wrong recovery code." if user is not None
-                             else "Tried to recover an account with a username nobody has.", actor, ip)
+                             else "Tried to recover an account with a username nobody has.", actor, ip, device)
             if throttle.is_locked(key):
                 auth.log_sign_in("auth.locked", f"Locked out for {LoginThrottle.LOCK_SECONDS // 60} minutes "
-                                 f"after {LoginThrottle.MAX_ATTEMPTS} wrong recovery codes.", actor, ip)
+                                 f"after {LoginThrottle.MAX_ATTEMPTS} wrong recovery codes.", actor, ip, device)
             raise UnauthorizedError("The username or the recovery code is not right.")
         if not user["active"]:
             # Said the same way as a wrong code, so this does not tell anyone the account exists
@@ -95,6 +95,6 @@ class RecoveryService(Service):
         uses_left = self.recovery.use_one(user["id"])
         throttle.passed(key)
         self.log("auth.password_recovered", "sign-in",
-                 f"Chose a new password with the recovery code ({plural_uses(uses_left)} left).", actor=user, address=ip)
+                 f"Chose a new password with the recovery code ({plural_uses(uses_left)} left).", actor=user, address=ip, device=device)
         self.commit()
         return {"ok": True, "uses_left": uses_left}

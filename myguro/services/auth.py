@@ -44,13 +44,13 @@ MAX_TYPED_NAME = 100  # a mistyped username is kept in the log, but not unlimite
 
 
 class AuthService(Service):
-    def log_sign_in(self, action, summary, actor, ip=""):
+    def log_sign_in(self, action, summary, actor, ip="", device=""):
         """Write a sign-in entry and save it right away: these happen outside any other change, and
         a failed login raises right after, so nothing else would commit the entry."""
-        self.log(action, "sign-in", summary, actor=actor, address=ip)
+        self.log(action, "sign-in", summary, actor=actor, address=ip, device=device)
         self.commit()
 
-    def login(self, username, password, ip, throttle):
+    def login(self, username, password, ip, throttle, device=""):
         """The user's row when the username and password are right. Every try is logged."""
         username = str(username or "").strip()
         password = str(password or "")
@@ -65,16 +65,16 @@ class AuthService(Service):
             typed = username[:MAX_TYPED_NAME]
             actor = user if user is not None else {"id": None, "name": typed, "username": typed, "role": ""}
             self.log_sign_in("auth.login_failed", "Wrong password." if user is not None
-                             else "Tried to log in with a username nobody has.", actor, ip)
+                             else "Tried to log in with a username nobody has.", actor, ip, device)
             if throttle.is_locked(key):
                 self.log_sign_in("auth.locked", f"Locked out for {LoginThrottle.LOCK_SECONDS // 60} minutes "
-                                 f"after {LoginThrottle.MAX_ATTEMPTS} wrong passwords.", actor, ip)
+                                 f"after {LoginThrottle.MAX_ATTEMPTS} wrong passwords.", actor, ip, device)
             raise UnauthorizedError("Wrong username or password.")
         if not user["active"]:
-            self.log_sign_in("auth.login_failed", "Tried to log in, but the account is deactivated.", user, ip)
+            self.log_sign_in("auth.login_failed", "Tried to log in, but the account is deactivated.", user, ip, device)
             raise ForbiddenError("This account is deactivated. Ask the admin.")
         throttle.passed(key)
-        self.log_sign_in("auth.login", "Logged in.", user, ip)
+        self.log_sign_in("auth.login", "Logged in.", user, ip, device)
         return user
 
     def logout(self):

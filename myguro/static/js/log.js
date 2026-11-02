@@ -69,7 +69,8 @@ function entryItem(entry) {
   category.className = "badge text-bg-light border";
   category.textContent = entry.category;
   const time = document.createElement("span");
-  time.textContent = formatTime(entry.at) + (entry.address ? ` · ${entry.address}` : "");
+  time.textContent = formatTime(entry.at) + (entry.address ? ` · ${entry.address}` : "")
+    + (entry.device ? ` · ${entry.device}` : "");
   details.append(category, time);
 
   row.append(summary, details);

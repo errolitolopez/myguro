@@ -258,7 +258,8 @@ CREATE TABLE IF NOT EXISTS activity_log (
     target_id INTEGER,
     target_name TEXT NOT NULL DEFAULT '',
     summary TEXT NOT NULL,             -- one short sentence for people to read
-    address TEXT NOT NULL DEFAULT ''   -- device address, sign-in actions only
+    address TEXT NOT NULL DEFAULT '',  -- device address, sign-in actions only
+    device TEXT NOT NULL DEFAULT ''    -- short device name ("Chrome on Windows"), sign-in actions only
 );
 CREATE INDEX IF NOT EXISTS activity_log_at ON activity_log (at);
 CREATE INDEX IF NOT EXISTS activity_log_actor ON activity_log (actor_id, at);

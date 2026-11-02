@@ -4,7 +4,7 @@ from flask import Blueprint, current_app, jsonify, redirect, render_template, ur
 
 from myguro.database import get_db
 from myguro.services import RecoveryService
-from myguro.web.security import client_address, current_user, json_body, login_required_api, login_required_page
+from myguro.web.security import client_address, client_device, current_user, json_body, login_required_api, login_required_page
 
 bp = Blueprint("recovery", __name__)
 
@@ -43,4 +43,4 @@ def api_recover():
     data = json_body()
     return jsonify(RecoveryService(get_db()).recover(
         data.get("username"), data.get("code"), data.get("new_password"), client_address(),
-        current_app.extensions["login_throttle"]))
+        current_app.extensions["login_throttle"], client_device()))

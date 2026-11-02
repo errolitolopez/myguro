@@ -35,14 +35,14 @@ class Service:
         if year_id != self.years.current_id():
             raise ValidationError("This school year is over. You can only look at it.")
 
-    def log(self, action, category, summary, target=("", None, ""), actor=None, address=""):
+    def log(self, action, category, summary, target=("", None, ""), actor=None, address="", device=""):
         """Add an activity log entry for what this service call did. Call it right before commit(), so
         the entry and the change are saved together (a failed change leaves no entry). actor is the
         logged-in user unless given; target = (type, id, name). Never put a password in the summary."""
         assert category in CATEGORIES, category
         who = actor if actor is not None else self.user
         self.logs.add({"id": who["id"], "name": who["name"], "username": who["username"], "role": who["role"]},
-                      action, category, clean_summary(summary), *target, address=address)
+                      action, category, clean_summary(summary), *target, address=address, device=device)
         self.logs.trim(log_rules.MAX_LOG_ENTRIES)  # keeps the log from growing without end
 
     def commit(self):

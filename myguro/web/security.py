@@ -6,6 +6,7 @@ from functools import wraps
 from flask import current_app, g, jsonify, redirect, request, session, url_for
 
 from myguro.database import get_db
+from myguro.domain.device import device_name
 from myguro.repositories import UserRepository
 
 
@@ -39,6 +40,11 @@ def client_address():
         return str(ipaddress.ip_address(candidate))
     except ValueError:
         return direct
+
+
+def client_device():
+    """A short name for the person's browser and system ("Chrome on Windows"), for the sign-in log."""
+    return device_name(request.headers.get("User-Agent", ""))
 
 
 def json_body():

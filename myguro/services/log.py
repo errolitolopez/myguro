@@ -25,6 +25,7 @@ class LogService(Service):
             "summary": row["summary"],
             "target": {"type": row["target_type"], "id": row["target_id"], "name": row["target_name"]},
             "address": row["address"],
+            "device": row["device"],
         }
 
     @staticmethod
