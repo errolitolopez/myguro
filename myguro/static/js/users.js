@@ -13,7 +13,6 @@ let confirmAction = null; // what t("Yes") does in the confirm box
 const list = document.getElementById("user-list");
 const searchInput = document.getElementById("search");
 // Advanced filter (students page only): full name, grade, section
-const nameFilter = document.getElementById("name-filter");
 const gradeFilter = document.getElementById("grade-filter");
 const sectionFilter = document.getElementById("section-filter");
 const statusFilter = document.getElementById("status-filter");
@@ -106,7 +105,7 @@ function messageItem(text) {
 // How many advanced filter fields are filled in (students page).
 function filtersInUse() {
   if (!gradeFilter) return 0;
-  return [nameFilter.value.trim() !== "", gradeFilter.value !== "*", sectionFilter.value.trim() !== "",
+  return [gradeFilter.value !== "*", sectionFilter.value.trim() !== "",
     statusFilter.value !== "", recoveryFilter.value !== ""]
     .filter(Boolean).length;
 }
@@ -147,7 +146,6 @@ async function loadUsers() {
   const params = new URLSearchParams({ role, page, q: searchInput.value.trim() });
   if (gradeFilter) {
     if (gradeFilter.value !== "*") params.set("grade", gradeFilter.value);
-    if (nameFilter.value.trim()) params.set("name", nameFilter.value.trim());
     if (sectionFilter.value.trim()) params.set("section", sectionFilter.value.trim());
     if (statusFilter.value) params.set("status", statusFilter.value);
     if (recoveryFilter.value) params.set("recovery", recoveryFilter.value);
@@ -184,12 +182,10 @@ function searchSoon() {
 searchInput.addEventListener("input", searchSoon);
 if (gradeFilter) {
   sectionFilter.addEventListener("input", searchSoon);
-  nameFilter.addEventListener("input", searchSoon);
   gradeFilter.addEventListener("change", () => goToPage(1));
   statusFilter.addEventListener("change", () => goToPage(1));
   recoveryFilter.addEventListener("change", () => goToPage(1));
   document.getElementById("filter-clear").addEventListener("click", () => {
-    nameFilter.value = "";
     sectionFilter.value = "";
     gradeFilter.value = "*";
     statusFilter.value = "";

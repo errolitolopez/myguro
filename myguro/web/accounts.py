@@ -49,8 +49,7 @@ def supervisors_page():
 @bp.get("/api/users")
 @role_required_api("admin")
 def api_list():
-    """?role=teacher (default) or student, ?q= search, ?grade= (empty = no grade), ?name= (full
-    name, any order) and ?section= and ?status= (active, pending, deactivated) and ?recovery= (yes, no) (advanced filters), ?page= and ?per_page= (20 by default)."""
+    """?role=teacher (default) or student, ?q= search, ?grade= (empty = no grade) and ?section= and ?status= (active, pending, deactivated) and ?recovery= (yes, no) (advanced filters), ?page= and ?per_page= (20 by default)."""
     args = request.args
     return jsonify(service().list(
         args.get("role", "teacher"),
@@ -58,7 +57,6 @@ def api_list():
         grade=args.get("grade") if "grade" in args else None,
         page=args.get("page", 1, type=int),
         per_page=args.get("per_page", 20, type=int),
-        name=args.get("name", ""),
         section=args.get("section", ""),
         status=args.get("status") or None,
         recovery=args.get("recovery") or None,
@@ -75,21 +73,21 @@ def api_create():
 @bp.put("/api/users/batch")
 @role_required_api("admin")
 def api_batch_update():
-    """Grade and/or section of many students: {user_ids or match: {q, grade, name, section, status}, grade?, section?}."""
+    """Grade and/or section of many students: {user_ids or match: {q, grade, section, status}, grade?, section?}."""
     return jsonify(updated=service().batch_update(json_body()))
 
 
 @bp.post("/api/users/batch-activate")
 @role_required_api("admin")
 def api_batch_activate():
-    """Enable students: {user_ids or match: {q, grade, name, section, status}}. Returns {activated, skipped}."""
+    """Enable students: {user_ids or match: {q, grade, section, status}}. Returns {activated, skipped}."""
     return jsonify(service().batch_activate(json_body()))
 
 
 @bp.post("/api/users/batch-reset-passwords")
 @role_required_api("admin")
 def api_batch_reset_passwords():
-    """New temporary passwords for students: {user_ids or match: {q, grade, name, section, status}}.
+    """New temporary passwords for students: {user_ids or match: {q, grade, section, status}}.
     Returns {students: [{id, name, username, grade, section, password}]}, shown once."""
     return jsonify(service().batch_reset_passwords(json_body()))
 
@@ -108,7 +106,7 @@ def api_login_details():
 @bp.post("/api/users/batch-delete")
 @role_required_api("admin")
 def api_batch_delete():
-    """Delete students never activated: {user_ids or match: {q, grade, name, section, status}}.
+    """Delete students never activated: {user_ids or match: {q, grade, section, status}}.
     Activated students (even deactivated now) are skipped."""
     return jsonify(service().batch_delete(json_body()))
 

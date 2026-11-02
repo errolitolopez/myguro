@@ -3,7 +3,7 @@
 // for each row and selectionShown() after each page loads.
 
 const selected = new Set(); // ids picked one by one (kept when changing page or search)
-let allMatching = null; // {q, grade, name, section, status, recovery, total}: every student matching that search, on all pages
+let allMatching = null; // {q, grade, section, status, recovery, total}: every student matching that search, on all pages
 let shownData = null; // the page on screen (from users.js)
 
 const selectionBar = document.getElementById("selection-bar");
@@ -11,11 +11,10 @@ const selectPage = document.getElementById("select-page");
 const selectMatching = document.getElementById("select-matching");
 const batchModal = bootstrap.Modal.getOrCreateInstance(document.getElementById("batch-modal"));
 
-// The search and filters on screen: {q, grade, name, section, status, recovery} (each only when used)
+// The search and filters on screen: {q, grade, section, status, recovery} (each only when used)
 function currentSearch() {
   const search = { q: searchInput.value.trim() };
   if (gradeFilter.value !== "*") search.grade = gradeFilter.value;
-  if (nameFilter.value.trim()) search.name = nameFilter.value.trim();
   if (sectionFilter.value.trim()) search.section = sectionFilter.value.trim();
   if (statusFilter.value) search.status = statusFilter.value;
   if (recoveryFilter.value) search.recovery = recoveryFilter.value;
@@ -97,7 +96,7 @@ function clearSelection() {
 document.getElementById("selection-clear").addEventListener("click", clearSelection);
 
 // A different search: "all matching" no longer means the same students.
-for (const box of [searchInput, nameFilter, sectionFilter]) {
+for (const box of [searchInput, sectionFilter]) {
   box.addEventListener("input", () => {
     if (allMatching) clearSelection();
   });
@@ -130,7 +129,7 @@ batchForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   hideError("batch-error");
   const body = allMatching ? { match: {
-    q: allMatching.q, grade: allMatching.grade, name: allMatching.name, section: allMatching.section,
+    q: allMatching.q, grade: allMatching.grade, section: allMatching.section,
     status: allMatching.status,
     recovery: allMatching.recovery,
   } } : { user_ids: [...selected] };
@@ -194,7 +193,7 @@ document.getElementById("delete-modal").addEventListener("show.bs.modal", () => 
 document.getElementById("delete-confirm").addEventListener("click", async (event) => {
   hideError("delete-error");
   const body = allMatching ? { match: {
-    q: allMatching.q, grade: allMatching.grade, name: allMatching.name, section: allMatching.section,
+    q: allMatching.q, grade: allMatching.grade, section: allMatching.section,
     status: allMatching.status,
     recovery: allMatching.recovery,
   } } : { user_ids: [...selected] };
@@ -231,7 +230,7 @@ document.getElementById("delete-confirm").addEventListener("click", async (event
 
 document.getElementById("batch-activate").addEventListener("click", async (event) => {
   const body = allMatching ? { match: {
-    q: allMatching.q, grade: allMatching.grade, name: allMatching.name, section: allMatching.section,
+    q: allMatching.q, grade: allMatching.grade, section: allMatching.section,
     status: allMatching.status,
     recovery: allMatching.recovery,
   } } : { user_ids: [...selected] };
@@ -285,7 +284,7 @@ passwordModal.addEventListener("show.bs.modal", () => {
 passwordConfirmButton.addEventListener("click", async () => {
   hideError("password-error");
   const body = allMatching ? { match: {
-    q: allMatching.q, grade: allMatching.grade, name: allMatching.name, section: allMatching.section,
+    q: allMatching.q, grade: allMatching.grade, section: allMatching.section,
     status: allMatching.status,
     recovery: allMatching.recovery,
   } } : { user_ids: [...selected] };

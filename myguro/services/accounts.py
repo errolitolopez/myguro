@@ -30,25 +30,23 @@ class AccountService(Service):
                 "has_recovery_code": self.users.has_recovery_code(row["id"])}
 
     @staticmethod
-    def filters(query="", grade=None, name="", section="", status=None, recovery=None):
-        """The search and the advanced filters (full name, grade, section, status) as the
-        arguments the repository takes after the role: (pattern, grade, name_words, section_pattern,
-        status, recovery).
-        Every word typed in the full name must be in the name, in any order."""
+    def filters(query="", grade=None, section="", status=None, recovery=None):
+        """The search and the advanced filters (grade, section, status) as the
+        arguments the repository takes after the role: (pattern, grade, section_pattern,
+        status, recovery)."""
         pattern = like_pattern(clean_name(query))
-        name_words = tuple(like_pattern(word) for word in clean_name(name).replace(",", " ").split())
         section = clean_name(section)
-        return pattern, grade, name_words, like_pattern(section) if section else None, status, recovery
+        return pattern, grade, like_pattern(section) if section else None, status, recovery
 
-    def list(self, role, query="", grade=None, page=1, per_page=DEFAULT_PER_PAGE, name="", section="",
+    def list(self, role, query="", grade=None, page=1, per_page=DEFAULT_PER_PAGE, section="",
              status=None, recovery=None):
         """One page of teachers or students, searched (name, username, section) and filtered by
-        grade (None = all, "" = no grade), full name, section and status (active, pending, deactivated). A page past the end shows the
+        grade (None = all, "" = no grade), section and status (active, pending, deactivated). A page past the end shows the
         last page."""
         if role not in ACCOUNT_ROLES:
             raise ValidationError("Unknown role.")
         per_page = max(1, min(per_page, MAX_PER_PAGE))
-        search = self.filters(query, grade, name, section, status, recovery)
+        search = self.filters(query, grade, section, status, recovery)
         total = self.users.count_matching(role, *search)
         pages = max(1, -(-total // per_page))  # rounded up
         page = max(1, min(page, pages))
@@ -129,7 +127,7 @@ class AccountService(Service):
 
     def batch_update(self, data):
         """Change grade and/or section of many students at once. Students are user_ids, or
-        match = {q, grade, name, section, status} for every student matching that search (all pages). A field not
+        match = {q, grade, section, status} for every student matching that search (all pages). A field not
         sent is kept; grade "" = no grade, section "" = no section (irregular).
         Returns how many students were changed."""
         ids = self.batch_ids(data, "change")
@@ -213,11 +211,11 @@ class AccountService(Service):
         return cleaned
 
     def batch_ids(self, data, verb):
-        """The students a batch request is about: user_ids, or match = {q, grade, name, section, status}
+        """The students a batch request is about: user_ids, or match = {q, grade, section, status}
         for every student matching that search (all pages)."""
         if "match" in data and isinstance(data["match"], dict):
             match = data["match"]
-            search = self.filters(match.get("q"), match.get("grade"), match.get("name"), match.get("section"),
+            search = self.filters(match.get("q"), match.get("grade"), match.get("section"),
                                   match.get("status"), match.get("recovery"))
             ids = self.users.matching_ids("student", *search)
         else:
