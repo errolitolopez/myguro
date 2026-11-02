@@ -12,6 +12,7 @@ GRADES_HIGH_TO_LOW = "grades_high_to_low"
 DISABLED_GRADES = "disabled_grades"
 FEEDBACK_POPUP = "feedback_popup"
 CHATBOT_ENABLED = "chatbot_enabled"
+HIDE_EVENTS_FROM_STUDENTS = "hide_events_from_students"
 MAINTENANCE_ENABLED = "maintenance_enabled"
 MAINTENANCE_MESSAGE = "maintenance_message"
 SUPPORT_KEYS = {"enabled": "support_enabled", "message": "support_message", "label": "support_label",
@@ -93,6 +94,10 @@ class SettingsService(Service):
         goes to an outside AI service."""
         return self.settings.get(CHATBOT_ENABLED) == "1"
 
+    def hide_events_from_students(self):
+        """The calendar shows students only holidays, not school events. On until the admin turns it off."""
+        return self.settings.get(HIDE_EVENTS_FROM_STUDENTS) != "0"
+
     def maintenance(self):
         """{enabled, message}: while enabled, only the admin can use MyGuro. message is the admin's own note
         (empty = none); shown_message is what the maintenance page says (the note, else the default text)."""
@@ -105,6 +110,7 @@ class SettingsService(Service):
         return {
             "feedback_popup": self.feedback_popup_mode(),
             "chatbot_enabled": self.chatbot_enabled(),
+            "hide_events_from_students": self.hide_events_from_students(),
             "maintenance": self.maintenance(),
             "support": self.support(),
             "grades_high_to_low": self.grades_high_to_low(),
@@ -131,6 +137,10 @@ class SettingsService(Service):
             if not isinstance(data[CHATBOT_ENABLED], bool):
                 raise ValidationError("Choose on or off.")
             self.settings.set(CHATBOT_ENABLED, "1" if data[CHATBOT_ENABLED] else "0")
+        if HIDE_EVENTS_FROM_STUDENTS in data:
+            if not isinstance(data[HIDE_EVENTS_FROM_STUDENTS], bool):
+                raise ValidationError("Choose on or off.")
+            self.settings.set(HIDE_EVENTS_FROM_STUDENTS, "1" if data[HIDE_EVENTS_FROM_STUDENTS] else "0")
         if "support" in data:
             if not isinstance(data["support"], dict):
                 raise ValidationError("Support link is not valid.")
@@ -150,6 +160,7 @@ class SettingsService(Service):
                          "Turned maintenance mode on." if after["enabled"] else "Turned maintenance mode off.")
         changed = [label for key, label in (("grades_high_to_low", "grade order"), ("disabled_grades", "grades in use"),
                                             (FEEDBACK_POPUP, "the feedback pop-up"), (CHATBOT_ENABLED, "the chatbot"),
+                                            (HIDE_EVENTS_FROM_STUDENTS, "school events for students"),
                                             ("support", "the support link")) if key in data]
         if "maintenance" in data and self.maintenance()["message"] != before_maintenance["message"]:
             changed.append("the maintenance message")

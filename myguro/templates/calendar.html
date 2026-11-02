@@ -63,7 +63,7 @@
     <span class="badge text-bg-warning">{{ _("Special non-working day") }}</span>
     <span class="badge text-bg-info">{{ _("Special working day") }}</span>
     <span class="badge text-bg-success">{{ _("Local holiday") }}</span>
-    <span class="badge text-bg-primary bi bi-calendar-event"> {{ _("School event") }}</span>
+    <span class="badge text-bg-primary bi bi-calendar-event{% if events_hidden %} d-none{% endif %}"> {{ _("School event") }}</span>
   </div>
 
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
@@ -77,11 +77,14 @@
     {{ _("National holidays follow the yearly proclamations. Days announced each year, such as Eid'l Fitr and Eid'l Adha, are added by the admin as local holidays.") }}
   </p>
 
-  <h2 class="h6">{{ _("School events this month") }}</h2>
-  <ul id="event-list" class="list-group mb-3"></ul>
-  <p class="small text-body-secondary">
-    {{ _("School events come from the DepEd school calendar (DepEd Order No. 09, s. 2026). The admin can change them.") }}
-  </p>
+  <!-- Hidden (not removed) for students when the admin keeps school events from them; calendar.js still fills it, with nothing. -->
+  <div{% if events_hidden %} class="d-none"{% endif %}>
+    <h2 class="h6">{{ _("School events this month") }}</h2>
+    <ul id="event-list" class="list-group mb-3"></ul>
+    <p class="small text-body-secondary">
+      {{ _("School events come from the DepEd school calendar (DepEd Order No. 09, s. 2026). The admin can change them.") }}
+    </p>
+  </div>
   </div>
 
   <div id="day-view" class="d-none">
@@ -98,8 +101,10 @@
       <input id="jump-day" class="form-control" type="date" min="{{ min_year }}-01-01" max="{{ max_year }}-12-31">
     </div>
     <ul id="day-holidays" class="list-group mb-3"></ul>
-    <h2 class="h6">{{ _("School events") }}</h2>
-    <ul id="day-events" class="list-group mb-3"></ul>
+    <div{% if events_hidden %} class="d-none"{% endif %}>
+      <h2 class="h6">{{ _("School events") }}</h2>
+      <ul id="day-events" class="list-group mb-3"></ul>
+    </div>
   </div>
 </main>
 

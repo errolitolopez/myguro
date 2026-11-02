@@ -36,7 +36,7 @@ def page(year=None, month=None, day=None):
         if not MIN_YEAR <= year <= MAX_YEAR:
             abort(404)
     return render_template("calendar.html", user=current_user(), min_year=MIN_YEAR, max_year=MAX_YEAR,
-                           generated_by=GENERATED_BY)
+                           generated_by=GENERATED_BY, events_hidden=service().events_hidden())
 
 
 @bp.get("/api/calendar")

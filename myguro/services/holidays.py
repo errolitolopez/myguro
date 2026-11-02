@@ -3,6 +3,7 @@ from myguro.domain import holidays as rules
 from myguro.errors import NotFoundError, ValidationError
 from myguro.repositories import HolidayRepository, SchoolEventRepository
 from myguro.services.base import Service
+from myguro.services.settings import SettingsService
 
 
 class HolidayService(Service):
@@ -12,6 +13,11 @@ class HolidayService(Service):
         super().__init__(db, user)
         self.holidays = HolidayRepository(db)
         self.events = SchoolEventRepository(db)
+
+    def events_hidden(self):
+        """True when this user is a student and the admin keeps school events from students."""
+        return (self.user is not None and self.user["role"] == "student"
+                and SettingsService(self.db, self.user).hide_events_from_students())
 
     def year(self, value):
         """Every holiday of a calendar year, national and local, by date (local ones carry their id), and the
@@ -23,7 +29,7 @@ class HolidayService(Service):
                   for row in self.holidays.in_year(year)]
         items.sort(key=lambda item: item["day"])
         events = [{"id": row["id"], "start_day": row["start_day"], "end_day": row["end_day"], "name": row["name"]}
-                  for row in self.events.in_year(year)]
+                  for row in self.events.in_year(year)] if not self.events_hidden() else []
         return {"year": year, "holidays": items, "events": events}
 
     def upcoming(self):
@@ -45,8 +51,9 @@ class HolidayService(Service):
                    if text.lower() in holiday["name"].lower()]
         results += [{"start_day": row["day"], "end_day": row["day"], "name": row["name"], "kind": rules.LOCAL}
                     for row in self.holidays.search(text)]
-        results += [{"start_day": row["start_day"], "end_day": row["end_day"], "name": row["name"], "kind": "event"}
-                    for row in self.events.search(text)]
+        if not self.events_hidden():
+            results += [{"start_day": row["start_day"], "end_day": row["end_day"], "name": row["name"],
+                         "kind": "event"} for row in self.events.search(text)]
         results.sort(key=lambda item: (item["end_day"] < today.isoformat(), item["start_day"]))
         return {"results": results[:rules.MAX_SEARCH_RESULTS]}
 

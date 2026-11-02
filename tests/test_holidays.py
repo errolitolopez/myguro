@@ -123,6 +123,23 @@ def test_search_finds_events_and_holidays(admin, teacher):
     assert search(teacher, "z%") == [] and search(teacher, "b") == []  # % is a letter here; one letter is too short
 
 
+def test_students_do_not_see_school_events_unless_the_admin_allows_it(admin, teacher):
+    student = login("jdelacruz01")
+
+    def seen():
+        year = student.get("/api/calendar?year=2026").get_json()
+        return len(year["events"]), len(search(student, "brigada")), student.get("/calendar").get_data(as_text=True)
+
+    events, found, page = seen()  # hidden by default
+    assert (events, found) == (0, 0) and 'id="event-list"' in page
+    assert len(teacher.get("/api/calendar?year=2026").get_json()["events"]) > 0
+    assert admin.get("/api/settings").get_json()["settings"]["hide_events_from_students"] is True
+
+    admin.put("/api/settings", json={"hide_events_from_students": False})
+    events, found, _ = seen()
+    assert events > 0 and found > 0
+
+
 def test_search_needs_a_login(app):
     assert app.test_client().get("/api/calendar/search?q=brigada").status_code == 401
 

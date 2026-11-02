@@ -16,6 +16,9 @@ ADMIN = {
     "Import from Excel": "I-import mula sa Excel",
     "Leave empty to make one": "Iwanang walang laman para gumawa ng isa",
     "All": "Lahat",
+    "Hide school events from students": "Itago ang school events sa mga estudyante",
+    "On: students see only holidays on the calendar. Off: they see the school events too. Teachers and you always see both. On by default.":
+        "On: holidays lang ang makikita ng mga estudyante sa calendar. Off: makikita rin nila ang school events. Makikita mo at ng mga teacher ang dalawa. Naka-on bilang default.",
     "Has recovery code": "May recovery code",
     "No recovery code": "Walang recovery code",
     "New passwords": "Mga bagong password",

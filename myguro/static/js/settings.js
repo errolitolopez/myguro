@@ -4,6 +4,7 @@ const gradesSwitch = document.getElementById("grades-high-to-low");
 const gradeList = document.getElementById("grade-list");
 const feedbackPopup = document.getElementById("feedback-popup");
 const chatbotSwitch = document.getElementById("chatbot-enabled");
+const hideEventsSwitch = document.getElementById("hide-events");
 const status = document.getElementById("settings-status");
 
 const supportForm = document.getElementById("support-form");
@@ -135,6 +136,8 @@ function showSettings(settings) {
   feedbackPopup.disabled = false;
   chatbotSwitch.checked = settings.chatbot_enabled;
   chatbotSwitch.disabled = false;
+  hideEventsSwitch.checked = settings.hide_events_from_students;
+  hideEventsSwitch.disabled = false;
   gradeList.replaceChildren(...settings.grades.map((grade, index) => {
     const column = document.createElement("div");
     column.className = "col";
@@ -161,7 +164,7 @@ function showSettings(settings) {
 // Sends the change and shows what the server saved (or puts the switches back on an error).
 async function save(body) {
   status.textContent = t("Saving...");
-  const fields = [gradesSwitch, feedbackPopup, chatbotSwitch, ...gradeList.querySelectorAll("input")];
+  const fields = [gradesSwitch, feedbackPopup, chatbotSwitch, hideEventsSwitch, ...gradeList.querySelectorAll("input")];
   fields.forEach((field) => (field.disabled = true));
   try {
     const response = await apiFetch("/api/settings", {
@@ -194,6 +197,7 @@ function saveGrades() {
 gradesSwitch.addEventListener("change", () => save({ grades_high_to_low: gradesSwitch.checked }));
 feedbackPopup.addEventListener("change", () => save({ feedback_popup: feedbackPopup.value }));
 chatbotSwitch.addEventListener("change", () => save({ chatbot_enabled: chatbotSwitch.checked }));
+hideEventsSwitch.addEventListener("change", () => save({ hide_events_from_students: hideEventsSwitch.checked }));
 
 async function loadSettings(clearStatus = true) {
   try {
