@@ -99,6 +99,8 @@ async function saveAnswers() {
       if (!response) return false;
       if (!response.ok) {
         const data = await response.json();
+        // The server did not keep these (for example it is under maintenance): send them with the next save.
+        Object.keys(sending).forEach((id) => changedIds.add(Number(id)));
         saveStatus.textContent = data.error || t("Could not save.");
         return false;
       }
