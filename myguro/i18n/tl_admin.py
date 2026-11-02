@@ -244,6 +244,44 @@ ADMIN = {
     "Previous month": "Nakaraang buwan",
     "Next month": "Susunod na buwan",
     "Today": "Ngayon",
+    "What it celebrates": "Ano ang ipinagdiriwang",
+    "One or two sentences that tell students what the day is about.": "Isa o dalawang pangungusap na nagsasabi sa mga estudyante kung tungkol saan ang araw.",
+    "The description can be at most {MAX_DESCRIPTION_LENGTH} characters.": "Hanggang {MAX_DESCRIPTION_LENGTH} na characters lang ang description.",
+    # What each national holiday is about (the sentences are in domain/holidays.py DESCRIPTIONS)
+    "Marks the first day of the new year. Families gather and welcome it with noise and round fruits, a Filipino tradition for good luck.":
+        "Ito ang unang araw ng bagong taon. Nagtitipon ang mga pamilya at sinasalubong ito ng ingay at bilog na prutas, isang tradisyon ng mga Pilipino para sa swerte.",
+    "Remembers the peaceful People Power Revolution of 1986, when millions of Filipinos gathered on EDSA, ended the rule of Ferdinand Marcos and brought back democracy.":
+        "Inaalala ang mapayapang People Power Revolution noong 1986, nang milyon-milyong Pilipino ang nagtipon sa EDSA, tinapos ang pamumuno ni Ferdinand Marcos at ibinalik ang demokrasya.",
+    "The Day of Valor. It honors the Filipino and American soldiers who fought in the Battle of Bataan in 1942, and those who suffered in the Bataan Death March that followed.":
+        "Ang Araw ng Kagitingan. Pinararangalan nito ang mga sundalong Pilipino at Amerikano na lumaban sa Battle of Bataan noong 1942, at ang mga nagdusa sa Bataan Death March na sumunod.",
+    "Honors Filipino workers and what they give to the country. Workers around the world celebrate it on the same day.":
+        "Pinararangalan ang mga manggagawang Pilipino at ang naiaambag nila sa bansa. Ipinagdiriwang ito ng mga manggagawa sa buong mundo sa parehong araw.",
+    "Remembers June 12, 1898, when Emilio Aguinaldo declared the independence of the Philippines from Spain in Kawit, Cavite.":
+        "Inaalala ang Hunyo 12, 1898, nang ideklara ni Emilio Aguinaldo ang kalayaan ng Pilipinas mula sa Spain sa Kawit, Cavite.",
+    "Remembers Senator Benigno \"Ninoy\" Aquino Jr., who was shot on August 21, 1983 when he came home. His death moved many Filipinos to join the movement that led to People Power.":
+        "Inaalala si Senador Benigno \"Ninoy\" Aquino Jr., na binaril noong Agosto 21, 1983 nang umuwi siya. Dahil sa pagkamatay niya, maraming Pilipino ang sumali sa kilusang humantong sa People Power.",
+    "Filipinos visit the graves of their loved ones, clean them, and leave flowers and candles to pray for them. The next day, November 2, is All Souls' Day.":
+        "Dinadalaw ng mga Pilipino ang libingan ng mga mahal nila sa buhay, nililinis ito, at nag-iiwan ng bulaklak at kandila para ipagdasal sila. Ang kasunod na araw, Nobyembre 2, ay All Souls' Day.",
+    "Honors Andres Bonifacio, born on November 30, 1863, who founded the Katipunan and is called the Father of the Philippine Revolution.":
+        "Pinararangalan si Andres Bonifacio, ipinanganak noong Nobyembre 30, 1863, na nagtatag ng Katipunan at tinatawag na Ama ng Rebolusyong Pilipino.",
+    "A Catholic feast in honor of the Virgin Mary, who is the patroness of the Philippines.":
+        "Isang Catholic feast bilang parangal sa Birheng Maria, na patroness ng Pilipinas.",
+    "The night before Christmas. Families go to the last night mass, called Simbang Gabi, and share Noche Buena, a feast at midnight.":
+        "Ang gabi bago mag-Pasko. Pumupunta ang mga pamilya sa huling night mass, na tinatawag na Simbang Gabi, at nagsasalo sa Noche Buena, isang handaan sa hatinggabi.",
+    "Celebrates the birth of Jesus Christ. Filipinos spend it with family, gifts and food, and the Christmas season starts as early as September.":
+        "Ipinagdiriwang ang kapanganakan ni Jesus Christ. Ginugugol ito ng mga Pilipino kasama ang pamilya, may regalo at pagkain, at nagsisimula ang Christmas season sa Setyembre pa lang.",
+    "Remembers Dr. José Rizal, our national hero, who was executed on December 30, 1896. His novels Noli Me Tangere and El Filibusterismo woke Filipinos to seek freedom.":
+        "Inaalala si Dr. José Rizal, ang ating pambansang bayani, na pinatay noong Disyembre 30, 1896. Ang mga nobela niyang Noli Me Tangere at El Filibusterismo ang gumising sa mga Pilipino na maghangad ng kalayaan.",
+    "The last day of the year. Families share Media Noche, a meal at midnight, and welcome the new year with noise, lights and fireworks.":
+        "Ang huling araw ng taon. Nagsasalo ang mga pamilya sa Media Noche, isang handaan sa hatinggabi, at sinasalubong ang bagong taon ng ingay, ilaw at paputok.",
+    "Part of Holy Week. It remembers the Last Supper of Jesus with his apostles. Many Filipinos do Visita Iglesia, visiting several churches to pray.":
+        "Bahagi ng Holy Week. Inaalala nito ang Last Supper ni Jesus kasama ang kanyang mga apostol. Maraming Pilipino ang nag-Visita Iglesia, dinadalaw ang ilang simbahan para magdasal.",
+    "Remembers the suffering and death of Jesus on the cross. It is a quiet day of prayer and fasting, with processions and the Way of the Cross.":
+        "Inaalala ang paghihirap at pagkamatay ni Jesus sa krus. Tahimik itong araw ng dasal at pag-aayuno, may mga prusisyon at Way of the Cross.",
+    "The day between Good Friday and Easter Sunday, when Jesus lay in the tomb. It is a day of quiet waiting before Easter.":
+        "Ang araw sa pagitan ng Good Friday at Easter Sunday, nang nasa libingan si Jesus. Araw ito ng tahimik na paghihintay bago mag-Easter.",
+    "Honors all the heroes, known and unknown, who fought for the freedom of the Philippines. It is held on the last Monday of August.":
+        "Pinararangalan ang lahat ng bayani, kilala man o hindi, na lumaban para sa kalayaan ng Pilipinas. Ginaganap ito tuwing huling Lunes ng Agosto.",
     "Calendar view": "View ng calendar",
     "Month": "Buwan",
     "Day": "Araw",

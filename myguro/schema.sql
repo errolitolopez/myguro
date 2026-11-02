@@ -315,6 +315,7 @@ CREATE TABLE IF NOT EXISTS local_holidays (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     day TEXT NOT NULL,
     name TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',  -- the admin's optional note: what the day is about
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS local_holidays_day ON local_holidays (day);

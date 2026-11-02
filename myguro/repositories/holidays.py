@@ -11,11 +11,13 @@ class HolidayRepository(Repository):
     def get(self, holiday_id):
         return self.one("SELECT * FROM local_holidays WHERE id = ?", (holiday_id,))
 
-    def create(self, day, name):
-        return self.execute("INSERT INTO local_holidays (day, name) VALUES (?, ?)", (day, name)).lastrowid
+    def create(self, day, name, description=""):
+        return self.execute("INSERT INTO local_holidays (day, name, description) VALUES (?, ?, ?)",
+                            (day, name, description)).lastrowid
 
-    def update(self, holiday_id, day, name):
-        self.execute("UPDATE local_holidays SET day = ?, name = ? WHERE id = ?", (day, name, holiday_id))
+    def update(self, holiday_id, day, name, description=""):
+        self.execute("UPDATE local_holidays SET day = ?, name = ?, description = ? WHERE id = ?",
+                     (day, name, description, holiday_id))
 
     def delete(self, holiday_id):
         self.execute("DELETE FROM local_holidays WHERE id = ?", (holiday_id,))

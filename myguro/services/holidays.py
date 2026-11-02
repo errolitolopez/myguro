@@ -15,28 +15,29 @@ class HolidayService(Service):
         """Every holiday of a calendar year, national and local, by date. Local ones carry their id."""
         year = rules.check_year(value)
         items = rules.national_holidays(year)
-        items += [{"id": row["id"], "day": row["day"], "name": row["name"], "kind": rules.LOCAL}
+        items += [{"id": row["id"], "day": row["day"], "name": row["name"], "kind": rules.LOCAL,
+                   "description": row["description"]}
                   for row in self.holidays.in_year(year)]
         items.sort(key=lambda item: item["day"])
         return {"year": year, "holidays": items}
 
     def add(self, data):
         """Admin: add a local holiday. Returns its id."""
-        day, name = rules.check_holiday(data)
+        day, name, description = rules.check_holiday(data)
         if self.holidays.exists(day, name):
             raise ValidationError("This holiday is already on the calendar.")
-        holiday_id = self.holidays.create(day, name)
+        holiday_id = self.holidays.create(day, name, description)
         self.log("holiday.added", "settings", f"Added the holiday {name} on {day}.", ("holiday", holiday_id, name))
         self.commit()
         return holiday_id
 
     def update(self, holiday_id, data):
-        """Admin: change a local holiday's date or name."""
+        """Admin: change a local holiday's date, name or description."""
         row = self.holiday_or_404(holiday_id)
-        day, name = rules.check_holiday(data)
+        day, name, description = rules.check_holiday(data)
         if (day, name.lower()) != (row["day"], row["name"].lower()) and self.holidays.exists(day, name):
             raise ValidationError("This holiday is already on the calendar.")
-        self.holidays.update(holiday_id, day, name)
+        self.holidays.update(holiday_id, day, name, description)
         self.log("holiday.updated", "settings", f"Changed the holiday {row['name']} to {name} on {day}.",
                  ("holiday", holiday_id, name))
         self.commit()

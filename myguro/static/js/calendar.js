@@ -133,6 +133,13 @@ function holidayItem(holiday) {
   details.className = "small text-body-secondary";
   details.textContent = formatDay(holiday.day);
   text.append(name, details);
+  // What the day is about: our own sentence for a national holiday (translated), the admin's words for a local one.
+  if (holiday.description) {
+    const about = document.createElement("div");
+    about.className = "small mt-1";
+    about.textContent = t(holiday.description);
+    text.append(about);
+  }
   const badge = document.createElement("span");
   badge.className = `badge ${KIND_BADGE[holiday.kind]}`;
   badge.textContent = t(KIND_LABEL[holiday.kind]);
@@ -267,6 +274,7 @@ if (isAdmin) {
   const form = document.getElementById("holiday-form");
   const dayInput = document.getElementById("holiday-day");
   const nameInput = document.getElementById("holiday-name");
+  const descriptionInput = document.getElementById("holiday-description");
 
   // openHolidayForm() -> a blank form; openHolidayForm(holiday) -> that holiday, to change it
   window.openHolidayForm = (holiday) => {
@@ -274,6 +282,7 @@ if (isAdmin) {
     document.getElementById("holiday-modal-title").textContent = holiday ? t("Edit local holiday") : t("Add local holiday");
     dayInput.value = holiday ? holiday.day : (view === "day" ? dayIso(shownDate) : isoDay(shownYear, shownMonth, 1));
     nameInput.value = holiday ? holiday.name : "";
+    descriptionInput.value = holiday ? holiday.description : "";
     hideError("holiday-form-error");
     modal.show();
   };
@@ -288,7 +297,7 @@ if (isAdmin) {
       const response = await apiFetch(editingId ? `/api/calendar/holidays/${editingId}` : "/api/calendar/holidays", {
         method: editingId ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ day: dayInput.value, name: nameInput.value }),
+        body: JSON.stringify({ day: dayInput.value, name: nameInput.value, description: descriptionInput.value }),
       });
       if (!response) return;
       if (!response.ok) {

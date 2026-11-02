@@ -199,6 +199,9 @@ def add_missing_columns(db):
             "ALTER TABLE activity_sections ADD COLUMN description_format TEXT NOT NULL DEFAULT 'plain' "
             "CHECK (description_format IN ('plain', 'rich'))"
         )
+    holiday_columns = [row["name"] for row in db.execute("PRAGMA table_info(local_holidays)")]
+    if holiday_columns and "description" not in holiday_columns:
+        db.execute("ALTER TABLE local_holidays ADD COLUMN description TEXT NOT NULL DEFAULT ''")
     log_columns = [row["name"] for row in db.execute("PRAGMA table_info(activity_log)")]
     if "device" not in log_columns:
         db.execute("ALTER TABLE activity_log ADD COLUMN device TEXT NOT NULL DEFAULT ''")

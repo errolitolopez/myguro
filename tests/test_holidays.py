@@ -36,7 +36,7 @@ def test_admin_adds_changes_and_removes_a_local_holiday(admin, teacher):
     assert response.status_code == 201
     holiday_id = response.get_json()["id"]
     local = [h for h in teacher.get("/api/calendar?year=2026").get_json()["holidays"] if h["kind"] == "local"]
-    assert local == [{"id": holiday_id, "day": "2026-03-10", "name": "Town Fiesta", "kind": "local"}]
+    assert local == [{"id": holiday_id, "day": "2026-03-10", "name": "Town Fiesta", "kind": "local", "description": ""}]
     # Another year does not show it
     assert not [h for h in teacher.get("/api/calendar?year=2027").get_json()["holidays"] if h["kind"] == "local"]
 
@@ -74,3 +74,24 @@ def test_calendar_page_has_a_month_and_a_day_view_in_both_languages(admin, teach
     assert "Nakaraang araw" in page and "Susunod na araw" in page and ">Buwan<" in page
     assert '"No holiday on this day.": "Walang holiday sa araw na ito."' in page  # for calendar.js
 
+
+def test_every_national_holiday_says_what_it_celebrates_in_both_languages():
+    from myguro.domain.holidays import national_holidays
+    from myguro.i18n.tl import CLIENT_TEXT
+    for year in (2026, 2027):  # Holy Week and National Heroes Day move; the rest are fixed
+        for holiday in national_holidays(year):
+            assert holiday["description"], holiday["name"]
+            assert holiday["description"] in CLIENT_TEXT, holiday["name"]  # calendar.js translates it
+
+
+def test_a_local_holiday_can_have_a_description_the_admin_writes(admin, teacher):
+    body = {"day": "2026-03-10", "name": "Town Fiesta", "description": "  The town   remembers its saint.  "}
+    holiday_id = admin.post("/api/calendar/holidays", json=body).get_json()["id"]
+    local = [h for h in teacher.get("/api/calendar?year=2026").get_json()["holidays"] if h["kind"] == "local"]
+    assert local[0]["description"] == "The town remembers its saint."
+    body["description"] = "Changed."
+    assert admin.put(f"/api/calendar/holidays/{holiday_id}", json=body).status_code == 200
+    local = [h for h in teacher.get("/api/calendar?year=2026").get_json()["holidays"] if h["kind"] == "local"]
+    assert local[0]["description"] == "Changed."
+    too_long = admin.post("/api/calendar/holidays", json={**body, "name": "Other", "description": "x" * 301})
+    assert error(too_long) == "The description can be at most 300 characters."
