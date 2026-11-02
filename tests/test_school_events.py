@@ -62,5 +62,5 @@ def test_only_the_admin_can_change_events(teacher):
     body = {"start_day": "2028-01-10", "name": "Fair"}
     assert teacher.post("/api/calendar/events", json=body).status_code == 403
     assert student.post("/api/calendar/events", json=body).status_code == 403
-    assert len(events(student, 2026)) > 0
+    assert len(events(teacher, 2026)) > 0
     assert 'id="event-modal"' not in teacher.get("/calendar").get_data(as_text=True)

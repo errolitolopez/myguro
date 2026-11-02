@@ -1,4 +1,4 @@
-"""The calendar: a page for admin, teachers and students; the admin adds local holidays and school events."""
+"""The calendar: a public page (anyone may read the holidays, without logging in); the admin adds local holidays and school events."""
 
 from datetime import date
 
@@ -9,7 +9,9 @@ from myguro.config import GENERATED_BY, school_today
 from myguro.domain.holidays import MAX_YEAR, MIN_YEAR
 from myguro.services.holidays import HolidayService
 from myguro.services.school_events import SchoolEventService
-from myguro.web.security import current_user, json_body, role_required_api, role_required_page
+from myguro.web.security import (
+    current_user, json_body, optional_login_api, optional_login_page, role_required_api,
+)
 
 bp = Blueprint("calendar", __name__)
 
@@ -26,7 +28,7 @@ def event_service():
 @bp.get("/calendar")
 @bp.get("/calendar/<int:year>/<int:month>")
 @bp.get("/calendar/<int:year>/<int:month>/<int:day>")
-@role_required_page("admin", "teacher", "student")
+@optional_login_page
 def page(year=None, month=None, day=None):
     if year is not None:
         try:
@@ -40,19 +42,19 @@ def page(year=None, month=None, day=None):
 
 
 @bp.get("/api/calendar")
-@role_required_api("admin", "teacher", "student")
+@optional_login_api
 def api_year():
     return jsonify(service().year(request.args.get("year", school_today().year)))
 
 
 @bp.get("/api/calendar/upcoming")
-@role_required_api("admin", "teacher", "student")
+@optional_login_api
 def api_upcoming():
     return jsonify(service().upcoming())
 
 
 @bp.get("/api/calendar/search")
-@role_required_api("admin", "teacher", "student")
+@optional_login_api
 def api_search():
     return jsonify(service().search(request.args.get("q", "")))
 

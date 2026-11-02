@@ -104,10 +104,18 @@ def test_a_month_or_a_day_has_its_own_address(teacher):
         assert teacher.get(path).status_code == 404
 
 
-def test_a_shared_link_comes_back_after_login(app):
-    response = app.test_client().get("/calendar/2026/09/15")
-    assert response.status_code == 302
-    assert response.headers["Location"] == "/login?next=/calendar/2026/09/15"
+def test_the_calendar_is_public_and_shows_only_holidays(app, admin):
+    visitor = app.test_client()
+    page = visitor.get("/calendar/2026/09/15")
+    assert page.status_code == 200 and 'href="/login"' in page.get_data(as_text=True)
+    assert 'id="add-event-button"' not in page.get_data(as_text=True)
+    year = visitor.get("/api/calendar?year=2026").get_json()
+    assert year["events"] == [] and len(year["holidays"]) > 0
+    assert search(visitor, "brigada") == [] and search(visitor, "rizal day")
+    assert visitor.get("/api/calendar/upcoming").status_code == 200
+    assert len(admin.get("/api/calendar?year=2026").get_json()["events"]) > 0
+    # Reading is open, changing is not
+    assert visitor.post("/api/calendar/holidays", json={"day": "2030-03-10", "name": "X"}).status_code == 401
 
 
 def search(client, text):
@@ -138,10 +146,6 @@ def test_students_do_not_see_school_events_unless_the_admin_allows_it(admin, tea
     admin.put("/api/settings", json={"hide_events_from_students": False})
     events, found, _ = seen()
     assert events > 0 and found > 0
-
-
-def test_search_needs_a_login(app):
-    assert app.test_client().get("/api/calendar/search?q=brigada").status_code == 401
 
 
 def test_admin_and_teachers_can_make_the_holiday_image(admin, teacher):

@@ -7,7 +7,7 @@ from myguro.services.settings import SettingsService
 
 
 class HolidayService(Service):
-    """The holiday calendar: everyone reads it, the admin adds local holidays."""
+    """The holiday calendar: anyone reads the holidays (even without logging in), the admin adds local holidays."""
 
     def __init__(self, db, user=None):
         super().__init__(db, user)
@@ -15,9 +15,11 @@ class HolidayService(Service):
         self.events = SchoolEventRepository(db)
 
     def events_hidden(self):
-        """True when this user is a student and the admin keeps school events from students."""
-        return (self.user is not None and self.user["role"] == "student"
-                and SettingsService(self.db, self.user).hide_events_from_students())
+        """True when this person must not see school events: anyone not logged in (the public calendar shows
+        only holidays), a supervisor, or a student while the admin keeps events from students."""
+        if self.user is None or self.user["role"] == "supervisor":
+            return True
+        return self.user["role"] == "student" and SettingsService(self.db, self.user).hide_events_from_students()
 
     def year(self, value):
         """Every holiday of a calendar year, national and local, by date (local ones carry their id), and the

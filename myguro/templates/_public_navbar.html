@@ -1,0 +1,22 @@
+{# The bar for someone who is not logged in (the public calendar): the logo, a theme menu and a way to log in. #}
+<nav class="navbar bg-success">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center" href="{{ url_for('auth.login_page') }}" aria-label="{{ _("MyGuro home") }}">
+      {% with height=30 %}{% include "_logo.html" %}{% endwith %}
+    </a>
+    <div class="d-flex align-items-center gap-2">
+      <div class="dropdown">
+        <button class="btn btn-outline-secondary bi bi-circle-half" type="button" data-bs-toggle="dropdown"
+                aria-expanded="false" aria-label="{{ _("Change theme") }}" title="{{ _("Change theme") }}"></button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><h6 class="dropdown-header">{{ _("Theme") }}</h6></li>
+          {% for value, label in (("auto", "Auto"), ("light", "Light"), ("dark", "Dark"), ("darcula", "Darcula"),
+                                  ("solarized", "Solarized"), ("neon", "Neon")) %}
+          <li><button class="dropdown-item" type="button" data-theme-choice="{{ value }}">{{ label }}</button></li>
+          {% endfor %}
+        </ul>
+      </div>
+      <a class="btn btn-light bi bi-box-arrow-in-right" href="{{ url_for('auth.login_page') }}"> {{ _("Login") }}</a>
+    </div>
+  </div>
+</nav>

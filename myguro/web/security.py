@@ -60,8 +60,7 @@ def login_required_page(view):
     def wrapper(*args, **kwargs):
         user = current_user()
         if user is None:
-            # A shared calendar link must still open after logging in. login.js checks this address before using it.
-            return redirect(url_for("auth.login_page", next=request.path if request.endpoint == "calendar.page" else None))
+            return redirect(url_for("auth.login_page"))
         if user["must_change_password"]:
             return redirect(url_for("auth.change_password_page"))
         return view(*args, **kwargs)
@@ -76,6 +75,29 @@ def login_required_api(view):
         if user is None:
             return jsonify(error="Please log in."), 401
         if user["must_change_password"]:
+            return jsonify(error="Please change your password first.", must_change_password=True), 403
+        return view(*args, **kwargs)
+    return wrapper
+
+
+def optional_login_page(view):
+    """For public HTML pages: anyone may open them, logged in or not. Someone who still has a temporary
+    password is sent to change it first, like on every other page."""
+    @wraps(view)
+    def wrapper(*args, **kwargs):
+        user = current_user()
+        if user is not None and user["must_change_password"]:
+            return redirect(url_for("auth.change_password_page"))
+        return view(*args, **kwargs)
+    return wrapper
+
+
+def optional_login_api(view):
+    """For public API routes: anyone may call them, logged in or not."""
+    @wraps(view)
+    def wrapper(*args, **kwargs):
+        user = current_user()
+        if user is not None and user["must_change_password"]:
             return jsonify(error="Please change your password first.", must_change_password=True), 403
         return view(*args, **kwargs)
     return wrapper

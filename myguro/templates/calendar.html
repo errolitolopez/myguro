@@ -3,7 +3,7 @@
 {% block title %}{{ _("Calendar") }} · MyGuro{% endblock %}
 
 {% block content %}
-{% include "_navbar.html" %}
+{% if user %}{% include "_navbar.html" %}{% else %}{% include "_public_navbar.html" %}{% endif %}
 
 <main class="container py-3" id="calendar-page" data-admin="{{ 'yes' if user.role == 'admin' else 'no' }}">
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
