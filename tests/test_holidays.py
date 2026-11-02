@@ -36,9 +36,9 @@ def test_admin_adds_changes_and_removes_a_local_holiday(admin, teacher):
     assert response.status_code == 201
     holiday_id = response.get_json()["id"]
     local = [h for h in teacher.get("/api/calendar?year=2026").get_json()["holidays"] if h["kind"] == "local"]
-    assert local == [{"id": holiday_id, "day": "2026-03-10", "name": "Town Fiesta", "kind": "local", "description": ""}]
+    assert {"id": holiday_id, "day": "2026-03-10", "name": "Town Fiesta", "kind": "local", "description": ""} in local
     # Another year does not show it
-    assert not [h for h in teacher.get("/api/calendar?year=2027").get_json()["holidays"] if h["kind"] == "local"]
+    assert ("2026-03-10", "Town Fiesta") not in names(teacher.get("/api/calendar?year=2027"))
 
     assert admin.put(f"/api/calendar/holidays/{holiday_id}", json={"day": "2026-03-11", "name": "Fiesta"}).status_code == 200
     assert ("2026-03-11", "Fiesta") in names(teacher.get("/api/calendar?year=2026"))

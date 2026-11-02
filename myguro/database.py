@@ -8,7 +8,7 @@ from flask import current_app, g
 from flask.cli import with_appcontext
 from werkzeug.security import generate_password_hash
 
-from myguro.migrations import add_missing_columns, copy_old_rows, upgrade_old_tables
+from myguro.migrations import add_missing_columns, copy_old_rows, load_deped_calendar, upgrade_old_tables
 
 DEFAULT_ADMIN_USERNAME = "admin"
 DEFAULT_ADMIN_PASSWORD = "admin"
@@ -38,6 +38,7 @@ def init_db():
     for table in rebuilt:
         copy_old_rows(db, table)
     add_missing_columns(db)
+    load_deped_calendar(db)
     create_default_admin(db)
 
 

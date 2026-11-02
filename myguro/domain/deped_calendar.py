@@ -1,0 +1,112 @@
+"""The DepEd school calendar for SY 2026-2027 (DepEd Order No. 09, s. 2026, Annex B), loaded once into a database."""
+
+# (first day, last day, name), in the order of the Annex. The holidays it lists are not here: the calendar works out
+# the national ones itself (domain/holidays.py). The wording and the "Start of" / "End of" pairs are the Annex's own.
+SCHOOL_EVENTS = [
+    # End of SY 2025-2026
+    ("2026-04-01", "2026-05-01", "30-day Teachers' EOSY Break"),
+    ("2026-04-13", "2026-04-17", "2026 National Schools Press Conference (NSPC)"),
+    ("2026-04-18", "2026-04-22", "2026 National Festival of Talents (NFOT)"),
+    ("2026-04-25", "2026-04-30", "2026 Palarong Pambansa"),
+    ("2026-05-04", "2026-05-22", "EOSY Intervention Program"),
+    ("2026-05-04", "2026-05-29", "Training Window for Teachers, School Heads, and Teaching-Related Personnel"),
+    ("2026-05-04", "2026-05-29", "Oplan Balik Eskwela"),
+    # Term 1
+    ("2026-06-01", "2026-06-05", "Brigada Eskwela"),
+    ("2026-06-01", "2026-06-05", "Enrollment Period"),
+    ("2026-06-08", "2026-06-11", "Opening Block: Start of Term 1"),
+    ("2026-06-08", "2026-06-11", "Start of Mandatory Learners' Health Assessment, Learners and Parents' Orientation, "
+                                 "and other activities"),
+    ("2026-06-08", "2026-06-11", "Start of Testing Window for BOSY Assessments (CRLA, RMA, Phil-IRI, etc.)"),
+    ("2026-06-08", "2026-06-11", "Gathering and Submission of Data needed for the New School Year"),
+    ("2026-06-22", "2026-06-26", "Phil ECD Checklist for BOSY"),
+    ("2026-06-23", "2026-06-23", "DepEd's Founding Anniversary: Flag Raising Ceremony and Opening of Activity"),
+    ("2026-06-24", "2026-06-24", "DepEd's Founding Anniversary: Anniversary Proper"),
+    ("2026-07-03", "2026-07-03", "End of Mandatory Learners' Health Assessment"),
+    ("2026-07-06", "2026-07-06", "Term 1: First Teacher-made Summative Test"),
+    ("2026-07-10", "2026-07-10", "End of Testing Window for BOSY Assessments (CRLA, RMA, Phil-IRI, etc.)"),
+    ("2026-07-13", "2026-07-17", "MFAT"),
+    ("2026-07-20", "2026-07-24", "National Federation SELG and SSLG Election"),
+    ("2026-07-28", "2026-07-28", "Term 1: Second Teacher-made Summative Test"),
+    ("2026-08-28", "2026-08-28", "Term 1 Examination"),
+    ("2026-09-01", "2026-09-01", "Term 1 Examination"),
+    ("2026-09-02", "2026-09-15", "End-of-Term Block"),
+    ("2026-09-02", "2026-09-08", "ARAL Program, Computation of Grades, Accomplishment of School Forms, and "
+                                 "Co-/Extra-Curricular Activities"),
+    ("2026-09-05", "2026-09-05", "Start of National Teachers' Month"),
+    ("2026-09-09", "2026-09-09", "PTA Meeting and Distribution of Report Cards"),
+    ("2026-09-10", "2026-09-11", "INSET"),
+    ("2026-09-10", "2026-09-15", "Wellness Break of Learners (guided asynchronous learning experiences)"),
+    ("2026-09-14", "2026-09-15", "Wellness Break of Teachers"),
+    ("2026-09-15", "2026-09-15", "End of Term 1"),
+    # Term 2
+    ("2026-09-16", "2026-09-16", "Start of Term 2"),
+    ("2026-09-16", "2026-09-16", "Start of Testing Window for NCAE (Grade 10 only)"),
+    ("2026-09-21", "2026-09-25", "Start of Testing Window for MOSY Assessments (CRLA, RMA, Phil-IRI, etc.)"),
+    ("2026-10-05", "2026-10-05", "Culmination of National Teachers' Month"),
+    ("2026-10-05", "2026-10-05", "World Teachers' Day"),
+    ("2026-10-05", "2026-10-09", "NAT for Grade 10"),
+    ("2026-10-07", "2026-10-07", "Term 2: First Teacher-made Summative Test"),
+    ("2026-10-19", "2026-10-23", "End of Testing Window for MOSY Assessments (CRLA, RMA, Phil-IRI, etc.)"),
+    ("2026-10-29", "2026-10-29", "Term 2: Second Teacher-made Summative Test"),
+    ("2026-11-15", "2026-11-15", "PEPT (Luzon and VisMin Clusters)"),
+    ("2026-11-27", "2026-11-27", "Araw ng Pagbasa"),
+    ("2026-12-03", "2026-12-04", "Term 2 Examination"),
+    ("2026-12-04", "2026-12-04", "End of Testing Window for NCAE (Grade 10 only)"),
+    ("2026-12-07", "2026-12-18", "End-of-Term Block"),
+    ("2026-12-07", "2026-12-14", "ARAL Program, Computation of Grades, Accomplishment of School Forms, and "
+                                 "Co-/Extra-Curricular Activities"),
+    ("2026-12-15", "2026-12-15", "PTA Meeting and Distribution of Progress/Performance Report"),
+    ("2026-12-16", "2026-12-16", "Year-End Activity"),
+    ("2026-12-17", "2026-12-18", "INSET"),
+    ("2026-12-17", "2026-12-18", "Wellness Break of Learners (guided asynchronous learning experiences)"),
+    ("2026-12-18", "2026-12-18", "End of Term 2"),
+    ("2026-12-19", "2026-12-31", "Year-End Break (Wellness Break of Learners and Teachers)"),
+    # Term 3
+    ("2027-01-04", "2027-01-04", "Start of Term 3"),
+    ("2027-01-25", "2027-01-25", "Term 3: First Teacher-made Summative Test"),
+    ("2027-01-30", "2027-02-26", "Early Registration for Incoming Kinder, Grades 1, 7, 11, OSCYA, and Transferees"),
+    ("2027-02-01", "2027-02-05", "Start of Testing Window for EOSY Assessments (CRLA, RMA, Phil-IRI, etc.)"),
+    ("2027-02-15", "2027-02-19", "NAT for Grade 12"),
+    ("2027-02-16", "2027-02-16", "Term 3: Second Teacher-made Summative Test"),
+    ("2027-03-01", "2027-03-05", "ELLNA for Grade 3"),
+    ("2027-03-08", "2027-03-12", "NAT for Grade 6"),
+    ("2027-03-08", "2027-03-12", "End of Testing Window for EOSY Assessments (CRLA, RMA, Phil-IRI, etc.)"),
+    ("2027-03-15", "2027-03-16", "Term 3 Examination (Moving Up/Graduating Learners)"),
+    ("2027-03-15", "2027-03-19", "Phil ECD Checklist for EOSY"),
+    ("2027-03-17", "2027-03-23", "Computation of Grades, Accomplishment of School Forms, and Academic Deliberation "
+                                 "(Moving Up/Graduating Learners)"),
+    ("2027-03-22", "2027-03-23", "Term 3 Examination (Other Grade Levels)"),
+    ("2027-03-24", "2027-03-24", "End-of-Term Block"),
+    ("2027-03-29", "2027-03-31", "End-of-Term Block"),
+    ("2027-03-24", "2027-03-24", "Announcement of Academic Excellence Awardees (Moving Up/Graduating Learners)"),
+    ("2027-03-24", "2027-03-24", "Computation of Grades (Other Grade Levels), Accomplishment of School Forms, and "
+                                 "Co-/Extra-Curricular Activities"),
+    ("2027-03-29", "2027-03-31", "Computation of Grades (Other Grade Levels), Accomplishment of School Forms, and "
+                                 "Co-/Extra-Curricular Activities"),
+    ("2027-04-01", "2027-04-08", "End-of-Term Block"),
+    ("2027-04-01", "2027-04-01", "Accomplishment of School Forms and Co-/Extra-Curricular Activities"),
+    ("2027-04-02", "2027-04-02", "INSET"),
+    ("2027-04-05", "2027-04-05", "INSET"),
+    ("2027-04-06", "2027-04-07", "EOSY Rites"),
+    ("2027-04-08", "2027-04-08", "PTA Meeting and Distribution of Report Cards"),
+    ("2027-04-08", "2027-04-08", "End of Term 3"),
+    # After SY 2026-2027
+    ("2027-04-09", "2027-05-09", "30-day Teachers' EOSY Break"),
+    ("2027-04-19", "2027-04-23", "2027 NSPC"),
+    ("2027-04-26", "2027-04-30", "2027 NFOT"),
+    ("2027-05-03", "2027-05-07", "2027 Palarong Pambansa"),
+    ("2027-05-10", "2027-05-14", "Start of EOSY Intervention Program"),
+    ("2027-05-10", "2027-05-14", "Start of Training Window for Teachers, School Heads, and Teaching-Related Personnel"),
+    ("2027-05-17", "2027-05-17", "Start of Oplan Balik Eskwela"),
+    ("2027-06-01", "2027-06-04", "End of Training Window for Teachers, School Heads, and Teaching-Related Personnel"),
+    ("2027-06-04", "2027-06-04", "End of Oplan Balik Eskwela"),
+    ("2027-06-07", "2027-06-11", "Brigada Eskwela"),
+    ("2027-06-07", "2027-06-11", "Enrollment Period"),
+]
+
+# Holidays in the Annex that are proclaimed each year, so domain/holidays.py cannot work them out: (day, name).
+LOCAL_HOLIDAYS = [
+    ("2026-11-02", "All Souls' Day"),
+    ("2027-02-06", "Chinese New Year"),
+]

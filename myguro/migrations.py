@@ -7,6 +7,9 @@ are handled here: upgrade_old_tables() runs before schema.sql, add_missing_colum
 from datetime import date
 
 from myguro.domain.accounts import display_name, guess_name_parts
+from myguro.domain.deped_calendar import LOCAL_HOLIDAYS, SCHOOL_EVENTS
+
+DEPED_CALENDAR_SETTING = "deped_calendar_2026_loaded"  # a new school year's list gets a new key
 
 # Tables from before students became accounts (when they joined with a class code + PIN).
 OLD_CLASS_TABLES = ["submission_answers", "submissions", "questions", "activities", "students", "classes"]
@@ -205,6 +208,20 @@ def add_missing_columns(db):
     log_columns = [row["name"] for row in db.execute("PRAGMA table_info(activity_log)")]
     if "device" not in log_columns:
         db.execute("ALTER TABLE activity_log ADD COLUMN device TEXT NOT NULL DEFAULT ''")
+    db.commit()
+
+
+def load_deped_calendar(db):
+    """Put the DepEd calendar into the database, once. The setting remembers it, so an event the admin
+    deleted does not come back when the app restarts."""
+    if db.execute("SELECT 1 FROM settings WHERE key = ?", (DEPED_CALENDAR_SETTING,)).fetchone():
+        return
+    db.executemany("INSERT INTO school_events (start_day, end_day, name) VALUES (?, ?, ?)", SCHOOL_EVENTS)
+    for day, name in LOCAL_HOLIDAYS:
+        # The admin may have added these by hand already.
+        if not db.execute("SELECT 1 FROM local_holidays WHERE day = ? AND name = ? COLLATE NOCASE", (day, name)).fetchone():
+            db.execute("INSERT INTO local_holidays (day, name) VALUES (?, ?)", (day, name))
+    db.execute("INSERT INTO settings (key, value) VALUES (?, '1')", (DEPED_CALENDAR_SETTING,))
     db.commit()
 
 
