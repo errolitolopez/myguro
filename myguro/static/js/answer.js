@@ -75,7 +75,7 @@ function setAnswer(questionId, value) {
 
 // savedText() -> "Saved at 3:42 PM"
 function savedText() {
-  return t("Saved at {time}", { time: new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) });
+  return t("Saved at {time}", { time: new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: true }) });
 }
 
 // Sends only the changed answers. Empty answers are sent as null (removes them).

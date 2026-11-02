@@ -26,6 +26,7 @@ const ROLE_BADGES = {
 function formatTime(value) {
   return new Date(value.replace(" ", "T") + "Z").toLocaleString(undefined, {
     month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit",
+    hour12: true, // a phone set to 24-hour would otherwise show 21:12; the app always shows AM / PM
     timeZone: SCHOOL_TIME_ZONE,
   });
 }

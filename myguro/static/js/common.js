@@ -37,6 +37,7 @@ function formatDay(isoDate) {
 function formatDateTime(utcText) {
   return new Date(utcText.replace(" ", "T") + "Z").toLocaleString(undefined, {
     month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
+    hour12: true, // always AM / PM, even when the phone is set to 24-hour
   });
 }
 
