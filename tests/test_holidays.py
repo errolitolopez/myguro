@@ -95,3 +95,16 @@ def test_a_local_holiday_can_have_a_description_the_admin_writes(admin, teacher)
     assert local[0]["description"] == "Changed."
     too_long = admin.post("/api/calendar/holidays", json={**body, "name": "Other", "description": "x" * 301})
     assert error(too_long) == "The description can be at most 300 characters."
+
+
+def test_a_month_or_a_day_has_its_own_address(teacher):
+    for path in ("/calendar/2026/09", "/calendar/2026/09/15"):
+        assert teacher.get(path).status_code == 200
+    for path in ("/calendar/2026/13", "/calendar/2026/02/30", "/calendar/1999/01"):
+        assert teacher.get(path).status_code == 404
+
+
+def test_a_shared_link_comes_back_after_login(app):
+    response = app.test_client().get("/calendar/2026/09/15")
+    assert response.status_code == 302
+    assert response.headers["Location"] == "/login?next=/calendar/2026/09/15"

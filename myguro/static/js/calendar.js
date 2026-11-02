@@ -23,6 +23,7 @@ let editingId = null;
 let editingEventId = null;
 let view = "month"; // "month" or "day"
 let shownDate = new Date(today.getFullYear(), today.getMonth(), today.getDate()); // the day in the Day view
+let firstDraw = true;
 
 // isoDay(2026, 0, 5) -> "2026-01-05"
 const isoDay = (year, month, day) =>
@@ -262,7 +263,35 @@ function drawDay() {
   document.getElementById("day-holidays").replaceChildren(...holidays.map(holidayItem));
 }
 
+// calendarPath() -> "/calendar/2026/09" for a month, "/calendar/2026/09/15" for a day
+function calendarPath() {
+  const [year, month, day] = (view === "day" ? dayIso(shownDate) : isoDay(shownYear, shownMonth, 1)).split("-");
+  return view === "day" ? `/calendar/${year}/${month}/${day}` : `/calendar/${year}/${month}`;
+}
+
+// Keeps the address on what is shown, so it can be shared and the browser's Back button works. The first page
+// replaces the address instead, or Back would land on /calendar and bounce forward again.
+function updateAddress() {
+  const path = calendarPath();
+  if (window.location.pathname === path) return;
+  if (firstDraw) window.history.replaceState(null, "", path);
+  else window.history.pushState(null, "", path);
+}
+
+// Sets shownDate from the address and returns the view it asks for. Plain /calendar means this month.
+function readAddress() {
+  const found = window.location.pathname.match(/^\/calendar\/(\d+)\/(\d+)(?:\/(\d+))?/);
+  if (!found) {
+    shownDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    return "month";
+  }
+  shownDate = new Date(Number(found[1]), Number(found[2]) - 1, Number(found[3] || 1));
+  return found[3] ? "day" : "month";
+}
+
 async function show() {
+  updateAddress();
+  firstDraw = false;
   if (!(await loadYear(shownYear))) return;
   if (view === "day") {
     drawDay();
@@ -314,6 +343,19 @@ document.getElementById("view-day").addEventListener("click", () => {
   if (view === "month") shownDate = thisMonth ? new Date(today.getFullYear(), today.getMonth(), today.getDate()) : new Date(shownYear, shownMonth, 1);
   setView("day");
 });
+window.addEventListener("popstate", () => setView(readAddress()));
+
+const copyLinkButton = document.getElementById("copy-link");
+copyLinkButton.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(window.location.href);
+    copyLinkButton.textContent = ` ${t("Copied!")}`;
+  } catch {
+    copyLinkButton.textContent = ` ${t("Can't copy")}`;
+  }
+  setTimeout(() => (copyLinkButton.textContent = ` ${t("Copy link")}`), 1500);
+});
+
 document.getElementById("previous-day").addEventListener("click", () => moveDay(-1));
 document.getElementById("next-day").addEventListener("click", () => moveDay(1));
 document.getElementById("today-day-button").addEventListener("click", () => {
@@ -444,4 +486,4 @@ if (isAdmin) {
 }
 
 weekdayHeaders();
-setView("month");
+setView(readAddress());

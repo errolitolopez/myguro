@@ -23,6 +23,13 @@ async function offerToSavePassword(username, password) {
   }
 }
 
+// A shared calendar link sends a logged-out person here with ?next=/calendar/2026/09. Only that exact shape is
+// followed: anything else in the address could send them to another website after they type their password.
+function pageAfterLogin() {
+  const next = new URLSearchParams(window.location.search).get("next") || "";
+  return /^\/calendar(\/\d+){0,3}$/.test(next) ? next : "/dashboard";
+}
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   errorBox.classList.add("d-none");
@@ -46,7 +53,7 @@ form.addEventListener("submit", async (event) => {
     if (response.ok) {
       // A temporary password isn't worth saving: it is replaced right away on the change password page.
       if (!data.must_change_password) await offerToSavePassword(username, password);
-      window.location.href = data.must_change_password ? "/change-password" : "/dashboard";
+      window.location.href = data.must_change_password ? "/change-password" : pageAfterLogin();
       return;
     }
     // Only clear the password after a failed login: on success the browser

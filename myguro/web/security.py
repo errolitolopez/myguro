@@ -60,7 +60,8 @@ def login_required_page(view):
     def wrapper(*args, **kwargs):
         user = current_user()
         if user is None:
-            return redirect(url_for("auth.login_page"))
+            # A shared calendar link must still open after logging in. login.js checks this address before using it.
+            return redirect(url_for("auth.login_page", next=request.path if request.endpoint == "calendar.page" else None))
         if user["must_change_password"]:
             return redirect(url_for("auth.change_password_page"))
         return view(*args, **kwargs)

@@ -1,9 +1,12 @@
 """The calendar: a page for admin, teachers and students; the admin adds local holidays and school events."""
 
-from flask import Blueprint, jsonify, render_template, request
+from datetime import date
+
+from flask import Blueprint, abort, jsonify, render_template, request
 
 from myguro.database import get_db
 from myguro.config import school_today
+from myguro.domain.holidays import MAX_YEAR, MIN_YEAR
 from myguro.services.holidays import HolidayService
 from myguro.services.school_events import SchoolEventService
 from myguro.web.security import current_user, json_body, role_required_api, role_required_page
@@ -19,9 +22,19 @@ def event_service():
     return SchoolEventService(get_db(), current_user())
 
 
+# The month or day on screen is in the address, so a person can share the link to it. calendar.js reads the address.
 @bp.get("/calendar")
+@bp.get("/calendar/<int:year>/<int:month>")
+@bp.get("/calendar/<int:year>/<int:month>/<int:day>")
 @role_required_page("admin", "teacher", "student")
-def page():
+def page(year=None, month=None, day=None):
+    if year is not None:
+        try:
+            date(year, month, day or 1)
+        except ValueError:
+            abort(404)
+        if not MIN_YEAR <= year <= MAX_YEAR:
+            abort(404)
     return render_template("calendar.html", user=current_user())
 
 

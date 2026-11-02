@@ -314,6 +314,7 @@ ADMIN = {
     "This holiday is already on the calendar.": "Nasa calendar na ang holiday na ito.",
     "Holiday not found.": "Hindi nahanap ang holiday.",
     "Add school event": "Magdagdag ng school event",
+    "Copy link": "Kopyahin ang link",
     "Edit school event": "I-edit ang school event",
     "Delete school event": "I-delete ang school event",
     "Delete this school event?": "I-delete ang school event na ito?",

@@ -19,9 +19,12 @@
   <div id="calendar-error" class="alert alert-danger d-none" role="alert"></div>
 
   <!-- Month or one day; calendar.js shows one of the two views below. -->
-  <div class="btn-group mb-3" role="group" aria-label="{{ _("Calendar view") }}">
-    <button id="view-month" type="button" class="btn btn-outline-secondary" aria-pressed="true">{{ _("Month") }}</button>
-    <button id="view-day" type="button" class="btn btn-outline-secondary" aria-pressed="false">{{ _("Day") }}</button>
+  <div class="d-flex flex-wrap justify-content-between gap-2 mb-3">
+    <div class="btn-group" role="group" aria-label="{{ _("Calendar view") }}">
+      <button id="view-month" type="button" class="btn btn-outline-secondary" aria-pressed="true">{{ _("Month") }}</button>
+      <button id="view-day" type="button" class="btn btn-outline-secondary" aria-pressed="false">{{ _("Day") }}</button>
+    </div>
+    <button id="copy-link" type="button" class="btn btn-outline-secondary bi bi-link-45deg"> {{ _("Copy link") }}</button>
   </div>
 
   <div id="month-view">
