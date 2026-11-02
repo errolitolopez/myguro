@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _("Time records") }} · MyGuro{% endblock %}
+
+{% block content %}
+{% include "_navbar.html" %}
+
+<main class="container py-3">
+  <div id="records-error" class="alert alert-danger d-none" role="alert"></div>
+
+  <h1 class="h4 mb-3">{{ _("Time records") }} <span class="badge text-bg-warning align-middle">{{ _("Beta") }}</span></h1>
+
+  <div class="card card-body mb-3">
+    <div class="row g-2 align-items-end">
+      <div class="col-6 col-md-3">
+        <label for="records-from" class="form-label small mb-1">{{ _("From") }}</label>
+        <input id="records-from" class="form-control" type="date">
+      </div>
+      <div class="col-6 col-md-3">
+        <label for="records-to" class="form-label small mb-1">{{ _("To") }}</label>
+        <input id="records-to" class="form-control" type="date">
+      </div>
+      <div class="col-12 col-md-4">
+        <label for="records-teacher" class="form-label small mb-1">{{ _("Teacher") }}</label>
+        <select id="records-teacher" class="form-select">
+          <option value="">{{ _("All teachers") }}</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div id="records-list" class="list-group mb-3">
+    {% include "_skeleton.html" %}
+  </div>
+  <p class="small text-body-secondary">{{ _("A time in without a time out is shown as \"No time out\" and adds nothing to the total.") }}</p>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/time-records.js') }}"></script>
+{% endblock %}

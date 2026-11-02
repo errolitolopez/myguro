@@ -105,6 +105,18 @@
 
   <div class="card mb-3">
     <div class="card-body">
+      <div class="form-check form-switch">
+        <input id="time-clock-enabled" class="form-check-input" type="checkbox" role="switch" disabled>
+        <label for="time-clock-enabled" class="form-check-label fw-semibold">{{ _("Time in / time out for teachers") }} <span class="badge text-bg-warning">{{ _("Beta") }}</span></label>
+      </div>
+      <div class="form-text">
+        {{ _("Teachers get a Time in / Time out page to record when they start and stop working. They can time in again after timing out. You read everyone's records under Time records in the account menu. Off by default.") }}
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-body">
       <h2 class="h6 fw-semibold mb-1">{{ _("Support link") }}</h2>
       <div class="form-text mb-3">
         {{ _("A small \"support\" note at the bottom of each page for admin and teachers. Its button opens a window with the ways to give that you fill in below (Ko-fi, GCash). Students never see it.") }}

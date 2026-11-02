@@ -2,7 +2,7 @@
 
 import os
 import secrets
-from datetime import datetime
+from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
 MAX_UPLOAD_MB = 2
@@ -16,6 +16,11 @@ SCHOOL_TIMEZONE = ZoneInfo("Asia/Manila")
 
 def school_today():
     return datetime.now(SCHOOL_TIMEZONE).date()
+
+
+def utc_now():
+    """The current time as a timezone-aware UTC datetime (a function so tests can set the clock)."""
+    return datetime.now(timezone.utc)
 
 
 def school_now_text():

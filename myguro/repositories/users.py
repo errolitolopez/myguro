@@ -94,6 +94,10 @@ class UserRepository(Repository):
             return self.value("SELECT COUNT(*) FROM classes WHERE teacher_id = ?", (user["id"],))
         return self.value("SELECT COUNT(*) FROM class_students WHERE student_id = ?", (user["id"],))
 
+    def active_teachers(self):
+        """Every teacher account, by name (for the time records filter)."""
+        return self.all("SELECT id, name FROM users WHERE role = 'teacher' ORDER BY name COLLATE NOCASE, id")
+
     def has_recovery_code(self, user_id):
         """Whether the person has a recovery code that still has uses left."""
         return bool(self.value("SELECT COUNT(*) FROM recovery_codes WHERE user_id = ? AND uses_left > 0",

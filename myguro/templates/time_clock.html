@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _("Time in / out") }} · MyGuro{% endblock %}
+
+{% block content %}
+{% include "_navbar.html" %}
+
+<main class="container py-3" style="max-width: 760px;">
+  <div id="clock-error" class="alert alert-danger d-none" role="alert"></div>
+
+  <h1 class="h4 mb-3">{{ _("Time in / out") }} <span class="badge text-bg-warning align-middle">{{ _("Beta") }}</span></h1>
+
+  <div class="card mb-3">
+    <div class="card-body text-center">
+      <div id="clock-state" class="text-body-secondary mb-3">{{ _("Loading...") }}</div>
+      <div class="d-flex flex-wrap justify-content-center gap-2">
+        <button id="time-in-button" type="button" class="btn btn-success btn-lg bi bi-box-arrow-in-right d-none"> {{ _("Time in") }}</button>
+        <button id="time-out-button" type="button" class="btn btn-danger btn-lg bi bi-box-arrow-right d-none"> {{ _("Time out") }}</button>
+      </div>
+      <div class="form-text mt-3">{{ _("You can time in again after you time out, as many times as you need in a day.") }}</div>
+    </div>
+  </div>
+
+  <h2 class="h6">{{ _("Last 14 days") }}</h2>
+  <div id="clock-days" class="list-group mb-3">
+    {% include "_skeleton.html" %}
+  </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/time-clock.js') }}"></script>
+{% endblock %}

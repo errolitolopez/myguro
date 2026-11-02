@@ -16,7 +16,8 @@ from myguro.repositories.schedule import ScheduleRepository
 from myguro.repositories.school_years import SchoolYearRepository
 from myguro.repositories.settings import SettingsRepository
 from myguro.repositories.submissions import SubmissionRepository
+from myguro.repositories.time_clock import TimeClockRepository
 from myguro.repositories.users import UserRepository
 
 __all__ = ["ActivityRepository", "AssignmentRepository", "AttendanceRepository", "ChatRepository", "ClassRepository", "FeedbackRepository", "HolidayRepository", "LogRepository", "NotificationRepository", "RecoveryRepository", "ScheduleRepository", "SchoolEventRepository", "SchoolYearRepository",
-           "SettingsRepository", "SubmissionRepository", "UserRepository"]
+           "SettingsRepository", "SubmissionRepository", "TimeClockRepository", "UserRepository"]

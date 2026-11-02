@@ -68,6 +68,12 @@
         <li><h6 class="dropdown-header">{{ user.name }} ({{ user.role }})</h6></li>
         <!-- School year, display, password, recovery code and feedback are grouped on the Settings page. -->
         <li><a class="dropdown-item bi bi-gear {{ 'active' if request.endpoint in ('settings.page', 'display.page') }}" href="{{ url_for('settings.page') }}"> {{ _("Settings") }}</a></li>
+        {% if TIME_CLOCK and user.role == "teacher" %}
+        <li><a class="dropdown-item bi bi-stopwatch {{ 'active' if request.endpoint == 'time_clock.page' }}" href="{{ url_for('time_clock.page') }}"> {{ _("Time in / out") }} <span class="badge text-bg-warning">{{ _("Beta") }}</span></a></li>
+        {% endif %}
+        {% if TIME_CLOCK and user.role == "admin" %}
+        <li><a class="dropdown-item bi bi-stopwatch {{ 'active' if request.endpoint == 'time_clock.records_page' }}" href="{{ url_for('time_clock.records_page') }}"> {{ _("Time records") }} <span class="badge text-bg-warning">{{ _("Beta") }}</span></a></li>
+        {% endif %}
         {% if user.role == "admin" %}
         <li><a class="dropdown-item bi bi-sliders {{ 'active' if request.endpoint == 'settings.system_page' }}" href="{{ url_for('settings.system_page') }}"> {{ _("System settings") }}</a></li>
         {% endif %}

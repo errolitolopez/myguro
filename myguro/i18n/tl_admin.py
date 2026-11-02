@@ -17,6 +17,13 @@ ADMIN = {
     "Leave empty to make one": "Iwanang walang laman para gumawa ng isa",
     "System settings": "System settings",
     "All": "Lahat",
+    "Time records": "Time records",
+    "All teachers": "Lahat ng teacher",
+    "No records for these days.": "Walang record sa mga araw na ito.",
+    "A time in without a time out is shown as \"No time out\" and adds nothing to the total.": "Ang time in na walang time out ay lalabas na \"Walang time out\" at walang idadagdag sa total.",
+    "Time in / time out for teachers": "Time in / time out para sa mga teacher",
+    "Teachers get a Time in / Time out page to record when they start and stop working. They can time in again after timing out. You read everyone's records under Time records in the account menu. Off by default.":
+        "May Time in / Time out page ang mga teacher para itala kung kailan sila nagsimula at tumigil sa trabaho. Puwede silang mag-time in ulit pagkatapos mag-time out. Mababasa mo ang record ng lahat sa Time records sa account menu. Naka-off bilang default.",
     "Hide school events from students": "Itago ang school events sa mga estudyante",
     "On: students see only holidays on the calendar. Off: they see the school events too. Teachers and you always see both. On by default.":
         "On: holidays lang ang makikita ng mga estudyante sa calendar. Off: makikita rin nila ang school events. Makikita mo at ng mga teacher ang dalawa. Naka-on bilang default.",

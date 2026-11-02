@@ -344,3 +344,15 @@ CREATE TABLE IF NOT EXISTS notifications (
     read_at TEXT  -- NULL = not read yet
 );
 CREATE INDEX IF NOT EXISTS notifications_user ON notifications (user_id, id);
+
+-- Time in / time out for teachers (beta, the admin turns it on). One row per time in: time_out stays NULL until the
+-- teacher times out. A teacher can time in again after timing out, so a day can have many rows. day = the school
+-- date of the time in. Times are UTC.
+CREATE TABLE IF NOT EXISTS time_records (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    teacher_id INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    day TEXT NOT NULL,
+    time_in TEXT NOT NULL,
+    time_out TEXT
+);
+CREATE INDEX IF NOT EXISTS time_records_day ON time_records (day, teacher_id);
