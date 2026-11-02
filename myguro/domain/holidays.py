@@ -121,16 +121,21 @@ def check_year(value):
     return year
 
 
-def check_holiday(data):
-    """(day, name, description) of a local holiday from the request; the description is optional ("" for none).
-    Raises ValidationError with a short message."""
-    day = data.get("day")
+def check_day(value):
+    """A date from the request as "YYYY-MM-DD". Raises ValidationError when it is not a real day in range."""
     try:
-        parsed = date.fromisoformat(day) if isinstance(day, str) and len(day) == 10 else None
+        parsed = date.fromisoformat(value) if isinstance(value, str) and len(value) == 10 else None
     except ValueError:
         parsed = None
     if parsed is None or not MIN_YEAR <= parsed.year <= MAX_YEAR:
         raise ValidationError("Choose a valid date.")
+    return parsed.isoformat()
+
+
+def check_holiday(data):
+    """(day, name, description) of a local holiday from the request; the description is optional ("" for none).
+    Raises ValidationError with a short message."""
+    day = check_day(data.get("day"))
     name = " ".join(data.get("name").split()) if isinstance(data.get("name"), str) else ""
     if not name:
         raise ValidationError("Type the name of the holiday.")
@@ -139,4 +144,4 @@ def check_holiday(data):
     description = " ".join(data.get("description").split()) if isinstance(data.get("description"), str) else ""
     if len(description) > MAX_DESCRIPTION_LENGTH:
         raise ValidationError(f"The description can be at most {MAX_DESCRIPTION_LENGTH} characters.")
-    return parsed.isoformat(), name, description
+    return day, name, description
