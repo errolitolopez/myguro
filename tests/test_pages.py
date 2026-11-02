@@ -174,3 +174,16 @@ def test_settings_groups_the_choices_by_category_and_the_menu_stays_short(admin,
 def test_the_old_display_address_goes_to_settings(teacher):
     response = teacher.get("/display")
     assert response.status_code == 302 and response.headers["Location"].endswith("/settings#appearance")
+
+
+def test_the_manifest_lets_a_phone_install_myguro(app):
+    visitor = app.test_client()
+    response = visitor.get("/manifest.webmanifest")
+    assert response.status_code == 200 and response.mimetype == "application/manifest+json"
+    manifest = response.get_json()
+    assert (manifest["name"], manifest["display"], manifest["start_url"], manifest["scope"]) == \
+        ("MyGuro", "standalone", "/", "/")
+    assert {icon["sizes"] for icon in manifest["icons"]} == {"192x192", "512x512"}
+    for icon in manifest["icons"]:
+        assert visitor.get(icon["src"]).status_code == 200  # the icon files really exist
+    assert 'rel="manifest" href="/manifest.webmanifest"' in visitor.get("/login").get_data(as_text=True)

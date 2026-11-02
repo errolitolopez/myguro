@@ -9,7 +9,7 @@ Layers (each only uses the ones below it):
 
 from datetime import date
 
-from flask import Flask, redirect, request, session, url_for
+from flask import Flask, jsonify, redirect, request, session, url_for
 
 from myguro import commands, config, database, seed, seed_demo
 from myguro.database import get_db
@@ -48,6 +48,19 @@ def create_app(test_config=None):
     def favicon():
         """Browsers ask for /favicon.ico by themselves."""
         return redirect(url_for("static", filename="img/favicon.ico"))
+
+    @app.get("/manifest.webmanifest")
+    def manifest():
+        """What a phone needs to put MyGuro on the home screen: its name, icons and colours. It is a route (not a
+        static file) so its scope can be the whole site. It opens the app at "/", which sends the person to the
+        login page or their dashboard."""
+        icons = [{"src": url_for("static", filename=f"img/icon-{size}.png"), "sizes": f"{size}x{size}",
+                  "type": "image/png"} for size in (192, 512)]
+        response = jsonify(id="/", name="MyGuro", short_name="MyGuro", description="Learning Management System",
+                           start_url="/", scope="/", display="standalone", background_color="#ffffff",
+                           theme_color="#4f46e5", icons=icons)
+        response.mimetype = "application/manifest+json"
+        return response
 
     @app.context_processor
     def language():

@@ -11,7 +11,7 @@ from myguro.web.security import current_user
 
 # Open even during maintenance: the files every page needs, and signing in and out. Without the sign-in the
 # admin could not get in to turn it off. Anyone else may sign in too: the next page they open is the maintenance page.
-OPEN_ENDPOINTS = {"static", "favicon", "auth.index", "auth.login_page", "auth.api_login", "auth.api_logout"}
+OPEN_ENDPOINTS = {"static", "favicon", "manifest", "auth.index", "auth.login_page", "auth.api_login", "auth.api_logout"}
 RETRY_AFTER_SECONDS = 300  # a hint for browsers and search engines; the page does not reload by itself
 
 
