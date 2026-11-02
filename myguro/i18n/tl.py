@@ -16,7 +16,6 @@ TAGLISH = {
     "Classes": "Classes",
     "Language": "Language",
     "Theme": "Theme",
-    "Change language": "Palitan ang language",
     "Change theme": "Palitan ang theme",
     "Account menu": "Account menu",
     "School year": "School year",
@@ -298,8 +297,8 @@ TAGLISH = {
     "Reading": "Reading",
     "Effects": "Effects",
     "Glass blur and moving background": "Glass blur at gumagalaw na background",
-    "Turn this off if pages feel slow or choppy, which can happen on a phone. Panels become plain and nothing moves behind them. Until you choose, phones start with it off and computers with it on.":
-        "I-off ito kung mabagal o putol-putol ang mga page, na puwedeng mangyari sa phone. Magiging plain ang mga panel at walang gagalaw sa likod. Hangga't hindi ka pumipili, naka-off ito sa mga phone at naka-on sa mga computer.",
+    "Turn this on for the glass blur and the moving background. It can make pages slow or choppy, especially on a phone. It starts off for everyone.":
+        "I-on ito para sa glass blur at gumagalaw na background. Puwede itong magpabagal o magpaputol-putol ng mga page, lalo na sa phone. Naka-off ito sa simula para sa lahat.",
     "Menu": "Menu",
     "Menu bar at the bottom on phones": "Menu bar sa ibaba sa mga phone",
     "On: the menu is a bar at the bottom of the screen, within reach of your thumb. Off: the menu tabs show at the top, like on a computer. Wider screens always show them at the top.":

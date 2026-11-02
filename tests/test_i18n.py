@@ -69,13 +69,12 @@ def test_javascript_has_the_same_text_helper():
     assert "function t(" in script and "window.TEXT" in script
 
 
-def test_language_buttons_are_on_the_navbar_display_and_login_pages(teacher):
+def test_language_choice_lives_only_on_the_settings_page(teacher):
     page = teacher.get("/dashboard").get_data(as_text=True)
-    assert 'data-language-choice="en"' in page and 'data-language-choice="tl"' in page
-    assert page.index('aria-label="Change language"') < page.index('aria-label="Change theme"')  # first in the row
+    assert "data-language-choice" not in page and 'aria-label="Change language"' not in page
     assert "data-language-select" in teacher.get("/settings").get_data(as_text=True)
     for path in ("/login", "/forgot-password"):
-        assert "data-language-select" in flask_app.test_client().get(path).get_data(as_text=True)
+        assert "data-language-select" not in flask_app.test_client().get(path).get_data(as_text=True)
 
 
 def test_the_language_script_keeps_the_choice_in_a_cookie_only():

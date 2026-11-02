@@ -9,9 +9,8 @@
     align: { key: "myguro-text-align", attribute: "data-text-align", choices: ["left", "justify"], fallback: "left" },
     spacing: { key: "myguro-line-spacing", attribute: "data-line-spacing", choices: ["normal", "relaxed"], fallback: "normal" },
     // Full = glass blur and the moving background; Light = plain panels, no motion (smoother on phones).
-    // Until a person chooses, a touch screen starts on Light and a computer on Full.
-    effects: { key: "myguro-effects", attribute: "data-effects", choices: ["full", "light"],
-               fallback: () => (window.matchMedia("(pointer: coarse)").matches ? "light" : "full") },
+    // Until a person chooses, everyone starts on Light: it is smooth on every device, and blur is a choice.
+    effects: { key: "myguro-effects", attribute: "data-effects", choices: ["full", "light"], fallback: "light" },
     tabbar: { key: "myguro-tab-bar", attribute: "data-tab-bar", choices: ["bottom", "top"], fallback: "bottom" },
   };
 

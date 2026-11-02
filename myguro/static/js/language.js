@@ -24,12 +24,5 @@
       select.value = chosen;
       select.addEventListener("change", () => choose(select.value));
     });
-    // The quick menu in the navbar: one button per language.
-    document.querySelectorAll("[data-language-choice]").forEach((button) => {
-      const isCurrent = button.dataset.languageChoice === chosen;
-      button.classList.toggle("active", isCurrent);
-      button.setAttribute("aria-current", isCurrent ? "true" : "false");
-      button.addEventListener("click", () => choose(button.dataset.languageChoice));
-    });
   });
 })();
