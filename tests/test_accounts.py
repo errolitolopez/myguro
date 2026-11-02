@@ -67,6 +67,22 @@ def test_teacher_ignores_grade(admin):
     assert teacher["grade"] == ""
 
 
+def test_list_says_who_has_a_recovery_code(admin):
+    student = admin.get("/api/users?role=student").get_json()["users"][0]
+    assert student["has_recovery_code"] is False
+    from myguro.database import get_db
+    with admin.application.app_context():
+        get_db().execute("INSERT INTO recovery_codes (user_id, code_hash, uses_left) VALUES (?, 'x', 3)",
+                         (student["id"],))
+        get_db().commit()
+    again = admin.get(f"/api/users?role=student&q={student['username']}").get_json()["users"][0]
+    assert again["has_recovery_code"] is True
+
+    has = admin.get("/api/users?role=student&recovery=yes").get_json()
+    no = admin.get("/api/users?role=student&recovery=no").get_json()
+    assert [u["id"] for u in has["users"]] == [student["id"]] and no["total"] == 47
+
+
 def test_list_is_paged(admin):
     data = admin.get("/api/users?role=student").get_json()
     assert (data["page"], data["pages"], data["per_page"], data["total"]) == (1, 3, 20, 48)

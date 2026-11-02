@@ -13,10 +13,11 @@ let confirmAction = null; // what t("Yes") does in the confirm box
 const list = document.getElementById("user-list");
 const searchInput = document.getElementById("search");
 // Advanced filter (students page only): full name, grade, section
-const gradeFilter = document.getElementById("grade-filter");
 const nameFilter = document.getElementById("name-filter");
+const gradeFilter = document.getElementById("grade-filter");
 const sectionFilter = document.getElementById("section-filter");
 const statusFilter = document.getElementById("status-filter");
+const recoveryFilter = document.getElementById("recovery-filter");
 
 const addModalElement = document.getElementById("add-user-modal");
 const addModal = bootstrap.Modal.getOrCreateInstance(addModalElement);
@@ -75,8 +76,16 @@ function userItem(user) {
     badge.textContent = t("Active");
   }
 
+  // Shows the admin who can reset their own password and who must ask for help.
+  const recovery = document.createElement("span");
+  recovery.className = user.has_recovery_code ? "badge text-bg-info" : "badge text-bg-light border";
+  recovery.textContent = user.has_recovery_code ? t("Has recovery code") : t("No recovery code");
+  const badges = document.createElement("div");
+  badges.className = "d-flex flex-column align-items-end gap-1";
+  badges.append(badge, recovery);
+
   if (typeof selectionBox === "function") row.append(selectionBox(user)); // students page
-  row.append(left, badge);
+  row.append(left, badges);
   row.addEventListener("click", () => openEdit(user));
   row.addEventListener("keydown", (event) => {
     if (event.target === row && (event.key === "Enter" || event.key === " ")) {
@@ -98,7 +107,7 @@ function messageItem(text) {
 function filtersInUse() {
   if (!gradeFilter) return 0;
   return [nameFilter.value.trim() !== "", gradeFilter.value !== "*", sectionFilter.value.trim() !== "",
-    statusFilter.value !== ""]
+    statusFilter.value !== "", recoveryFilter.value !== ""]
     .filter(Boolean).length;
 }
 
@@ -141,6 +150,7 @@ async function loadUsers() {
     if (nameFilter.value.trim()) params.set("name", nameFilter.value.trim());
     if (sectionFilter.value.trim()) params.set("section", sectionFilter.value.trim());
     if (statusFilter.value) params.set("status", statusFilter.value);
+    if (recoveryFilter.value) params.set("recovery", recoveryFilter.value);
   }
   try {
     const response = await apiFetch(`/api/users?${params}`);
@@ -173,15 +183,17 @@ function searchSoon() {
 }
 searchInput.addEventListener("input", searchSoon);
 if (gradeFilter) {
-  nameFilter.addEventListener("input", searchSoon);
   sectionFilter.addEventListener("input", searchSoon);
+  nameFilter.addEventListener("input", searchSoon);
   gradeFilter.addEventListener("change", () => goToPage(1));
   statusFilter.addEventListener("change", () => goToPage(1));
+  recoveryFilter.addEventListener("change", () => goToPage(1));
   document.getElementById("filter-clear").addEventListener("click", () => {
     nameFilter.value = "";
     sectionFilter.value = "";
     gradeFilter.value = "*";
     statusFilter.value = "";
+    recoveryFilter.value = "";
     // Same events the boxes send, so batch-edit.js drops "all matching" too.
     gradeFilter.dispatchEvent(new Event("change"));
   });

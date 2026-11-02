@@ -24,29 +24,31 @@ class AccountService(Service):
     """The admin's work on teacher and student accounts (there is no sign-up)."""
 
     def account_json(self, row):
-        """user_json plus the role and how many classes the teacher teaches or the student is in."""
-        return {**user_json(row), "role": row["role"], "classes": self.users.count_classes(row)}
+        """user_json plus the role, how many classes the teacher teaches or the student is in, and
+        whether the person has a usable recovery code (never the code itself)."""
+        return {**user_json(row), "role": row["role"], "classes": self.users.count_classes(row),
+                "has_recovery_code": self.users.has_recovery_code(row["id"])}
 
     @staticmethod
-    def filters(query="", grade=None, name="", section="", status=None):
+    def filters(query="", grade=None, name="", section="", status=None, recovery=None):
         """The search and the advanced filters (full name, grade, section, status) as the
         arguments the repository takes after the role: (pattern, grade, name_words, section_pattern,
-        status).
+        status, recovery).
         Every word typed in the full name must be in the name, in any order."""
         pattern = like_pattern(clean_name(query))
         name_words = tuple(like_pattern(word) for word in clean_name(name).replace(",", " ").split())
         section = clean_name(section)
-        return pattern, grade, name_words, like_pattern(section) if section else None, status
+        return pattern, grade, name_words, like_pattern(section) if section else None, status, recovery
 
     def list(self, role, query="", grade=None, page=1, per_page=DEFAULT_PER_PAGE, name="", section="",
-             status=None):
+             status=None, recovery=None):
         """One page of teachers or students, searched (name, username, section) and filtered by
         grade (None = all, "" = no grade), full name, section and status (active, pending, deactivated). A page past the end shows the
         last page."""
         if role not in ACCOUNT_ROLES:
             raise ValidationError("Unknown role.")
         per_page = max(1, min(per_page, MAX_PER_PAGE))
-        search = self.filters(query, grade, name, section, status)
+        search = self.filters(query, grade, name, section, status, recovery)
         total = self.users.count_matching(role, *search)
         pages = max(1, -(-total // per_page))  # rounded up
         page = max(1, min(page, pages))
@@ -216,7 +218,7 @@ class AccountService(Service):
         if "match" in data and isinstance(data["match"], dict):
             match = data["match"]
             search = self.filters(match.get("q"), match.get("grade"), match.get("name"), match.get("section"),
-                                  match.get("status"))
+                                  match.get("status"), match.get("recovery"))
             ids = self.users.matching_ids("student", *search)
         else:
             ids = data.get("user_ids")

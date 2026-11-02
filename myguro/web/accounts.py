@@ -50,7 +50,7 @@ def supervisors_page():
 @role_required_api("admin")
 def api_list():
     """?role=teacher (default) or student, ?q= search, ?grade= (empty = no grade), ?name= (full
-    name, any order) and ?section= and ?status= (active, pending, deactivated) (advanced filters), ?page= and ?per_page= (20 by default)."""
+    name, any order) and ?section= and ?status= (active, pending, deactivated) and ?recovery= (yes, no) (advanced filters), ?page= and ?per_page= (20 by default)."""
     args = request.args
     return jsonify(service().list(
         args.get("role", "teacher"),
@@ -61,6 +61,7 @@ def api_list():
         name=args.get("name", ""),
         section=args.get("section", ""),
         status=args.get("status") or None,
+        recovery=args.get("recovery") or None,
     ))
 
 

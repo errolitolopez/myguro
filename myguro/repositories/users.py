@@ -8,6 +8,12 @@ STATUS_WHERE = {
     "deactivated": "active = 0",
 }
 
+# The recovery code filter: a code only counts while it has uses left (as the badge shows it)
+RECOVERY_WHERE = {
+    "yes": "id IN (SELECT user_id FROM recovery_codes WHERE uses_left > 0)",
+    "no": "id NOT IN (SELECT user_id FROM recovery_codes WHERE uses_left > 0)",
+}
+
 
 class UserRepository(Repository):
     def get(self, user_id):
@@ -32,11 +38,11 @@ class UserRepository(Repository):
                         + (" AND active = 1" if active_only else ""), (student_id,))
 
     @staticmethod
-    def _matching(role, pattern, grade, name_words=(), section_pattern=None, status=None):
+    def _matching(role, pattern, grade, name_words=(), section_pattern=None, status=None, recovery=None):
         """WHERE for accounts of this role whose name, username or section matches the LIKE
-        pattern; grade filters exactly ("" = no grade, None = any). Advanced filters: every
-        word of name_words is in the full name, the section contains section_pattern, and status is
-        one of STATUS_WHERE (active, pending = not logged in yet, deactivated)."""
+        pattern; grade filters exactly ("" = no grade, None = any). Advanced filters: the
+        section contains section_pattern, status is one of STATUS_WHERE (active, pending = not logged in yet, deactivated), and recovery is
+        yes / no (has a recovery code with uses left)."""
         where = ("role = ? AND (name LIKE ? ESCAPE '\\' OR username LIKE ? ESCAPE '\\' "
                  "OR section LIKE ? ESCAPE '\\')")
         params = [role, pattern, pattern, pattern]
@@ -51,23 +57,25 @@ class UserRepository(Repository):
             params.append(section_pattern)
         if status in STATUS_WHERE:
             where += f" AND {STATUS_WHERE[status]}"
+        if recovery in RECOVERY_WHERE:
+            where += f" AND {RECOVERY_WHERE[recovery]}"
         return where, params
 
-    def count_matching(self, role, pattern, grade=None, name_words=(), section_pattern=None, status=None):
-        where, params = self._matching(role, pattern, grade, name_words, section_pattern, status)
+    def count_matching(self, role, pattern, grade=None, name_words=(), section_pattern=None, status=None, recovery=None):
+        where, params = self._matching(role, pattern, grade, name_words, section_pattern, status, recovery)
         return self.value(f"SELECT COUNT(*) FROM users WHERE {where}", params)
 
-    def search(self, role, pattern, grade=None, name_words=(), section_pattern=None, status=None,
+    def search(self, role, pattern, grade=None, name_words=(), section_pattern=None, status=None, recovery=None,
                limit=20, offset=0):
         """One page of the matching accounts: active ones first, then by name (Last, First =
         by last name)."""
-        where, params = self._matching(role, pattern, grade, name_words, section_pattern, status)
+        where, params = self._matching(role, pattern, grade, name_words, section_pattern, status, recovery)
         return self.all(f"SELECT * FROM users WHERE {where} ORDER BY active DESC, name COLLATE NOCASE, id "
                         "LIMIT ? OFFSET ?", [*params, limit, offset])
 
-    def matching_ids(self, role, pattern, grade=None, name_words=(), section_pattern=None, status=None):
+    def matching_ids(self, role, pattern, grade=None, name_words=(), section_pattern=None, status=None, recovery=None):
         """Ids of every account matching a search (all pages)."""
-        where, params = self._matching(role, pattern, grade, name_words, section_pattern, status)
+        where, params = self._matching(role, pattern, grade, name_words, section_pattern, status, recovery)
         return [row["id"] for row in self.all(f"SELECT id FROM users WHERE {where}", params)]
 
     def count_students(self, user_ids):
@@ -88,6 +96,11 @@ class UserRepository(Repository):
         if user["role"] == "teacher":
             return self.value("SELECT COUNT(*) FROM classes WHERE teacher_id = ?", (user["id"],))
         return self.value("SELECT COUNT(*) FROM class_students WHERE student_id = ?", (user["id"],))
+
+    def has_recovery_code(self, user_id):
+        """Whether the person has a recovery code that still has uses left."""
+        return bool(self.value("SELECT COUNT(*) FROM recovery_codes WHERE user_id = ? AND uses_left > 0",
+                               (user_id,)))
 
     def create(self, names, username, password_hash, role, grade="", section="", must_change_password=True,
                active=True):

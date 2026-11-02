@@ -70,6 +70,14 @@
             <option value="deactivated">{{ _("Deactivated") }}</option>
           </select>
         </div>
+        <div class="col-6 col-md-2">
+          <label for="recovery-filter" class="form-label small mb-1">{{ _("Recovery code") }}</label>
+          <select id="recovery-filter" class="form-select">
+            <option value="">{{ _("All") }}</option>
+            <option value="yes">{{ _("Has recovery code") }}</option>
+            <option value="no">{{ _("No recovery code") }}</option>
+          </select>
+        </div>
         <div class="col-12 col-md-2">
           <button id="filter-clear" type="button" class="btn btn-outline-secondary w-100 bi bi-x-circle">{{ _("Clear filters") }}</button>
         </div>
