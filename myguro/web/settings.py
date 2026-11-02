@@ -1,4 +1,4 @@
-"""The Settings page (every role: appearance and account; the admin also gets the school-wide settings) and its API."""
+"""The Settings page (every role: appearance and account), the admin's System settings page (school-wide) and the API."""
 
 from flask import Blueprint, jsonify, render_template
 
@@ -17,6 +17,12 @@ def service():
 @role_required_page("admin", "teacher", "student", "supervisor")
 def page():
     return render_template("settings.html", user=current_user())
+
+
+@bp.get("/system-settings")
+@role_required_page("admin")
+def system_page():
+    return render_template("system_settings.html", user=current_user())
 
 
 @bp.get("/api/settings")

@@ -160,10 +160,11 @@ def test_settings_groups_the_choices_by_category_and_the_menu_stays_short(admin,
             assert category in page
         for link in ('href="/recovery-code"', 'href="/change-password"', 'id="year-select"'):
             assert link in page, link
-        if client is not admin:  # the school-wide settings are the admin's
-            assert "js/settings.js" not in page
-            assert 'id="school"' not in page and 'id="support-form"' not in page
-    admin_page = admin.get("/settings").get_data(as_text=True)
+        # The school-wide settings are on the admin's own System settings page
+        assert "js/settings.js" not in page and 'id="school"' not in page and 'id="support-form"' not in page
+        assert (client.get("/system-settings").status_code == 200) is (client is admin)
+        assert ('href="/system-settings"' in menu) is (client is admin)
+    admin_page = admin.get("/system-settings").get_data(as_text=True)
     assert 'id="school"' in admin_page and 'id="popups"' in admin_page and "js/settings.js" in admin_page
     # A supervisor has no school year and no feedback, but still has the rest
     page = supervisor.get("/settings").get_data(as_text=True)

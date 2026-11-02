@@ -51,6 +51,9 @@
         <li><h6 class="dropdown-header">{{ user.name }} ({{ user.role }})</h6></li>
         <!-- School year, display, password, recovery code and feedback are grouped on the Settings page. -->
         <li><a class="dropdown-item bi bi-gear {{ 'active' if request.endpoint in ('settings.page', 'display.page') }}" href="{{ url_for('settings.page') }}"> {{ _("Settings") }}</a></li>
+        {% if user.role == "admin" %}
+        <li><a class="dropdown-item bi bi-sliders {{ 'active' if request.endpoint == 'settings.system_page' }}" href="{{ url_for('settings.system_page') }}"> {{ _("System settings") }}</a></li>
+        {% endif %}
         <li><hr class="dropdown-divider"></li>
         <li><button id="logout-button" class="dropdown-item bi bi-box-arrow-right" type="button"> {{ _("Logout") }}</button></li>
       </ul>
@@ -86,7 +89,7 @@
   <div class="alert alert-danger py-2 mb-0 small" role="alert">
     <i class="bi bi-tools" aria-hidden="true"></i>
     {{ _("Maintenance mode is on. Only you can use MyGuro.") }}
-    <a class="alert-link" href="{{ url_for('settings.page') }}#maintenance">{{ _("Turn it off") }}</a>
+    <a class="alert-link" href="{{ url_for('settings.system_page') }}#maintenance">{{ _("Turn it off") }}</a>
   </div>
 </div>
 {% endif %}

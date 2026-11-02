@@ -15,6 +15,7 @@ ADMIN = {
     "Full name": "Buong pangalan",
     "Import from Excel": "I-import mula sa Excel",
     "Leave empty to make one": "Iwanang walang laman para gumawa ng isa",
+    "System settings": "System settings",
     "All": "Lahat",
     "Hide school events from students": "Itago ang school events sa mga estudyante",
     "On: students see only holidays on the calendar. Off: they see the school events too. Teachers and you always see both. On by default.":

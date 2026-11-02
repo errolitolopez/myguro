@@ -99,5 +99,6 @@ def test_bad_input_is_refused_and_nothing_changes(admin):
 
 
 def test_the_admin_settings_page_has_the_maintenance_card_and_others_do_not(admin, teacher):
-    assert 'id="maintenance-form"' in admin.get("/settings").get_data(as_text=True)
-    assert 'id="maintenance-form"' not in teacher.get("/settings").get_data(as_text=True)
+    assert 'id="maintenance-form"' in admin.get("/system-settings").get_data(as_text=True)
+    assert 'id="maintenance-form"' not in admin.get("/settings").get_data(as_text=True)
+    assert teacher.get("/system-settings").status_code == 302  # sent to their dashboard

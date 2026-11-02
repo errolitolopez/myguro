@@ -6,18 +6,12 @@
 {% include "_navbar.html" %}
 
 <main class="container py-3" style="max-width: 760px;">
-  <div id="settings-error" class="alert alert-danger d-none" role="alert"></div>
   <h1 class="h4 mb-3">{{ _("Settings") }}</h1>
 
-  <!-- The categories as links, so a long page (the admin's) is easy to jump around. -->
+  <!-- The categories as links, so the page is easy to jump around. -->
   <nav class="nav nav-pills mb-3 gap-1" aria-label="{{ _("Settings") }}">
     <a class="nav-link py-1" href="#appearance">{{ _("Appearance") }}</a>
     <a class="nav-link py-1" href="#account">{{ _("Account") }}</a>
-    {% if user.role == "admin" %}
-    <a class="nav-link py-1" href="#school">{{ _("School") }}</a>
-    <a class="nav-link py-1" href="#popups">{{ _("Pop-ups and help") }}</a>
-    <a class="nav-link py-1" href="#maintenance">{{ _("Maintenance") }}</a>
-    {% endif %}
   </nav>
 
   <section id="appearance" class="mb-4">
@@ -111,197 +105,10 @@
     </div>
   </section>
 
-  {% if user.role == "admin" %}
-  <section id="school" class="mb-4">
-    <h2 class="h5 mb-3">{{ _("School") }}</h2>
-  <div class="card mb-3">
-    <div class="card-body">
-      <div class="form-check form-switch">
-        <input id="grades-high-to-low" class="form-check-input" type="checkbox" role="switch" disabled>
-        <label for="grades-high-to-low" class="form-check-label fw-semibold">{{ _("Show grades from highest to lowest") }}</label>
-      </div>
-      <div class="form-text">
-        {{ _("On: Grade 12 first, Kinder last. Off: Kinder first, Grade 12 last. Applies to every grade dropdown for everyone. Takes effect the next time a page is opened.") }}
-      </div>
-    </div>
-  </div>
 
-  <div class="card mb-3">
-    <div class="card-body">
-      <h2 class="h6 fw-semibold mb-1">{{ _("Grades in use") }}</h2>
-      <div class="form-text mb-2">
-        {{ _("Turn off the grades your school doesn't have. A disabled grade is hidden from the dropdowns and can't be given to a student or a class. Students who already have it keep it, and the Students filter still lists it so you can move them.") }}
-      </div>
-      <div id="grade-list" class="row row-cols-2 row-cols-sm-3 g-2"></div>
-    </div>
-  </div>
-
-  <div class="card mb-3">
-    <div class="card-body">
-      <div class="form-check form-switch">
-        <input id="hide-events" class="form-check-input" type="checkbox" role="switch" disabled>
-        <label for="hide-events" class="form-check-label fw-semibold">{{ _("Hide school events from students") }}</label>
-      </div>
-      <div class="form-text">
-        {{ _("On: students see only holidays on the calendar. Off: they see the school events too. Teachers and you always see both. On by default.") }}
-      </div>
-    </div>
-  </div>
-
-  <div class="card mb-3">
-    <div class="card-body">
-      <h2 class="h6 fw-semibold mb-1">{{ _("School years") }}</h2>
-      <div class="form-text mb-2">
-        {{ _("Classes and the work given to them belong to a school year. When you start a new year it becomes the current one: teachers and students begin with no classes, and past years can only be looked at (each person picks the year to look at under Account).") }}
-      </div>
-      <ul id="year-list" class="list-group mb-3"></ul>
-      <form id="year-form" class="d-flex flex-wrap gap-2 align-items-center" novalidate>
-        <label class="visually-hidden" for="year-name">{{ _("New school year") }}</label>
-        <input id="year-name" class="form-control w-auto" maxlength="9" placeholder="2027-2028"
-               autocomplete="off" inputmode="numeric">
-        <div class="form-check mb-0">
-          <input id="year-copy" class="form-check-input" type="checkbox" checked>
-          <label class="form-check-label small" for="year-copy">{{ _("Copy last year's classes (without students)") }}</label>
-        </div>
-        <button id="year-start" type="submit" class="btn btn-success bi bi-plus-lg">{{ _("Start new school year") }}</button>
-      </form>
-      <div id="year-error" class="alert alert-danger py-2 mt-2 d-none" role="alert"></div>
-      <div id="year-status" class="small text-body-secondary mt-2"></div>
-    </div>
-  </div>
-  </section>
-
-  <section id="popups" class="mb-4">
-    <h2 class="h5 mb-3">{{ _("Pop-ups and help") }}</h2>
-  <div class="card mb-3">
-    <div class="card-body">
-      <label for="feedback-popup" class="form-label fw-semibold">{{ _("Feedback pop-up") }}</label>
-      <select id="feedback-popup" class="form-select w-auto" disabled>
-        <option value="off">{{ _("Never") }}</option>
-        <option value="login">{{ _("Once each time they log in") }}</option>
-        <option value="daily">{{ _("Once a day") }}</option>
-      </select>
-      <div class="form-text">
-        {{ _("Asks teachers and students who have not sent feedback yet to rate MyGuro. It stops for each person once they send it. Never on the answer page.") }}
-      </div>
-    </div>
-  </div>
-
-  <div class="card mb-3">
-    <div class="card-body">
-      <div class="form-check form-switch">
-        <input id="chatbot-enabled" class="form-check-input" type="checkbox" role="switch" disabled>
-        <label for="chatbot-enabled" class="form-check-label fw-semibold">{{ _("GuroBot, the navigation chatbot (teachers)") }}</label>
-      </div>
-      <div class="form-text">
-        {{ _("A chat bubble that helps teachers find a page. It only opens pages: it cannot read or change anything. Each question a teacher types is sent to an outside AI service, and no student or class data is sent. Off by default.") }}
-      </div>
-    </div>
-  </div>
-
-  <div class="card mb-3">
-    <div class="card-body">
-      <h2 class="h6 fw-semibold mb-1">{{ _("Support link") }}</h2>
-      <div class="form-text mb-3">
-        {{ _("A small \"support\" note at the bottom of each page for admin and teachers. Its button opens a window with the ways to give that you fill in below (Ko-fi, GCash). Students never see it.") }}
-      </div>
-      <form id="support-form" novalidate>
-        <div class="form-check form-switch mb-3">
-          <input id="support-enabled" class="form-check-input" type="checkbox" role="switch">
-          <label for="support-enabled" class="form-check-label fw-semibold">{{ _("Show the support link") }}</label>
-        </div>
-        <div class="mb-3">
-          <label for="support-url" class="form-label">{{ _("Ko-fi link") }} <span class="text-body-secondary">{{ _("(optional)") }}</span></label>
-          <input id="support-url" type="url" class="form-control" maxlength="300" autocomplete="off"
-                 placeholder="https://ko-fi.com/yourname">
-        </div>
-        <div class="row g-2 mb-3">
-          <div class="col-12 col-md-5">
-            <label for="support-gcash-number" class="form-label">{{ _("GCash number") }} <span class="text-body-secondary">{{ _("(optional)") }}</span></label>
-            <input id="support-gcash-number" type="tel" class="form-control" maxlength="20" autocomplete="off"
-                   placeholder="0917 123 4567">
-          </div>
-          <div class="col-12 col-md-7">
-            <label for="support-gcash-name" class="form-label">{{ _("GCash account name") }} <span class="text-body-secondary">{{ _("(optional)") }}</span></label>
-            <input id="support-gcash-name" class="form-control" maxlength="60" autocomplete="off"
-                   placeholder="Juan D.">
-          </div>
-        </div>
-        <div class="row g-2 mb-3">
-          <div class="col-12 col-md-8">
-            <label for="support-message" class="form-label">{{ _("Message") }}</label>
-            <input id="support-message" class="form-control" maxlength="200" autocomplete="off"
-                   placeholder="Enjoying MyGuro? Help keep it running.">
-          </div>
-          <div class="col-12 col-md-4">
-            <label for="support-label" class="form-label">{{ _("Button text") }}</label>
-            <input id="support-label" class="form-control" maxlength="30" autocomplete="off"
-                   placeholder="Support MyGuro">
-          </div>
-        </div>
-        <div class="mb-3">
-          <label for="support-popup" class="form-label">{{ _("Pop-up for teachers") }}</label>
-          <select id="support-popup" class="form-select w-auto">
-            <option value="off">{{ _("Never (only the footer button)") }}</option>
-            <option value="login">{{ _("Once each time they log in") }}</option>
-            <option value="daily">{{ _("Once a day") }}</option>
-            <option value="always">{{ _("On every page") }}</option>
-          </select>
-          <div class="form-text">{{ _("Opens the support window by itself. Only teachers see it, never students.") }}</div>
-        </div>
-        <div id="support-error" class="alert alert-danger py-2 d-none" role="alert"></div>
-        <button id="support-save" type="submit" class="btn btn-success bi bi-check-lg">{{ _("Save") }}</button>
-        <span id="support-status" class="small text-body-secondary ms-2"></span>
-      </form>
-    </div>
-  </div>
-
-  <div class="card mb-3">
-    <div class="card-body">
-      <h2 class="h6 fw-semibold mb-1">{{ _("Tips preview") }}</h2>
-      <div class="form-text mb-3">
-        {{ _("Teachers and students see one of these in a closable box under the menu, a new one every 3 days. They can close it or turn tips off. Never shown on the answer page.") }}
-      </div>
-      <h3 class="small fw-semibold text-body-secondary mb-1">{{ _("Teachers") }}</h3>
-      <ul id="tips-teacher" class="list-group mb-3"></ul>
-      <h3 class="small fw-semibold text-body-secondary mb-1">{{ _("Students") }}</h3>
-      <ul id="tips-student" class="list-group"></ul>
-      <button id="tip-preview" type="button" class="btn btn-outline-secondary btn-sm bi bi-eye mt-3">{{ _("Preview a tip") }}</button>
-      <div id="tip-preview-box" class="mt-2"></div>
-    </div>
-  </div>
-  </section>
-
-  <section id="maintenance" class="mb-4">
-    <h2 class="h5 mb-3">{{ _("Maintenance") }}</h2>
-    <div class="card mb-3">
-      <div class="card-body">
-        <form id="maintenance-form" novalidate>
-          <div class="form-check form-switch mb-2">
-            <input id="maintenance-enabled" class="form-check-input" type="checkbox" role="switch" disabled>
-            <label for="maintenance-enabled" class="form-check-label fw-semibold">{{ _("Maintenance mode") }}</label>
-          </div>
-          <div class="form-text mb-3">
-            {{ _("While it is on, teachers, students and supervisors see a maintenance page and cannot log in. Only you can use MyGuro. People who are signed in are not logged out: they can use it again when you turn this off. Turn it on when nobody is answering an activity.") }}
-          </div>
-          <label for="maintenance-message" class="form-label">{{ _("Message for the maintenance page") }} <span class="text-body-secondary">{{ _("(optional)") }}</span></label>
-          <input id="maintenance-message" class="form-control mb-3" maxlength="200" autocomplete="off"
-                 placeholder="Back at 3 PM. We are updating MyGuro." disabled>
-          <div id="maintenance-error" class="alert alert-danger py-2 d-none" role="alert"></div>
-          <button id="maintenance-save" type="submit" class="btn btn-success bi bi-check-lg" disabled>{{ _("Save") }}</button>
-          <span id="maintenance-status" class="small text-body-secondary ms-2"></span>
-        </form>
-      </div>
-    </div>
-  </section>
-  {% endif %}
-
-  <div id="settings-status" class="small text-body-secondary mt-2"></div>
 </main>
 {% endblock %}
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/common.js') }}"></script>
-{# settings.js is the admin's school-wide settings; the other roles have nothing for it to fill in. #}
-{% if user.role == "admin" %}<script src="{{ url_for('static', filename='js/settings.js') }}"></script>{% endif %}
 {% endblock %}
