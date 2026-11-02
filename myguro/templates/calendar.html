@@ -9,7 +9,10 @@
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
     <h1 class="h4 mb-0">{{ _("Calendar") }}</h1>
     {% if user.role == "admin" %}
-    <button id="add-holiday-button" type="button" class="btn btn-success bi bi-plus-lg"> {{ _("Add local holiday") }}</button>
+    <div class="d-flex flex-wrap gap-2">
+      <button id="add-event-button" type="button" class="btn btn-outline-primary bi bi-plus-lg"> {{ _("Add school event") }}</button>
+      <button id="add-holiday-button" type="button" class="btn btn-success bi bi-plus-lg"> {{ _("Add local holiday") }}</button>
+    </div>
     {% endif %}
   </div>
 
@@ -43,12 +46,19 @@
     <span class="badge text-bg-warning">{{ _("Special non-working day") }}</span>
     <span class="badge text-bg-info">{{ _("Special working day") }}</span>
     <span class="badge text-bg-success">{{ _("Local holiday") }}</span>
+    <span class="badge text-bg-primary bi bi-calendar-event"> {{ _("School event") }}</span>
   </div>
 
   <h2 class="h6">{{ _("Holidays this month") }}</h2>
   <ul id="holiday-list" class="list-group mb-3"></ul>
   <p class="small text-body-secondary">
     {{ _("National holidays follow the yearly proclamations. Days announced each year, such as Eid'l Fitr and Eid'l Adha, are added by the admin as local holidays.") }}
+  </p>
+
+  <h2 class="h6">{{ _("School events this month") }}</h2>
+  <ul id="event-list" class="list-group mb-3"></ul>
+  <p class="small text-body-secondary">
+    {{ _("School events come from the DepEd school calendar (DepEd Order No. 09, s. 2026). The admin can change them.") }}
   </p>
   </div>
 
@@ -62,6 +72,8 @@
       <button id="next-day" type="button" class="btn btn-outline-secondary bi bi-chevron-right" aria-label="{{ _("Next day") }}"></button>
     </div>
     <ul id="day-holidays" class="list-group mb-3"></ul>
+    <h2 class="h6">{{ _("School events") }}</h2>
+    <ul id="day-events" class="list-group mb-3"></ul>
   </div>
 </main>
 
@@ -92,6 +104,39 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-outline-secondary bi bi-x-lg" data-bs-dismiss="modal"> {{ _("Cancel") }}</button>
         <button id="holiday-save" type="submit" class="btn btn-success bi bi-check-lg"> {{ _("Save") }}</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal fade" id="event-modal" tabindex="-1" aria-labelledby="event-modal-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form id="event-form" class="modal-content" novalidate>
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="event-modal-title">{{ _("Add school event") }}</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ _("Close") }}"></button>
+      </div>
+      <div class="modal-body">
+        <div id="event-form-error" class="alert alert-danger d-none" role="alert"></div>
+        <div class="row g-3 mb-3">
+          <div class="col-sm-6">
+            <label for="event-start" class="form-label">{{ _("First day") }}</label>
+            <input id="event-start" class="form-control" type="date" required>
+          </div>
+          <div class="col-sm-6">
+            <label for="event-end" class="form-label">{{ _("Last day") }} <span class="text-body-secondary">{{ _("(optional)") }}</span></label>
+            <input id="event-end" class="form-control" type="date">
+          </div>
+          <div class="form-text mt-1">{{ _("Leave it empty for a one-day event.") }}</div>
+        </div>
+        <div>
+          <label for="event-name" class="form-label">{{ _("Name") }}</label>
+          <input id="event-name" class="form-control" type="text" maxlength="150" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary bi bi-x-lg" data-bs-dismiss="modal"> {{ _("Cancel") }}</button>
+        <button id="event-save" type="submit" class="btn btn-success bi bi-check-lg"> {{ _("Save") }}</button>
       </div>
     </form>
   </div>

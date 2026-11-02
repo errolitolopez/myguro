@@ -319,3 +319,14 @@ CREATE TABLE IF NOT EXISTS local_holidays (
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS local_holidays_day ON local_holidays (day);
+
+-- School events on the calendar: an exam, a break, a window of days. They are not holidays, and they can run over
+-- many days, so they have their own table. Loaded once from domain/deped_calendar.py; the admin can change them.
+CREATE TABLE IF NOT EXISTS school_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    start_day TEXT NOT NULL,
+    end_day TEXT NOT NULL,  -- the same as start_day for a one-day event
+    name TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS school_events_days ON school_events (start_day, end_day);

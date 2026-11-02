@@ -1,10 +1,11 @@
-"""The holiday calendar: a page for admin, teachers and students; the admin adds local holidays."""
+"""The calendar: a page for admin, teachers and students; the admin adds local holidays and school events."""
 
 from flask import Blueprint, jsonify, render_template, request
 
 from myguro.database import get_db
 from myguro.config import school_today
 from myguro.services.holidays import HolidayService
+from myguro.services.school_events import SchoolEventService
 from myguro.web.security import current_user, json_body, role_required_api, role_required_page
 
 bp = Blueprint("calendar", __name__)
@@ -12,6 +13,10 @@ bp = Blueprint("calendar", __name__)
 
 def service():
     return HolidayService(get_db(), current_user())
+
+
+def event_service():
+    return SchoolEventService(get_db(), current_user())
 
 
 @bp.get("/calendar")
@@ -43,4 +48,24 @@ def api_update(holiday_id):
 @role_required_api("admin")
 def api_delete(holiday_id):
     service().delete(holiday_id)
+    return jsonify(ok=True)
+
+
+@bp.post("/api/calendar/events")
+@role_required_api("admin")
+def api_add_event():
+    return jsonify(id=event_service().add(json_body())), 201
+
+
+@bp.put("/api/calendar/events/<int:event_id>")
+@role_required_api("admin")
+def api_update_event(event_id):
+    event_service().update(event_id, json_body())
+    return jsonify(ok=True)
+
+
+@bp.delete("/api/calendar/events/<int:event_id>")
+@role_required_api("admin")
+def api_delete_event(event_id):
+    event_service().delete(event_id)
     return jsonify(ok=True)

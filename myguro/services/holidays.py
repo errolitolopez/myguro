@@ -1,6 +1,6 @@
 from myguro.domain import holidays as rules
 from myguro.errors import NotFoundError, ValidationError
-from myguro.repositories import HolidayRepository
+from myguro.repositories import HolidayRepository, SchoolEventRepository
 from myguro.services.base import Service
 
 
@@ -10,16 +10,20 @@ class HolidayService(Service):
     def __init__(self, db, user=None):
         super().__init__(db, user)
         self.holidays = HolidayRepository(db)
+        self.events = SchoolEventRepository(db)
 
     def year(self, value):
-        """Every holiday of a calendar year, national and local, by date. Local ones carry their id."""
+        """Every holiday of a calendar year, national and local, by date (local ones carry their id), and the
+        school events with a day in that year."""
         year = rules.check_year(value)
         items = rules.national_holidays(year)
         items += [{"id": row["id"], "day": row["day"], "name": row["name"], "kind": rules.LOCAL,
                    "description": row["description"]}
                   for row in self.holidays.in_year(year)]
         items.sort(key=lambda item: item["day"])
-        return {"year": year, "holidays": items}
+        events = [{"id": row["id"], "start_day": row["start_day"], "end_day": row["end_day"], "name": row["name"]}
+                  for row in self.events.in_year(year)]
+        return {"year": year, "holidays": items, "events": events}
 
     def add(self, data):
         """Admin: add a local holiday. Returns its id."""
