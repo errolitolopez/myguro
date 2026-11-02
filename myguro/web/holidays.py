@@ -5,7 +5,7 @@ from datetime import date
 from flask import Blueprint, abort, jsonify, render_template, request
 
 from myguro.database import get_db
-from myguro.config import school_today
+from myguro.config import GENERATED_BY, school_today
 from myguro.domain.holidays import MAX_YEAR, MIN_YEAR
 from myguro.services.holidays import HolidayService
 from myguro.services.school_events import SchoolEventService
@@ -35,7 +35,8 @@ def page(year=None, month=None, day=None):
             abort(404)
         if not MIN_YEAR <= year <= MAX_YEAR:
             abort(404)
-    return render_template("calendar.html", user=current_user(), min_year=MIN_YEAR, max_year=MAX_YEAR)
+    return render_template("calendar.html", user=current_user(), min_year=MIN_YEAR, max_year=MAX_YEAR,
+                           generated_by=GENERATED_BY)
 
 
 @bp.get("/api/calendar")

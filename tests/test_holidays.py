@@ -125,3 +125,11 @@ def test_search_finds_events_and_holidays(admin, teacher):
 
 def test_search_needs_a_login(app):
     assert app.test_client().get("/api/calendar/search?q=brigada").status_code == 401
+
+
+def test_admin_and_teachers_can_make_the_holiday_image(admin, teacher):
+    for client in (admin, teacher):
+        page = client.get("/calendar").get_data(as_text=True)
+        assert 'id="share-image-button"' in page and "calendar-image.js" in page
+    page = login("jdelacruz01").get("/calendar").get_data(as_text=True)
+    assert 'id="share-image-button"' not in page and "calendar-image.js" not in page

@@ -66,7 +66,12 @@
     <span class="badge text-bg-primary bi bi-calendar-event"> {{ _("School event") }}</span>
   </div>
 
-  <h2 class="h6">{{ _("Holidays this month") }}</h2>
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+    <h2 class="h6 mb-0">{{ _("Holidays this month") }}</h2>
+    {% if user.role in ("admin", "teacher") %}
+    <button id="share-image-button" type="button" class="btn btn-sm btn-outline-primary bi bi-image" data-generated-by="{{ generated_by }}"> {{ _("Make image") }}</button>
+    {% endif %}
+  </div>
   <ul id="holiday-list" class="list-group mb-3"></ul>
   <p class="small text-body-secondary">
     {{ _("National holidays follow the yearly proclamations. Days announced each year, such as Eid'l Fitr and Eid'l Adha, are added by the admin as local holidays.") }}
@@ -97,6 +102,28 @@
     <ul id="day-events" class="list-group mb-3"></ul>
   </div>
 </main>
+
+{% if user.role in ("admin", "teacher") %}
+<div class="modal fade" id="image-modal" tabindex="-1" aria-labelledby="image-modal-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="image-modal-title">{{ _("Holiday image") }}</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ _("Close") }}"></button>
+      </div>
+      <div class="modal-body">
+        <div id="image-error" class="alert alert-danger d-none" role="alert"></div>
+        <p id="image-empty" class="text-body-secondary mb-0 d-none">{{ _("No holidays this month.") }}</p>
+        <img id="image-preview" class="img-fluid rounded d-none" alt="">
+      </div>
+      <div class="modal-footer">
+        <button id="image-share" type="button" class="btn btn-outline-primary bi bi-share d-none"> {{ _("Share") }}</button>
+        <a id="image-download" class="btn btn-success bi bi-download d-none"> {{ _("Download") }}</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
 
 {% if user.role == "admin" %}
 <div class="modal fade" id="holiday-modal" tabindex="-1" aria-labelledby="holiday-modal-title" aria-hidden="true">
@@ -168,4 +195,7 @@
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/common.js') }}"></script>
 <script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
+{% if user.role in ("admin", "teacher") %}
+<script src="{{ url_for('static', filename='js/calendar-image.js') }}"></script>
+{% endif %}
 {% endblock %}
