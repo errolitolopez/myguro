@@ -103,7 +103,7 @@ WRITE_ROUTES = [
 ]
 READ_ROUTES = ["/api/dashboard", "/api/school-years", "/api/settings", "/api/users", "/api/classes",
                "/api/activities", "/api/my-activities", "/api/assignments/1/results"]
-OTHER_PAGES = ["/users", "/teachers", "/students", "/supervisors", "/settings", "/activities", "/classes",
+OTHER_PAGES = ["/users", "/teachers", "/students", "/supervisors", "/activities", "/classes",
                "/my-activities", "/results/1", "/classes/1/gradebook"]
 
 

@@ -254,7 +254,7 @@ yearForm.addEventListener("submit", async (event) => {
     }
     yearName.value = "";
     document.getElementById("year-status").textContent = t("New school year started.");
-    // Reload so the account menu and every page use the new current year.
+    // Reload so the year picker and every page use the new current year.
     window.location.reload();
   } catch {
     showError("year-error", t("Cannot reach the server. Check your connection."));

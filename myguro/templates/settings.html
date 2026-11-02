@@ -9,7 +9,111 @@
   <div id="settings-error" class="alert alert-danger d-none" role="alert"></div>
   <h1 class="h4 mb-3">{{ _("Settings") }}</h1>
 
-  <div class="card">
+  <!-- The categories as links, so a long page (the admin's) is easy to jump around. -->
+  <nav class="nav nav-pills mb-3 gap-1" aria-label="{{ _("Settings") }}">
+    <a class="nav-link py-1" href="#appearance">{{ _("Appearance") }}</a>
+    <a class="nav-link py-1" href="#account">{{ _("Account") }}</a>
+    {% if user.role == "admin" %}
+    <a class="nav-link py-1" href="#school">{{ _("School") }}</a>
+    <a class="nav-link py-1" href="#popups">{{ _("Pop-ups and help") }}</a>
+    {% endif %}
+  </nav>
+
+  <section id="appearance" class="mb-4">
+    <h2 class="h5 mb-1">{{ _("Appearance") }}</h2>
+    <p class="text-body-secondary small">
+      {{ _("How MyGuro looks to you. These choices are saved in this browser only, so on another phone or computer you choose again.") }}
+    </p>
+  <div class="card mb-3">
+    <div class="card-body">
+      <h2 class="h5 bi bi-translate"> {{ _("Language") }}</h2>
+      {% include "_language_select.html" %}
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <h2 class="h5 bi bi-palette"> {{ _("Theme") }}</h2>
+      {% include "_theme_select.html" %}
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <h2 class="h5 bi bi-fonts"> {{ _("Reading") }}</h2>
+      {% include "_reading_settings.html" %}
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <h2 class="h5 bi bi-speedometer2"> {{ _("Effects") }}</h2>
+      <div class="form-check form-switch">
+        <input id="effects-switch" class="form-check-input" type="checkbox" role="switch" data-reading-switch="effects">
+        <label for="effects-switch" class="form-check-label">{{ _("Glass blur and moving background") }}</label>
+      </div>
+      <div class="form-text">
+        {{ _("Turn this off if pages feel slow or choppy, which can happen on a phone. Panels become plain and nothing moves behind them. Until you choose, phones start with it off and computers with it on.") }}
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <h2 class="h5 bi bi-layout-text-window-reverse"> {{ _("Menu") }}</h2>
+      <div class="form-check form-switch">
+        <input id="tab-bar-switch" class="form-check-input" type="checkbox" role="switch" data-reading-switch="tabbar">
+        <label for="tab-bar-switch" class="form-check-label">{{ _("Menu bar at the bottom on phones") }}</label>
+      </div>
+      <div class="form-text">
+        {{ _("On: the menu is a bar at the bottom of the screen, within reach of your thumb. Off: the menu tabs show at the top, like on a computer. Wider screens always show them at the top.") }}
+      </div>
+    </div>
+  </div>
+
+  {% if CHATBOT %}
+  <div class="card mb-3">
+    <div class="card-body">
+      <h2 class="h5 bi bi-robot"> GuroBot</h2>
+      <!-- chat.js checks it from the saved choice and saves a change; the choice is kept in this browser. -->
+      <div class="form-check form-switch">
+        <input id="chat-visibility" class="form-check-input" type="checkbox" role="switch">
+        <label for="chat-visibility" class="form-check-label">{{ _("Show GuroBot") }}</label>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  </section>
+
+  <section id="account" class="mb-4">
+    <h2 class="h5 mb-3">{{ _("Account") }}</h2>
+    {% if SCHOOL_YEARS %}
+    <div class="card mb-3">
+      <div class="card-body">
+        <label class="form-label fw-semibold" for="year-select">{{ _("School year") }}</label>
+        <select id="year-select" class="form-select w-auto">
+          {% for year in SCHOOL_YEARS.years %}
+          <option value="{{ year.id }}" {{ 'selected' if year.id == SCHOOL_YEARS.viewing_id }}>
+            {{ year.name }}{{ (" " ~ _("(current)")) if year.current }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    {% endif %}
+    <div class="list-group mb-3">
+      <a class="list-group-item list-group-item-action bi bi-key" href="{{ url_for('auth.change_password_page') }}"> {{ _("Password") }}</a>
+      <a class="list-group-item list-group-item-action bi bi-shield-lock" href="{{ url_for('recovery.code_page') }}"> {{ _("Recovery code") }}</a>
+      {% if user.role in ("admin", "teacher", "student") %}
+      <a class="list-group-item list-group-item-action bi bi-star" href="{{ url_for('feedback.page') }}"> {{ _("Feedback") }}</a>
+      {% endif %}
+    </div>
+  </section>
+
+  {% if user.role == "admin" %}
+  <section id="school" class="mb-4">
+    <h2 class="h5 mb-3">{{ _("School") }}</h2>
+  <div class="card mb-3">
     <div class="card-body">
       <div class="form-check form-switch">
         <input id="grades-high-to-low" class="form-check-input" type="checkbox" role="switch" disabled>
@@ -21,37 +125,21 @@
     </div>
   </div>
 
-  <div class="card mt-3">
+  <div class="card mb-3">
     <div class="card-body">
-      <label for="feedback-popup" class="form-label fw-semibold">{{ _("Feedback pop-up") }}</label>
-      <select id="feedback-popup" class="form-select w-auto" disabled>
-        <option value="off">{{ _("Never") }}</option>
-        <option value="login">{{ _("Once each time they log in") }}</option>
-        <option value="daily">{{ _("Once a day") }}</option>
-      </select>
-      <div class="form-text">
-        {{ _("Asks teachers and students who have not sent feedback yet to rate MyGuro. It stops for each person once they send it. Never on the answer page.") }}
+      <h2 class="h6 fw-semibold mb-1">{{ _("Grades in use") }}</h2>
+      <div class="form-text mb-2">
+        {{ _("Turn off the grades your school doesn't have. A disabled grade is hidden from the dropdowns and can't be given to a student or a class. Students who already have it keep it, and the Students filter still lists it so you can move them.") }}
       </div>
+      <div id="grade-list" class="row row-cols-2 row-cols-sm-3 g-2"></div>
     </div>
   </div>
 
-  <div class="card mt-3">
-    <div class="card-body">
-      <div class="form-check form-switch">
-        <input id="chatbot-enabled" class="form-check-input" type="checkbox" role="switch" disabled>
-        <label for="chatbot-enabled" class="form-check-label fw-semibold">{{ _("GuroBot, the navigation chatbot (teachers)") }}</label>
-      </div>
-      <div class="form-text">
-        {{ _("A chat bubble that helps teachers find a page. It only opens pages: it cannot read or change anything. Each question a teacher types is sent to an outside AI service, and no student or class data is sent. Off by default.") }}
-      </div>
-    </div>
-  </div>
-
-  <div class="card mt-3">
+  <div class="card mb-3">
     <div class="card-body">
       <h2 class="h6 fw-semibold mb-1">{{ _("School years") }}</h2>
       <div class="form-text mb-2">
-        {{ _("Classes and the work given to them belong to a school year. When you start a new year it becomes the current one: teachers and students begin with no classes, and past years can only be looked at (the year picker is in the account menu).") }}
+        {{ _("Classes and the work given to them belong to a school year. When you start a new year it becomes the current one: teachers and students begin with no classes, and past years can only be looked at (each person picks the year to look at under Account).") }}
       </div>
       <ul id="year-list" class="list-group mb-3"></ul>
       <form id="year-form" class="d-flex flex-wrap gap-2 align-items-center" novalidate>
@@ -68,18 +156,37 @@
       <div id="year-status" class="small text-body-secondary mt-2"></div>
     </div>
   </div>
+  </section>
 
-  <div class="card mt-3">
+  <section id="popups" class="mb-4">
+    <h2 class="h5 mb-3">{{ _("Pop-ups and help") }}</h2>
+  <div class="card mb-3">
     <div class="card-body">
-      <h2 class="h6 fw-semibold mb-1">{{ _("Grades in use") }}</h2>
-      <div class="form-text mb-2">
-        {{ _("Turn off the grades your school doesn't have. A disabled grade is hidden from the dropdowns and can't be given to a student or a class. Students who already have it keep it, and the Students filter still lists it so you can move them.") }}
+      <label for="feedback-popup" class="form-label fw-semibold">{{ _("Feedback pop-up") }}</label>
+      <select id="feedback-popup" class="form-select w-auto" disabled>
+        <option value="off">{{ _("Never") }}</option>
+        <option value="login">{{ _("Once each time they log in") }}</option>
+        <option value="daily">{{ _("Once a day") }}</option>
+      </select>
+      <div class="form-text">
+        {{ _("Asks teachers and students who have not sent feedback yet to rate MyGuro. It stops for each person once they send it. Never on the answer page.") }}
       </div>
-      <div id="grade-list" class="row row-cols-2 row-cols-sm-3 g-2"></div>
     </div>
   </div>
 
-  <div class="card mt-3">
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="form-check form-switch">
+        <input id="chatbot-enabled" class="form-check-input" type="checkbox" role="switch" disabled>
+        <label for="chatbot-enabled" class="form-check-label fw-semibold">{{ _("GuroBot, the navigation chatbot (teachers)") }}</label>
+      </div>
+      <div class="form-text">
+        {{ _("A chat bubble that helps teachers find a page. It only opens pages: it cannot read or change anything. Each question a teacher types is sent to an outside AI service, and no student or class data is sent. Off by default.") }}
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-3">
     <div class="card-body">
       <h2 class="h6 fw-semibold mb-1">{{ _("Support link") }}</h2>
       <div class="form-text mb-3">
@@ -136,7 +243,7 @@
     </div>
   </div>
 
-  <div class="card mt-3">
+  <div class="card mb-3">
     <div class="card-body">
       <h2 class="h6 fw-semibold mb-1">{{ _("Tips preview") }}</h2>
       <div class="form-text mb-3">
@@ -150,6 +257,8 @@
       <div id="tip-preview-box" class="mt-2"></div>
     </div>
   </div>
+  </section>
+  {% endif %}
 
   <div id="settings-status" class="small text-body-secondary mt-2"></div>
 </main>
@@ -157,5 +266,6 @@
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/common.js') }}"></script>
-<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+{# settings.js is the admin's school-wide settings; the other roles have nothing for it to fill in. #}
+{% if user.role == "admin" %}<script src="{{ url_for('static', filename='js/settings.js') }}"></script>{% endif %}
 {% endblock %}

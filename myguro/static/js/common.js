@@ -275,7 +275,7 @@ function showRecoveryCode(box, code, username) {
     const hidden = document.createElement("div");
     hidden.className = "alert alert-secondary mb-0";
     hidden.setAttribute("role", "status");
-    hidden.textContent = t("The code is hidden now and is not shown again. If you did not save it, make a new one (account menu, Recovery code).");
+    hidden.textContent = t("The code is hidden now and is not shown again. If you did not save it, make a new one (Settings, Account, Recovery code).");
     box.replaceChildren(hidden);
   }, 1000);
 }
@@ -359,7 +359,7 @@ if (logoutButton) {
   });
 }
 
-// The school year picker in the account menu: remember the choice, then reload so every list
+// The school year picker (Settings, Account): remember the choice, then reload so every list
 // shows that year.
 const yearSelect = document.getElementById("year-select");
 if (yearSelect) {

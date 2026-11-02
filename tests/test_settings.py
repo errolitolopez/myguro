@@ -39,7 +39,8 @@ def test_turn_off_saves_and_changes_every_dropdown(admin, teacher):
 
 def test_only_admin_changes_it(teacher):
     assert teacher.put("/api/settings", json={"grades_high_to_low": False}).status_code == 403
-    assert teacher.get("/settings").status_code == 302  # sent back to the dashboard
+    page = teacher.get("/settings").get_data(as_text=True)  # their own settings, not the school-wide ones
+    assert "js/settings.js" not in page and "support-form" not in page
 
 
 def test_value_must_be_on_or_off(admin):

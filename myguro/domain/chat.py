@@ -42,7 +42,7 @@ TEACHER_PAGES = {
     "schedule": ("My schedule", "/my-schedule",
                  "The teacher's weekly timetable, once the admin published it.", ""),
     "feedback": ("Feedback", "/feedback", "Rate MyGuro and send feedback.", ""),
-    "display": ("Display", "/display", "Theme (light or dark), text size and reading settings.", ""),
+    "display": ("Settings", "/settings", "Theme (light or dark), text size, reading settings, school year, password and recovery code.", ""),
     "password": ("Change password", "/change-password", "Change the account password.", ""),
     "recovery-code": ("Recovery code", "/recovery-code",
                       "Make a recovery code to reset a forgotten password without the admin.", ""),

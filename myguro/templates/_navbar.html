@@ -51,7 +51,7 @@
     </div>
     <button id="palette-button" class="btn btn-outline-secondary bi bi-search" type="button"
             aria-label="{{ _("Quick jump (Ctrl+K)") }}" title="{{ _("Quick jump (Ctrl+K)") }}"></button>
-    <!-- One account menu for every screen size: Settings (admin), Password and Logout. -->
+    <!-- One account menu for every screen size: Settings and Logout. -->
     <div class="dropdown">
       <button class="btn btn-outline-secondary bi bi-person-circle dropdown-toggle" type="button"
               data-bs-toggle="dropdown" aria-expanded="false" aria-label="{{ _("Account menu") }}">
@@ -59,32 +59,8 @@
       </button>
       <ul class="dropdown-menu dropdown-menu-end">
         <li><h6 class="dropdown-header">{{ user.name }} ({{ user.role }})</h6></li>
-        {% if SCHOOL_YEARS %}
-        <li class="px-3 pb-2">
-          <label class="form-label small text-body-secondary mb-1" for="year-select">{{ _("School year") }}</label>
-          <select id="year-select" class="form-select form-select-sm">
-            {% for year in SCHOOL_YEARS.years %}
-            <option value="{{ year.id }}" {{ 'selected' if year.id == SCHOOL_YEARS.viewing_id }}>
-              {{ year.name }}{{ (" " ~ _("(current)")) if year.current }}
-            </option>
-            {% endfor %}
-          </select>
-        </li>
-        <li><hr class="dropdown-divider"></li>
-        {% endif %}
-        <li><a class="dropdown-item bi bi-palette {{ 'active' if request.endpoint == 'display.page' }}" href="{{ url_for('display.page') }}"> {{ _("Display") }}</a></li>
-        {% if CHATBOT %}
-        <!-- chat.js sets the text and the icon (Hide or Show GuroBot); the choice is kept in this browser. -->
-        <li><button id="chat-visibility" class="dropdown-item bi bi-eye-slash" type="button"> {{ _("Hide GuroBot") }}</button></li>
-        {% endif %}
-        {% if user.role in ("admin", "teacher", "student") %}
-        <li><a class="dropdown-item bi bi-star {{ 'active' if request.endpoint == 'feedback.page' }}" href="{{ url_for('feedback.page') }}"> {{ _("Feedback") }}</a></li>
-        {% endif %}
-        {% if user.role == "admin" %}
-        <li><a class="dropdown-item bi bi-gear {{ 'active' if request.endpoint == 'settings.page' }}" href="{{ url_for('settings.page') }}"> {{ _("Settings") }}</a></li>
-        {% endif %}
-        <li><a class="dropdown-item bi bi-key" href="{{ url_for('auth.change_password_page') }}"> {{ _("Password") }}</a></li>
-        <li><a class="dropdown-item bi bi-shield-lock {{ 'active' if request.endpoint == 'recovery.code_page' }}" href="{{ url_for('recovery.code_page') }}"> {{ _("Recovery code") }}</a></li>
+        <!-- School year, display, password, recovery code and feedback are grouped on the Settings page. -->
+        <li><a class="dropdown-item bi bi-gear {{ 'active' if request.endpoint in ('settings.page', 'display.page') }}" href="{{ url_for('settings.page') }}"> {{ _("Settings") }}</a></li>
         <li><hr class="dropdown-divider"></li>
         <li><button id="logout-button" class="dropdown-item bi bi-box-arrow-right" type="button"> {{ _("Logout") }}</button></li>
       </ul>

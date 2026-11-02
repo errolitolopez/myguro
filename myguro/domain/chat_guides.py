@@ -81,14 +81,14 @@ TEACHER_GUIDES = {
          "To bring an archived one back, open Activities and tap Deleted, then restore it. It comes back not started."]),
     "how-recovery-code": (
         "Use a recovery code", "How to make a recovery code, and how to reset a forgotten password with it.", "recovery-code",
-        ["Make a code now: open Recovery code from the account menu and type your password. Write the code down, it is shown only once.",
+        ["Make a code now: open Settings from the account menu, then Account, then Recovery code, and type your password. Write the code down, it is shown only once.",
          "Forgot your password later? On the login page tap Forgot your password?",
          "Type your username, the code and a new password.",
          "A code works 3 times. Make a new one after you use it."]),
     "how-school-year": (
         "Look at another school year", "How to switch to a past school year, which can only be looked at.", "dashboard",
-        ["Open the account menu at the top right.",
-         "Choose the school year in the School year box.",
+        ["Open Settings from the account menu at the top right.",
+         "Under Account, choose the school year in the School year box.",
          "Past years are read-only. Choose the current year again to work."]),
     "how-rename-class": (
         "Rename a class or change its subject", "How to edit a class's name or subject.", "classes",
@@ -144,19 +144,19 @@ TEACHER_GUIDES = {
          "For every activity of a class in one table, use the class Gradebook instead."]),
     "how-display": (
         "Change the theme, text size or menu bar", "How to change the theme (light or dark), text size, line spacing, or turn the bottom menu bar or the blur effects on or off.", "display",
-        ["Open Display from the account menu at the top right.",
+        ["Open Settings from the account menu at the top right, then go to Appearance.",
          "Theme: choose Auto, Light or Dark.",
          "Reading: choose the text size, alignment and line spacing.",
          "Effects: turn off the glass blur and moving background if pages feel slow on a phone.",
          "Menu: turn the menu bar at the bottom of the phone on or off."]),
     "how-feedback": (
         "Send feedback about MyGuro", "How to rate MyGuro and send feedback.", "feedback",
-        ["Open Feedback from the account menu.",
+        ["Open Settings from the account menu, then Account, then Feedback.",
          "Rate each question from 1 to 5 stars.",
          "Send it. Your answers are private, and you can send them only once."]),
     "how-change-password": (
         "Change your password", "How to change the account password.", "password",
-        ["Open Password from the account menu.",
+        ["Open Settings from the account menu, then Account, then Password.",
          "Type your current password and then the new one.",
          "Save it. Make a recovery code too, in case you forget it."]),
 }

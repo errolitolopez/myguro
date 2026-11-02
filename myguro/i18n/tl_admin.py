@@ -106,8 +106,8 @@ ADMIN = {
     "Asks teachers and students who have not sent feedback yet to rate MyGuro. It stops for each person once they send it. Never on the answer page.":
         "Hinihiling sa mga teacher at estudyanteng hindi pa nakapagpadala ng feedback na i-rate ang MyGuro. Humihinto ito para sa bawat tao kapag naipadala na nila. Hindi kailanman sa answer page.",
     "Button text": "Text ng button",
-    "Classes and the work given to them belong to a school year. When you start a new year it becomes the current one: teachers and students begin with no classes, and past years can only be looked at (the year picker is in the account menu).":
-        "Ang mga class at ang gawang ibinigay sa kanila ay kabilang sa isang school year. Kapag nagsimula ka ng bagong taon, ito ang magiging kasalukuyan: magsisimula ang mga teacher at estudyante nang walang class, at matitingnan na lang ang mga nakaraang taon (nasa account menu ang year picker).",
+    "Classes and the work given to them belong to a school year. When you start a new year it becomes the current one: teachers and students begin with no classes, and past years can only be looked at (each person picks the year to look at under Account).":
+        "Ang mga class at ang gawang ibinigay sa kanila ay kabilang sa isang school year. Kapag nagsimula ka ng bagong taon, ito ang magiging kasalukuyan: magsisimula ang mga teacher at estudyante nang walang class, at matitingnan na lang ang mga nakaraang taon (pipili ang bawat tao ng taong titingnan sa ilalim ng Account).",
     "Copy last year's classes (without students)": "Kopyahin ang mga class noong nakaraang taon (walang estudyante)",
     "Feedback pop-up": "Feedback pop-up",
     "GCash account name": "Pangalan ng GCash account",

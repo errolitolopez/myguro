@@ -410,7 +410,7 @@ def test_the_round_button_can_be_dragged_and_the_place_is_remembered():
     assert "touch-action: none" in open("myguro/static/css/glass.css").read()  # a drag must not scroll the page
 
 
-def test_teacher_menu_has_a_hide_guro_bot_item_only_with_the_chatbot(teacher, chat_on):
-    page = teacher.get("/dashboard").get_data(as_text=True)
-    assert 'id="chat-visibility"' in page
+def test_settings_page_has_a_hide_guro_bot_button_only_with_the_chatbot(teacher, chat_on):
+    assert 'id="chat-visibility"' in teacher.get("/settings").get_data(as_text=True)
+    assert 'id="chat-visibility"' not in teacher.get("/dashboard").get_data(as_text=True)
     assert 'chat-hidden' in open("myguro/static/js/chat.js").read()

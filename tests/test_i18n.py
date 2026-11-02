@@ -73,7 +73,7 @@ def test_language_buttons_are_on_the_navbar_display_and_login_pages(teacher):
     page = teacher.get("/dashboard").get_data(as_text=True)
     assert 'data-language-choice="en"' in page and 'data-language-choice="tl"' in page
     assert page.index('aria-label="Change language"') < page.index('aria-label="Change theme"')  # first in the row
-    assert "data-language-select" in teacher.get("/display").get_data(as_text=True)
+    assert "data-language-select" in teacher.get("/settings").get_data(as_text=True)
     for path in ("/login", "/forgot-password"):
         assert "data-language-select" in flask_app.test_client().get(path).get_data(as_text=True)
 

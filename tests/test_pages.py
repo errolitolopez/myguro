@@ -70,15 +70,15 @@ def test_dashboard_chart_is_for_teachers_and_students_only(admin, teacher):
 def test_every_page_with_the_account_menu_loads_common_js(admin, teacher, supervisor):
     """common.js makes Logout work; a page without it has a dead Logout button."""
     student = login("jdelacruz01")
-    for client, path in [(admin, "/display"), (teacher, "/display"), (student, "/display"), (supervisor, "/display"),
+    for client, path in [(admin, "/settings"), (teacher, "/settings"), (student, "/settings"), (supervisor, "/settings"),
                          (admin, "/feedback"), (teacher, "/feedback"), (student, "/feedback")]:
         page = client.get(path).get_data(as_text=True)
         assert 'id="logout-button"' in page and "js/common.js" in page, path
 
 
-def test_display_page_is_open_to_every_role(admin, teacher, supervisor):
+def test_settings_page_is_open_to_every_role(admin, teacher, supervisor):
     for client in (admin, teacher, supervisor, login("jdelacruz01")):
-        page = client.get("/display").get_data(as_text=True)
+        page = client.get("/settings").get_data(as_text=True)
         assert "data-theme-select" in page and 'data-reading-select="size"' in page
         assert 'data-reading-switch="tabbar"' in page and 'data-reading-switch="effects"' in page
         # The choices live on this page now, not in the account menu of the other pages
@@ -87,13 +87,13 @@ def test_display_page_is_open_to_every_role(admin, teacher, supervisor):
 
 def test_a_crash_shows_our_own_page_or_json_and_never_a_traceback(teacher, monkeypatch):
     from myguro.services import SettingsService
-    import myguro.web.display as display_page
+    import myguro.web.settings as display_page
 
     def boom(*args, **kwargs):
         raise RuntimeError("secret details")
 
     monkeypatch.setattr(display_page, "render_template", boom)
-    page = teacher.get("/display")
+    page = teacher.get("/settings")
     assert page.status_code == 500 and b"Something went wrong" in page.data and b"Try again" in page.data
     assert b"secret details" not in page.data and b"Traceback" not in page.data
 
@@ -145,3 +145,31 @@ def test_the_cookie_notice_is_on_every_page_but_the_answer_page(teacher):
     assignment_id = assign(teacher, activity_id, class_id)
     student = login(students[0]["username"])
     assert 'id="cookie-notice"' not in student.get(f"/my-activities/{assignment_id}").get_data(as_text=True)
+
+
+def test_settings_groups_the_choices_by_category_and_the_menu_stays_short(admin, teacher, supervisor):
+    """The account menu only has Settings and Logout; the rest is on the Settings page, in categories."""
+    student = login("jdelacruz01")
+    for client in (admin, teacher, student):
+        menu = client.get("/dashboard").get_data(as_text=True)
+        assert 'href="/settings"' in menu and 'id="logout-button"' in menu
+        for moved in ('dropdown-item bi bi-shield-lock', 'dropdown-item bi bi-star', 'dropdown-item bi bi-key', 'id="year-select"'):
+            assert moved not in menu, moved
+        page = client.get("/settings").get_data(as_text=True)
+        for category in ('id="appearance"', 'id="account"'):
+            assert category in page
+        for link in ('href="/recovery-code"', 'href="/change-password"', 'id="year-select"'):
+            assert link in page, link
+        if client is not admin:  # the school-wide settings are the admin's
+            assert "js/settings.js" not in page
+            assert 'id="school"' not in page and 'id="support-form"' not in page
+    admin_page = admin.get("/settings").get_data(as_text=True)
+    assert 'id="school"' in admin_page and 'id="popups"' in admin_page and "js/settings.js" in admin_page
+    # A supervisor has no school year and no feedback, but still has the rest
+    page = supervisor.get("/settings").get_data(as_text=True)
+    assert 'id="year-select"' not in page and 'href="/feedback"' not in page and 'href="/change-password"' in page
+
+
+def test_the_old_display_address_goes_to_settings(teacher):
+    response = teacher.get("/display")
+    assert response.status_code == 302 and response.headers["Location"].endswith("/settings#appearance")

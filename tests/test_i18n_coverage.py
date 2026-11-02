@@ -23,7 +23,7 @@ TRANSLATED_FILES = [
     # The answer page
     "myguro/templates/answer.html", "myguro/static/js/answer.js",
     # Feedback and Display
-    "myguro/templates/feedback.html", "myguro/static/js/feedback.js", "myguro/templates/display.html",
+    "myguro/templates/feedback.html", "myguro/static/js/feedback.js",
     "myguro/templates/_reading_settings.html",
     # The error page (its title and message come from errors.py and are translated there)
     "myguro/templates/error.html",

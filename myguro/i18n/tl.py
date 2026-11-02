@@ -111,8 +111,8 @@ TAGLISH = {
         "Isang beses lang ipinapakita ang code na ito at kusa itong nagtatago sa loob ng {seconds} segundo. I-save na ito ngayon, halimbawa sa notes ng phone mo o sa password manager. Kahit sino na may hawak nito ay makakapag-reset ng password mo, kaya huwag mo itong ibigay sa iba.",
     "Hiding in 1 second.": "Magtatago sa loob ng 1 segundo.",
     "Hiding in {count} seconds.": "Magtatago sa loob ng {count} segundo.",
-    "The code is hidden now and is not shown again. If you did not save it, make a new one (account menu, Recovery code).":
-        "Nakatago na ang code at hindi na ito ipapakita ulit. Kung hindi mo ito na-save, gumawa ng bago (account menu, Recovery code).",
+    "The code is hidden now and is not shown again. If you did not save it, make a new one (Settings, Account, Recovery code).":
+        "Nakatago na ang code at hindi na ito ipapakita ulit. Kung hindi mo ito na-save, gumawa ng bago (Settings, Account, Recovery code).",
     # --- Student dashboard ---
     "Hi, {name}!": "Hi, {name}!",
     "You don't have a working recovery code. Without one, only the admin can reset your password.":
@@ -287,6 +287,11 @@ TAGLISH = {
     "I know what to do on each page.": "Alam ko kung ano ang gagawin sa bawat page.",
     "I like how MyGuro looks.": "Gusto ko ang itsura ng MyGuro.",
     "Overall, how would you rate MyGuro?": "Sa kabuuan, ano ang rating mo sa MyGuro?",
+    # --- Settings page categories ---
+    "Appearance": "Itsura",
+    "Account": "Account",
+    "School": "Paaralan",
+    "Pop-ups and help": "Mga pop-up at tulong",
     # --- Display ---
     "How MyGuro looks to you. These choices are saved in this browser only, so on another phone or computer you choose again.":
         "Kung paano lumalabas ang MyGuro para sa iyo. Sa browser na ito lang naka-save ang mga pinili mo, kaya sa ibang phone o computer ay pipili ka ulit.",
@@ -300,8 +305,6 @@ TAGLISH = {
     "On: the menu is a bar at the bottom of the screen, within reach of your thumb. Off: the menu tabs show at the top, like on a computer. Wider screens always show them at the top.":
         "On: nasa ibaba ng screen ang menu bilang bar, abot ng hinlalaki mo. Off: nasa itaas ang mga menu tab, gaya sa computer. Ang mas malalapad na screen ay laging nasa itaas ang mga ito.",
     "Preview": "Preview",
-    "Read the paragraph below and answer the questions that follow. A good reading text is easy on the eyes: the letters are big enough, the lines are not crowded, and the edges are tidy. Change the choices above until this paragraph feels comfortable to read for a long time.":
-        "Basahin ang talata sa ibaba at sagutin ang mga tanong pagkatapos nito. Madaling tingnan sa mata ang magandang babasahin: sapat ang laki ng mga letra, hindi siksik ang mga linya, at maayos ang mga gilid. Baguhin ang mga pinili sa itaas hanggang maging komportable ang pagbasa ng talatang ito nang matagal.",
     "Text size": "Laki ng text",
     "Small": "Maliit",
     "Normal": "Normal",
