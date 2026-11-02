@@ -15,6 +15,13 @@
 
   <div id="calendar-error" class="alert alert-danger d-none" role="alert"></div>
 
+  <!-- Month or one day; calendar.js shows one of the two views below. -->
+  <div class="btn-group mb-3" role="group" aria-label="{{ _("Calendar view") }}">
+    <button id="view-month" type="button" class="btn btn-outline-secondary" aria-pressed="true">{{ _("Month") }}</button>
+    <button id="view-day" type="button" class="btn btn-outline-secondary" aria-pressed="false">{{ _("Day") }}</button>
+  </div>
+
+  <div id="month-view">
   <div class="d-flex justify-content-between align-items-center mb-2">
     <button id="previous-month" type="button" class="btn btn-outline-secondary bi bi-chevron-left" aria-label="{{ _("Previous month") }}"></button>
     <div class="text-center">
@@ -43,6 +50,19 @@
   <p class="small text-body-secondary">
     {{ _("National holidays follow the yearly proclamations. Days announced each year, such as Eid'l Fitr and Eid'l Adha, are added by the admin as local holidays.") }}
   </p>
+  </div>
+
+  <div id="day-view" class="d-none">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <button id="previous-day" type="button" class="btn btn-outline-secondary bi bi-chevron-left" aria-label="{{ _("Previous day") }}"></button>
+      <div class="text-center">
+        <h2 id="day-title" class="h5 mb-0"></h2>
+        <button id="today-day-button" type="button" class="btn btn-link btn-sm p-0">{{ _("Today") }}</button>
+      </div>
+      <button id="next-day" type="button" class="btn btn-outline-secondary bi bi-chevron-right" aria-label="{{ _("Next day") }}"></button>
+    </div>
+    <ul id="day-holidays" class="list-group mb-3"></ul>
+  </div>
 </main>
 
 {% if user.role == "admin" %}

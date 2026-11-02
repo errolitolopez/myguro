@@ -61,3 +61,16 @@ def test_bad_input_and_duplicates(admin):
 def test_navbar_has_calendar_for_everyone(admin, teacher):
     for client in (admin, teacher, login("jdelacruz01")):
         assert 'href="/calendar"' in client.get("/dashboard").get_data(as_text=True)
+
+
+def test_calendar_page_has_a_month_and_a_day_view_in_both_languages(admin, teacher):
+    """The Day view is drawn in the browser from the year's holidays, so the page only needs its pieces."""
+    for client in (admin, teacher, login("jdelacruz01")):
+        page = client.get("/calendar").get_data(as_text=True)
+        for piece in ('id="view-month"', 'id="view-day"', 'id="day-view"', 'id="previous-day"', 'id="next-day"'):
+            assert piece in page, piece
+    teacher.set_cookie("myguro-lang", "tl")
+    page = teacher.get("/calendar").get_data(as_text=True)
+    assert "Nakaraang araw" in page and "Susunod na araw" in page and ">Buwan<" in page
+    assert '"No holiday on this day.": "Walang holiday sa araw na ito."' in page  # for calendar.js
+

@@ -1,4 +1,4 @@
-// The holiday calendar: one month at a time. The admin can add, change and remove local holidays.
+// The holiday calendar: one month at a time, or one day. The admin can add, change and remove local holidays.
 
 const isAdmin = document.getElementById("calendar-page").dataset.admin === "yes";
 const KIND_BADGE = {
@@ -19,10 +19,15 @@ let shownYear = today.getFullYear();
 let shownMonth = today.getMonth(); // 0 = January
 const loadedYears = {}; // year -> holidays, so moving between months of one year asks the server once
 let editingId = null;
+let view = "month"; // "month" or "day"
+let shownDate = new Date(today.getFullYear(), today.getMonth(), today.getDate()); // the day in the Day view
 
 // isoDay(2026, 0, 5) -> "2026-01-05"
 const isoDay = (year, month, day) =>
   `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
+// dayIso(new Date(2026, 0, 5)) -> "2026-01-05"
+const dayIso = (date) => isoDay(date.getFullYear(), date.getMonth(), date.getDate());
 
 // holidaysOn("2026-01-01") -> the holidays of that day (a list, maybe empty)
 const holidaysOn = (day) => (loadedYears[shownYear] || []).filter((holiday) => holiday.day === day);
@@ -60,6 +65,22 @@ function dayCell(day, isToday) {
   const cell = document.createElement("td");
   cell.className = "p-1 align-top";
   cell.style.height = "4.5rem";
+  // Tap a day to see just that day (a keyboard can do it too).
+  cell.setAttribute("role", "button");
+  cell.tabIndex = 0;
+  cell.style.cursor = "pointer";
+  cell.setAttribute("aria-label", new Date(shownYear, shownMonth, day.number).toLocaleDateString(undefined, { dateStyle: "full" }));
+  const openDay = () => {
+    shownDate = new Date(shownYear, shownMonth, day.number);
+    setView("day");
+  };
+  cell.addEventListener("click", openDay);
+  cell.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      openDay();
+    }
+  });
   const number = document.createElement("div");
   number.className = isToday ? "fw-bold text-success" : "small";
   number.textContent = day.number;
@@ -145,10 +166,49 @@ function drawList() {
   document.getElementById("holiday-list").replaceChildren(...holidays.map(holidayItem));
 }
 
+// The Day view: the day's name and its holidays (or a line saying there is none).
+function drawDay() {
+  document.getElementById("day-title").textContent =
+    shownDate.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+  const holidays = holidaysOn(dayIso(shownDate));
+  if (!holidays.length) {
+    const empty = document.createElement("li");
+    empty.className = "list-group-item text-body-secondary";
+    empty.textContent = t("No holiday on this day.");
+    document.getElementById("day-holidays").replaceChildren(empty);
+    return;
+  }
+  document.getElementById("day-holidays").replaceChildren(...holidays.map(holidayItem));
+}
+
 async function show() {
   if (!(await loadYear(shownYear))) return;
+  if (view === "day") {
+    drawDay();
+    return;
+  }
   drawMonth();
   drawList();
+}
+
+// setView("day") shows the Day view for shownDate; setView("month") the month the day is in.
+function setView(name) {
+  view = name;
+  shownYear = shownDate.getFullYear();
+  shownMonth = shownDate.getMonth();
+  document.getElementById("month-view").classList.toggle("d-none", name !== "month");
+  document.getElementById("day-view").classList.toggle("d-none", name !== "day");
+  for (const [id, own] of [["view-month", "month"], ["view-day", "day"]]) {
+    const button = document.getElementById(id);
+    button.classList.toggle("active", name === own);
+    button.setAttribute("aria-pressed", name === own ? "true" : "false");
+  }
+  show();
+}
+
+function moveDay(step) {
+  shownDate = new Date(shownDate.getFullYear(), shownDate.getMonth(), shownDate.getDate() + step);
+  setView("day");
 }
 
 function moveMonth(step) {
@@ -164,6 +224,20 @@ document.getElementById("today-button").addEventListener("click", () => {
   shownYear = today.getFullYear();
   shownMonth = today.getMonth();
   show();
+});
+
+document.getElementById("view-month").addEventListener("click", () => setView("month"));
+document.getElementById("view-day").addEventListener("click", () => {
+  // From the month grid: today when this is the month of today, else the 1st of the month on screen.
+  const thisMonth = shownYear === today.getFullYear() && shownMonth === today.getMonth();
+  if (view === "month") shownDate = thisMonth ? new Date(today.getFullYear(), today.getMonth(), today.getDate()) : new Date(shownYear, shownMonth, 1);
+  setView("day");
+});
+document.getElementById("previous-day").addEventListener("click", () => moveDay(-1));
+document.getElementById("next-day").addEventListener("click", () => moveDay(1));
+document.getElementById("today-day-button").addEventListener("click", () => {
+  shownDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  setView("day");
 });
 
 // ---- Admin: add, change, remove a local holiday ----
@@ -198,7 +272,7 @@ if (isAdmin) {
   window.openHolidayForm = (holiday) => {
     editingId = holiday ? holiday.id : null;
     document.getElementById("holiday-modal-title").textContent = holiday ? t("Edit local holiday") : t("Add local holiday");
-    dayInput.value = holiday ? holiday.day : isoDay(shownYear, shownMonth, 1);
+    dayInput.value = holiday ? holiday.day : (view === "day" ? dayIso(shownDate) : isoDay(shownYear, shownMonth, 1));
     nameInput.value = holiday ? holiday.name : "";
     hideError("holiday-form-error");
     modal.show();
@@ -222,12 +296,11 @@ if (isAdmin) {
         return;
       }
       modal.hide();
-      // Show the month of the holiday that was just saved, so the admin sees it.
-      const [year, month] = dayInput.value.split("-").map(Number);
+      // Show the month (or day) of the holiday that was just saved, so the admin sees it.
+      const [year, month, day] = dayInput.value.split("-").map(Number);
       for (const key of Object.keys(loadedYears)) delete loadedYears[key];
-      shownYear = year;
-      shownMonth = month - 1;
-      await show();
+      shownDate = new Date(year, month - 1, day);
+      setView(view);
     } catch {
       showError("holiday-form-error", t("Cannot reach the server. Check your connection."));
     } finally {
@@ -237,4 +310,4 @@ if (isAdmin) {
 }
 
 weekdayHeaders();
-show();
+setView("month");
