@@ -51,7 +51,7 @@ TRANSLATED_FILES = [
     # Admin: settings, schedule, log, feedback totals
     "myguro/templates/settings.html", "myguro/static/js/settings.js", "myguro/templates/maintenance.html", "myguro/templates/schedule.html",
     "myguro/static/js/schedule.js", "myguro/templates/log.html", "myguro/static/js/log.js",
-    "myguro/static/js/log-chart.js", "myguro/templates/calendar.html", "myguro/static/js/calendar.js", "myguro/static/js/calendar-image.js", "myguro/templates/feedback_results.html", "myguro/static/js/feedback-results.js",
+    "myguro/static/js/log-chart.js", "myguro/templates/calendar.html", "myguro/static/js/calendar.js", "myguro/static/js/calendar-image.js", "myguro/static/js/dashboard-holidays.js", "myguro/templates/_holidays_widget.html", "myguro/templates/feedback_results.html", "myguro/static/js/feedback-results.js",
 ]
 
 PLACEHOLDER = re.compile(r"\{(\w+)\}")

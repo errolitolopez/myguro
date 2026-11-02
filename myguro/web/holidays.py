@@ -45,6 +45,12 @@ def api_year():
     return jsonify(service().year(request.args.get("year", school_today().year)))
 
 
+@bp.get("/api/calendar/upcoming")
+@role_required_api("admin", "teacher", "student")
+def api_upcoming():
+    return jsonify(service().upcoming())
+
+
 @bp.get("/api/calendar/search")
 @role_required_api("admin", "teacher", "student")
 def api_search():

@@ -133,3 +133,14 @@ def test_admin_and_teachers_can_make_the_holiday_image(admin, teacher):
         assert 'id="share-image-button"' in page and "calendar-image.js" in page
     page = login("jdelacruz01").get("/calendar").get_data(as_text=True)
     assert 'id="share-image-button"' not in page and "calendar-image.js" not in page
+
+
+def test_the_dashboard_shows_the_next_holidays(admin, teacher, monkeypatch):
+    from datetime import date
+    monkeypatch.setattr("myguro.services.holidays.school_today", lambda: date(2026, 12, 30))
+    for client in (admin, teacher, login("jdelacruz01")):
+        assert 'id="holidays-list"' in client.get("/dashboard").get_data(as_text=True)
+    body = teacher.get("/api/calendar/upcoming").get_json()
+    assert body["today"] == "2026-12-30"
+    # Today counts, and the list runs into the next year
+    assert [h["name"] for h in body["holidays"]] == ["Rizal Day", "New Year's Eve", "New Year's Day"]

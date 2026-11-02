@@ -10,6 +10,7 @@ MIN_YEAR = 2000  # the calendar page and the API stay inside a sane range
 MAX_YEAR = 2100
 MIN_SEARCH_LENGTH = 2  # one letter matches nearly everything
 MAX_SEARCH_RESULTS = 30  # enough to choose from on a phone
+MAX_UPCOMING_HOLIDAYS = 3  # rows in the dashboard card
 
 # What kind of day it is. "local" holidays are the ones the admin adds.
 REGULAR = "regular"  # regular holiday: no classes

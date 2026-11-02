@@ -26,6 +26,13 @@ class HolidayService(Service):
                   for row in self.events.in_year(year)]
         return {"year": year, "holidays": items, "events": events}
 
+    def upcoming(self):
+        """The next holidays from today on, for the dashboard. Next year is included so December can reach January."""
+        today = school_today()
+        holidays = self.year(today.year)["holidays"] + self.year(today.year + 1)["holidays"]
+        ahead = [holiday for holiday in holidays if holiday["day"] >= today.isoformat()]
+        return {"today": today.isoformat(), "holidays": ahead[:rules.MAX_UPCOMING_HOLIDAYS]}
+
     def search(self, query):
         """Holidays and school events with this text in their name, what is still to come first. National holidays
         repeat every year and are worked out, so only this year's and next year's are searched."""
