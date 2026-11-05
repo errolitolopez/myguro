@@ -533,6 +533,13 @@ h6, .h6 { font-size: 0.9375rem; }
 
 /* The bottom tab bar on phones (copied from mymotoworks). Opaque, so page content never shows through
    it. d-md-none (Bootstrap) hides it from 768px up. */
+/* The bar's height: the 3rem of the tabs plus room under them. Phones with rounded corners report no safe area, yet
+   their curve cuts the bottom of the screen, so there is always at least 0.5rem under the labels (more on an
+   iPhone with a home bar). Everything that sits above the bar uses --tabbar-height, so they stay in step. */
+:root {
+  --tabbar-extra: max(0.5rem, env(safe-area-inset-bottom));
+  --tabbar-height: calc(3rem + var(--tabbar-extra));
+}
 .tabbar {
   position: fixed;
   inset: auto 0 0 0;
@@ -541,8 +548,11 @@ h6, .h6 { font-size: 0.9375rem; }
   display: flex;
   background-color: var(--glass-solid);
   border-top: 1px solid var(--glass-border);
-  /* The iPhone home bar area. Needs viewport-fit=cover in base.html. */
-  padding-bottom: env(safe-area-inset-bottom);
+  /* Room under the labels for the rounded bottom of the screen and the iPhone home bar (needs viewport-fit=cover in
+     base.html), and at the sides so the first and last labels are not cut by the rounded corners. */
+  padding-bottom: var(--tabbar-extra);
+  padding-left: max(0.75rem, env(safe-area-inset-left));
+  padding-right: max(0.75rem, env(safe-area-inset-right));
 }
 
 /* Display settings → Bottom menu bar off: phones get the same tabs as a computer (under the logo) instead of
@@ -576,17 +586,17 @@ html[data-tab-bar="top"] .web-tabs { display: block !important; }
 @media (max-width: 767.98px) {
   /* Room for the bar, so the last row of a page is never hidden behind it. */
   html:not([data-tab-bar="top"]) body:has(.tabbar) {
-    padding-bottom: calc(3rem + env(safe-area-inset-bottom));
+    padding-bottom: var(--tabbar-height);
   }
 
   /* The editor and answer bars sit on top of the tab bar, not under it. */
   html:not([data-tab-bar="top"]) body:has(.tabbar) .position-fixed.bottom-0 {
-    bottom: calc(3rem + env(safe-area-inset-bottom)) !important; /* !important beats Bootstrap's bottom-0 */
+    bottom: var(--tabbar-height) !important; /* !important beats Bootstrap's bottom-0 */
   }
 
   /* The chat bubble goes above the bar too, not on top of it. */
   html:not([data-tab-bar="top"]) body:has(.tabbar) .chat-bubble {
-    --chat-bottom: calc(var(--chat-lift, 0rem) + 3rem + 0.75rem + env(safe-area-inset-bottom));
+    --chat-bottom: calc(var(--chat-lift, 0rem) + var(--tabbar-height) + 0.75rem);
   }
 }
 
@@ -604,7 +614,7 @@ html[data-tab-bar="top"] .web-tabs { display: block !important; }
 }
 @media (max-width: 767.98px) {
   html:not([data-tab-bar="top"]) body:has(.tabbar) .cookie-notice {
-    bottom: calc(3rem + 0.75rem + env(safe-area-inset-bottom));
+    bottom: calc(var(--tabbar-height) + 0.75rem);
   }
 }
 
@@ -636,11 +646,11 @@ html[data-tab-bar="top"] .web-tabs { display: block !important; }
   color: var(--confirm-text);
 }
 @media (max-width: 767.98px) {
-  html:not([data-tab-bar="top"]) body:has(.tabbar) .feedback-toast { bottom: calc(3rem + 0.75rem + env(safe-area-inset-bottom)); }
-  html:not([data-tab-bar="top"]) body:has(.tabbar) .feedback-toast-above-chat { bottom: calc(3rem + 4.75rem + env(safe-area-inset-bottom)); }
+  html:not([data-tab-bar="top"]) body:has(.tabbar) .feedback-toast { bottom: calc(var(--tabbar-height) + 0.75rem); }
+  html:not([data-tab-bar="top"]) body:has(.tabbar) .feedback-toast-above-chat { bottom: calc(var(--tabbar-height) + 4.75rem); }
   /* The cookie notice is shown until the person taps OK; the card then goes above it */
   body:has(#cookie-notice:not(.d-none)) .feedback-toast { bottom: calc(max(0.75rem, env(safe-area-inset-bottom)) + 4.5rem); }
-  html:not([data-tab-bar="top"]) body:has(.tabbar):has(#cookie-notice:not(.d-none)) .feedback-toast { bottom: calc(3rem + 5.25rem + env(safe-area-inset-bottom)); }
+  html:not([data-tab-bar="top"]) body:has(.tabbar):has(#cookie-notice:not(.d-none)) .feedback-toast { bottom: calc(var(--tabbar-height) + 5.25rem); }
 }
 @media (prefers-reduced-motion: reduce) { .feedback-toast { transition: none; transform: none; } }
 
