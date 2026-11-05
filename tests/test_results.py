@@ -132,7 +132,7 @@ def test_results_and_the_checking_page_tell_when_the_student_started_and_submitt
     assert detail["started_at"] and detail["submitted_at"] and detail["auto_submitted"] is False
 
 
-def test_check_cards_list_the_fewest_points_to_check_first(teacher):
+def test_check_cards_list_the_oldest_given_first(teacher):
     first_class, first_students = make_class(teacher)
     second_class, second_students = make_class(teacher, "Grade 10 - Mabini", grade="Grade 10", section="Mabini")
     activity_id, q = make_activity(teacher)
@@ -142,8 +142,10 @@ def test_check_cards_list_the_fewest_points_to_check_first(teacher):
     for assignment_id in ids.values():
         assert teacher.put(f"/api/assignments/{assignment_id}/status", json={"status": "open"}).status_code == 200
     answers = {q[0]: 1, q[2]: "Daoism", q[4]: "Because"}  # one short answer = 5 points to check
-    submit(first_students[0]["username"], ids[first_class], answers)
-    for student in second_students[:2]:
-        submit(student["username"], ids[second_class], answers)
+    for student in first_students[:2]:
+        submit(student["username"], ids[first_class], answers)
+    submit(second_students[0]["username"], ids[second_class], answers)
     cards = teacher.get(f"/api/results/to-check?activity_id={activity_id}").get_json()["assignments"]
-    assert [card["to_check"] for card in cards] == [5, 10]
+    # given together, the first class's assignment is the older one, whatever its points
+    assert [card["id"] for card in cards] == sorted(ids.values())
+    assert [card["to_check"] for card in cards] == [10, 5]
