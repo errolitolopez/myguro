@@ -78,20 +78,21 @@ function userItem(user) {
 
   const badge = document.createElement("span");
   if (!user.active) {
-    badge.className = "badge text-bg-secondary";
+    badge.className = "badge rounded-0 text-bg-secondary";
     badge.textContent = t("Deactivated");
   } else if (user.must_change_password) {
-    badge.className = "badge text-bg-warning";
+    badge.className = "badge rounded-0 text-bg-warning";
     badge.textContent = t("Not logged in yet");
     badge.title = t("Still using the temporary password");
   } else {
-    badge.className = "badge text-bg-success";
+    badge.className = "badge rounded-0 text-bg-success";
     badge.textContent = t("Active");
   }
 
   // Shows the admin who can reset their own password and who must ask for help.
   const recovery = document.createElement("span");
-  recovery.className = user.has_recovery_code ? "badge text-bg-info" : "badge text-bg-light border";
+  // rounded-0: square badges in the list
+  recovery.className = user.has_recovery_code ? "badge rounded-0 text-bg-info" : "badge rounded-0 text-bg-light border";
   recovery.textContent = user.has_recovery_code ? t("Has recovery code") : t("No recovery code");
   const badges = document.createElement("div");
   badges.className = "d-flex flex-column align-items-end gap-1 users-col-status";

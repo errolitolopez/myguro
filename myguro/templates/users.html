@@ -101,8 +101,7 @@
   </div>
   {% endif %}
 
-  <!-- Square corners on the list: a table-like card with a header row looks cleaner without the rounded ones. -->
-  <div class="card" style="--bs-card-border-radius: 0; --bs-card-inner-border-radius: 0;">
+  <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center gap-2">
       {% if role == "student" %}
       <input id="select-page" type="checkbox" class="form-check-input mt-0" aria-label="{{ _("Select all on this page") }}">
