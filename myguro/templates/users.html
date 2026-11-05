@@ -21,11 +21,6 @@
     <input id="search" type="search" class="form-control flex-grow-1" style="min-width: 12rem; width: auto;"
            placeholder="Search name, username{{ ' or section' if role == 'student' }}"
            aria-label="Search {{ nouns|lower }}" autocomplete="off">
-    <select id="sort" class="form-select w-auto" aria-label="{{ _("Sort by") }}">
-      <option value="name">{{ _("Sort: name") }}</option>
-      <option value="login_new">{{ _("Sort: last login, newest") }}</option>
-      <option value="login_old">{{ _("Sort: last login, oldest") }}</option>
-    </select>
     {% if role == "student" %}
     <button id="filter-toggle" type="button" class="btn btn-outline-secondary text-nowrap bi bi-funnel"
             data-bs-toggle="collapse" data-bs-target="#advanced-filter" aria-expanded="false"
@@ -112,6 +107,11 @@
       <input id="select-page" type="checkbox" class="form-check-input mt-0" aria-label="{{ _("Select all on this page") }}">
       {% endif %}
       <span class="fw-semibold me-auto">{{ nouns }}</span>
+      <!-- Sort by name (default) or by last login; tap Last login again to flip newest / oldest -->
+      <div class="btn-group btn-group-sm" role="group" aria-label="{{ _("Sort by") }}">
+        <button id="sort-name" type="button" class="btn btn-outline-secondary active">{{ _("Name") }}</button>
+        <button id="sort-login" type="button" class="btn btn-outline-secondary bi bi-arrow-down-up">{{ _("Last login") }}</button>
+      </div>
       <span id="user-summary" class="text-body-secondary small"></span>
     </div>
     <div id="user-list" class="list-group list-group-flush">

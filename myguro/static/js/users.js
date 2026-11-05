@@ -13,7 +13,9 @@ let confirmAction = null; // what t("Yes") does in the confirm box
 const list = document.getElementById("user-list");
 const searchInput = document.getElementById("search");
 // Advanced filter (students page only): full name, grade, section
-const sortSelect = document.getElementById("sort");
+const sortNameButton = document.getElementById("sort-name");
+const sortLoginButton = document.getElementById("sort-login");
+let sort = "name"; // "name", "login_new" or "login_old" (the server accepts only these)
 const gradeFilter = document.getElementById("grade-filter");
 const sectionFilter = document.getElementById("section-filter");
 const statusFilter = document.getElementById("status-filter");
@@ -62,13 +64,17 @@ function userItem(user) {
   const place = gradeSection(user);
   details.append(username, place ? ` · ${place}` : "", ` · ${plural(user.classes, "class", "classes")}`);
   left.append(name, details);
-  // Only logins since the app started recording them have a time; older accounts show nothing.
-  if (user.last_login_at) {
-    const lastLogin = document.createElement("div");
-    lastLogin.className = "small text-body-secondary";
-    lastLogin.textContent = `${t("Last login")}: ${formatDateTime(user.last_login_at)}`;
-    left.append(lastLogin);
-  }
+  // Only logins since the app started recording them have a time; older accounts show a dash.
+  // A column of its own on wide screens; on a phone it is a line under the name instead.
+  const lastLogin = user.last_login_at ? formatDateTime(user.last_login_at) : "–";
+  const phoneLogin = document.createElement("div");
+  phoneLogin.className = "small text-body-secondary d-md-none";
+  phoneLogin.textContent = `${t("Last login")}: ${lastLogin}`;
+  left.append(phoneLogin);
+  const loginColumn = document.createElement("div");
+  loginColumn.className = "small text-body-secondary d-none d-md-block text-nowrap";
+  loginColumn.style.width = "9rem";
+  loginColumn.textContent = lastLogin;
 
   const badge = document.createElement("span");
   if (!user.active) {
@@ -92,7 +98,7 @@ function userItem(user) {
   badges.append(badge, recovery);
 
   if (typeof selectionBox === "function") row.append(selectionBox(user)); // students page
-  row.append(left, badges);
+  row.append(left, loginColumn, badges);
   row.addEventListener("click", () => openEdit(user));
   row.addEventListener("keydown", (event) => {
     if (event.target === row && (event.key === "Enter" || event.key === " ")) {
@@ -151,7 +157,7 @@ function render(data) {
 // Loads the current page of the search from the server.
 async function loadUsers() {
   const thisLoad = ++loadNumber;
-  const params = new URLSearchParams({ role, page, q: searchInput.value.trim(), sort: sortSelect.value });
+  const params = new URLSearchParams({ role, page, q: searchInput.value.trim(), sort });
   if (gradeFilter) {
     if (gradeFilter.value !== "*") params.set("grade", gradeFilter.value);
     if (sectionFilter.value.trim()) params.set("section", sectionFilter.value.trim());
@@ -188,7 +194,18 @@ function searchSoon() {
   searchTimer = setTimeout(() => goToPage(1), 250);
 }
 searchInput.addEventListener("input", searchSoon);
-sortSelect.addEventListener("change", () => goToPage(1));
+// Name sorts by name; Last login sorts newest first, and a second tap flips to oldest first.
+function setSort(newSort) {
+  sort = newSort;
+  sortNameButton.classList.toggle("active", sort === "name");
+  sortLoginButton.classList.toggle("active", sort !== "name");
+  sortLoginButton.classList.toggle("bi-arrow-down-up", sort === "name");
+  sortLoginButton.classList.toggle("bi-arrow-down", sort === "login_new");
+  sortLoginButton.classList.toggle("bi-arrow-up", sort === "login_old");
+  goToPage(1);
+}
+sortNameButton.addEventListener("click", () => setSort("name"));
+sortLoginButton.addEventListener("click", () => setSort(sort === "login_new" ? "login_old" : "login_new"));
 if (gradeFilter) {
   sectionFilter.addEventListener("input", searchSoon);
   gradeFilter.addEventListener("change", () => goToPage(1));
