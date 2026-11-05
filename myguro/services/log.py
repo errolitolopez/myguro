@@ -4,6 +4,7 @@ from myguro.config import SCHOOL_TIMEZONE, school_today
 from myguro.domain.log import CATEGORIES, CHART_VIEWS, LOG_ROLES, chart_days, day_bounds
 from myguro.domain.text import clean_name, like_pattern
 from myguro.errors import ValidationError
+from myguro.repositories import DeviceRepository
 from myguro.services.base import Service
 
 DEFAULT_PER_PAGE = 20
@@ -12,6 +13,20 @@ MAX_PER_PAGE = 100
 
 class LogService(Service):
     """Reading the activity log (supervisors and the admin). Writing is Service.log."""
+
+    def shared_devices(self):
+        """{devices: [...]}: the devices that two or more accounts signed in from, newest first. Each is {device: a short
+        code like "3F9A2C10", device_name, last_at (UTC), accounts: [{id, name, username, role, logins, first_at,
+        last_at}]}. A device is a browser with the same cookie, so a private tab or cleared cookies counts as a new one:
+        this points at sharing, it does not prove it."""
+        found = {}
+        for row in DeviceRepository(self.db).shared():
+            item = found.setdefault(row["device_key"], {"device": row["device_key"], "device_name": row["device_name"],
+                                                         "last_at": row["last_at"], "accounts": []})
+            item["accounts"].append({"id": row["user_id"], "name": row["name"], "username": row["username"],
+                                     "role": row["role"], "logins": row["logins"], "first_at": row["first_at"],
+                                     "last_at": row["last_at"]})
+        return {"devices": list(found.values())}
 
     @staticmethod
     def entry_json(row):

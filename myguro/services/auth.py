@@ -4,6 +4,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from myguro.domain.accounts import check_password_change
 from myguro.errors import ForbiddenError, TooManyRequestsError, UnauthorizedError, ValidationError
+from myguro.repositories import DeviceRepository
 from myguro.services.base import Service
 
 
@@ -44,14 +45,19 @@ MAX_TYPED_NAME = 100  # a mistyped username is kept in the log, but not unlimite
 
 
 class AuthService(Service):
+    def __init__(self, db, user=None):
+        super().__init__(db, user)
+        self.devices = DeviceRepository(db)
+
     def log_sign_in(self, action, summary, actor, ip="", device=""):
         """Write a sign-in entry and save it right away: these happen outside any other change, and
         a failed login raises right after, so nothing else would commit the entry."""
         self.log(action, "sign-in", summary, actor=actor, address=ip, device=device)
         self.commit()
 
-    def login(self, username, password, ip, throttle, device=""):
-        """The user's row when the username and password are right. Every try is logged."""
+    def login(self, username, password, ip, throttle, device="", device_key=""):
+        """The user's row when the username and password are right. Every try is logged. device_key is the short
+        hash of the browser's device id: a successful login is remembered against it (see domain/devices.py)."""
         username = str(username or "").strip()
         password = str(password or "")
         if not username or not password:
@@ -75,6 +81,8 @@ class AuthService(Service):
             raise ForbiddenError("This account is deactivated. Ask the admin.")
         throttle.passed(key)
         self.users.set_last_login(user["id"])
+        if device_key:
+            self.devices.record(user["id"], device_key, device)
         self.log_sign_in("auth.login", "Logged in.", user, ip, device)
         return user
 

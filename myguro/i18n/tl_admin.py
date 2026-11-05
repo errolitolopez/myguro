@@ -28,6 +28,12 @@ ADMIN = {
     "On: students see only holidays on the calendar. Off: they see the school events too. Teachers and you always see both. On by default.":
         "On: holidays lang ang makikita ng mga estudyante sa calendar. Off: makikita rin nila ang school events. Makikita mo at ng mga teacher ang dalawa. Naka-on bilang default.",
     "Has recovery code": "May recovery code",
+    "Shared devices": "Mga shared na device",
+    "Devices that more than one account signed in from, for example one phone used by two students. A device is a browser: a private tab or cleared cookies counts as a new device, so this points at sharing but does not prove it. Tap a name to see that person's entries.":
+        "Mga device na ginamit ng mahigit isang account sa pag-sign in, halimbawa isang phone na ginamit ng dalawang estudyante. Ang device ay isang browser: ang private tab o nabura na cookies ay bibilangin bilang bagong device, kaya nagtuturo ito ng posibleng pagpapahiram pero hindi ito patunay. I-tap ang pangalan para makita ang mga entry ng taong iyon.",
+    "Last used {time}": "Huling ginamit {time}",
+    "Could not load the shared devices.": "Hindi na-load ang mga shared na device.",
+    "No device has been used by more than one account.": "Walang device na ginamit ng mahigit isang account.",
     "Grade order": "Ayos ng mga grade",
     "School events": "Mga school event",
     "Time in / time out": "Time in / time out",

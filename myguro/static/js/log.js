@@ -144,6 +144,64 @@ async function search(wantedPage) {
   }
 }
 
+// --- Shared devices ------------------------------------------------------------------
+
+// deviceItem({device, device_name, last_at, accounts}) -> a row: the device code and what it is, then each account that
+// signed in from it with how many times. Tapping an account shows only that person's entries below.
+function deviceItem(device) {
+  const row = document.createElement("div");
+  row.className = "list-group-item";
+  const top = document.createElement("div");
+  const code = document.createElement("span");
+  code.className = "font-monospace fw-semibold";
+  code.textContent = device.device;
+  top.append(code, device.device_name ? ` · ${device.device_name}` : "");
+  const last = document.createElement("div");
+  last.className = "small text-body-secondary";
+  last.textContent = t("Last used {time}", { time: formatTime(device.last_at) });
+  const accounts = document.createElement("div");
+  accounts.className = "d-flex flex-wrap align-items-center gap-1 mt-1";
+  for (const account of device.accounts) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1";
+    const badge = document.createElement("span");
+    badge.className = `badge ${ROLE_BADGES[account.role] || "text-bg-secondary"}`;
+    badge.textContent = account.role;
+    button.append(account.name, badge, ` · ${plural(account.logins, "login")}`);
+    button.addEventListener("click", () => {
+      showPerson(account);
+      document.getElementById("log-summary").scrollIntoView({ behavior: "smooth" });
+    });
+    accounts.append(button);
+  }
+  row.append(top, last, accounts);
+  return row;
+}
+
+async function loadSharedDevices() {
+  const listBox = document.getElementById("devices-list");
+  const count = document.getElementById("devices-count");
+  hideError("devices-error");
+  try {
+    const response = await apiFetch("/api/log/devices");
+    if (!response) return;
+    const data = await response.json();
+    if (!response.ok) {
+      listBox.replaceChildren();
+      showError("devices-error", data.error || t("Could not load the shared devices."));
+      return;
+    }
+    count.textContent = data.devices.length;
+    count.classList.toggle("d-none", data.devices.length === 0);
+    listBox.replaceChildren(...(data.devices.length ? data.devices.map(deviceItem)
+      : [messageItem(t("No device has been used by more than one account."))]));
+  } catch {
+    listBox.replaceChildren();
+    showError("devices-error", t("Cannot reach the server. Check your connection."));
+  }
+}
+
 searchInput.addEventListener("input", () => {
   clearTimeout(searchTimer);
   searchTimer = setTimeout(() => search(1), SEARCH_DELAY);
@@ -158,3 +216,4 @@ document.getElementById("prev-page").addEventListener("click", () => search(page
 document.getElementById("next-page").addEventListener("click", () => search(page + 1));
 
 search(1);
+loadSharedDevices();

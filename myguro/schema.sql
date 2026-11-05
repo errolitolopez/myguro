@@ -306,6 +306,19 @@ CREATE TABLE IF NOT EXISTS teacher_settings (
     PRIMARY KEY (user_id, key)
 );
 
+-- Which browsers (devices) each person signed in from (domain/devices.py), to show when one device is used by
+-- several accounts. device_key is a short hash of a random id the browser keeps in a cookie, never the id itself.
+-- One row per device and person: how many times and when they last signed in from it.
+CREATE TABLE IF NOT EXISTS device_logins (
+    device_key TEXT NOT NULL,
+    user_id INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    logins INTEGER NOT NULL DEFAULT 1,
+    first_at TEXT NOT NULL DEFAULT (datetime('now')),
+    last_at TEXT NOT NULL DEFAULT (datetime('now')),
+    device_name TEXT NOT NULL DEFAULT '',
+    PRIMARY KEY (device_key, user_id)
+);
+
 -- "Check with AI" (domain/ai_check.py): how many short answers each teacher sent to be checked each school
 -- day, for the daily limit. Counts only: the answers themselves are never kept.
 CREATE TABLE IF NOT EXISTS ai_check_usage (

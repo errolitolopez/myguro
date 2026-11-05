@@ -93,6 +93,20 @@
     </div>
   </div>
 
+  <!-- Devices (browsers) that two or more accounts signed in from. The device is a random id kept in a cookie, so it
+       is a pointer, not proof: a private tab or cleared cookies look like a new device. -->
+  <section class="card mb-3" aria-labelledby="devices-title">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      <span class="fw-semibold bi bi-phone" id="devices-title"> {{ _("Shared devices") }}</span>
+      <span id="devices-count" class="badge text-bg-warning d-none"></span>
+    </div>
+    <div class="card-body pb-2 small text-body-secondary">
+      {{ _("Devices that more than one account signed in from, for example one phone used by two students. A device is a browser: a private tab or cleared cookies counts as a new device, so this points at sharing but does not prove it. Tap a name to see that person's entries.") }}
+    </div>
+    <div id="devices-error" class="alert alert-danger m-3 mb-0 d-none" role="alert"></div>
+    <div id="devices-list" class="list-group list-group-flush">{% include "_skeleton.html" %}</div>
+  </section>
+
   <div id="log-summary" class="small text-body-secondary"></div>
   <div class="small text-body-secondary mb-2">{{ _("Keeps the latest {count} entries. Older ones are removed.", count="{:,}".format(max_entries)) }}</div>
   <div id="log-list" class="list-group">

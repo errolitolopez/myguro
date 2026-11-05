@@ -33,6 +33,13 @@ def api_chart():
     ))
 
 
+@bp.get("/api/log/devices")
+@role_required_api("supervisor", "admin")
+def api_devices():
+    """Devices (browsers) that two or more accounts signed in from. Read only."""
+    return jsonify(service().shared_devices())
+
+
 @bp.get("/api/log")
 @role_required_api("supervisor", "admin")
 def api_list():

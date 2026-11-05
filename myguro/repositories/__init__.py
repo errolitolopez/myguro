@@ -6,6 +6,7 @@ from myguro.repositories.ai_check import AiCheckRepository
 from myguro.repositories.assignments import AssignmentRepository
 from myguro.repositories.attendance import AttendanceRepository
 from myguro.repositories.chat import ChatRepository
+from myguro.repositories.devices import DeviceRepository
 from myguro.repositories.classes import ClassRepository
 from myguro.repositories.feedback import FeedbackRepository
 from myguro.repositories.holidays import HolidayRepository
@@ -20,5 +21,5 @@ from myguro.repositories.submissions import SubmissionRepository
 from myguro.repositories.time_clock import TimeClockRepository
 from myguro.repositories.users import UserRepository
 
-__all__ = ["ActivityRepository", "AiCheckRepository", "AssignmentRepository", "AttendanceRepository", "ChatRepository", "ClassRepository", "FeedbackRepository", "HolidayRepository", "LogRepository", "NotificationRepository", "RecoveryRepository", "ScheduleRepository", "SchoolEventRepository", "SchoolYearRepository",
+__all__ = ["ActivityRepository", "AiCheckRepository", "AssignmentRepository", "AttendanceRepository", "ChatRepository", "ClassRepository", "DeviceRepository", "FeedbackRepository", "HolidayRepository", "LogRepository", "NotificationRepository", "RecoveryRepository", "ScheduleRepository", "SchoolEventRepository", "SchoolYearRepository",
            "SettingsRepository", "SubmissionRepository", "TimeClockRepository", "UserRepository"]
