@@ -18,7 +18,7 @@
   {% endif %}
 
   {% if user.role == "admin" %}
-  <div class="bento">
+  <div class="bento mb-4">
     <div class="bento-full">
       <a class="card h-100 text-decoration-none" href="{{ url_for('accounts.users_page') }}"><div class="card-body">
         <div class="text-body-secondary small">{{ _("Users") }}</div>
@@ -26,20 +26,18 @@
       </div></a>
     </div>
   </div>
-  <div class="mt-3">{% include "_holidays_widget.html" %}</div>
+  {% include "_holidays_widget.html" %}
   <!-- A full copy of the database. Turns yellow when the last backup is old or there never was one. -->
-  <div class="mt-3">
-      <div class="card h-100 {{ 'border-warning' if backup.stale else '' }}" {% if backup.stale %}id="backup-warning"{% endif %}>
-        <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-2">
-          <div>
-            <div class="fw-semibold bi bi-shield-check"> {{ _("Backup") }}</div>
-            <div class="small {{ 'text-warning-emphasis' if backup.stale else 'text-body-secondary' }}">
-              {{ _("Last backup: never") if backup.days is none else (_("Last backup: today") if backup.days == 0 else (_("Last backup: 1 day ago") if backup.days == 1 else _("Last backup: {days} days ago", days=backup.days))) }}
-            </div>
-          </div>
-          <a href="{{ url_for('backup.download') }}" class="btn btn-outline-secondary bi bi-download"> {{ _("Download backup") }}</a>
+  <div class="card mb-4 {{ 'border-warning' if backup.stale else '' }}" {% if backup.stale %}id="backup-warning"{% endif %}>
+    <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <div>
+        <div class="fw-semibold bi bi-shield-check"> {{ _("Backup") }}</div>
+        <div class="small {{ 'text-warning-emphasis' if backup.stale else 'text-body-secondary' }}">
+          {{ _("Last backup: never") if backup.days is none else (_("Last backup: today") if backup.days == 0 else (_("Last backup: 1 day ago") if backup.days == 1 else _("Last backup: {days} days ago", days=backup.days))) }}
         </div>
       </div>
+      <a href="{{ url_for('backup.download') }}" class="btn btn-outline-secondary bi bi-download"> {{ _("Download backup") }}</a>
+    </div>
   </div>
   {% elif user.role == "student" %}
   <div class="bento mb-4">
