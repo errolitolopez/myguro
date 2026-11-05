@@ -53,6 +53,7 @@ TAGLISH = {
     "Login": "Login",
     "Learning Management System": "Learning Management System",
     "Username": "Username",
+    "Remember my username on this device": "Tandaan ang username ko sa device na ito",
     "Show password": "Ipakita ang password",
     "Hide password": "Itago ang password",
     "Forgot your password?": "Nakalimutan mo ba ang password mo?",

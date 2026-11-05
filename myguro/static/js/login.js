@@ -6,6 +6,37 @@ const usernameInput = document.getElementById("username");
 const passwordInput = document.getElementById("password");
 const errorBox = document.getElementById("login-error");
 const button = document.getElementById("login-button");
+const rememberBox = document.getElementById("remember");
+
+// The username is kept in this browser only, and only when the person ticks the box (a school computer is often
+// shared, so it starts unticked). The password is never kept by this page.
+const REMEMBER_KEY = "myguro-username";
+
+// savedUsername() -> "abautista", or "" when nothing is saved or the browser blocks storage
+function savedUsername() {
+  try {
+    return localStorage.getItem(REMEMBER_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
+// rememberUsername("abautista") saves it; rememberUsername("") forgets it
+function rememberUsername(username) {
+  try {
+    if (username) localStorage.setItem(REMEMBER_KEY, username);
+    else localStorage.removeItem(REMEMBER_KEY);
+  } catch {
+    // Remembering is only a convenience; never block the login.
+  }
+}
+
+// A remembered username is filled in and the cursor goes straight to the password.
+if (savedUsername()) {
+  usernameInput.value = savedUsername();
+  rememberBox.checked = true;
+  passwordInput.focus();
+}
 
 function showError(message) {
   errorBox.textContent = message;
@@ -51,6 +82,8 @@ form.addEventListener("submit", async (event) => {
     const data = await response.json();
 
     if (response.ok) {
+      // Only after a successful login, so a mistyped name is never saved. Unticked forgets the old one.
+      rememberUsername(rememberBox.checked ? username : "");
       // A temporary password isn't worth saving: it is replaced right away on the change password page.
       if (!data.must_change_password) await offerToSavePassword(username, password);
       window.location.href = data.must_change_password ? "/change-password" : pageAfterLogin();
