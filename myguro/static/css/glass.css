@@ -1321,3 +1321,40 @@ body:has(.position-fixed.bottom-0), body:has(.sticky-bottom) { --chat-lift: 3.75
   box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--accent-to) 30%, transparent);
 }
 @media (min-width: 768px) { .match-slot { min-width: 14rem; } }
+
+/* ---- Neumorphic style (Display settings -> Style, data-style="neu" on <html>; beta) ----
+   Instead of new rules, the glass tokens above are pointed at one flat base colour, so every card,
+   input, modal and bar follows. Depth then comes from a light shadow on one side and a dark one on
+   the other, never from blur or borders. These selectors are more specific than the named themes
+   (Darcula, Solarized, Neon), so Style wins over them; only light and dark mode are used. */
+html[data-style="neu"] {
+  --neu-bg: #e0e5ec;
+  --neu-light: rgba(255, 255, 255, 0.9);
+  --neu-dark: rgba(163, 177, 198, 0.65);
+  --neu-raised: 6px 6px 12px var(--neu-dark), -6px -6px 12px var(--neu-light);
+  --neu-inset: inset 3px 3px 6px var(--neu-dark), inset -3px -3px 6px var(--neu-light);
+}
+html[data-style="neu"][data-bs-theme="dark"] {
+  --neu-bg: #2b2f36;
+  --neu-light: rgba(60, 66, 76, 0.7);
+  --neu-dark: rgba(18, 20, 24, 0.7);
+}
+html[data-style="neu"] {
+  --glass-bg: var(--neu-bg);
+  --glass-bg-strong: var(--neu-bg);
+  --glass-solid: var(--neu-bg);
+  --navbar-bg: var(--neu-bg);
+  --page-base: var(--neu-bg);
+  --page-gradient: none;
+  --glass-hover: var(--neu-bg);
+  --glass-border: transparent;
+  --glass-blur: none;
+  --glass-shadow: var(--neu-raised);
+  --glass-input: var(--neu-bg);
+  --glass-input-focus: var(--neu-bg);
+  --glass-input-border: transparent;
+  --glass-input-shadow: var(--neu-inset);
+}
+/* The moving colour blobs and the faint logo would show through as stains on a flat surface. */
+html[data-style="neu"] body::after,
+html[data-style="neu"] body::before { display: none; }
