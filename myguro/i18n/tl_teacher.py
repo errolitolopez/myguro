@@ -98,6 +98,8 @@ TEACHER = {
         "Pareho ang ayos tuwing bubuksan ng estudyante ang activity, at nagbabago kapag sumubok ulit sila. Hindi ini-shuffle ang matching, true or false at ang iba pang uri. Beta ito: sabihin sa amin kung may mukhang mali.",
     "Could not load your settings.": "Hindi na-load ang mga setting mo.",
     "Check with AI": "I-check gamit ang AI",
+    "Save score": "I-save ang score",
+    "Not saved yet": "Hindi pa na-save",
     "AI suggestion": "Suhestiyon ng AI",
     "Use {points} points": "Gamitin ang {points} points",
     "Beta: the AI can be wrong. A suggestion only, read the answer and decide.": "Beta: puwedeng magkamali ang AI. Suhestiyon lang ito, basahin ang sagot at ikaw ang magdesisyon.",

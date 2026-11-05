@@ -10,6 +10,7 @@ const aiCheckOn = document.querySelector("main").dataset.aiCheck === "1";
 let detail = null; // the attempt shown
 let changedPoints = {}; // question id -> new points, not saved yet
 let changedFeedback = {}; // question id -> new remark, not saved yet
+let justSaved = null; // the question whose Save button was just used, to show "Saved" after the page is drawn again
 let neighbours = { previous: null, next: null }; // student ids to check before and after this one
 
 // The results page's search and filter, so "Next student" follows the list the teacher came from.
@@ -181,36 +182,12 @@ function questionReview(question, number, editable) {
   const top = el("div", "d-flex justify-content-between align-items-start gap-2");
   top.append(el("div", "preserve-lines", `${number}. ${question.prompt}`));
 
-  // Points: editable on a submitted attempt. Empty = short answer not checked yet.
+  // The top right only says how many points the question is worth, and what was given so far. The box to type
+  // the score is at the bottom, under the remark, with its own Save button (see scoreRow below).
   const pointsBox = el("div", "d-flex align-items-center gap-1 text-nowrap");
-  let pointsInput = null;
-  if (editable) {
-    // Bigger and bold than a normal small box, so the score is easy to find and type. Orange while a score is
-    // missing, accent-coloured once it was changed and not saved yet (see .points-input in glass.css).
-    const input = el("input", "form-control text-end fw-bold points-input");
-    pointsInput = input;
-    input.type = "number";
-    input.min = 0;
-    input.max = question.points;
-    input.value = question.earned === null ? "" : question.earned;
-    input.placeholder = question.type === "short_answer" ? "?" : "0";
-    input.setAttribute("aria-label", t("Points for question {number}", { number }));
-    const markPoints = (unsaved) => {
-      const missing = input.value === "" && question.type === "short_answer";
-      input.classList.toggle("points-missing", missing);
-      input.classList.toggle("points-unsaved", unsaved && !missing);
-    };
-    markPoints(false);
-    input.addEventListener("input", () => {
-      markPoints(true);
-      changedPoints[question.id] = input.value === "" ? null : Number(input.value);
-      savePointsButton.disabled = false;
-      document.getElementById("points-status").textContent = t("Unsaved scores");
-    });
-    pointsBox.append(input, el("span", "small text-body-secondary", `/ ${question.points}`));
-  } else {
-    pointsBox.append(el("span", "small text-body-secondary", plural(question.points, "pt", "pts")));
-  }
+  pointsBox.append(el("span", "small text-body-secondary",
+    editable ? `${question.earned === null ? "?" : question.earned} / ${plural(question.points, "pt", "pts")}`
+      : plural(question.points, "pt", "pts")));
   top.append(pointsBox);
   item.append(top);
 
@@ -234,6 +211,16 @@ function questionReview(question, number, editable) {
     item.append(keyRow);
   }
 
+  // The score box, made here so "Use N points" from the AI check can fill it; it is shown at the bottom.
+  const pointsInput = el("input", "form-control form-control-sm text-end");
+  pointsInput.type = "number";
+  pointsInput.min = 0;
+  pointsInput.max = question.points;
+  pointsInput.style.width = "5rem";
+  pointsInput.value = question.earned === null ? "" : question.earned;
+  pointsInput.placeholder = question.type === "short_answer" ? "?" : "0";
+  pointsInput.setAttribute("aria-label", t("Points for question {number}", { number }));
+
   // Check with AI (a short answer the student wrote, while the admin has it on): a suggestion only.
   if (aiCheckOn && editable && question.type === "short_answer" && given !== null) {
     item.append(aiCheckBox(question, number, pointsInput));
@@ -247,12 +234,44 @@ function questionReview(question, number, editable) {
     remark.value = question.feedback || "";
     remark.placeholder = t("Remark for the student (optional)");
     remark.setAttribute("aria-label", t("Remark for question {number}", { number }));
-    remark.addEventListener("input", () => {
-      changedFeedback[question.id] = remark.value;
+    item.append(remark);
+
+    // Last of all, so the order is: read the answer, write a remark, give the score, then Save. The button is
+    // only on while this answer has a change that is not saved yet, so it says when saving is needed.
+    const scoreRow = el("div", "d-flex flex-wrap align-items-center gap-2 mt-2");
+    const saveButton = el("button", "btn btn-sm btn-outline-secondary bi bi-check2", ` ${t("Save score")}`);
+    saveButton.type = "button";
+    saveButton.disabled = true;
+    const state = el("span", "small");
+    if (justSaved === question.id) state.append(el("span", "text-success bi bi-check-circle", ` ${t("Saved")}`));
+    const markUnsaved = () => {
+      saveButton.disabled = false;
+      saveButton.className = "btn btn-sm btn-success bi bi-check2";
+      state.replaceChildren(el("span", "text-warning-emphasis", t("Not saved yet")));
       savePointsButton.disabled = false;
       document.getElementById("points-status").textContent = t("Unsaved scores");
+    };
+    pointsInput.addEventListener("input", () => {
+      changedPoints[question.id] = pointsInput.value === "" ? null : Number(pointsInput.value);
+      markUnsaved();
     });
-    item.append(remark);
+    remark.addEventListener("input", () => {
+      changedFeedback[question.id] = remark.value;
+      markUnsaved();
+    });
+    saveButton.addEventListener("click", async () => {
+      const stopLoading = startLoading(saveButton);
+      if (!stopLoading) return;
+      justSaved = question.id;
+      const scrolled = window.scrollY; // saving draws the page again: keep the teacher where they are
+      await savePoints();
+      window.scrollTo(0, scrolled);
+      justSaved = null; // the "Saved" mark was drawn with the page; it should not come back on the next draw
+      stopLoading();
+    });
+    scoreRow.append(el("span", "small fw-semibold", t("Score")), pointsInput,
+      el("span", "small text-body-secondary", `/ ${question.points}`), saveButton, state);
+    item.append(scoreRow);
   } else if (question.feedback) {
     item.append(el("div", "small mt-2 preserve-lines", t("Remark: {feedback}", { feedback: question.feedback })));
   }
