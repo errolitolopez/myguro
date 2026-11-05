@@ -651,6 +651,24 @@ html[data-tab-bar="top"] .web-tabs { display: block !important; }
   color: var(--confirm-text);
 }
 
+/* The points box on the checking page: bigger than a small form box, so the score is easy to see and tap. While a short
+   answer has no score yet it is outlined in the warning colour; once typed and not saved it is outlined in the
+   accent colour. */
+.points-input {
+  width: 5.5rem;
+  font-size: 1.1rem;
+  padding-top: 0.3rem;
+  padding-bottom: 0.3rem;
+}
+.points-input.points-missing {
+  border-color: var(--bs-warning);
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--bs-warning) 35%, transparent);
+}
+.points-input.points-unsaved {
+  border-color: var(--accent-to);
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--accent-to) 30%, transparent);
+}
+
 /* Slim scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb { background-color: var(--scroll-thumb); border-radius: 6px; }

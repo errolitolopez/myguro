@@ -185,16 +185,24 @@ function questionReview(question, number, editable) {
   const pointsBox = el("div", "d-flex align-items-center gap-1 text-nowrap");
   let pointsInput = null;
   if (editable) {
-    const input = el("input", "form-control form-control-sm text-end");
+    // Bigger and bold than a normal small box, so the score is easy to find and type. Orange while a score is
+    // missing, accent-coloured once it was changed and not saved yet (see .points-input in glass.css).
+    const input = el("input", "form-control text-end fw-bold points-input");
     pointsInput = input;
     input.type = "number";
     input.min = 0;
     input.max = question.points;
-    input.style.width = "4.5rem";
     input.value = question.earned === null ? "" : question.earned;
     input.placeholder = question.type === "short_answer" ? "?" : "0";
     input.setAttribute("aria-label", t("Points for question {number}", { number }));
+    const markPoints = (unsaved) => {
+      const missing = input.value === "" && question.type === "short_answer";
+      input.classList.toggle("points-missing", missing);
+      input.classList.toggle("points-unsaved", unsaved && !missing);
+    };
+    markPoints(false);
     input.addEventListener("input", () => {
+      markPoints(true);
       changedPoints[question.id] = input.value === "" ? null : Number(input.value);
       savePointsButton.disabled = false;
       document.getElementById("points-status").textContent = t("Unsaved scores");
