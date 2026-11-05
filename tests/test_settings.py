@@ -66,8 +66,10 @@ def test_disabled_grade_hidden_and_refused(admin, teacher):
     page = admin.get("/students").get_data(as_text=True)
     assert "Kinder" not in grade_options(page, "add-grade") and "Grade 1" not in grade_options(page, "add-grade")
     assert "Kinder" not in grade_options(page, "batch-grade")
-    # the Students filter still lists them, so students there can be found and moved
-    assert "Kinder" in grade_options(page, "grade-filter")
+    # the Students filter drops a disabled grade nobody has, but keeps one a student still has
+    assert "Kinder" not in grade_options(page, "grade-filter") and "Grade 9" in grade_options(page, "grade-filter")
+    admin.put("/api/settings", json={"disabled_grades": ["Kinder", "Grade 1", "Grade 9"]})
+    assert "Grade 9" in grade_options(admin.get("/students").get_data(as_text=True), "grade-filter")
 
     assert error(new_student(admin, "Kinder")) == "Kinder is disabled. Choose another grade (Settings page)."
     assert new_student(admin, "Grade 2").status_code == 201
@@ -211,8 +213,9 @@ def test_import_template_lists_only_enabled_grades(admin):
     assert "Grade 2" in options and "Kinder" not in options and "Grade 1," not in options
 
 
-def test_class_page_grade_filter_lists_disabled_grades(admin, teacher):
-    admin.put("/api/settings", json={"disabled_grades": ["Grade 5"]})
-    class_id = teacher.post("/api/classes", json={"name": "Grade 9 - Rizal"}).get_json()["class"]["id"]
+def test_class_page_grade_filter_lists_disabled_grades_with_students(admin, teacher):
+    admin.put("/api/settings", json={"disabled_grades": ["Grade 5", "Grade 9"]})
+    class_id = teacher.post("/api/classes", json={"name": "Grade 10 - Rizal"}).get_json()["class"]["id"]
     page = teacher.get(f"/classes/{class_id}").get_data(as_text=True)
-    assert "<option>Grade 5</option>" in page
+    # Grade 9 is off but seeded students have it; Grade 5 is off and nobody has it
+    assert "<option>Grade 9</option>" in page and "<option>Grade 5</option>" not in page

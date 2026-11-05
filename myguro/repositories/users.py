@@ -28,6 +28,10 @@ class UserRepository(Repository):
     def username_taken(self, username):
         return self.by_username(username) is not None
 
+    def student_grades(self):
+        """The grades at least one student has."""
+        return {row["grade"] for row in self.all("SELECT DISTINCT grade FROM users WHERE role = 'student'")}
+
     def get_account(self, user_id):
         """A teacher, student or supervisor account (never the admin)."""
         return self.one("SELECT * FROM users WHERE id = ? AND role IN ('teacher', 'student', 'supervisor')",

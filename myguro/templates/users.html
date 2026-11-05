@@ -47,7 +47,7 @@
           <label for="grade-filter" class="form-label small mb-1">{{ _("Grade") }}</label>
           <select id="grade-filter" class="form-select">
             <option value="*">{{ _("All grades") }}</option>
-            {% for grade in ALL_GRADES %}<option>{{ grade }}</option>{% endfor %}
+            {% for grade in FILTER_GRADES %}<option>{{ grade }}</option>{% endfor %}
             <option value="">{{ _("No grade") }}</option>
           </select>
         </div>

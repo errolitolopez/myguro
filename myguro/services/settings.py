@@ -43,6 +43,13 @@ class SettingsService(Service):
         disabled grade can still be found)."""
         return list(reversed(GRADES)) if self.grades_high_to_low() else list(GRADES)
 
+    def filter_grade_options(self):
+        """The grades for filters: the enabled ones, and a disabled one only while a student still
+        has it (so they can be found and moved, but unused grades don't clutter the list)."""
+        disabled = self.disabled_grades()
+        with_students = self.users.student_grades()
+        return [grade for grade in self.all_grade_options() if grade not in disabled or grade in with_students]
+
     def grade_options(self):
         """The grades that can be given to someone, in the order the dropdowns show them."""
         disabled = self.disabled_grades()

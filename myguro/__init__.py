@@ -75,7 +75,7 @@ def create_app(test_config=None):
     @app.context_processor
     def grade_options():
         """The grades for the dropdowns, in the order the admin chose (Settings page): GRADES are
-        the ones that can be given to someone, ALL_GRADES also the disabled ones (for filters)."""
+        the ones that can be given to someone, FILTER_GRADES also a disabled one while a student still has it (for filters)."""
         settings = SettingsService(get_db())
         user = current_user()
         support = settings.support_for(user["role"]) if user else None
@@ -101,7 +101,7 @@ def create_app(test_config=None):
                     session["feedback_popup_day"] = today
         return {
             "GRADES": settings.grade_options(),
-            "ALL_GRADES": settings.all_grade_options(),
+            "FILTER_GRADES": settings.filter_grade_options(),
             # The "Support myguro" link in the page footer: admin and teachers only, when turned on
             "SUPPORT": support,
             "SUPPORT_POPUP": popup,
