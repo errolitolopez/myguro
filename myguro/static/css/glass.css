@@ -568,6 +568,42 @@ html[data-tab-bar="top"] .web-tabs { display: block !important; }
   }
 }
 
+/* The feedback card: a small solid card at the lower right that slides in. It is above the chat bubble on pages that
+   have one, and above the phone's tab bar and the cookie notice on a small screen. */
+.feedback-toast {
+  --bs-card-bg: var(--glass-solid);
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  width: min(20rem, calc(100vw - 2rem));
+  z-index: 1045; /* over the chat bubble and the cookie notice, under Bootstrap's modals (1055) */
+  box-shadow: var(--glass-shadow);
+  border-color: var(--bs-success);
+  opacity: 0;
+  transform: translateY(1rem);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.feedback-toast[hidden] { display: none; }
+.feedback-toast-in { opacity: 1; transform: none; }
+.feedback-toast-above-chat { bottom: calc(max(1rem, env(safe-area-inset-bottom)) + 4rem); }
+.feedback-toast-icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--accent-gradient);
+  color: var(--confirm-text);
+}
+@media (max-width: 767.98px) {
+  html:not([data-tab-bar="top"]) body:has(.tabbar) .feedback-toast { bottom: calc(3rem + 0.75rem + env(safe-area-inset-bottom)); }
+  html:not([data-tab-bar="top"]) body:has(.tabbar) .feedback-toast-above-chat { bottom: calc(3rem + 4.75rem + env(safe-area-inset-bottom)); }
+  /* The cookie notice is shown until the person taps OK; the card then goes above it */
+  body:has(#cookie-notice:not(.d-none)) .feedback-toast { bottom: calc(max(0.75rem, env(safe-area-inset-bottom)) + 4.5rem); }
+  html:not([data-tab-bar="top"]) body:has(.tabbar):has(#cookie-notice:not(.d-none)) .feedback-toast { bottom: calc(3rem + 5.25rem + env(safe-area-inset-bottom)); }
+}
+@media (prefers-reduced-motion: reduce) { .feedback-toast { transition: none; transform: none; } }
+
 /* Slim scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb { background-color: var(--scroll-thumb); border-radius: 8px; }

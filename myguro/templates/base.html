@@ -115,27 +115,22 @@
   {% endif %}
 
   {% if FEEDBACK_POPUP %}
-  <!-- Asks someone who has not sent feedback yet. Opens by itself (see FEEDBACK_POPUP in myguro/__init__.py). -->
-  <div class="modal fade" id="feedback-modal" tabindex="-1" aria-labelledby="feedback-modal-title" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header border-0 pb-0">
-          <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal" aria-label="{{ _("Close") }}"></button>
+  <!-- Asks someone who has not sent feedback yet: a small card that slides in at the lower right (not a window, so
+       nothing is blocked). Shown by itself (see FEEDBACK_POPUP in myguro/__init__.py); feedback-toast.js slides it in. -->
+  <div id="feedback-toast" class="feedback-toast card{{ ' feedback-toast-above-chat' if CHATBOT }}" role="status" aria-labelledby="feedback-toast-title" hidden>
+    <div class="card-body py-2 px-3">
+      <div class="d-flex align-items-start gap-2">
+        <div class="feedback-toast-icon flex-shrink-0" aria-hidden="true"><i class="bi bi-star-fill"></i></div>
+        <div class="flex-grow-1">
+          <div class="fw-semibold small" id="feedback-toast-title">{{ _("How is MyGuro for you?") }}</div>
+          <div class="small text-body-secondary">{{ _("It takes less than a minute, and your answers are private.") }}</div>
+          <a href="{{ url_for('feedback.page') }}" class="btn btn-success btn-sm bi bi-star mt-2"> {{ _("Give feedback") }}</a>
         </div>
-        <div class="modal-body pt-2 text-center">
-          <div class="modal-badge" aria-hidden="true"><i class="bi bi-star-fill"></i></div>
-          <h2 class="h4 mb-1" id="feedback-modal-title">{{ _("How is MyGuro for you?") }}</h2>
-          <p class="text-body-secondary mb-0">
-            {{ _("Tell us what you think. It takes less than a minute: a few questions, each rated 1 to 5 stars. Your answers are private.") }}
-          </p>
-        </div>
-        <div class="modal-footer border-0 pt-0 justify-content-center">
-          <a href="{{ url_for('feedback.page') }}" class="btn btn-success bi bi-star">{{ _("Give feedback") }}</a>
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ _("Maybe later") }}</button>
-        </div>
+        <button id="feedback-toast-close" type="button" class="btn-close btn-sm" aria-label="{{ _("Maybe later") }}"></button>
       </div>
     </div>
   </div>
+  <script src="{{ url_for('static', filename='js/feedback-toast.js') }}"></script>
   {% endif %}
 
   {% if CHATBOT %}
@@ -180,11 +175,6 @@
   <!-- Teachers: the support window opens by itself, as often as the admin chose in Settings. -->
   <script>
     bootstrap.Modal.getOrCreateInstance(document.getElementById("support-modal")).show();
-  </script>
-  {% endif %}
-  {% if FEEDBACK_POPUP %}
-  <script>
-    bootstrap.Modal.getOrCreateInstance(document.getElementById("feedback-modal")).show();
   </script>
   {% endif %}
   {% if request.endpoint != "student.answer_page" %}

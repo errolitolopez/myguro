@@ -191,8 +191,7 @@ TAGLISH = {
     "Your score can stay hidden until your teacher releases it.": "Maaaring nakatago ang score mo hanggang ilabas ito ng teacher mo.",
     "Late work is still accepted. It is marked Late.": "Tinatanggap pa rin ang late na gawa. Mamarkahan itong Late.",
     "How is MyGuro for you?": "Kumusta ang MyGuro para sa iyo?",
-    "Tell us what you think. It takes less than a minute: a few questions, each rated 1 to 5 stars. Your answers are private.":
-        "Sabihin sa amin ang iniisip mo. Wala pang isang minuto: ilang tanong na may rating na 1 hanggang 5 stars. Pribado ang mga sagot mo.",
+    "It takes less than a minute, and your answers are private.": "Wala pang isang minuto, at pribado ang mga sagot mo.",
     "Give feedback": "Magbigay ng feedback",
     "Maybe later": "Mamaya na lang",
     # --- My activities ---

@@ -88,7 +88,7 @@ def test_feedback_page_per_role(admin, teacher, supervisor):
     assert supervisor.get("/feedback").headers["Location"].endswith("/dashboard")
 
 
-POPUP = 'id="feedback-modal"'
+POPUP = 'id="feedback-toast"'
 
 
 def test_popup_asks_once_per_login_until_feedback_is_sent(admin, teacher):
