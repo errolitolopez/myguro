@@ -142,6 +142,11 @@ def clean_grade_section(data):
     return grade, section
 
 
+def class_grade(name):
+    """The grade a class name starts with ("Grade 6 - Rizal" -> "Grade 6"), or "" if it has none."""
+    return next((grade for grade in GRADES if name == grade or name.startswith(f"{grade} - ")), "")
+
+
 def suggest_username(first_name, last_name):
     """"Ana Marie" + "Bautista" -> "abautista" (first letter of the first name + the
     last name, without spaces), the same as the add-account form suggests. ñ -> n, é -> e."""

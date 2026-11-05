@@ -190,3 +190,13 @@ def test_support_window_shows_the_gcash_and_kofi_app_icons(admin, teacher, app):
     # The icon files are served
     assert app.test_client().get("/static/img/gcash-app-icon.png").status_code == 200
     assert app.test_client().get("/static/img/kofi-app-icon.png").status_code == 200
+
+
+def test_disabled_grade_refused_for_classes(admin, teacher):
+    old = teacher.post("/api/classes", json={"name": "Grade 7 - Rizal"}).get_json()["class"]["id"]
+    admin.put("/api/settings", json={"disabled_grades": ["Grade 7", "Grade 8"]})
+    assert error(teacher.post("/api/classes", json={"name": "Grade 8 - Luna"})) == \
+        "Grade 8 is disabled. Choose another grade (Settings page)."
+    # a class already in the grade can still be renamed within it, but not moved into another disabled one
+    assert teacher.put(f"/api/classes/{old}", json={"name": "Grade 7 - Mabini"}).status_code == 200
+    assert teacher.put(f"/api/classes/{old}", json={"name": "Grade 8 - Mabini"}).status_code == 400

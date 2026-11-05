@@ -1,8 +1,9 @@
-from myguro.domain.accounts import MAX_NAME_LENGTH, check_name
+from myguro.domain.accounts import MAX_NAME_LENGTH, check_name, class_grade
 from myguro.domain.text import clean_name, like_pattern, plural
 from myguro.errors import NotFoundError, ValidationError
 from myguro.services.base import Service
 from myguro.services.presenters import class_json, user_json
+from myguro.services.settings import SettingsService
 
 # Enough for a whole section; the teacher can narrow the search for more.
 MAX_SEARCH_RESULTS = 200
@@ -32,6 +33,7 @@ class ClassService(Service):
 
     def clean_fields(self, data, year_id, class_id=None):
         name = check_name(clean_name(data.get("name")), "Class name")
+        self.check_grade_enabled(name, class_id)
         subject = clean_name(data.get("subject"))
         if len(subject) > MAX_NAME_LENGTH:
             raise ValidationError("Subject can be at most 100 characters.")
@@ -39,6 +41,13 @@ class ClassService(Service):
         if same and same["id"] != class_id:
             raise ValidationError("You already have a class with this name and subject.")
         return name, subject
+
+    def check_grade_enabled(self, name, class_id=None):
+        """A class can't be made in a disabled grade; one already in it keeps its grade on rename."""
+        grade = class_grade(name)
+        current = class_grade(self.classes.get_for_teacher(class_id, self.user["id"])["name"]) if class_id else ""
+        if grade and grade != current and grade in SettingsService(self.db).disabled_grades():
+            raise ValidationError(f"{grade} is disabled. Choose another grade (Settings page).")
 
     def create(self, data):
         year_id = self.year_id()
