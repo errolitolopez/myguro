@@ -24,7 +24,7 @@ def test_pages_per_role(admin, teacher):
 
 
 def test_navbar_per_role(admin, teacher):
-    assert 'href="/teachers"' in admin.get("/dashboard").get_data(as_text=True)
+    assert 'href="/users"' in admin.get("/dashboard").get_data(as_text=True)
     page = teacher.get("/dashboard").get_data(as_text=True)
     assert 'href="/activities"' in page and 'href="/classes"' in page and 'href="/teachers"' not in page
     assert 'href="/my-activities"' in login("jdelacruz01").get("/dashboard").get_data(as_text=True)

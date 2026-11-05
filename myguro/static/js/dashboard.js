@@ -112,11 +112,9 @@ async function loadDashboard() {
     }
 
     if (data.role === "admin") {
-      setText("stat-teachers", data.teachers);
+      setText("stat-users", data.users);
       setText("stat-classes", data.classes);
-      setText("stat-students", data.students);
       setText("stat-activities", data.activities);
-      setText("stat-supervisors", data.supervisors);
     } else if (data.role === "student") {
       setText("stat-submitted", data.submitted);
       setText("stat-to-do", data.to_do);

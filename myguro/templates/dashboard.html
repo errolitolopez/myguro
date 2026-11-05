@@ -18,23 +18,11 @@
   {% endif %}
 
   {% if user.role == "admin" %}
-  <div class="bento bento-5">
+  <div class="bento bento-3">
     <div>
-      <a class="card h-100 text-decoration-none" href="{{ url_for('accounts.teachers_page') }}"><div class="card-body">
-        <div class="text-body-secondary small">{{ _("Teachers") }}</div>
-        <div class="fs-3 fw-bold stat-number" id="stat-teachers">–</div>
-      </div></a>
-    </div>
-    <div>
-      <a class="card h-100 text-decoration-none" href="{{ url_for('accounts.students_page') }}"><div class="card-body">
-        <div class="text-body-secondary small">{{ _("Students") }}</div>
-        <div class="fs-3 fw-bold stat-number" id="stat-students">–</div>
-      </div></a>
-    </div>
-    <div>
-      <a class="card h-100 text-decoration-none" href="{{ url_for('accounts.supervisors_page') }}"><div class="card-body">
-        <div class="text-body-secondary small">{{ _("Supervisors") }}</div>
-        <div class="fs-3 fw-bold stat-number" id="stat-supervisors">–</div>
+      <a class="card h-100 text-decoration-none" href="{{ url_for('accounts.users_page') }}"><div class="card-body">
+        <div class="text-body-secondary small">{{ _("Users") }}</div>
+        <div class="fs-3 fw-bold stat-number" id="stat-users">–</div>
       </div></a>
     </div>
     <div>

@@ -17,6 +17,8 @@ class DashboardService(Service):
                 "classes": self.classes.count_all(year_id),
                 "students": self.users.count("student"),
                 "supervisors": self.users.count("supervisor"),
+                # Teachers, students and supervisors together (the admin account is not counted)
+                "users": self.users.count("teacher") + self.users.count("student") + self.users.count("supervisor"),
                 "activities": self.activities.count_all(),
             }
         if role == "student":

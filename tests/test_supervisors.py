@@ -39,7 +39,8 @@ def test_supervisors_page_and_dashboard_count(admin, teacher):
     make_supervisor(admin)
     assert admin.get("/supervisors").status_code == 200
     assert teacher.get("/supervisors").status_code == 302
-    assert admin.get("/api/dashboard").get_json()["supervisors"] == 1
+    data = admin.get("/api/dashboard").get_json()
+    assert data["supervisors"] == 1 and data["users"] == data["teachers"] + data["students"] + 1
 
 
 def test_migration_adds_supervisor_and_keeps_users(app):
