@@ -18,24 +18,12 @@
   {% endif %}
 
   {% if user.role == "admin" %}
-  <div class="bento bento-3">
-    <div>
+  <div class="bento">
+    <div class="bento-full">
       <a class="card h-100 text-decoration-none" href="{{ url_for('accounts.users_page') }}"><div class="card-body">
         <div class="text-body-secondary small">{{ _("Users") }}</div>
         <div class="fs-3 fw-bold stat-number" id="stat-users">–</div>
       </div></a>
-    </div>
-    <div>
-      <div class="card h-100"><div class="card-body">
-        <div class="text-body-secondary small">{{ _("Classes") }}</div>
-        <div class="fs-3 fw-bold stat-number" id="stat-classes">–</div>
-      </div></div>
-    </div>
-    <div>
-      <div class="card h-100"><div class="card-body">
-        <div class="text-body-secondary small">{{ _("Activities") }}</div>
-        <div class="fs-3 fw-bold stat-number" id="stat-activities">–</div>
-      </div></div>
     </div>
     <!-- A full copy of the database. Turns yellow when the last backup is old or there never was one. -->
     <div class="bento-full">
