@@ -180,16 +180,18 @@ function aiCheckBox(question, number, pointsInput) {
 function questionReview(question, number, editable) {
   const item = el("div", "border rounded p-2 mb-2");
   const top = el("div", "d-flex justify-content-between align-items-start gap-2");
-  top.append(el("div", "preserve-lines", `${number}. ${question.prompt}`));
+  const prompt = el("div", "preserve-lines");
+  // The "to check" pill is the first thing in the question's own row, before the number and the text, so a short
+  // answer that still needs a score is seen as soon as the question is.
+  if (question.type === "short_answer" && editable && question.earned === null && question.given !== null) {
+    prompt.append(el("span", "badge text-bg-warning me-1", "to check"));
+  }
+  prompt.append(`${number}. ${question.prompt}`);
+  top.append(prompt);
 
   // The top right only says how many points the question is worth, and what was given so far. The box to type
   // the score is at the bottom, under the remark, with its own Save button (see scoreRow below).
   const pointsBox = el("div", "d-flex align-items-center gap-1 text-nowrap");
-  // The "to check" pill is in the top row, next to the question and its points, so a short answer that still needs a
-  // score is seen as soon as the question is.
-  if (question.type === "short_answer" && editable && question.earned === null && question.given !== null) {
-    pointsBox.append(el("span", "badge text-bg-warning me-1", "to check"));
-  }
   pointsBox.append(el("span", "small text-body-secondary",
     editable ? `${question.earned === null ? "?" : question.earned} / ${plural(question.points, "pt", "pts")}`
       : plural(question.points, "pt", "pts")));
