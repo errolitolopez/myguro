@@ -1329,14 +1329,14 @@ body:has(.position-fixed.bottom-0), body:has(.sticky-bottom) { --chat-lift: 3.75
    (Darcula, Solarized, Neon), so Style wins over them; only light and dark mode are used. */
 html[data-style="neu"] {
   --neu-bg: #e0e5ec;
-  --neu-light: rgba(255, 255, 255, 0.9);
+  --neu-light: rgba(255, 255, 255, 0.55); /* was 0.9: the white side looked like a glow on the top and left */
   --neu-dark: rgba(163, 177, 198, 0.65);
-  --neu-raised: 6px 6px 12px var(--neu-dark), -6px -6px 12px var(--neu-light);
-  --neu-inset: inset 3px 3px 6px var(--neu-dark), inset -3px -3px 6px var(--neu-light);
+  --neu-raised: 6px 6px 12px var(--neu-dark), -3px -3px 8px var(--neu-light);
+  --neu-inset: inset 3px 3px 6px var(--neu-dark), inset -2px -2px 5px var(--neu-light);
 }
 html[data-style="neu"][data-bs-theme="dark"] {
   --neu-bg: #2b2f36;
-  --neu-light: rgba(60, 66, 76, 0.7);
+  --neu-light: rgba(60, 66, 76, 0.4);
   --neu-dark: rgba(18, 20, 24, 0.7);
 }
 html[data-style="neu"] {
@@ -1363,8 +1363,8 @@ html[data-style="neu"] body::before { display: none; }
    reads as sitting on the card. The border goes (the shadow is the edge) and the hover accent border with it;
    hover only lifts the text colour. */
 html[data-style="neu"] {
-  --neu-raised-sm: 3px 3px 6px var(--neu-dark), -3px -3px 6px var(--neu-light);
-  --neu-inset-sm: inset 2px 2px 4px var(--neu-dark), inset -2px -2px 4px var(--neu-light);
+  --neu-raised-sm: 3px 3px 6px var(--neu-dark), -2px -2px 4px var(--neu-light);
+  --neu-inset-sm: inset 2px 2px 4px var(--neu-dark), inset -1px -1px 3px var(--neu-light);
 }
 html[data-style="neu"] :is(.btn-success, .btn-outline-success, .btn-primary, .btn-outline-primary,
   .btn-danger, .btn-outline-danger, .btn-secondary, .btn-outline-secondary, .btn-warning, .btn-outline-warning, .btn-toggle) {
