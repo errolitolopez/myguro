@@ -276,6 +276,9 @@ footer {
    see-through text is hard to read. */
 .dropdown-menu {
   --bs-dropdown-border-radius: 0.6rem;
+  /* The "inner" radius too (the rounded first and last item): Bootstrap builds it from --bs-border-radius, so without
+     this the highlighted item had a different corner from the menu around it. Same reason as .card above. */
+  --bs-dropdown-inner-border-radius: calc(0.6rem - var(--bs-dropdown-border-width));
   --bs-dropdown-bg: var(--glass-solid);
   --bs-dropdown-border-color: var(--glass-border);
   box-shadow: var(--glass-shadow);
@@ -319,6 +322,17 @@ footer {
   border-radius: var(--bs-border-radius);
   box-shadow: var(--glass-shadow);
 }
+/* A menu with no padding (the notifications bell) has a list that touches its edges: its square row backgrounds
+   poked out past the menu's rounded corners. Cut them to the menu's shape. */
+.dropdown-menu.p-0 { overflow: hidden; }
+
+/* A list inside a card or a window already sits on a panel that has its own shadow. A second big shadow under
+   the list made a curved, doubled edge inside the card, so lists there have none. (On the page itself they keep it.) */
+.card .list-group,
+.modal-content .list-group {
+  box-shadow: none;
+}
+
 /* A flush list sits inside a card, and the card already has the outline, the corners and the shadow. The rule above
    gave the list its own radius and shadow as well (Bootstrap's `flush` sets them to none, but this file loads
    later), so its first row had rounded top corners and a second shadow edge inside the card. Flush means none. */
