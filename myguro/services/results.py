@@ -157,7 +157,8 @@ class ResultsService(Service):
 
     def to_check(self, activity_id=None):
         """The cards for checking results: every assignment of the school year the teacher is
-        looking at (of one sheet, if activity_id is given), the ones with points still to check first."""
+        looking at (of one sheet, if activity_id is given): the ones with the fewest points still to check
+        first (the quickest to finish), then the ones with nothing to check."""
         cards = []
         for assignment_id in self.assignments.ids_for_teacher(self.user["id"], self.year_id()):
             data = self.results(assignment_id)
@@ -175,8 +176,8 @@ class ResultsService(Service):
                 "due_date": data["assignment"]["due_date"],
                 "status": data["assignment"]["status"],
             })
-        # sorted() is stable, so assignments with the same to-check state stay newest first
-        return sorted(cards, key=lambda card: card["to_check"] == 0)
+        # sorted() is stable, so assignments with the same number of points stay newest first
+        return sorted(cards, key=lambda card: (card["to_check"] == 0, card["to_check"]))
 
     def attempt_detail(self, submission, activity_id):
         """One attempt: every section and question with the answer key, the student's answer,
