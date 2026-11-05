@@ -126,15 +126,17 @@
 
   {% with role="teacher" %}{% include "_dashboard_chart.html" %}{% endwith %}
 
-  <section class="card mb-3" aria-labelledby="classes-title">
+  <!-- overflow-hidden: the last row's square corners are cut to the card's rounded bottom corners. -->
+  <section class="card mb-3 overflow-hidden" aria-labelledby="classes-title">
     <div class="card-header d-flex justify-content-between align-items-center gap-2">
       <span class="fw-semibold bi bi-people" id="classes-title"> {{ _("My classes") }}</span>
       <a class="small" href="{{ url_for('classes.list_page') }}">{{ _("Manage classes") }}</a>
     </div>
-    <div id="class-list" class="list-group list-group-flush"></div>
     <p id="no-classes" class="text-body-secondary d-none m-3">
       {{ _("No classes yet.") }} <a href="{{ url_for('classes.list_page') }}">{{ _("Create your first class") }}</a>.
     </p>
+    <!-- The list is the last thing in the card, so Bootstrap rounds its last row to the card's corners. -->
+    <div id="class-list" class="list-group list-group-flush"></div>
   </section>
   {% endif %}
 </main>
