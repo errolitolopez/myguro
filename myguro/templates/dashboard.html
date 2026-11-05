@@ -87,38 +87,30 @@
 
   {% include "_holidays_widget.html" %}
   {% else %}
-  <div class="bento mb-3">
-    <div>
-      <div class="card h-100"><div class="card-body">
-        <div class="text-body-secondary small">{{ _("Students") }}</div>
-        <div class="fs-3 fw-bold stat-number" id="stat-students">–</div>
-      </div></div>
+  <!-- Everything about activities in one card: assignments by status and the answers students submitted. -->
+  <a class="card text-decoration-none mb-3" href="{{ url_for('activities.list_page') }}">
+    <div class="card-body">
+      <div class="fw-semibold bi bi-journal-text mb-2"> {{ _("Activities") }}</div>
+      <div class="row row-cols-2 row-cols-md-4 g-3">
+        <div class="col">
+          <div class="text-body-secondary small">{{ _("Not started") }}</div>
+          <div class="fs-3 fw-bold stat-number" id="stat-not-started">–</div>
+        </div>
+        <div class="col">
+          <div class="text-body-secondary small">{{ _("Open now") }}</div>
+          <div class="fs-3 fw-bold stat-number" id="stat-open">–</div>
+        </div>
+        <div class="col">
+          <div class="text-body-secondary small">{{ _("Closed") }}</div>
+          <div class="fs-3 fw-bold stat-number" id="stat-closed">–</div>
+        </div>
+        <div class="col">
+          <div class="text-body-secondary small">{{ _("Answers submitted") }}</div>
+          <div class="fs-3 fw-bold stat-number" id="stat-submissions">–</div>
+        </div>
+      </div>
     </div>
-    <div>
-      <a class="card h-100 text-decoration-none" href="{{ url_for('activities.list_page') }}"><div class="card-body">
-        <div class="text-body-secondary small">{{ _("Not started activities") }}</div>
-        <div class="fs-3 fw-bold stat-number" id="stat-not-started">–</div>
-      </div></a>
-    </div>
-    <div class="bento-wide">
-      <a class="card h-100 text-decoration-none" href="{{ url_for('activities.list_page') }}"><div class="card-body">
-        <div class="text-body-secondary small">{{ _("Open activities") }}</div>
-        <div class="fs-3 fw-bold stat-number" id="stat-open">–</div>
-      </div></a>
-    </div>
-    <div class="bento-wide">
-      <a class="card h-100 text-decoration-none" href="{{ url_for('activities.list_page') }}"><div class="card-body">
-        <div class="text-body-secondary small">{{ _("Closed activities") }}</div>
-        <div class="fs-3 fw-bold stat-number" id="stat-closed">–</div>
-      </div></a>
-    </div>
-    <div class="bento-wide">
-      <div class="card h-100"><div class="card-body">
-        <div class="text-body-secondary small">{{ _("Answers submitted") }}</div>
-        <div class="fs-3 fw-bold stat-number" id="stat-submissions">–</div>
-      </div></div>
-    </div>
-  </div>
+  </a>
 
   {% include "_holidays_widget.html" %}
 

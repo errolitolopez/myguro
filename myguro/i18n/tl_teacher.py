@@ -368,7 +368,6 @@ TEACHER = {
     # --- Dashboard (teacher and admin tiles), schedule view, GuroBot, navbar extras ---
     "Answers submitted": "Mga sagot na na-submit",
     "Backup": "Backup",
-    "Closed activities": "Mga sarado na activity",
     "Create your first class": "Gumawa ng unang class mo",
     "Download backup": "I-download ang backup",
     "Last backup: never": "Huling backup: wala pa",
@@ -377,8 +376,7 @@ TEACHER = {
     "Last backup: {days} days ago": "Huling backup: {days} araw ang nakalipas",
     "Manage classes": "Pamahalaan ang mga class",
     "No classes yet.": "Wala pang class.",
-    "Not started activities": "Mga activity na hindi pa nasimulan",
-    "Open activities": "Mga bukas na activity",
+    "Open now": "Bukas na",
     "Supervisors": "Mga supervisor",
     "Teachers": "Mga teacher",
     "Beta": "Beta",

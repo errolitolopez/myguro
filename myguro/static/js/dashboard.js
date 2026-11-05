@@ -117,7 +117,6 @@ async function loadDashboard() {
       setText("stat-submitted", data.submitted);
       setText("stat-to-do", data.to_do);
     } else {
-      setText("stat-students", data.students);
       setText("stat-not-started", data.not_started);
       setText("stat-open", data.open);
       setText("stat-closed", data.closed);
