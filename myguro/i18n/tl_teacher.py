@@ -392,6 +392,8 @@ TEACHER = {
     "Last backup: 1 day ago": "Huling backup: 1 araw ang nakalipas",
     "Last backup: {days} days ago": "Huling backup: {days} araw ang nakalipas",
     "Manage classes": "Pamahalaan ang mga class",
+    "Manage": "Pamahalaan",
+    "View all": "Tingnan lahat",
     "No classes yet.": "Wala pang class.",
     "Open now": "Bukas na",
     "Supervisors": "Mga supervisor",

@@ -18,27 +18,28 @@
   {% endif %}
 
   {% if user.role == "admin" %}
-  <div class="bento mb-3">
-    <div class="bento-full">
-      <a class="card h-100 text-decoration-none" href="{{ url_for('accounts.users_page') }}"><div class="card-body">
-        <div class="text-body-secondary small">{{ _("Users") }}</div>
-        <div class="fs-3 fw-bold stat-number" id="stat-users">–</div>
-      </div></a>
+  <!-- Every dashboard card has the same shape as Upcoming holidays: a header with an icon, the title and a link on the
+       right, then the content. -->
+  <section class="card mb-3" aria-labelledby="users-title">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      <span class="fw-semibold bi bi-people" id="users-title"> {{ _("Users") }}</span>
+      <a class="small" href="{{ url_for('accounts.users_page') }}">{{ _("Manage") }}</a>
     </div>
-  </div>
+    <div class="card-body">
+      <div class="fs-3 fw-bold stat-number" id="stat-users">–</div>
+    </div>
+  </section>
   {% include "_holidays_widget.html" %}
   <!-- A full copy of the database. Turns yellow when the last backup is old or there never was one. -->
-  <div class="card mb-3 {{ 'border-warning' if backup.stale else '' }}" {% if backup.stale %}id="backup-warning"{% endif %}>
+  <section class="card mb-3 {{ 'border-warning' if backup.stale else '' }}" {% if backup.stale %}id="backup-warning"{% endif %} aria-labelledby="backup-title">
+    <div class="card-header"><span class="fw-semibold bi bi-shield-check" id="backup-title"> {{ _("Backup") }}</span></div>
     <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-2">
-      <div>
-        <div class="fw-semibold bi bi-shield-check"> {{ _("Backup") }}</div>
-        <div class="small {{ 'text-warning-emphasis' if backup.stale else 'text-body-secondary' }}">
-          {{ _("Last backup: never") if backup.days is none else (_("Last backup: today") if backup.days == 0 else (_("Last backup: 1 day ago") if backup.days == 1 else _("Last backup: {days} days ago", days=backup.days))) }}
-        </div>
+      <div class="small {{ 'text-warning-emphasis' if backup.stale else 'text-body-secondary' }}">
+        {{ _("Last backup: never") if backup.days is none else (_("Last backup: today") if backup.days == 0 else (_("Last backup: 1 day ago") if backup.days == 1 else _("Last backup: {days} days ago", days=backup.days))) }}
       </div>
       <a href="{{ url_for('backup.download') }}" class="btn btn-outline-secondary bi bi-download"> {{ _("Download backup") }}</a>
     </div>
-  </div>
+  </section>
   {% elif user.role == "student" %}
   <div class="bento mb-3">
     <div class="bento-half">
@@ -68,8 +69,8 @@
     </div>
     <div class="col-12 col-lg-4">
       <section class="card h-100 text-center" aria-labelledby="progress-title">
+        <div class="card-header fw-semibold bi bi-check2-circle" id="progress-title"> {{ _("Progress") }}</div>
         <div class="card-body d-flex flex-column align-items-center justify-content-center gap-2">
-          <h2 class="h6 mb-0 bi bi-check2-circle" id="progress-title"> {{ _("Progress") }}</h2>
           <div id="progress-ring"></div>
           <div class="small text-body-secondary" id="progress-text">–</div>
           <div class="small" id="progress-week"></div>
@@ -88,9 +89,12 @@
   {% include "_holidays_widget.html" %}
   {% else %}
   <!-- Everything about activities in one card: assignments by status. -->
-  <a class="card text-decoration-none mb-3" href="{{ url_for('activities.list_page') }}">
+  <section class="card mb-3" aria-labelledby="activities-title">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      <span class="fw-semibold bi bi-journal-text" id="activities-title"> {{ _("Activities") }}</span>
+      <a class="small" href="{{ url_for('activities.list_page') }}">{{ _("View all") }}</a>
+    </div>
     <div class="card-body">
-      <div class="fw-semibold bi bi-journal-text mb-2"> {{ _("Activities") }}</div>
       <div class="row row-cols-3 g-3">
         <div class="col">
           <div class="text-body-secondary small">{{ _("Not started") }}</div>
@@ -106,32 +110,32 @@
         </div>
       </div>
     </div>
-  </a>
+  </section>
 
   {% include "_holidays_widget.html" %}
 
   <!-- Work waiting for the teacher: short answers (and other points) still to check. Filled in by dashboard.js. -->
-  <div class="card mb-3" id="to-check-card">
-    <div class="card-body">
-      <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
-        <h2 class="h5 mb-0 bi bi-check2-square"> {{ _("To check") }}</h2>
-        <span id="to-check-total" class="badge text-bg-warning d-none"></span>
-      </div>
-      <div id="to-check-error" class="alert alert-danger d-none" role="alert"></div>
-      <div id="to-check-list" class="list-group">{% include "_skeleton.html" %}</div>
+  <section class="card mb-3" id="to-check-card" aria-labelledby="to-check-title">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      <span class="fw-semibold bi bi-check2-square" id="to-check-title"> {{ _("To check") }}</span>
+      <span id="to-check-total" class="badge text-bg-warning d-none"></span>
     </div>
-  </div>
+    <div id="to-check-error" class="alert alert-danger m-3 mb-0 d-none" role="alert"></div>
+    <div id="to-check-list" class="list-group list-group-flush">{% include "_skeleton.html" %}</div>
+  </section>
 
   {% with role="teacher" %}{% include "_dashboard_chart.html" %}{% endwith %}
 
-  <div class="d-flex justify-content-between align-items-center mb-2">
-    <h2 class="h5 mb-0">{{ _("My classes") }}</h2>
-    <a class="btn btn-sm btn-outline-success bi bi-people" href="{{ url_for('classes.list_page') }}">{{ _("Manage classes") }}</a>
-  </div>
-  <div id="class-list" class="list-group"></div>
-  <p id="no-classes" class="text-body-secondary d-none">
-    {{ _("No classes yet.") }} <a href="{{ url_for('classes.list_page') }}">{{ _("Create your first class") }}</a>.
-  </p>
+  <section class="card mb-3" aria-labelledby="classes-title">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      <span class="fw-semibold bi bi-people" id="classes-title"> {{ _("My classes") }}</span>
+      <a class="small" href="{{ url_for('classes.list_page') }}">{{ _("Manage classes") }}</a>
+    </div>
+    <div id="class-list" class="list-group list-group-flush"></div>
+    <p id="no-classes" class="text-body-secondary d-none m-3">
+      {{ _("No classes yet.") }} <a href="{{ url_for('classes.list_page') }}">{{ _("Create your first class") }}</a>.
+    </p>
+  </section>
   {% endif %}
 </main>
 {% endblock %}
