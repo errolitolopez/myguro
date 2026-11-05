@@ -328,6 +328,7 @@ TAGLISH = {
     "MyGuro uses cookies to improve your experience.":
         "Gumagamit ang MyGuro ng cookies para mapabuti ang karanasan mo.",
     "OK, got it": "OK, sige",
+    "Philippine Standard Time": "Philippine Standard Time",
 }
 
 _PAGES = dict(TAGLISH)  # the student and shared sentences, before the other files are added

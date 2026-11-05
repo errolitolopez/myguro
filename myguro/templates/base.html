@@ -39,6 +39,8 @@
   <!-- Footer on every page. The support note and its button are for admin and teachers only;
        the button opens the ways to give. -->
   <footer class="container py-3 mt-auto text-center small text-body-secondary">
+    <!-- The school's time (Asia/Manila), ticking every second; school-clock.js fills it in. -->
+    <div class="mb-1">{{ _("Philippine Standard Time") }}: <time id="school-clock" class="fw-semibold"></time></div>
     <div>{{ _("MyGuro is a free, non-profit tool for schools.") }}</div>
     {% if SUPPORT %}
     <div class="mt-1">{{ SUPPORT.message }}</div>
@@ -171,6 +173,7 @@
           integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
           crossorigin="anonymous"></script>
   <script src="{{ url_for('static', filename='js/tips.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/school-clock.js') }}"></script>
   {% if SUPPORT and SUPPORT_POPUP %}
   <!-- Teachers: the support window opens by itself, as often as the admin chose in Settings. -->
   <script>
