@@ -518,11 +518,11 @@ LETTERS = "ABCDEFGHIJKL"
 WRITE_LINES = 3  # ruled lines under a short answer
 # The sheet is made compact on purpose, to save paper: Times-style text (Liberation Serif has the same letter
 # widths as Times New Roman and is free to bundle), tight lines and small margins.
-SHEET_TEXT_SIZE = 9.5  # pt, the body text (questions, choices, directions)
+SHEET_TEXT_SIZE = 10.5  # pt, the body text (questions, choices, directions)
 SHEET_LINE_HEIGHT = 0.4  # mm per point of text size, about 1.15 times the text size
 SHEET_MARGIN = 10  # mm
 WRITE_LINE_GAP = 5.5  # mm between the ruled lines of a short answer
-INLINE_CHOICES_MAX = 110  # characters: choices that fit on one line are printed side by side
+INLINE_CHOICES_MAX = 100  # characters: choices that fit on one line are printed side by side
 
 
 class SheetPDF(FPDF):
@@ -602,7 +602,7 @@ def print_question(pdf, number, question, with_key):
     if with_key:
         answer = question_key_text(question)
         if answer:
-            pdf.paragraph(f"Answer: {answer}", size=8.5, bold=True, indent=6)
+            pdf.paragraph(f"Answer: {answer}", size=9, bold=True, indent=6)
     pdf.ln(1)
 
 
@@ -618,19 +618,19 @@ def sheet_pdf_bytes(activity, teacher, with_key, password=None):
                            permissions=AccessPermission.PRINT_LOW_RES | AccessPermission.PRINT_HIGH_RES)
     pdf.add_page()
 
-    pdf.text_style(12.5, bold=True)
-    pdf.multi_cell(0, 5.5, activity["title"], new_x="LMARGIN", new_y="NEXT")
+    pdf.text_style(13, bold=True)
+    pdf.multi_cell(0, 6, activity["title"], new_x="LMARGIN", new_y="NEXT")
     total = sum(question["points"] for section in activity["sections"] for question in section["questions"])
-    pdf.paragraph("  ·  ".join(filter(None, [activity["subject"], teacher, f"{total} points"])), size=8.5, grey=True)
+    pdf.paragraph("  ·  ".join(filter(None, [activity["subject"], teacher, f"{total} points"])), size=9.5, grey=True)
     if with_key:
-        pdf.paragraph("ANSWER KEY (teacher's copy)", size=9.5, bold=True)
+        pdf.paragraph("ANSWER KEY (teacher's copy)", size=10.5, bold=True)
     else:
         pdf.paragraph(f"Name: {'_' * 36}   Date: {'_' * 16}   Score: ______ / {total}")
     pdf.ln(2)
 
     for section in activity["sections"]:
         if section["title"]:
-            pdf.paragraph(section["title"], size=10.5, bold=True)
+            pdf.paragraph(section["title"], size=11.5, bold=True)
         if section["description"]:
             text = rich_to_text(section["description"]) if section["description_format"] == "rich" \
                 else section["description"]
