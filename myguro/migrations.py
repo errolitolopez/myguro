@@ -133,6 +133,8 @@ def add_missing_columns(db):
     """CREATE TABLE IF NOT EXISTS skips tables that already exist, so new columns are
     added here for databases created before the column existed."""
     user_columns = [row["name"] for row in db.execute("PRAGMA table_info(users)")]
+    if "last_login_at" not in user_columns:
+        db.execute("ALTER TABLE users ADD COLUMN last_login_at TEXT")
     if "grade" not in user_columns:
         db.execute("ALTER TABLE users ADD COLUMN grade TEXT NOT NULL DEFAULT ''")
     if "section" not in user_columns:

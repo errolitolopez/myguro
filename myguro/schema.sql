@@ -19,6 +19,8 @@ CREATE TABLE IF NOT EXISTS users (
     -- the account is enabled and never goes back, even if it is deactivated later
     activated INTEGER NOT NULL DEFAULT 1,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    -- UTC time of the last successful login; NULL = not recorded yet (only logins after this column was added count)
+    last_login_at TEXT,
     -- Students only, both optional (an irregular student may have no section): "Grade 6", "Rizal"
     grade TEXT NOT NULL DEFAULT '',
     section TEXT NOT NULL DEFAULT '',

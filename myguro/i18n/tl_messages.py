@@ -45,6 +45,7 @@ MESSAGES = {
     "{label} must be a whole number from {low} to {high}.": "Ang {label} ay dapat buong numero mula {low} hanggang {high}.",
     "The middle initial must be a letter.": "Ang middle initial ay dapat isang letra.",
     "Unknown role.": "Hindi kilalang role.",
+    "Unknown sort.": "Hindi kilalang sort.",
     "Choose a grade from the list.": "Pumili ng grade mula sa listahan.",
     "Choose grades from the list.": "Pumili ng mga grade mula sa listahan.",
     "Choose a grade or section to change.": "Pumili ng grade o section na babaguhin.",

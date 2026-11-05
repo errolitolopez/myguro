@@ -13,6 +13,7 @@ let confirmAction = null; // what t("Yes") does in the confirm box
 const list = document.getElementById("user-list");
 const searchInput = document.getElementById("search");
 // Advanced filter (students page only): full name, grade, section
+const sortSelect = document.getElementById("sort");
 const gradeFilter = document.getElementById("grade-filter");
 const sectionFilter = document.getElementById("section-filter");
 const statusFilter = document.getElementById("status-filter");
@@ -61,6 +62,13 @@ function userItem(user) {
   const place = gradeSection(user);
   details.append(username, place ? ` · ${place}` : "", ` · ${plural(user.classes, "class", "classes")}`);
   left.append(name, details);
+  // Only logins since the app started recording them have a time; older accounts show nothing.
+  if (user.last_login_at) {
+    const lastLogin = document.createElement("div");
+    lastLogin.className = "small text-body-secondary";
+    lastLogin.textContent = `${t("Last login")}: ${formatDateTime(user.last_login_at)}`;
+    left.append(lastLogin);
+  }
 
   const badge = document.createElement("span");
   if (!user.active) {
@@ -143,7 +151,7 @@ function render(data) {
 // Loads the current page of the search from the server.
 async function loadUsers() {
   const thisLoad = ++loadNumber;
-  const params = new URLSearchParams({ role, page, q: searchInput.value.trim() });
+  const params = new URLSearchParams({ role, page, q: searchInput.value.trim(), sort: sortSelect.value });
   if (gradeFilter) {
     if (gradeFilter.value !== "*") params.set("grade", gradeFilter.value);
     if (sectionFilter.value.trim()) params.set("section", sectionFilter.value.trim());
@@ -180,6 +188,7 @@ function searchSoon() {
   searchTimer = setTimeout(() => goToPage(1), 250);
 }
 searchInput.addEventListener("input", searchSoon);
+sortSelect.addEventListener("change", () => goToPage(1));
 if (gradeFilter) {
   sectionFilter.addEventListener("input", searchSoon);
   gradeFilter.addEventListener("change", () => goToPage(1));

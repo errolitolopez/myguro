@@ -21,6 +21,11 @@
     <input id="search" type="search" class="form-control flex-grow-1" style="min-width: 12rem; width: auto;"
            placeholder="Search name, username{{ ' or section' if role == 'student' }}"
            aria-label="Search {{ nouns|lower }}" autocomplete="off">
+    <select id="sort" class="form-select w-auto" aria-label="{{ _("Sort by") }}">
+      <option value="name">{{ _("Sort: name") }}</option>
+      <option value="login_new">{{ _("Sort: last login, newest") }}</option>
+      <option value="login_old">{{ _("Sort: last login, oldest") }}</option>
+    </select>
     {% if role == "student" %}
     <button id="filter-toggle" type="button" class="btn btn-outline-secondary text-nowrap bi bi-funnel"
             data-bs-toggle="collapse" data-bs-target="#advanced-filter" aria-expanded="false"

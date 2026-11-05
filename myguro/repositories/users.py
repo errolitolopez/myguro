@@ -41,6 +41,14 @@ class UserRepository(Repository):
         return self.one("SELECT * FROM users WHERE id = ? AND role = 'student'"
                         + (" AND active = 1" if active_only else ""), (student_id,))
 
+    # The sort choices; the SQL is picked from here, never built from the request.
+    # A login not recorded yet (NULL) always goes last.
+    SORT_ORDER = {
+        "name": "active DESC, name COLLATE NOCASE, id",
+        "login_new": "last_login_at IS NULL, last_login_at DESC, name COLLATE NOCASE, id",
+        "login_old": "last_login_at IS NULL, last_login_at ASC, name COLLATE NOCASE, id",
+    }
+
     @staticmethod
     def _matching(role, pattern, grade, section_pattern=None, status=None, recovery=None):
         """WHERE for accounts of this role whose name, username or section matches the LIKE
@@ -67,11 +75,11 @@ class UserRepository(Repository):
         return self.value(f"SELECT COUNT(*) FROM users WHERE {where}", params)
 
     def search(self, role, pattern, grade=None, section_pattern=None, status=None, recovery=None,
-               limit=20, offset=0):
-        """One page of the matching accounts: active ones first, then by name (Last, First =
-        by last name)."""
+               limit=20, offset=0, sort="name"):
+        """One page of the matching accounts. sort "name" (default): active ones first, then by name
+        (Last, First = by last name); "login_new" / "login_old": by last login."""
         where, params = self._matching(role, pattern, grade, section_pattern, status, recovery)
-        return self.all(f"SELECT * FROM users WHERE {where} ORDER BY active DESC, name COLLATE NOCASE, id "
+        return self.all(f"SELECT * FROM users WHERE {where} ORDER BY {self.SORT_ORDER[sort]} "
                         "LIMIT ? OFFSET ?", [*params, limit, offset])
 
     def matching_ids(self, role, pattern, grade=None, section_pattern=None, status=None, recovery=None):
@@ -124,6 +132,10 @@ class UserRepository(Repository):
 
     def set_grade_section(self, user_id, grade, section):
         self.execute("UPDATE users SET grade = ?, section = ? WHERE id = ?", (grade, section, user_id))
+
+    def set_last_login(self, user_id):
+        """Remember now (UTC) as the person's last successful login."""
+        self.execute("UPDATE users SET last_login_at = datetime('now') WHERE id = ?", (user_id,))
 
     def set_active(self, user_id, active):
         # Enabling once is forever: the account is no longer fresh.

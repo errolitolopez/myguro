@@ -74,6 +74,7 @@ class AuthService(Service):
             self.log_sign_in("auth.login_failed", "Tried to log in, but the account is deactivated.", user, ip, device)
             raise ForbiddenError("This account is deactivated. Ask the admin.")
         throttle.passed(key)
+        self.users.set_last_login(user["id"])
         self.log_sign_in("auth.login", "Logged in.", user, ip, device)
         return user
 

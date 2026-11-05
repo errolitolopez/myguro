@@ -188,3 +188,17 @@ def test_status_filter(admin):
                      else "pending" if user["must_change_password"] else "active")
             assert shown == status
     assert sum(counts.values()) == everyone["all_count"]
+
+
+def test_last_login_is_recorded_and_sortable(admin, teacher):
+    from conftest import login
+    login("ecruz")  # a second teacher login; "teacher" fixture is another account
+    page = admin.get("/api/users?role=teacher&sort=login_new").get_json()["users"]
+    with_login = [user for user in page if user["last_login_at"]]
+    assert with_login and page[0]["last_login_at"]  # those with a login come first
+    assert page[len(with_login):] and all(user["last_login_at"] is None for user in page[len(with_login):]) \
+        or len(with_login) == len(page)
+    old = admin.get("/api/users?role=teacher&sort=login_old").get_json()["users"]
+    times = [user["last_login_at"] for user in old if user["last_login_at"]]
+    assert times == sorted(times)
+    assert admin.get("/api/users?role=teacher&sort=bad").status_code == 400

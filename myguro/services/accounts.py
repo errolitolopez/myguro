@@ -26,7 +26,7 @@ class AccountService(Service):
     def account_json(self, row):
         """user_json plus the role, how many classes the teacher teaches or the student is in, and
         whether the person has a usable recovery code (never the code itself)."""
-        return {**user_json(row), "role": row["role"], "classes": self.users.count_classes(row),
+        return {**user_json(row), "last_login_at": row["last_login_at"], "role": row["role"], "classes": self.users.count_classes(row),
                 "has_recovery_code": self.users.has_recovery_code(row["id"])}
 
     @staticmethod
@@ -39,18 +39,20 @@ class AccountService(Service):
         return pattern, grade, like_pattern(section) if section else None, status, recovery
 
     def list(self, role, query="", grade=None, page=1, per_page=DEFAULT_PER_PAGE, section="",
-             status=None, recovery=None):
+             status=None, recovery=None, sort="name"):
         """One page of teachers or students, searched (name, username, section) and filtered by
         grade (None = all, "" = no grade), section and status (active, pending, deactivated). A page past the end shows the
         last page."""
         if role not in ACCOUNT_ROLES:
             raise ValidationError("Unknown role.")
+        if sort not in self.users.SORT_ORDER:
+            raise ValidationError("Unknown sort.")
         per_page = max(1, min(per_page, MAX_PER_PAGE))
         search = self.filters(query, grade, section, status, recovery)
         total = self.users.count_matching(role, *search)
         pages = max(1, -(-total // per_page))  # rounded up
         page = max(1, min(page, pages))
-        rows = self.users.search(role, *search, limit=per_page, offset=(page - 1) * per_page)
+        rows = self.users.search(role, *search, limit=per_page, offset=(page - 1) * per_page, sort=sort)
         return {
             "users": [self.account_json(row) for row in rows],
             "page": page,
