@@ -193,15 +193,17 @@ function questionReview(question, number, editable) {
 
   const given = answerText(question, question.given);
   const answerRow = el("div", "mt-1 small");
+  // The "to check" pill comes first, before the answer, so a short answer that still needs a score is seen at once
+  // (it used to come after the answer's box, at the bottom).
+  if (question.type === "short_answer" && editable && question.earned === null && given !== null) {
+    answerRow.append(el("span", "badge text-bg-warning me-1", "to check"), " ");
+  }
   answerRow.append(el("span", "text-body-secondary", t("Answer: ")));
   answerRow.append(given === null ? el("em", "text-body-secondary", "no answer")
     : el("span", question.type === "short_answer" ? "preserve-lines d-block border rounded p-2 mt-1" : "fw-semibold", given));
   if (question.is_correct === true) answerRow.append(" ", el("span", "badge text-bg-success", "✓"));
   if (question.is_correct === false && question.earned > 0) answerRow.append(" ", el("span", "badge text-bg-warning", "part"));
   else if (question.is_correct === false) answerRow.append(" ", el("span", "badge text-bg-danger", "✗"));
-  if (question.type === "short_answer" && editable && question.earned === null && given !== null) {
-    answerRow.append(" ", el("span", "badge text-bg-warning", "to check"));
-  }
   item.append(answerRow);
 
   const key = keyText(question);
