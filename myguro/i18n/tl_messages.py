@@ -123,6 +123,8 @@ MESSAGES = {
     "Section {number} is an activity with no questions. Add a question, or delete it.": "Ang Section {number} ay activity na walang tanong. Magdagdag ng tanong, o i-delete ito.",
     "Section {number}: at most {MAX_QUESTIONS_PER_SECTION} questions.": "Section {number}: hanggang {MAX_QUESTIONS_PER_SECTION} na tanong lang.",
     "Question not found.": "Hindi nahanap ang tanong.",
+    "The student left this answer empty.": "Walang sagot ang estudyante dito.",
+    "The AI check is not available right now.": "Hindi available ang AI check ngayon.",
     "{where} is not valid.": "Hindi valid ang {where}.",
     "{where}: unknown question type.": "{where}: hindi kilalang uri ng tanong.",
     "{where}: type the question.": "{where}: i-type ang tanong.",

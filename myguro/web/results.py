@@ -8,7 +8,7 @@ from flask import Blueprint, jsonify, redirect, render_template, request, send_f
 from myguro.config import SCHOOL_TIMEZONE, school_now_text
 from myguro.database import get_db
 from myguro.exports import results_pdf_bytes, results_xlsx_bytes
-from myguro.services import ResultsService
+from myguro.services import AiCheckService, ResultsService
 from myguro.web.security import current_user, json_body, role_required_api, role_required_page
 
 bp = Blueprint("results", __name__)
@@ -84,6 +84,13 @@ def api_student(assignment_id, student_id):
 def api_points(submission_id):
     body = json_body()
     return jsonify(detail=service().set_points(submission_id, body.get("points"), body.get("feedback")))
+
+
+@bp.post("/api/submissions/<int:submission_id>/questions/<int:question_id>/ai-check")
+@role_required_api("teacher")
+def api_ai_check(submission_id, question_id):
+    """A suggested score and a short explanation for one short answer (404 while the admin has it off)."""
+    return jsonify(AiCheckService(get_db(), current_user()).suggest(submission_id, question_id))
 
 
 @bp.put("/api/assignments/<int:assignment_id>/release")

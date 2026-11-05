@@ -297,6 +297,15 @@ CREATE TABLE IF NOT EXISTS chat_usage (
     PRIMARY KEY (user_id, day)
 );
 
+-- "Check with AI" (domain/ai_check.py): how many short answers each teacher sent to be checked each school
+-- day, for the daily limit. Counts only: the answers themselves are never kept.
+CREATE TABLE IF NOT EXISTS ai_check_usage (
+    user_id INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    day TEXT NOT NULL,
+    count INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (user_id, day)
+);
+
 -- Navigation chatbot history: each teacher's own questions and the replies, so the chat is still there on
 -- the next page or the next login. Only that teacher can read or clear it; the admin has no way to read
 -- it. Only the newest MAX_SAVED_MESSAGES per teacher are kept (domain/chat.py). Only the latest MAX_CONTEXT_MESSAGES go to the AI service.

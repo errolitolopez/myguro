@@ -348,7 +348,7 @@ TAGLISH.update(ADMIN)
 # script uses a server-only sentence that is not listed here).
 ALSO_IN_BROWSER = {
     "Choose a grade or section to change.", "Individual students", "Last name is required.", "Periods a week",
-    "Subject", "Teacher", "Subject is required.", "Title is required.", "The chatbot is not available right now.",
+    "Subject", "Teacher", "Subject is required.", "Title is required.", "The chatbot is not available right now.", "The AI check is not available right now.",
     "Username must be 3 to 30 letters, numbers, dots, dashes or underscores, with no spaces.",
 }
 CLIENT_TEXT = {english: taglish for english, taglish in TAGLISH.items()

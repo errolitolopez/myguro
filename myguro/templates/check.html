@@ -11,7 +11,7 @@
 {% block content %}
 {% include "_navbar.html" %}
 
-<main class="container py-3" data-plain-background data-assignment-id="{{ assignment_id }}" data-student-id="{{ student_id }}">
+<main class="container py-3" data-plain-background data-assignment-id="{{ assignment_id }}" data-student-id="{{ student_id }}" data-ai-check="{{ 1 if AI_CHECK else 0 }}">
   <a id="back-link" href="{{ url_for('results.page', assignment_id=assignment_id) }}" class="small">{{ _("‹ Results") }}</a>
 
   <header class="d-flex flex-wrap justify-content-between align-items-start gap-2 mt-2 mb-3">

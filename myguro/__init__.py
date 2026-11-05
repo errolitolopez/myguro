@@ -110,6 +110,8 @@ def create_app(test_config=None):
             "MAINTENANCE": bool(user and user["role"] == "admin" and settings.maintenance()["enabled"]),
             # The navigation chat bubble: teachers only, and only while the admin has it on
             "CHATBOT": bool(user and user["role"] == "teacher" and settings.chatbot_enabled()),
+            # The "Check with AI" button on the checking page: teachers only, and only while the admin has it on
+            "AI_CHECK": bool(user and user["role"] == "teacher" and settings.ai_check_enabled()),
             # The Time in / out menu items (teacher's page, admin's records): only while the admin has the beta on
             "TIME_CLOCK": bool(user and user["role"] in ("teacher", "admin") and settings.time_clock_enabled()),
             # The school years for the picker on the Settings page (not on the login page)

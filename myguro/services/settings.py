@@ -12,6 +12,7 @@ GRADES_HIGH_TO_LOW = "grades_high_to_low"
 DISABLED_GRADES = "disabled_grades"
 FEEDBACK_POPUP = "feedback_popup"
 CHATBOT_ENABLED = "chatbot_enabled"
+AI_CHECK_ENABLED = "ai_check_enabled"
 HIDE_EVENTS_FROM_STUDENTS = "hide_events_from_students"
 TIME_CLOCK_ENABLED = "time_clock_enabled"
 MAINTENANCE_ENABLED = "maintenance_enabled"
@@ -102,6 +103,11 @@ class SettingsService(Service):
         goes to an outside AI service."""
         return self.settings.get(CHATBOT_ENABLED) == "1"
 
+    def ai_check_enabled(self):
+        """The "Check with AI" button for teachers. Off until the admin turns it on, because each short answer
+        it checks goes to an outside AI service."""
+        return self.settings.get(AI_CHECK_ENABLED) == "1"
+
     def time_clock_enabled(self):
         """Time in / time out for teachers (a beta). Off until the admin turns it on."""
         return self.settings.get(TIME_CLOCK_ENABLED) == "1"
@@ -122,6 +128,7 @@ class SettingsService(Service):
         return {
             "feedback_popup": self.feedback_popup_mode(),
             "chatbot_enabled": self.chatbot_enabled(),
+            "ai_check_enabled": self.ai_check_enabled(),
             "time_clock_enabled": self.time_clock_enabled(),
             "hide_events_from_students": self.hide_events_from_students(),
             "maintenance": self.maintenance(),
@@ -150,6 +157,10 @@ class SettingsService(Service):
             if not isinstance(data[CHATBOT_ENABLED], bool):
                 raise ValidationError("Choose on or off.")
             self.settings.set(CHATBOT_ENABLED, "1" if data[CHATBOT_ENABLED] else "0")
+        if AI_CHECK_ENABLED in data:
+            if not isinstance(data[AI_CHECK_ENABLED], bool):
+                raise ValidationError("Choose on or off.")
+            self.settings.set(AI_CHECK_ENABLED, "1" if data[AI_CHECK_ENABLED] else "0")
         if TIME_CLOCK_ENABLED in data:
             if not isinstance(data[TIME_CLOCK_ENABLED], bool):
                 raise ValidationError("Choose on or off.")
@@ -176,7 +187,7 @@ class SettingsService(Service):
                 self.log("settings.maintenance_on" if after["enabled"] else "settings.maintenance_off", "settings",
                          "Turned maintenance mode on." if after["enabled"] else "Turned maintenance mode off.")
         changed = [label for key, label in (("grades_high_to_low", "grade order"), ("disabled_grades", "grades in use"),
-                                            (FEEDBACK_POPUP, "the feedback pop-up"), (CHATBOT_ENABLED, "the chatbot"), (TIME_CLOCK_ENABLED, "time in / time out (beta)"),
+                                            (FEEDBACK_POPUP, "the feedback pop-up"), (CHATBOT_ENABLED, "the chatbot"), (AI_CHECK_ENABLED, "Check with AI"), (TIME_CLOCK_ENABLED, "time in / time out (beta)"),
                                             (HIDE_EVENTS_FROM_STUDENTS, "school events for students"),
                                             ("support", "the support link")) if key in data]
         if "maintenance" in data and self.maintenance()["message"] != before_maintenance["message"]:

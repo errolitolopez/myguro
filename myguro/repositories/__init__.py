@@ -2,6 +2,7 @@
 none of them commits (the service decides when the work is done)."""
 
 from myguro.repositories.activities import ActivityRepository
+from myguro.repositories.ai_check import AiCheckRepository
 from myguro.repositories.assignments import AssignmentRepository
 from myguro.repositories.attendance import AttendanceRepository
 from myguro.repositories.chat import ChatRepository
@@ -19,5 +20,5 @@ from myguro.repositories.submissions import SubmissionRepository
 from myguro.repositories.time_clock import TimeClockRepository
 from myguro.repositories.users import UserRepository
 
-__all__ = ["ActivityRepository", "AssignmentRepository", "AttendanceRepository", "ChatRepository", "ClassRepository", "FeedbackRepository", "HolidayRepository", "LogRepository", "NotificationRepository", "RecoveryRepository", "ScheduleRepository", "SchoolEventRepository", "SchoolYearRepository",
+__all__ = ["ActivityRepository", "AiCheckRepository", "AssignmentRepository", "AttendanceRepository", "ChatRepository", "ClassRepository", "FeedbackRepository", "HolidayRepository", "LogRepository", "NotificationRepository", "RecoveryRepository", "ScheduleRepository", "SchoolEventRepository", "SchoolYearRepository",
            "SettingsRepository", "SubmissionRepository", "TimeClockRepository", "UserRepository"]

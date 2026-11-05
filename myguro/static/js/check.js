@@ -5,6 +5,8 @@
 
 const assignmentId = document.querySelector("main").dataset.assignmentId;
 const studentId = Number(document.querySelector("main").dataset.studentId);
+// The admin turns "Check with AI" on in System settings; until then there is no button.
+const aiCheckOn = document.querySelector("main").dataset.aiCheck === "1";
 let detail = null; // the attempt shown
 let changedPoints = {}; // question id -> new points, not saved yet
 let changedFeedback = {}; // question id -> new remark, not saved yet
@@ -129,6 +131,50 @@ function hasUnsaved() {
   return Object.keys(changedPoints).length > 0 || Object.keys(changedFeedback).length > 0;
 }
 
+// The "Check with AI" button of a short answer and the box that shows what it suggests. "Use N points" only
+// types the number in the points box: the teacher still presses Save.
+function aiCheckBox(question, number, pointsInput) {
+  const box = el("div", "mt-2");
+  const button = el("button", "btn btn-sm btn-outline-primary bi bi-stars", ` ${t("Check with AI")}`);
+  button.type = "button";
+  const result = el("div", "d-none alert alert-info small mt-2 mb-0");
+  button.addEventListener("click", async () => {
+    const stopLoading = startLoading(button);
+    if (!stopLoading) return;
+    try {
+      const response = await apiFetch(`/api/submissions/${detail.id}/questions/${question.id}/ai-check`, { method: "POST" });
+      if (!response) return;
+      const data = await response.json();
+      result.classList.remove("d-none");
+      if (!response.ok) {
+        result.className = "alert alert-danger small mt-2 mb-0";
+        result.textContent = data.error || t("The AI check is not available right now.");
+        return;
+      }
+      result.className = "alert alert-info small mt-2 mb-0";
+      const useButton = el("button", "btn btn-sm btn-primary ms-2",
+        t("Use {points} points", { points: data.points }));
+      useButton.type = "button";
+      useButton.addEventListener("click", () => {
+        pointsInput.value = data.points;
+        pointsInput.dispatchEvent(new Event("input")); // so it counts as an unsaved score
+      });
+      result.replaceChildren(
+        el("div", "fw-semibold", `${t("AI suggestion")}: ${data.points} / ${data.max_points}`),
+        el("div", "preserve-lines", data.explanation),
+        el("div", "text-body-secondary mt-1", t("A suggestion only. Read the answer and decide.")),
+        useButton);
+    } catch {
+      result.className = "alert alert-danger small mt-2 mb-0";
+      result.textContent = t("Cannot reach the server. Check your connection.");
+    } finally {
+      stopLoading();
+    }
+  });
+  box.append(button, result);
+  return box;
+}
+
 function questionReview(question, number, editable) {
   const item = el("div", "border rounded p-2 mb-2");
   const top = el("div", "d-flex justify-content-between align-items-start gap-2");
@@ -136,8 +182,10 @@ function questionReview(question, number, editable) {
 
   // Points: editable on a submitted attempt. Empty = short answer not checked yet.
   const pointsBox = el("div", "d-flex align-items-center gap-1 text-nowrap");
+  let pointsInput = null;
   if (editable) {
     const input = el("input", "form-control form-control-sm text-end");
+    pointsInput = input;
     input.type = "number";
     input.min = 0;
     input.max = question.points;
@@ -175,6 +223,11 @@ function questionReview(question, number, editable) {
     const keyRow = el("div", "small text-body-secondary mt-1");
     keyRow.append(question.type === "short_answer" ? t("Guide: ") : t("Key: "), el("span", "preserve-lines", key));
     item.append(keyRow);
+  }
+
+  // Check with AI (a short answer the student wrote, while the admin has it on): a suggestion only.
+  if (aiCheckOn && editable && question.type === "short_answer" && given !== null) {
+    item.append(aiCheckBox(question, number, pointsInput));
   }
 
   // The teacher's remark on this answer. The student sees it once the scores are released.

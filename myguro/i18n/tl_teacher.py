@@ -85,6 +85,10 @@ TEACHER = {
     "A text section is for reading; an activity section has directions and questions.":
         "Ang text section ay para sa pagbabasa; ang activity section ay may directions at mga tanong.",
     "Check results": "Tingnan ang mga resulta",
+    "Check with AI": "I-check gamit ang AI",
+    "AI suggestion": "Suhestiyon ng AI",
+    "Use {points} points": "Gamitin ang {points} points",
+    "A suggestion only. Read the answer and decide.": "Suhestiyon lang ito. Basahin ang sagot at ikaw ang magdesisyon.",
     "Delete": "Delete",
     "Delete this activity": "I-delete ang activity na ito",
     "Delete this activity with all its sections and questions? This can't be undone.":

@@ -7,6 +7,7 @@ from myguro.services.assignments import AssignmentService
 from myguro.services.attendance import AttendanceService
 from myguro.services.backups import BackupService
 from myguro.services.auth import AuthService, LoginThrottle
+from myguro.services.ai_check import AiCheckService
 from myguro.services.chat import ChatService
 from myguro.services.classes import ClassService
 from myguro.services.dashboard import DashboardService
@@ -24,5 +25,5 @@ from myguro.services.settings import SettingsService
 from myguro.services.student_work import StudentWorkService
 from myguro.services.time_clock import TimeClockService
 
-__all__ = ["AccountService", "ActivityService", "AssignmentService", "AttendanceService", "AuthService", "BackupService", "ChatService", "ClassService",
+__all__ = ["AccountService", "ActivityService", "AiCheckService", "AssignmentService", "AttendanceService", "AuthService", "BackupService", "ChatService", "ClassService",
            "DashboardService", "FeedbackService", "GradebookService", "HolidayService", "LoginThrottle", "LogService", "NotificationService", "RecoveryService", "ResultsService", "ScheduleService", "SchoolEventService", "SchoolYearService", "SettingsService", "StudentWorkService", "TimeClockService"]
