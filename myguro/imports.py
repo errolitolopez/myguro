@@ -87,8 +87,8 @@ def read_student_rows(content):
         MAX_ROWS, f"The file has more than {MAX_ROWS} students. Split it into smaller files.")
 
 
-def template_xlsx_bytes():
-    """The file to fill in: the columns (Grade as a dropdown) and a sheet explaining them."""
+def template_xlsx_bytes(grades=GRADES):
+    """The file to fill in: the columns (Grade as a dropdown of the given grades) and a sheet explaining them."""
     workbook = Workbook()
     sheet = workbook.active
     sheet.title = "Students"
@@ -98,9 +98,9 @@ def template_xlsx_bytes():
         cell.fill = PatternFill("solid", fgColor="E9ECEF")
     for letter, width in zip("ABCDEFG", (20, 24, 15, 18, 12, 16, 18)):
         sheet.column_dimensions[letter].width = width
-    grades = DataValidation(type="list", formula1='"' + ",".join(GRADES) + '"', allow_blank=True)
-    grades.add(f"E2:E{MAX_ROWS + 1}")
-    sheet.add_data_validation(grades)
+    grade_list = DataValidation(type="list", formula1='"' + ",".join(grades) + '"', allow_blank=True)
+    grade_list.add(f"E2:E{MAX_ROWS + 1}")
+    sheet.add_data_validation(grade_list)
     sheet.freeze_panes = "A2"
 
     help_sheet = workbook.create_sheet("How to fill")

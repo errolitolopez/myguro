@@ -5,11 +5,11 @@ import io
 from flask import Blueprint, jsonify, render_template, request, send_file
 
 from myguro.database import get_db
-from myguro.domain.accounts import ACCOUNT_ROLES
+from myguro.domain.accounts import ACCOUNT_ROLES, GRADES
 from myguro.errors import ValidationError, say
 from myguro.exports import login_details_xlsx_bytes
 from myguro.imports import read_student_rows, template_xlsx_bytes
-from myguro.services import AccountService
+from myguro.services import AccountService, SettingsService
 from myguro.web.security import current_user, json_body, role_required_api, role_required_page
 
 bp = Blueprint("accounts", __name__)
@@ -121,11 +121,17 @@ def api_update(user_id):
     return jsonify(result)
 
 
+def enabled_grades():
+    """The grades the school uses, Kinder first (the order of the Excel dropdown)."""
+    disabled = SettingsService(get_db(), current_user()).disabled_grades()
+    return [grade for grade in GRADES if grade not in disabled]
+
+
 @bp.get("/students/import-template.xlsx")
 @role_required_page("admin")
 def import_template():
     """The Excel file to fill in for importing students."""
-    return send_file(io.BytesIO(template_xlsx_bytes()), as_attachment=True,
+    return send_file(io.BytesIO(template_xlsx_bytes(enabled_grades())), as_attachment=True,
                      download_name="MyGuro students template.xlsx",
                      mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 

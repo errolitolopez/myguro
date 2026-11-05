@@ -200,3 +200,12 @@ def test_disabled_grade_refused_for_classes(admin, teacher):
     # a class already in the grade can still be renamed within it, but not moved into another disabled one
     assert teacher.put(f"/api/classes/{old}", json={"name": "Grade 7 - Mabini"}).status_code == 200
     assert teacher.put(f"/api/classes/{old}", json={"name": "Grade 8 - Mabini"}).status_code == 400
+
+
+def test_import_template_lists_only_enabled_grades(admin):
+    admin.put("/api/settings", json={"disabled_grades": ["Kinder", "Grade 1"]})
+    from io import BytesIO
+    from openpyxl import load_workbook
+    sheet = load_workbook(BytesIO(admin.get("/students/import-template.xlsx").data))["Students"]
+    options = sheet.data_validations.dataValidation[0].formula1
+    assert "Grade 2" in options and "Kinder" not in options and "Grade 1," not in options
