@@ -1410,3 +1410,13 @@ html[data-style="neu"] :is(.btn, .list-group-item-action):focus-visible {
   outline: 2px solid var(--accent-to);
   outline-offset: 2px;
 }
+
+/* Neumorphic alerts (the tips box too). The style makes --glass-border transparent, which took the outline off the
+   alert and left only the coloured bar on the left. Give the other three sides a soft line in the alert's own
+   colour; the left bar keeps its full colour (so border-left is not touched). */
+html[data-style="neu"] .alert {
+  --bs-alert-border-color: color-mix(in srgb, var(--alert-color) 40%, transparent);
+  border-top-color: var(--bs-alert-border-color);
+  border-right-color: var(--bs-alert-border-color);
+  border-bottom-color: var(--bs-alert-border-color);
+}
