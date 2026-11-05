@@ -185,6 +185,11 @@ function questionReview(question, number, editable) {
   // The top right only says how many points the question is worth, and what was given so far. The box to type
   // the score is at the bottom, under the remark, with its own Save button (see scoreRow below).
   const pointsBox = el("div", "d-flex align-items-center gap-1 text-nowrap");
+  // The "to check" pill is in the top row, next to the question and its points, so a short answer that still needs a
+  // score is seen as soon as the question is.
+  if (question.type === "short_answer" && editable && question.earned === null && question.given !== null) {
+    pointsBox.append(el("span", "badge text-bg-warning me-1", "to check"));
+  }
   pointsBox.append(el("span", "small text-body-secondary",
     editable ? `${question.earned === null ? "?" : question.earned} / ${plural(question.points, "pt", "pts")}`
       : plural(question.points, "pt", "pts")));
@@ -193,11 +198,6 @@ function questionReview(question, number, editable) {
 
   const given = answerText(question, question.given);
   const answerRow = el("div", "mt-1 small");
-  // The "to check" pill comes first, before the answer, so a short answer that still needs a score is seen at once
-  // (it used to come after the answer's box, at the bottom).
-  if (question.type === "short_answer" && editable && question.earned === null && given !== null) {
-    answerRow.append(el("span", "badge text-bg-warning me-1", "to check"), " ");
-  }
   answerRow.append(el("span", "text-body-secondary", t("Answer: ")));
   answerRow.append(given === null ? el("em", "text-body-secondary", "no answer")
     : el("span", question.type === "short_answer" ? "preserve-lines d-block border rounded p-2 mt-1" : "fw-semibold", given));
