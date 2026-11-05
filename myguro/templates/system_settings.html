@@ -107,10 +107,10 @@
     <div class="card-body">
       <div class="form-check form-switch">
         <input id="ai-check-enabled" class="form-check-input" type="checkbox" role="switch" disabled>
-        <label for="ai-check-enabled" class="form-check-label fw-semibold">{{ _("Check with AI (teachers)") }}</label>
+        <label for="ai-check-enabled" class="form-check-label fw-semibold">{{ _("Check with AI (teachers)") }} <span class="badge text-bg-warning">{{ _("Beta") }}</span></label>
       </div>
       <div class="form-text">
-        {{ _("A button on a student's short answer that suggests points and a short explanation. The teacher decides and saves the points. The question, the guide for checking and the student's answer are sent to an outside AI service; the student's name is not. Off by default.") }}
+        {{ _("A button on a student's short answer that suggests points and a short explanation. The teacher decides and saves the points. The question, the guide for checking and the student's answer are sent to an outside AI service; the student's name is not. This is a beta: the suggestions can be wrong, so teachers always decide. Off by default.") }}
       </div>
     </div>
   </div>

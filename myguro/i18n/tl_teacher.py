@@ -100,7 +100,7 @@ TEACHER = {
     "Check with AI": "I-check gamit ang AI",
     "AI suggestion": "Suhestiyon ng AI",
     "Use {points} points": "Gamitin ang {points} points",
-    "A suggestion only. Read the answer and decide.": "Suhestiyon lang ito. Basahin ang sagot at ikaw ang magdesisyon.",
+    "Beta: the AI can be wrong. A suggestion only, read the answer and decide.": "Beta: puwedeng magkamali ang AI. Suhestiyon lang ito, basahin ang sagot at ikaw ang magdesisyon.",
     "Delete": "Delete",
     "Delete this activity": "I-delete ang activity na ito",
     "Delete this activity with all its sections and questions? This can't be undone.":

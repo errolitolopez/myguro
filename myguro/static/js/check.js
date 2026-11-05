@@ -137,6 +137,7 @@ function aiCheckBox(question, number, pointsInput) {
   const box = el("div", "mt-2");
   const button = el("button", "btn btn-sm btn-outline-primary bi bi-stars", ` ${t("Check with AI")}`);
   button.type = "button";
+  button.append(" ", el("span", "badge text-bg-warning", t("Beta"))); // a beta: it can be wrong
   const result = el("div", "d-none alert alert-info small mt-2 mb-0");
   button.addEventListener("click", async () => {
     const stopLoading = startLoading(button);
@@ -160,9 +161,9 @@ function aiCheckBox(question, number, pointsInput) {
         pointsInput.dispatchEvent(new Event("input")); // so it counts as an unsaved score
       });
       result.replaceChildren(
-        el("div", "fw-semibold", `${t("AI suggestion")}: ${data.points} / ${data.max_points}`),
+        el("div", "fw-semibold", `${t("AI suggestion")} (${t("Beta")}): ${data.points} / ${data.max_points}`),
         el("div", "preserve-lines", data.explanation),
-        el("div", "text-body-secondary mt-1", t("A suggestion only. Read the answer and decide.")),
+        el("div", "text-body-secondary mt-1", t("Beta: the AI can be wrong. A suggestion only, read the answer and decide.")),
         useButton);
     } catch {
       result.className = "alert alert-danger small mt-2 mb-0";

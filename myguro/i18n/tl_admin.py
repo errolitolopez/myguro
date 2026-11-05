@@ -29,8 +29,8 @@ ADMIN = {
         "On: holidays lang ang makikita ng mga estudyante sa calendar. Off: makikita rin nila ang school events. Makikita mo at ng mga teacher ang dalawa. Naka-on bilang default.",
     "Has recovery code": "May recovery code",
     "Check with AI (teachers)": "Check with AI (mga teacher)",
-    "A button on a student's short answer that suggests points and a short explanation. The teacher decides and saves the points. The question, the guide for checking and the student's answer are sent to an outside AI service; the student's name is not. Off by default.":
-        "Isang button sa short answer ng estudyante na nagmumungkahi ng points at maikling paliwanag. Ang teacher ang magdedesisyon at magse-save ng points. Ipinapadala sa isang outside AI service ang tanong, ang guide sa pag-check at ang sagot ng estudyante; hindi ipinapadala ang pangalan ng estudyante. Naka-off bilang default.",
+    "A button on a student's short answer that suggests points and a short explanation. The teacher decides and saves the points. The question, the guide for checking and the student's answer are sent to an outside AI service; the student's name is not. This is a beta: the suggestions can be wrong, so teachers always decide. Off by default.":
+        "Isang button sa short answer ng estudyante na nagmumungkahi ng points at maikling paliwanag. Ang teacher ang magdedesisyon at magse-save ng points. Ipinapadala sa isang outside AI service ang tanong, ang guide sa pag-check at ang sagot ng estudyante; hindi ipinapadala ang pangalan ng estudyante. Beta ito: puwedeng magkamali ang mga suhestiyon, kaya ang teacher pa rin ang magdedesisyon. Naka-off bilang default.",
     "No recovery code": "Walang recovery code",
     "Last login": "Huling login",
     "Sort by": "I-sort ayon sa",
