@@ -184,7 +184,8 @@ function questionReview(question, number, editable) {
   // The "to check" pill is the first thing in the question's own row, before the number and the text, so a short
   // answer that still needs a score is seen as soon as the question is.
   if (question.type === "short_answer" && editable && question.earned === null && question.given !== null) {
-    prompt.append(el("span", "badge text-bg-warning me-1", "to check"));
+    // d-table puts the question on the next line, and keeps the pill as wide as its text: the pill alone on the first line, then "1. Why?"
+    prompt.append(el("span", "badge text-bg-warning d-table mb-1", "to check"));
   }
   prompt.append(`${number}. ${question.prompt}`);
   top.append(prompt);
