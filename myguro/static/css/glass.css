@@ -1424,3 +1424,7 @@ html[data-style="neu"] .alert {
 /* Cards written with Bootstrap's .shadow-sm (the login and password pages) kept its faint shadow, because a utility class
    is !important and beat the raised shadow above, so those cards had no visible edge. !important here only to beat it. */
 html[data-style="neu"] .card.shadow-sm { box-shadow: var(--neu-raised) !important; }
+
+/* The question cards in the activity editor have their own faint shadow, which hid the neu edge. A smaller raised shadow
+   suits them: they sit inside another card. */
+html[data-style="neu"] .question-card { box-shadow: var(--neu-raised-sm); }
