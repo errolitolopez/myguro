@@ -1,6 +1,6 @@
 // Display settings: text size, text alignment, line spacing, visual effects and whether phones get the menu bar at the bottom. Loaded in <head> so they are set
 // before the page is drawn (no jump). A person's choices are kept in this browser only, like the theme.
-// They become attributes on <html> (data-text-size, data-text-align, data-line-spacing, data-effects, data-tab-bar); glass.css
+// They become attributes on <html> (data-text-size, data-text-align, data-line-spacing, data-effects, data-style, data-tab-bar); glass.css
 // does the rest.
 
 (function () {
@@ -11,6 +11,8 @@
     // Full = glass blur and the moving background; Light = plain panels, no motion (smoother on phones).
     // Until a person chooses, everyone starts on Light: it is smooth on every device, and blur is a choice.
     effects: { key: "myguro-effects", attribute: "data-effects", choices: ["full", "light"], fallback: "light" },
+    // Neu = the soft raised/pressed "neumorphic" look; Glass = the default frosted look. The switch is on for the first choice.
+    style: { key: "myguro-style", attribute: "data-style", choices: ["neu", "glass"], fallback: "glass" },
     tabbar: { key: "myguro-tab-bar", attribute: "data-tab-bar", choices: ["bottom", "top"], fallback: "bottom" },
   };
 

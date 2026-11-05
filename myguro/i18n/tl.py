@@ -309,6 +309,10 @@ TAGLISH = {
     "Turn this on for the glass blur and the moving background. It can make pages slow or choppy, especially on a phone. It starts off for everyone.":
         "I-on ito para sa glass blur at gumagalaw na background. Puwede itong magpabagal o magpaputol-putol ng mga page, lalo na sa phone. Naka-off ito sa simula para sa lahat.",
     "Menu": "Menu",
+    "Style": "Style",
+    "Beta": "Beta",
+    "Soft raised look (neumorphic)": "Malambot na nakaangat na itsura (neumorphic)",
+    "Turn this on for soft, raised buttons and panels with no blur. It is new, so some pages may look unfinished or hard to read. It starts off for everyone.": "I-on ito para sa malambot at nakaangat na mga button at panel na walang blur. Bago pa ito, kaya may mga page na mukhang hindi pa tapos o mahirap basahin. Nakaoff ito sa lahat sa simula.",
     "Menu bar at the bottom on phones": "Menu bar sa ibaba sa mga phone",
     "On: the menu is a bar at the bottom of the screen, within reach of your thumb. Off: the menu tabs show at the top, like on a computer. Wider screens always show them at the top.":
         "On: nasa ibaba ng screen ang menu bilang bar, abot ng hinlalaki mo. Off: nasa itaas ang mga menu tab, gaya sa computer. Ang mas malalapad na screen ay laging nasa itaas ang mga ito.",
