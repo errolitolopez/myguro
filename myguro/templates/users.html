@@ -22,17 +22,17 @@
            placeholder="Search name, username{{ ' or section' if role == 'student' }}"
            aria-label="Search {{ nouns|lower }}" autocomplete="off">
     {% if role == "student" %}
-    <button id="filter-toggle" type="button" class="btn btn-outline-secondary text-nowrap bi bi-funnel"
+    <button id="filter-toggle" type="button" class="btn btn-outline-secondary btn-input-height text-nowrap bi bi-funnel"
             data-bs-toggle="collapse" data-bs-target="#advanced-filter" aria-expanded="false"
             aria-controls="advanced-filter">
       {{ _("Filters") }}<span id="filter-count" class="badge text-bg-success ms-1 d-none"></span>
     </button>
     {% endif %}
-    <button class="btn btn-success text-nowrap bi bi-plus-lg" data-bs-toggle="modal" data-bs-target="#add-user-modal">
+    <button class="btn btn-success btn-input-height text-nowrap bi bi-plus-lg" data-bs-toggle="modal" data-bs-target="#add-user-modal">
       {{ _("Add {noun}", noun=noun) }}
     </button>
     {% if role == "student" %}
-    <button class="btn btn-outline-success text-nowrap bi bi-file-earmark-arrow-up" data-bs-toggle="modal" data-bs-target="#import-modal">
+    <button class="btn btn-outline-success btn-input-height text-nowrap bi bi-file-earmark-arrow-up" data-bs-toggle="modal" data-bs-target="#import-modal">
       {{ _("Import from Excel") }}
     </button>
     {% endif %}
@@ -74,7 +74,7 @@
           </select>
         </div>
         <div class="col-12 col-md-2">
-          <button id="filter-clear" type="button" class="btn btn-outline-secondary w-100 bi bi-x-circle">{{ _("Clear filters") }}</button>
+          <button id="filter-clear" type="button" class="btn btn-outline-secondary btn-input-height w-100 bi bi-x-circle">{{ _("Clear filters") }}</button>
         </div>
       </div>
     </div>
