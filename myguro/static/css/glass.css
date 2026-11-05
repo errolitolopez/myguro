@@ -483,7 +483,12 @@ h6, .h6 { font-size: 0.9375rem; }
 /* A button that sits in a row with inputs and selects takes their height. Buttons are small on purpose (above) but form boxes
    keep Bootstrap's size, so side by side the button looked shorter. The numbers are the height of a form box (38px;
    36px on a phone, see below); flex centres the text and icon. */
-.btn-input-height {
+/* It also happens by itself, everywhere: a normal-size button in the same row as a normal-size input or select takes
+   their height, so no page needs the class. The rows are the flex toolbars (search box + buttons) and the filter
+   grids (inputs with a Clear button). Small buttons (.btn-sm) stay small on purpose, and so do small inputs. */
+.btn-input-height,
+.d-flex:has(> .form-control:not(.form-control-sm), > .form-select:not(.form-select-sm)) > .btn:not(.btn-sm):not(.btn-lg),
+.row:has(.form-control:not(.form-control-sm), .form-select:not(.form-select-sm)) .btn:not(.btn-sm):not(.btn-lg) {
   min-height: 2.375rem;
   display: inline-flex;
   align-items: center;
@@ -496,7 +501,11 @@ h6, .h6 { font-size: 0.9375rem; }
   .btn { min-height: 1.75rem; }
   .btn-sm { min-height: 1.5rem; }
   .btn-lg { min-height: 2rem; }
-  .btn.btn-input-height { min-height: 2.25rem; }
+  .btn.btn-input-height,
+  .d-flex:has(> .form-control:not(.form-control-sm), > .form-select:not(.form-select-sm)) > .btn:not(.btn-sm):not(.btn-lg),
+  .row:has(.form-control:not(.form-control-sm), .form-select:not(.form-select-sm)) .btn:not(.btn-sm):not(.btn-lg) {
+    min-height: 2.25rem;
+  }
 
   .form-control,
   .form-select {
