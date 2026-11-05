@@ -1,9 +1,7 @@
-// Student dashboard widgets: Next due, Progress and Score trend. They use only /api/my-activities.
+// Student dashboard widgets: Next due and Progress (with the latest score). They use only /api/my-activities.
 // Wrapped in a function so its names (percentOf ...) cannot clash with dashboard-chart.js on the same page.
 (() => {
   const NEXT_DUE_LIMIT = 3; // rows in Next due
-  const TREND_POINTS = 8; // most recent released scores in the trend line
-  const SVG = "http://www.w3.org/2000/svg";
 
   // dayNumber("2026-10-30") -> a whole number of days, so two calendar days can be subtracted without a time
   // zone shifting them (the server sends days as text)
@@ -92,51 +90,18 @@
     document.getElementById("progress-week").textContent = thisWeek ? t("{count} submitted this week", { count: thisWeek }) : "";
   };
 
-  // A small line through the scores, drawn as SVG so it follows the text colour and needs no library.
-  const trendLine = (percents) => {
-    const width = 120;
-    const height = 40;
-    const svg = document.createElementNS(SVG, "svg");
-    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
-    svg.setAttribute("preserveAspectRatio", "none");
-    svg.setAttribute("width", "100%");
-    svg.setAttribute("height", "100%");
-    svg.setAttribute("role", "img");
-    svg.setAttribute("aria-label", t("Your last scores: {scores}", { scores: percents.map((percent) => `${percent}%`).join(", ") }));
-    const step = percents.length > 1 ? (width - 8) / (percents.length - 1) : 0;
-    const points = percents.map((percent, index) => [4 + index * step, 36 - (percent / 100) * 32]);
-    const line = document.createElementNS(SVG, "polyline");
-    line.setAttribute("points", points.map((point) => point.join(",")).join(" "));
-    line.setAttribute("fill", "none");
-    line.setAttribute("stroke", "currentColor");
-    line.setAttribute("stroke-width", "2");
-    line.setAttribute("vector-effect", "non-scaling-stroke");
-    svg.append(line);
-    for (const [x, y] of points) {
-      const dot = document.createElementNS(SVG, "circle");
-      dot.setAttribute("cx", x);
-      dot.setAttribute("cy", y);
-      dot.setAttribute("r", "2.5");
-      dot.setAttribute("fill", "currentColor");
-      svg.append(dot);
-    }
-    return svg;
-  };
-
-  // Score trend: the released scores in the order they were submitted; the latest and how it moved.
-  const showTrend = (activities) => {
+  // Latest score (inside the Progress card): the score of the activity submitted last, and how it moved
+  // from the one before. Only released scores count.
+  const showLatestScore = (activities) => {
     const scored = activities
       .filter((activity) => activity.submitted_at && percentOf(activity.score) !== null)
       .sort((a, b) => a.submitted_at.localeCompare(b.submitted_at))
-      .slice(-TREND_POINTS)
       .map((activity) => percentOf(activity.score));
-    const latest = document.getElementById("trend-latest");
-    const change = document.getElementById("trend-change");
-    const line = document.getElementById("trend-line");
+    const latest = document.getElementById("progress-latest");
+    const change = document.getElementById("progress-change");
     if (scored.length === 0) {
       latest.textContent = "–";
       change.textContent = t("Scores show here once your teacher releases them.");
-      line.replaceChildren();
       return;
     }
     latest.textContent = `${scored[scored.length - 1]}%`;
@@ -145,7 +110,6 @@
       : difference === 0 ? t("Same as the one before")
       : difference > 0 ? t("Up {n}% from the one before", { n: difference })
       : t("Down {n}% from the one before", { n: -difference });
-    line.replaceChildren(scored.length > 1 ? trendLine(scored) : "");
   };
 
   async function loadStudentWidgets() {
@@ -161,7 +125,7 @@
       }
       showNextDue(data.activities, data.today);
       showProgress(data.activities);
-      showTrend(data.activities);
+      showLatestScore(data.activities);
     } catch {
       document.getElementById("next-due-list").replaceChildren();
       showError("next-due-error", t("Cannot reach the server. Check your connection."));
