@@ -78,7 +78,8 @@
 
   // Progress: activities submitted out of everything given this school year, and how many this week.
   const showProgress = (activities) => {
-    const done = activities.filter((activity) => activity.done).length;
+    // An activity they are trying again is to do, not done, until they submit it again (as in My activities).
+    const done = activities.filter((activity) => activity.done && activity.status !== "in_progress").length;
     document.getElementById("progress-ring").replaceChildren(scoreRing(done, activities.length));
     document.getElementById("progress-text").textContent = activities.length === 0
       ? t("Nothing given yet")

@@ -177,10 +177,14 @@ class SubmissionRepository(Repository):
         self.execute("DELETE FROM submissions WHERE id = ?", (submission_id,))
 
     def count_submitted_by_student(self, student_id, year_id):
-        """How many assignments of one school year the student submitted (however many attempts)."""
-        return self.value("SELECT COUNT(DISTINCT assignment_id) FROM submissions "
-                          "WHERE student_id = ? AND submitted_at IS NOT NULL AND assignment_id IN "
-                          "(SELECT id FROM assignments WHERE school_year_id = ?)", (student_id, year_id))
+        """How many assignments of one school year the student has submitted and is not trying again: the latest
+        attempt must be the submitted one (an assignment they started again is to do, not submitted, until they
+        submit it again)."""
+        return self.value("SELECT COUNT(*) FROM submissions s WHERE s.student_id = ? AND s.submitted_at IS NOT NULL "
+                          "AND s.attempt = (SELECT MAX(attempt) FROM submissions "
+                          "WHERE assignment_id = s.assignment_id AND student_id = s.student_id) "
+                          "AND s.assignment_id IN (SELECT id FROM assignments WHERE school_year_id = ?)",
+                          (student_id, year_id))
 
     def count_submitted_for_teacher(self, teacher_id, year_id):
         """Students who submitted the teacher's sheets in one school year (each once per assignment)."""

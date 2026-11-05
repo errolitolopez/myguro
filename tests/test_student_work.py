@@ -196,10 +196,11 @@ def test_try_again_puts_the_activity_back_in_to_do(teacher):
     teacher.put(f"/api/activities/{activity_id}/settings", json={"max_attempts": 3})
     student = login(students[0]["username"])
     to_do = lambda: student.get("/api/dashboard").get_json()["to_do"]
-    assert to_do() == 1
+    submitted = lambda: student.get("/api/dashboard").get_json()["submitted"]
+    assert (to_do(), submitted()) == (1, 0)
     student.post(f"/api/my-activities/{assignment_id}/submit", json={"answers": {str(q[0]): 0}})
-    assert to_do() == 0  # submitted: done
+    assert (to_do(), submitted()) == (0, 1)  # submitted: done
     student.post(f"/api/my-activities/{assignment_id}/retry")
-    assert to_do() == 1  # trying again: it is to do again, until it is submitted again
+    assert (to_do(), submitted()) == (1, 0)  # trying again: to do again, and not counted as submitted twice
     student.post(f"/api/my-activities/{assignment_id}/submit", json={"answers": {str(q[0]): 0}})
-    assert to_do() == 0
+    assert (to_do(), submitted()) == (0, 1)
