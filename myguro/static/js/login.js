@@ -72,6 +72,9 @@ form.addEventListener("submit", async (event) => {
     return;
   }
 
+  // Take the cursor out of the field, so the phone keyboard closes while the login is checked.
+  // (A failed login puts it back in the password box below.)
+  if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
   button.disabled = true;
   try {
     const response = await fetch("/api/login", {
