@@ -18,7 +18,7 @@
   {% endif %}
 
   {% if user.role == "admin" %}
-  <div class="bento mb-4">
+  <div class="bento mb-3">
     <div class="bento-full">
       <a class="card h-100 text-decoration-none" href="{{ url_for('accounts.users_page') }}"><div class="card-body">
         <div class="text-body-secondary small">{{ _("Users") }}</div>
@@ -28,7 +28,7 @@
   </div>
   {% include "_holidays_widget.html" %}
   <!-- A full copy of the database. Turns yellow when the last backup is old or there never was one. -->
-  <div class="card mb-4 {{ 'border-warning' if backup.stale else '' }}" {% if backup.stale %}id="backup-warning"{% endif %}>
+  <div class="card mb-3 {{ 'border-warning' if backup.stale else '' }}" {% if backup.stale %}id="backup-warning"{% endif %}>
     <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-2">
       <div>
         <div class="fw-semibold bi bi-shield-check"> {{ _("Backup") }}</div>
@@ -40,7 +40,7 @@
     </div>
   </div>
   {% elif user.role == "student" %}
-  <div class="bento mb-4">
+  <div class="bento mb-3">
     <div class="bento-half">
       <a class="card h-100 text-decoration-none" href="{{ url_for('student.activities_page') }}"><div class="card-body">
         <div class="text-body-secondary small">{{ _("To do") }}</div>
@@ -56,7 +56,7 @@
   </div>
 
   <!-- Widgets: what is due next, how far along, and the latest score. Filled in by student-widgets.js. -->
-  <div class="row g-3 mb-4" id="student-widgets">
+  <div class="row g-3 mb-3" id="student-widgets">
     <div class="col-12 col-lg-8">
       <section class="card h-100" aria-labelledby="next-due-title">
         <div class="card-header fw-semibold bi bi-alarm" id="next-due-title"> {{ _("Next due") }}</div>
@@ -87,7 +87,7 @@
 
   {% include "_holidays_widget.html" %}
   {% else %}
-  <div class="bento mb-4">
+  <div class="bento mb-3">
     <div>
       <div class="card h-100"><div class="card-body">
         <div class="text-body-secondary small">{{ _("Students") }}</div>
@@ -123,7 +123,7 @@
   {% include "_holidays_widget.html" %}
 
   <!-- Work waiting for the teacher: short answers (and other points) still to check. Filled in by dashboard.js. -->
-  <div class="card mb-4" id="to-check-card">
+  <div class="card mb-3" id="to-check-card">
     <div class="card-body">
       <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
         <h2 class="h5 mb-0 bi bi-check2-square"> {{ _("To check") }}</h2>
