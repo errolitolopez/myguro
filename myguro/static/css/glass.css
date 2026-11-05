@@ -5,6 +5,12 @@
 
 :root {
   /* Bootstrap reads its text font from this variable. The system fonts are the fallback while Plus Jakarta Sans loads. */
+  /* Bootstrap's own corner sizes (inputs, list groups, badges, tables and anything using .rounded) a little smaller. */
+  --bs-border-radius-sm: 0.2rem;
+  --bs-border-radius: 0.3rem;
+  --bs-border-radius-lg: 0.4rem;
+  --bs-border-radius-xl: 0.8rem;
+  --bs-border-radius-xxl: 1.6rem;
   --bs-body-font-size: 0.9375rem;
   --bs-body-font-family: "Plus Jakarta Sans", Inter, Roboto, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --glass-bg: rgba(255, 255, 255, 0.6);
@@ -16,7 +22,7 @@
   /* Blur cost grows with the radius, and every panel on the page does it: a small radius is much lighter and still
      frosted. (It was 14px.) */
   --glass-blur: blur(8px);
-  --radius-card: 1.25rem;
+  --radius-card: 1rem; /* was 1.25rem: every corner in the app is about 20% smaller than it was */
   /* The one accent gradient: primary buttons, progress bars, the active tab, score rings. */
   --accent-from: #4f46e5;
   --accent-to: #06b6d4;
@@ -269,7 +275,7 @@ footer {
 /* Dropdown menus are plain and opaque, not glass: they open over busy content (cards, tables), where
    see-through text is hard to read. */
 .dropdown-menu {
-  --bs-dropdown-border-radius: 0.75rem;
+  --bs-dropdown-border-radius: 0.6rem;
   --bs-dropdown-bg: var(--glass-solid);
   --bs-dropdown-border-color: var(--glass-border);
   box-shadow: var(--glass-shadow);
@@ -436,21 +442,21 @@ h6, .h6 { font-size: 0.9375rem; }
   --bs-btn-padding-y: 0.2rem;
   --bs-btn-padding-x: 0.55rem;
   --bs-btn-font-size: 0.75rem;
-  --bs-btn-border-radius: 0.3rem;
+  --bs-btn-border-radius: 0.25rem;
 }
 
 .btn-sm {
   --bs-btn-padding-y: 0.12rem;
   --bs-btn-padding-x: 0.4rem;
   --bs-btn-font-size: 0.6875rem;
-  --bs-btn-border-radius: 0.3rem;
+  --bs-btn-border-radius: 0.25rem;
 }
 
 .btn-lg {
   --bs-btn-padding-y: 0.3rem;
   --bs-btn-padding-x: 0.7rem;
   --bs-btn-font-size: 0.8125rem;
-  --bs-btn-border-radius: 0.3rem;
+  --bs-btn-border-radius: 0.25rem;
 }
 
 /* A button that sits in a row with inputs and selects takes their height. Buttons are small on purpose (above) but form boxes
@@ -640,7 +646,7 @@ html[data-tab-bar="top"] .web-tabs { display: block !important; }
 
 /* Slim scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-thumb { background-color: var(--scroll-thumb); border-radius: 8px; }
+::-webkit-scrollbar-thumb { background-color: var(--scroll-thumb); border-radius: 6px; }
 
 /* Modals open with a small 3D pop */
 @keyframes modal-open {
@@ -820,7 +826,7 @@ main { animation: page-in 0.35s ease both; }
 .skeleton {
   display: block;
   height: 0.9rem;
-  border-radius: 0.5rem;
+  border-radius: 0.4rem;
   background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%);
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.4s linear infinite;
@@ -881,7 +887,7 @@ main { animation: page-in 0.35s ease both; }
   align-items: center;
   gap: 0.6rem;
   padding: 0.55rem 0.7rem;
-  border-radius: 0.6rem;
+  border-radius: 0.5rem;
   color: inherit;
   text-decoration: none;
   cursor: pointer;
@@ -971,7 +977,7 @@ html[data-text-align="justify"] :is([data-reading]) :is(div, p, li, label) {
   transition: transform 0.12s ease;
 }
 .star:hover { transform: scale(1.15); }
-.star:focus-visible { outline: 2px solid var(--accent-to); outline-offset: 2px; border-radius: 0.5rem; }
+.star:focus-visible { outline: 2px solid var(--accent-to); outline-offset: 2px; border-radius: 0.4rem; }
 /* A tapped star bounces; the ones filled before it follow a moment later (the delay is set by the script). */
 .star-pop { animation: star-pop 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
 @keyframes star-pop {
@@ -1015,7 +1021,7 @@ html[data-text-align="justify"] :is([data-reading]) :is(div, p, li, label) {
   gap: 0.75rem;
   padding: 0.75rem;
   border: 1px solid var(--glass-border);
-  border-radius: 1rem;
+  border-radius: 0.8rem;
   background: var(--glass-bg);
 }
 .support-icon {
@@ -1024,7 +1030,7 @@ html[data-text-align="justify"] :is([data-reading]) :is(div, p, li, label) {
   height: 2.5rem;
   display: grid;
   place-items: center;
-  border-radius: 0.75rem;
+  border-radius: 0.6rem;
   background: rgba(var(--confirm-rgb), 0.15);
   color: var(--accent-to);
   font-size: 1.2rem;
@@ -1055,7 +1061,7 @@ html[data-text-align="justify"] :is([data-reading]) :is(div, p, li, label) {
   --bs-alert-bg: var(--glass-bg);
   --bs-alert-border-color: var(--glass-border);
   --bs-alert-link-color: var(--bs-emphasis-color);
-  --bs-alert-border-radius: 0.75rem;
+  --bs-alert-border-radius: 0.6rem;
   border-left: 4px solid var(--alert-color);
 }
 :root .alert-info { --alert-color: var(--accent-to); }
@@ -1099,7 +1105,7 @@ html[data-effects="light"] main { animation: none; }
 .recovery-code {
   padding: 0.9rem 1rem;
   border: 2px dashed var(--accent-to);
-  border-radius: 1rem;
+  border-radius: 0.8rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 1.25rem;
   font-weight: 700;
@@ -1255,7 +1261,7 @@ body:has(.position-fixed.bottom-0), body:has(.sticky-bottom) { --chat-lift: 3.75
    for "picked" and "over", so it works in every theme through the same variables. */
 .match-chip, .match-slot {
   border: 1px solid var(--glass-border);
-  border-radius: 0.75rem;
+  border-radius: 0.6rem;
   background: transparent;
   color: inherit;
   padding: 0.4rem 0.8rem;
