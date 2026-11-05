@@ -49,7 +49,7 @@ function userItem(user) {
   row.tabIndex = 0;
   row.setAttribute("role", "button");
   row.className =
-    "list-group-item list-group-item-action d-flex justify-content-between align-items-center gap-2";
+    "list-group-item list-group-item-action rounded-0 d-flex justify-content-between align-items-center gap-2";
   if (!user.active) row.classList.add("text-body-secondary");
 
   const left = document.createElement("div");
@@ -112,7 +112,7 @@ function userItem(user) {
 
 function messageItem(text) {
   const div = document.createElement("div");
-  div.className = "list-group-item text-body-secondary";
+  div.className = "list-group-item rounded-0 text-body-secondary";
   div.textContent = text;
   return div;
 }
