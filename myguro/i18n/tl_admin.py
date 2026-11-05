@@ -28,6 +28,10 @@ ADMIN = {
     "On: students see only holidays on the calendar. Off: they see the school events too. Teachers and you always see both. On by default.":
         "On: holidays lang ang makikita ng mga estudyante sa calendar. Off: makikita rin nila ang school events. Makikita mo at ng mga teacher ang dalawa. Naka-on bilang default.",
     "Has recovery code": "May recovery code",
+    "Grade order": "Ayos ng mga grade",
+    "School events": "Mga school event",
+    "Time in / time out": "Time in / time out",
+    "Your account": "Ang account mo",
     "Check with AI (teachers)": "Check with AI (mga teacher)",
     "A button on a student's short answer that suggests points and a short explanation. The teacher decides and saves the points. The question, the guide for checking and the student's answer are sent to an outside AI service; the student's name is not. This is a beta: the suggestions can be wrong, so teachers always decide. Off by default.":
         "Isang button sa short answer ng estudyante na nagmumungkahi ng points at maikling paliwanag. Ang teacher ang magdedesisyon at magse-save ng points. Ipinapadala sa isang outside AI service ang tanong, ang guide sa pag-check at ang sagot ng estudyante; hindi ipinapadala ang pangalan ng estudyante. Beta ito: puwedeng magkamali ang mga suhestiyon, kaya ang teacher pa rin ang magdedesisyon. Naka-off bilang default.",

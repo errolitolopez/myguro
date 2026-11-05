@@ -18,43 +18,53 @@
 
   <section id="school" class="mb-4">
     <h2 class="h5 mb-3">{{ _("School") }}</h2>
-  <div class="card mb-3">
+  <section class="card mb-3" aria-labelledby="grade-order-title">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      <span class="fw-semibold bi bi-sort-down" id="grade-order-title"> {{ _("Grade order") }}</span>
+    </div>
     <div class="card-body">
       <div class="form-check form-switch">
         <input id="grades-high-to-low" class="form-check-input" type="checkbox" role="switch" disabled>
-        <label for="grades-high-to-low" class="form-check-label fw-semibold">{{ _("Show grades from highest to lowest") }}</label>
+        <label for="grades-high-to-low" class="form-check-label">{{ _("Show grades from highest to lowest") }}</label>
       </div>
       <div class="form-text">
         {{ _("On: Grade 12 first, Kinder last. Off: Kinder first, Grade 12 last. Applies to every grade dropdown for everyone. Takes effect the next time a page is opened.") }}
       </div>
     </div>
-  </div>
+  </section>
 
-  <div class="card mb-3">
+  <section class="card mb-3" aria-labelledby="grades-in-use-title">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      <span class="fw-semibold bi bi-mortarboard" id="grades-in-use-title"> {{ _("Grades in use") }}</span>
+    </div>
     <div class="card-body">
-      <h2 class="h6 fw-semibold mb-1">{{ _("Grades in use") }}</h2>
       <div class="form-text mb-2">
         {{ _("Turn off the grades your school doesn't have. A disabled grade is hidden from the dropdowns and can't be given to a student or a class. Students who already have it keep it, and the Students filter still lists it so you can move them.") }}
       </div>
       <div id="grade-list" class="row row-cols-2 row-cols-sm-3 g-2"></div>
     </div>
-  </div>
+  </section>
 
-  <div class="card mb-3">
+  <section class="card mb-3" aria-labelledby="school-events-title">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      <span class="fw-semibold bi bi-calendar-event" id="school-events-title"> {{ _("School events") }}</span>
+    </div>
     <div class="card-body">
       <div class="form-check form-switch">
         <input id="hide-events" class="form-check-input" type="checkbox" role="switch" disabled>
-        <label for="hide-events" class="form-check-label fw-semibold">{{ _("Hide school events from students") }}</label>
+        <label for="hide-events" class="form-check-label">{{ _("Hide school events from students") }}</label>
       </div>
       <div class="form-text">
         {{ _("On: students see only holidays on the calendar. Off: they see the school events too. Teachers and you always see both. On by default.") }}
       </div>
     </div>
-  </div>
+  </section>
 
-  <div class="card mb-3">
+  <section class="card mb-3" aria-labelledby="school-years-title">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      <span class="fw-semibold bi bi-calendar3" id="school-years-title"> {{ _("School years") }}</span>
+    </div>
     <div class="card-body">
-      <h2 class="h6 fw-semibold mb-1">{{ _("School years") }}</h2>
       <div class="form-text mb-2">
         {{ _("Classes and the work given to them belong to a school year. When you start a new year it becomes the current one: teachers and students begin with no classes, and past years can only be looked at (each person picks the year to look at under Account).") }}
       </div>
@@ -72,14 +82,17 @@
       <div id="year-error" class="alert alert-danger py-2 mt-2 d-none" role="alert"></div>
       <div id="year-status" class="small text-body-secondary mt-2"></div>
     </div>
-  </div>
+  </section>
   </section>
 
   <section id="popups" class="mb-4">
     <h2 class="h5 mb-3">{{ _("Pop-ups and help") }}</h2>
-  <div class="card mb-3">
+  <section class="card mb-3" aria-labelledby="feedback-popup-title">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      <span class="fw-semibold bi bi-star" id="feedback-popup-title"> {{ _("Feedback pop-up") }}</span>
+    </div>
     <div class="card-body">
-      <label for="feedback-popup" class="form-label fw-semibold">{{ _("Feedback pop-up") }}</label>
+      <label for="feedback-popup" class="visually-hidden">{{ _("Feedback pop-up") }}</label>
       <select id="feedback-popup" class="form-select w-auto" disabled>
         <option value="off">{{ _("Never") }}</option>
         <option value="login">{{ _("Once each time they log in") }}</option>
@@ -89,54 +102,67 @@
         {{ _("Asks teachers and students who have not sent feedback yet to rate MyGuro. It stops for each person once they send it. Never on the answer page.") }}
       </div>
     </div>
-  </div>
+  </section>
 
-  <div class="card mb-3">
+  <section class="card mb-3" aria-labelledby="chatbot-title">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      <span class="fw-semibold bi bi-robot" id="chatbot-title"> GuroBot</span>
+    </div>
     <div class="card-body">
       <div class="form-check form-switch">
         <input id="chatbot-enabled" class="form-check-input" type="checkbox" role="switch" disabled>
-        <label for="chatbot-enabled" class="form-check-label fw-semibold">{{ _("GuroBot, the navigation chatbot (teachers)") }}</label>
+        <label for="chatbot-enabled" class="form-check-label">{{ _("GuroBot, the navigation chatbot (teachers)") }}</label>
       </div>
       <div class="form-text">
         {{ _("A chat bubble that helps teachers find a page. It only opens pages: it cannot read or change anything. Each question a teacher types is sent to an outside AI service, and no student or class data is sent. Off by default.") }}
       </div>
     </div>
-  </div>
+  </section>
 
-  <div class="card mb-3">
+  <section class="card mb-3" aria-labelledby="ai-check-title">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      <span class="fw-semibold bi bi-stars" id="ai-check-title"> {{ _("Check with AI") }}</span>
+      <span class="badge text-bg-warning">{{ _("Beta") }}</span>
+    </div>
     <div class="card-body">
       <div class="form-check form-switch">
         <input id="ai-check-enabled" class="form-check-input" type="checkbox" role="switch" disabled>
-        <label for="ai-check-enabled" class="form-check-label fw-semibold">{{ _("Check with AI (teachers)") }} <span class="badge text-bg-warning">{{ _("Beta") }}</span></label>
+        <label for="ai-check-enabled" class="form-check-label">{{ _("Check with AI (teachers)") }}</label>
       </div>
       <div class="form-text">
         {{ _("A button on a student's short answer that suggests points and a short explanation. The teacher decides and saves the points. The question, the guide for checking and the student's answer are sent to an outside AI service; the student's name is not. This is a beta: the suggestions can be wrong, so teachers always decide. Off by default.") }}
       </div>
     </div>
-  </div>
+  </section>
 
-  <div class="card mb-3">
+  <section class="card mb-3" aria-labelledby="time-clock-title">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      <span class="fw-semibold bi bi-clock" id="time-clock-title"> {{ _("Time in / time out") }}</span>
+      <span class="badge text-bg-warning">{{ _("Beta") }}</span>
+    </div>
     <div class="card-body">
       <div class="form-check form-switch">
         <input id="time-clock-enabled" class="form-check-input" type="checkbox" role="switch" disabled>
-        <label for="time-clock-enabled" class="form-check-label fw-semibold">{{ _("Time in / time out for teachers") }} <span class="badge text-bg-warning">{{ _("Beta") }}</span></label>
+        <label for="time-clock-enabled" class="form-check-label">{{ _("Time in / time out for teachers") }}</label>
       </div>
       <div class="form-text">
         {{ _("Teachers get a Time in / Time out page to record when they start and stop working. They can time in again after timing out. You read everyone's records under Time records in the account menu. Off by default.") }}
       </div>
     </div>
-  </div>
+  </section>
 
-  <div class="card mb-3">
+  <section class="card mb-3" aria-labelledby="support-title">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      <span class="fw-semibold bi bi-heart" id="support-title"> {{ _("Support link") }}</span>
+    </div>
     <div class="card-body">
-      <h2 class="h6 fw-semibold mb-1">{{ _("Support link") }}</h2>
       <div class="form-text mb-3">
         {{ _("A small \"support\" note at the bottom of each page for admin and teachers. Its button opens a window with the ways to give that you fill in below (Ko-fi, GCash). Students never see it.") }}
       </div>
       <form id="support-form" novalidate>
         <div class="form-check form-switch mb-3">
           <input id="support-enabled" class="form-check-input" type="checkbox" role="switch">
-          <label for="support-enabled" class="form-check-label fw-semibold">{{ _("Show the support link") }}</label>
+          <label for="support-enabled" class="form-check-label">{{ _("Show the support link") }}</label>
         </div>
         <div class="mb-3">
           <label for="support-url" class="form-label">{{ _("Ko-fi link") }} <span class="text-body-secondary">{{ _("(optional)") }}</span></label>
@@ -182,11 +208,13 @@
         <span id="support-status" class="small text-body-secondary ms-2"></span>
       </form>
     </div>
-  </div>
+  </section>
 
-  <div class="card mb-3">
+  <section class="card mb-3" aria-labelledby="tips-title">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      <span class="fw-semibold bi bi-lightbulb" id="tips-title"> {{ _("Tips preview") }}</span>
+    </div>
     <div class="card-body">
-      <h2 class="h6 fw-semibold mb-1">{{ _("Tips preview") }}</h2>
       <div class="form-text mb-3">
         {{ _("Teachers and students see one of these in a closable box under the menu, a new one every 3 days. They can close it or turn tips off. Never shown on the answer page.") }}
       </div>
@@ -197,17 +225,20 @@
       <button id="tip-preview" type="button" class="btn btn-outline-secondary btn-sm bi bi-eye mt-3">{{ _("Preview a tip") }}</button>
       <div id="tip-preview-box" class="mt-2"></div>
     </div>
-  </div>
+  </section>
   </section>
 
   <section id="maintenance" class="mb-4">
     <h2 class="h5 mb-3">{{ _("Maintenance") }}</h2>
-    <div class="card mb-3">
+    <section class="card mb-3" aria-labelledby="maintenance-title">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      <span class="fw-semibold bi bi-tools" id="maintenance-title"> {{ _("Maintenance mode") }}</span>
+    </div>
       <div class="card-body">
         <form id="maintenance-form" novalidate>
           <div class="form-check form-switch mb-2">
             <input id="maintenance-enabled" class="form-check-input" type="checkbox" role="switch" disabled>
-            <label for="maintenance-enabled" class="form-check-label fw-semibold">{{ _("Maintenance mode") }}</label>
+            <label for="maintenance-enabled" class="form-check-label">{{ _("Maintenance mode") }}</label>
           </div>
           <div class="form-text mb-3">
             {{ _("While it is on, teachers, students and supervisors see a maintenance page and cannot log in. Only you can use MyGuro. People who are signed in are not logged out: they can use it again when you turn this off. Turn it on when nobody is answering an activity.") }}
@@ -220,7 +251,7 @@
           <span id="maintenance-status" class="small text-body-secondary ms-2"></span>
         </form>
       </div>
-    </div>
+    </section>
   </section>
 
   <div id="settings-status" class="small text-body-secondary mt-2"></div>

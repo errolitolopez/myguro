@@ -20,30 +20,38 @@
     <p class="text-body-secondary small">
       {{ _("How MyGuro looks to you. These choices are saved in this browser only, so on another phone or computer you choose again.") }}
     </p>
-  <div class="card mb-3">
+  <section class="card mb-3" aria-labelledby="language-title">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      <span class="fw-semibold bi bi-translate" id="language-title"> {{ _("Language") }}</span>
+    </div>
     <div class="card-body">
-      <h2 class="h5 bi bi-translate"> {{ _("Language") }}</h2>
       {% include "_language_select.html" %}
     </div>
-  </div>
+  </section>
 
-  <div class="card mb-3">
+  <section class="card mb-3" aria-labelledby="theme-title">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      <span class="fw-semibold bi bi-palette" id="theme-title"> {{ _("Theme") }}</span>
+    </div>
     <div class="card-body">
-      <h2 class="h5 bi bi-palette"> {{ _("Theme") }}</h2>
       {% include "_theme_select.html" %}
     </div>
-  </div>
+  </section>
 
-  <div class="card mb-3">
+  <section class="card mb-3" aria-labelledby="reading-title">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      <span class="fw-semibold bi bi-fonts" id="reading-title"> {{ _("Reading") }}</span>
+    </div>
     <div class="card-body">
-      <h2 class="h5 bi bi-fonts"> {{ _("Reading") }}</h2>
       {% include "_reading_settings.html" %}
     </div>
-  </div>
+  </section>
 
-  <div class="card mb-3">
+  <section class="card mb-3" aria-labelledby="effects-title">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      <span class="fw-semibold bi bi-speedometer2" id="effects-title"> {{ _("Effects") }}</span>
+    </div>
     <div class="card-body">
-      <h2 class="h5 bi bi-speedometer2"> {{ _("Effects") }}</h2>
       <div class="form-check form-switch">
         <input id="effects-switch" class="form-check-input" type="checkbox" role="switch" data-reading-switch="effects">
         <label for="effects-switch" class="form-check-label">{{ _("Glass blur and moving background") }}</label>
@@ -52,11 +60,13 @@
         {{ _("Turn this on for the glass blur and the moving background. It can make pages slow or choppy, especially on a phone. It starts off for everyone.") }}
       </div>
     </div>
-  </div>
+  </section>
 
-  <div class="card mb-3">
+  <section class="card mb-3" aria-labelledby="menu-title">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      <span class="fw-semibold bi bi-layout-text-window-reverse" id="menu-title"> {{ _("Menu") }}</span>
+    </div>
     <div class="card-body">
-      <h2 class="h5 bi bi-layout-text-window-reverse"> {{ _("Menu") }}</h2>
       <div class="form-check form-switch">
         <input id="tab-bar-switch" class="form-check-input" type="checkbox" role="switch" data-reading-switch="tabbar">
         <label for="tab-bar-switch" class="form-check-label">{{ _("Menu bar at the bottom on phones") }}</label>
@@ -65,19 +75,21 @@
         {{ _("On: the menu is a bar at the bottom of the screen, within reach of your thumb. Off: the menu tabs show at the top, like on a computer. Wider screens always show them at the top.") }}
       </div>
     </div>
-  </div>
+  </section>
 
   {% if CHATBOT %}
-  <div class="card mb-3">
+  <section class="card mb-3" aria-labelledby="gurobot-title">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      <span class="fw-semibold bi bi-robot" id="gurobot-title"> GuroBot</span>
+    </div>
     <div class="card-body">
-      <h2 class="h5 bi bi-robot"> GuroBot</h2>
       <!-- chat.js checks it from the saved choice and saves a change; the choice is kept in this browser. -->
       <div class="form-check form-switch">
         <input id="chat-visibility" class="form-check-input" type="checkbox" role="switch">
         <label for="chat-visibility" class="form-check-label">{{ _("Show GuroBot") }}</label>
       </div>
     </div>
-  </div>
+  </section>
   {% endif %}
   </section>
 
@@ -87,9 +99,12 @@
   <section id="teaching" class="mb-4">
     <h2 class="h5 mb-1">{{ _("Teaching") }}</h2>
     <p class="text-body-secondary small">{{ _("These choices apply to all the activities you give to students.") }}</p>
-    <div class="card mb-3">
+    <section class="card mb-3" aria-labelledby="shuffle-title">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      <span class="fw-semibold bi bi-shuffle" id="shuffle-title"> {{ _("Shuffle") }}</span>
+      <span class="badge text-bg-warning">{{ _("Beta") }}</span>
+    </div>
       <div class="card-body">
-        <h2 class="h5 bi bi-shuffle"> {{ _("Shuffle") }} <span class="badge text-bg-warning align-middle">{{ _("Beta") }}</span></h2>
         <div id="teacher-settings-error" class="alert alert-danger py-2 d-none" role="alert"></div>
         <div class="form-check form-switch mb-2">
           <input id="shuffle-questions" class="form-check-input" type="checkbox" role="switch" disabled>
@@ -103,16 +118,19 @@
         </div>
         <div class="form-text mt-2">{{ _("The order stays the same each time a student opens the activity, and changes when they try again. Matching, true or false and the other types are not shuffled. This is a beta: tell us if something looks wrong.") }}</div>
       </div>
-    </div>
+    </section>
   </section>
   {% endif %}
 
   <section id="account" class="mb-4">
     <h2 class="h5 mb-3">{{ _("Account") }}</h2>
     {% if SCHOOL_YEARS %}
-    <div class="card mb-3">
+    <section class="card mb-3" aria-labelledby="school-year-title">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      <span class="fw-semibold bi bi-calendar3" id="school-year-title"> {{ _("School year") }}</span>
+    </div>
       <div class="card-body">
-        <label class="form-label fw-semibold" for="year-select">{{ _("School year") }}</label>
+        <label class="visually-hidden" for="year-select">{{ _("School year") }}</label>
         <select id="year-select" class="form-select w-auto">
           {% for year in SCHOOL_YEARS.years %}
           <option value="{{ year.id }}" {{ 'selected' if year.id == SCHOOL_YEARS.viewing_id }}>
@@ -121,15 +139,18 @@
           {% endfor %}
         </select>
       </div>
-    </div>
+    </section>
     {% endif %}
-    <div class="list-group mb-3">
+    <section class="card mb-3" aria-labelledby="account-links-title">
+      <div class="card-header fw-semibold bi bi-person-circle" id="account-links-title"> {{ _("Your account") }}</div>
+      <div class="list-group list-group-flush">
       <a class="list-group-item list-group-item-action bi bi-key" href="{{ url_for('auth.change_password_page') }}"> {{ _("Password") }}</a>
       <a class="list-group-item list-group-item-action bi bi-shield-lock" href="{{ url_for('recovery.code_page') }}"> {{ _("Recovery code") }}</a>
       {% if user.role in ("admin", "teacher", "student") %}
       <a class="list-group-item list-group-item-action bi bi-star" href="{{ url_for('feedback.page') }}"> {{ _("Feedback") }}</a>
       {% endif %}
-    </div>
+      </div>
+    </section>
   </section>
 
 
