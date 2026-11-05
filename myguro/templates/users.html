@@ -114,7 +114,7 @@
          the columns of a row (users.js, glass.css .users-col-*). -->
     <!-- shadow-none rounded-0: glass.css gives every .list-group a radius and a shadow, which drew a curved edge inside the card. -->
     <div class="list-group list-group-flush rounded-0 shadow-none">
-      <div class="list-group-item rounded-0 d-flex align-items-center gap-2 small bg-body-tertiary" id="user-head">
+      <div class="list-group-item rounded-0 d-flex align-items-center gap-2 small" id="user-head">
         {% if role == "student" %}<span class="flex-shrink-0" style="width: 1em;" aria-hidden="true"></span>{% endif %}
         <span class="me-auto">
           <button id="sort-name" type="button" class="btn btn-link rounded-0 p-0 border-0 fw-semibold text-reset text-decoration-none text-nowrap bi bi-arrow-up"> {{ _("Name") }}</button>
