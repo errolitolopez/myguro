@@ -97,7 +97,11 @@ function dayCell(day, isToday) {
   const events = eventsBetween(day.iso, day.iso);
   const label = new Date(shownYear, shownMonth, day.number).toLocaleDateString(undefined, { dateStyle: "full" });
   const eventCount = events.length === 1 ? t("1 school event") : t("{count} school events", { count: events.length });
-  cell.setAttribute("aria-label", events.length ? `${label}, ${eventCount}` : label);
+  cell.setAttribute("aria-label", [label, isToday ? t("Today") : null, events.length ? eventCount : null].filter(Boolean).join(", "));
+  if (isToday) {
+    cell.classList.add("calendar-today"); // an outline around the whole day, so it is found at a glance
+    cell.setAttribute("aria-current", "date");
+  }
   const openDay = () => {
     shownDate = new Date(shownYear, shownMonth, day.number);
     setView("day");
@@ -110,7 +114,8 @@ function dayCell(day, isToday) {
     }
   });
   const number = document.createElement("div");
-  number.className = isToday ? "fw-bold text-success" : "small";
+  // Today's number sits in a filled circle in the accent colour, like a phone's calendar
+  number.className = isToday ? "calendar-today-number fw-bold small" : "small";
   number.textContent = day.number;
   cell.append(number);
   // A dot per holiday keeps a phone-sized cell readable; the full names are in the list below.
