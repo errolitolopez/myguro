@@ -13,7 +13,9 @@
   /* Two soft layers plus a 1px inner light edge: the panel looks lifted off the page. */
   --glass-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset, 0 12px 28px -8px rgba(15, 23, 42, 0.18),
     0 4px 8px -4px rgba(15, 23, 42, 0.08);
-  --glass-blur: blur(14px);
+  /* Blur cost grows with the radius, and every panel on the page does it: a small radius is much lighter and still
+     frosted. (It was 14px.) */
+  --glass-blur: blur(8px);
   --radius-card: 1.25rem;
   /* The one accent gradient: primary buttons, progress bars, the active tab, score rings. */
   --accent-from: #4f46e5;
@@ -359,7 +361,7 @@ footer {
 
 /* Tables and alerts inside glass */
 .table { --bs-table-bg: transparent; }
-.alert { -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+/* No blur on alerts (they were 8px): they sit on a tinted background that needs none, and each blur costs GPU time. */
 
 /* Every button looks the same: see-through glass with a form-box border, and the theme's accent on
    the border when hovered or open. The label and its icon say what it does (Save, Delete, Download),
@@ -679,7 +681,8 @@ body::before {
 /* ---- Modern layer: aurora, accent gradient, bento dashboard, score rings, skeletons, palette ---- */
 
 /* Aurora: three soft colour blobs drifting slowly behind the glass. One fixed layer that only moves
-   with transform (cheap for the GPU); the glass panels blur it where they cover it. */
+   with transform (cheap for the GPU); the glass panels blur it where they cover it. See the animation below for
+   why it moves in steps. */
 body::after {
   content: "";
   position: fixed;
@@ -690,7 +693,12 @@ body::after {
     radial-gradient(40% 35% at 20% 25%, var(--aurora-1), transparent 70%),
     radial-gradient(35% 40% at 80% 20%, var(--aurora-2), transparent 70%),
     radial-gradient(45% 40% at 55% 85%, var(--aurora-3), transparent 70%);
-  animation: aurora-drift 28s ease-in-out infinite alternate;
+  /* The glass panels re-blur whatever is behind them every time it changes, so a background that moves 60 times a
+     second makes every panel blur 60 times a second, which is what made the page lag. steps(140) moves it in
+     small jumps, 10 a second: the blobs are so soft and slow that it still looks like drifting, with six times less
+     blurring. will-change keeps it on its own layer, so moving it does not repaint the page. */
+  animation: aurora-drift 28s steps(140) infinite alternate;
+  will-change: transform;
 }
 @keyframes aurora-drift {
   0% { transform: translate3d(-2%, -1%, 0) rotate(0deg) scale(1); }
