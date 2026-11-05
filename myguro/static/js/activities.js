@@ -29,12 +29,48 @@ function statusBadge(text, status) {
   return badge;
 }
 
-function activityItem(activity) {
-  const row = document.createElement("a");
-  row.href = `/activities/${activity.id}`;
-  row.className = "list-group-item list-group-item-action d-flex justify-content-between align-items-start gap-2";
+// One class or group the sheet is given to: its name and status, and the button that opens, closes or re-opens it
+// (the same buttons as in Check results on the activity's page, so a teacher can do it from the list).
+function givenRow(given) {
+  const row = document.createElement("div");
+  row.className = "d-flex align-items-center gap-2 mt-1";
+  const action = STATUS_ACTIONS[given.status];
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = `btn btn-sm text-nowrap bi ${action.icon} ${action.className}`;
+  button.textContent = ` ${action.label}`;
+  button.setAttribute("aria-label", `${action.label}: ${given.name}`);
+  button.addEventListener("click", async () => {
+    const stopLoading = startLoading(button);
+    if (!stopLoading) return;
+    hideError("activities-error");
+    try {
+      const response = await putStatus(given.assignment_id, action.next, given.name);
+      if (!response) return; // cancelled, or signed out
+      if (!response.ok) {
+        showError("activities-error", (await response.json()).error || t("Could not save."));
+        window.scrollTo({ top: 0 });
+        return;
+      }
+      await loadActivities(); // the badge and the button change together
+    } catch {
+      showError("activities-error", t("Cannot reach the server. Check your connection."));
+    } finally {
+      stopLoading();
+    }
+  });
+  row.append(statusBadge(`${given.name} · ${STATUS_LABELS[given.status]}`, given.status), button);
+  return row;
+}
 
-  const left = document.createElement("div");
+// A div, not a link, because it holds buttons: the title and details are the link that opens the sheet.
+function activityItem(activity) {
+  const row = document.createElement("div");
+  row.className = "list-group-item list-group-item-action";
+
+  const link = document.createElement("a");
+  link.href = `/activities/${activity.id}`;
+  link.className = "d-block text-decoration-none text-reset";
   const title = document.createElement("div");
   title.className = "fw-semibold";
   title.textContent = activity.title;
@@ -47,20 +83,19 @@ function activityItem(activity) {
     plural(activity.questions, "question"),
     t("edited {date}", { date: formatDate(activity.updated_at) }),
   ].filter(Boolean).join(" · ");
-  left.append(title, details);
+  link.append(title, details);
+  row.append(link);
 
-  // Under the details: where the sheet is given, a badge per class or group with its status, or
+  // Under the details: where the sheet is given, a status and an Open / Close button per class or group, or
   // "Not given yet". Only the school year being viewed is listed.
-  const givenTo = document.createElement("div");
-  givenTo.className = "d-flex flex-wrap gap-1 mt-1";
   if (activity.given_to.length === 0) {
-    givenTo.append(statusBadge(t("Not given yet"), "not_started"));
+    const none = document.createElement("div");
+    none.className = "mt-1";
+    none.append(statusBadge(t("Not given yet"), "not_started"));
+    row.append(none);
   } else {
-    givenTo.append(...activity.given_to.map((given) => statusBadge(`${given.name} · ${STATUS_LABELS[given.status]}`, given.status)));
+    row.append(...activity.given_to.map(givenRow));
   }
-  left.append(givenTo);
-
-  row.append(left);
   return row;
 }
 
