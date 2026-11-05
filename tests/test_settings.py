@@ -209,3 +209,10 @@ def test_import_template_lists_only_enabled_grades(admin):
     sheet = load_workbook(BytesIO(admin.get("/students/import-template.xlsx").data))["Students"]
     options = sheet.data_validations.dataValidation[0].formula1
     assert "Grade 2" in options and "Kinder" not in options and "Grade 1," not in options
+
+
+def test_class_page_grade_filter_lists_disabled_grades(admin, teacher):
+    admin.put("/api/settings", json={"disabled_grades": ["Grade 5"]})
+    class_id = teacher.post("/api/classes", json={"name": "Grade 9 - Rizal"}).get_json()["class"]["id"]
+    page = teacher.get(f"/classes/{class_id}").get_data(as_text=True)
+    assert "<option>Grade 5</option>" in page
