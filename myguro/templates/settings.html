@@ -11,6 +11,7 @@
   <!-- The categories as links, so the page is easy to jump around. -->
   <nav class="nav nav-pills mb-3 gap-1" aria-label="{{ _("Settings") }}">
     <a class="nav-link py-1" href="#appearance">{{ _("Appearance") }}</a>
+    {% if user.role == "teacher" %}<a class="nav-link py-1" href="#teaching">{{ _("Teaching") }}</a>{% endif %}
     <a class="nav-link py-1" href="#account">{{ _("Account") }}</a>
   </nav>
 
@@ -80,6 +81,32 @@
   {% endif %}
   </section>
 
+  {% if user.role == "teacher" %}
+  <!-- Your own choices for the activities you write (saved in the database, so they follow you to any device).
+       teacher-settings.js loads them and saves a change at once. -->
+  <section id="teaching" class="mb-4">
+    <h2 class="h5 mb-1">{{ _("Teaching") }}</h2>
+    <p class="text-body-secondary small">{{ _("These choices apply to all the activities you give to students.") }}</p>
+    <div class="card mb-3">
+      <div class="card-body">
+        <h2 class="h5 bi bi-shuffle"> {{ _("Shuffle") }} <span class="badge text-bg-warning align-middle">{{ _("Beta") }}</span></h2>
+        <div id="teacher-settings-error" class="alert alert-danger py-2 d-none" role="alert"></div>
+        <div class="form-check form-switch mb-2">
+          <input id="shuffle-questions" class="form-check-input" type="checkbox" role="switch" disabled>
+          <label for="shuffle-questions" class="form-check-label fw-semibold">{{ _("Shuffle the questions") }}</label>
+          <div class="form-text">{{ _("Each student gets the questions of every part in their own order, so answers can't just be passed around by number.") }}</div>
+        </div>
+        <div class="form-check form-switch">
+          <input id="shuffle-choices" class="form-check-input" type="checkbox" role="switch" disabled>
+          <label for="shuffle-choices" class="form-check-label fw-semibold">{{ _("Shuffle the choices") }}</label>
+          <div class="form-text">{{ _("Each student gets the choices of a multiple choice question in their own order. Scoring and your results are not affected: you still see the answers in your own order.") }}</div>
+        </div>
+        <div class="form-text mt-2">{{ _("The order stays the same each time a student opens the activity, and changes when they try again. Matching, true or false and the other types are not shuffled. This is a beta: tell us if something looks wrong.") }}</div>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
   <section id="account" class="mb-4">
     <h2 class="h5 mb-3">{{ _("Account") }}</h2>
     {% if SCHOOL_YEARS %}
@@ -111,4 +138,5 @@
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/common.js') }}"></script>
+{% if user.role == "teacher" %}<script src="{{ url_for('static', filename='js/teacher-settings.js') }}"></script>{% endif %}
 {% endblock %}

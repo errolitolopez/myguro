@@ -1,6 +1,7 @@
 import json
 
 from myguro.domain.accounts import GRADES
+from myguro.domain.shuffle import TEACHER_SETTING_KEYS
 from myguro.domain.feedback import DEFAULT_POPUP as FEEDBACK_DEFAULT_POPUP, POPUP_MODES as FEEDBACK_POPUP_MODES
 from myguro.domain.support import (DEFAULT_LABEL, DEFAULT_MESSAGE, DEFAULT_POPUP, POPUP_MODES, clean_support,
                                    format_gcash_number)
@@ -102,6 +103,29 @@ class SettingsService(Service):
         """The navigation chatbot for teachers. Off until the admin turns it on, because each question
         goes to an outside AI service."""
         return self.settings.get(CHATBOT_ENABLED) == "1"
+
+    def teacher_settings(self, teacher_id=None):
+        """{shuffle_questions, shuffle_choices} of a teacher (default: the person asking). Both off until the
+        teacher turns them on."""
+        teacher_id = teacher_id if teacher_id is not None else self.user["id"]
+        return {key: self.settings.get_for_user(teacher_id, key) == "1" for key in TEACHER_SETTING_KEYS}
+
+    def update_teacher_settings(self, data):
+        """Save the asking teacher's own settings: each key sent must be true or false."""
+        changed = []
+        for key in TEACHER_SETTING_KEYS:
+            if key in data:
+                if not isinstance(data[key], bool):
+                    raise ValidationError("Choose on or off.")
+                if data[key] != self.teacher_settings()[key]:
+                    changed.append(key)
+                self.settings.set_for_user(self.user["id"], key, "1" if data[key] else "0")
+        if changed:
+            labels = {"shuffle_questions": "shuffled questions", "shuffle_choices": "shuffled choices"}
+            self.log("settings.teacher_changed", "settings",
+                     f"Changed own settings: {', '.join(labels[key] for key in changed)}.")
+        self.commit()
+        return self.teacher_settings()
 
     def ai_check_enabled(self):
         """The "Check with AI" button for teachers. Off until the admin turns it on, because each short answer

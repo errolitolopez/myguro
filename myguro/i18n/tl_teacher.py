@@ -85,6 +85,18 @@ TEACHER = {
     "A text section is for reading; an activity section has directions and questions.":
         "Ang text section ay para sa pagbabasa; ang activity section ay may directions at mga tanong.",
     "Check results": "Tingnan ang mga resulta",
+    "Teaching": "Pagtuturo",
+    "These choices apply to all the activities you give to students.": "Ang mga choice na ito ay para sa lahat ng activity na ibinibigay mo sa mga estudyante.",
+    "Shuffle": "I-shuffle",
+    "Shuffle the questions": "I-shuffle ang mga tanong",
+    "Each student gets the questions of every part in their own order, so answers can't just be passed around by number.":
+        "Bawat estudyante ay may sariling ayos ng mga tanong sa bawat bahagi, kaya hindi na basta maipapasa ang mga sagot ayon sa numero.",
+    "Shuffle the choices": "I-shuffle ang mga choice",
+    "Each student gets the choices of a multiple choice question in their own order. Scoring and your results are not affected: you still see the answers in your own order.":
+        "Bawat estudyante ay may sariling ayos ng mga choice sa multiple choice na tanong. Hindi apektado ang pag-score at ang mga resulta mo: nakikita mo pa rin ang mga sagot sa sarili mong ayos.",
+    "The order stays the same each time a student opens the activity, and changes when they try again. Matching, true or false and the other types are not shuffled. This is a beta: tell us if something looks wrong.":
+        "Pareho ang ayos tuwing bubuksan ng estudyante ang activity, at nagbabago kapag sumubok ulit sila. Hindi ini-shuffle ang matching, true or false at ang iba pang uri. Beta ito: sabihin sa amin kung may mukhang mali.",
+    "Could not load your settings.": "Hindi na-load ang mga setting mo.",
     "Check with AI": "I-check gamit ang AI",
     "AI suggestion": "Suhestiyon ng AI",
     "Use {points} points": "Gamitin ang {points} points",

@@ -297,6 +297,15 @@ CREATE TABLE IF NOT EXISTS chat_usage (
     PRIMARY KEY (user_id, day)
 );
 
+-- Settings that belong to one teacher (domain/shuffle.py): user_id + key -> value, like the school-wide
+-- settings table. Written only by that teacher.
+CREATE TABLE IF NOT EXISTS teacher_settings (
+    user_id INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    key TEXT NOT NULL,
+    value TEXT NOT NULL,
+    PRIMARY KEY (user_id, key)
+);
+
 -- "Check with AI" (domain/ai_check.py): how many short answers each teacher sent to be checked each school
 -- day, for the daily limit. Counts only: the answers themselves are never kept.
 CREATE TABLE IF NOT EXISTS ai_check_usage (

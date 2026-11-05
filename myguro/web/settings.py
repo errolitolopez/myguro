@@ -31,6 +31,19 @@ def api_get():
     return jsonify(settings=service().get())
 
 
+@bp.get("/api/teacher-settings")
+@role_required_api("teacher")
+def api_teacher_get():
+    """The teacher's own settings (shuffled questions and choices, a beta)."""
+    return jsonify(settings=service().teacher_settings())
+
+
+@bp.put("/api/teacher-settings")
+@role_required_api("teacher")
+def api_teacher_update():
+    return jsonify(settings=service().update_teacher_settings(json_body()))
+
+
 @bp.put("/api/settings")
 @role_required_api("admin")
 def api_update():

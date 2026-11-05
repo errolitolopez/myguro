@@ -1,10 +1,12 @@
 from myguro.config import school_today
+from myguro.domain import shuffle
 from myguro.domain.grading import clean_student_answer, question_for_student
 from myguro.domain.work import can_try_again, is_late
 from myguro.errors import NotFoundError, ValidationError
 from myguro.services.attempts import grade_attempt
 from myguro.services.base import Service
 from myguro.services.presenters import class_title
+from myguro.services.settings import SettingsService
 
 
 class StudentWorkService(Service):
@@ -77,14 +79,40 @@ class StudentWorkService(Service):
             })
         return result
 
+    def shuffling(self, assignment, attempt):
+        """(seed, shuffle questions, shuffle choices) for this student's attempt: the choices of the teacher who
+        wrote the sheet (a beta each teacher turns on). The seed makes the order the same on every visit."""
+        chosen = SettingsService(self.db, self.user).teacher_settings(assignment["teacher_id"])
+        return (shuffle.seed_for(self.user["id"], assignment["id"], attempt),
+                chosen["shuffle_questions"], chosen["shuffle_choices"])
+
+    def choice_orders(self, assignment, attempt, questions):
+        """{question id: order} for the multiple choice questions whose choices are shuffled for this student
+        (empty when the teacher has it off). Answers are always stored by the teacher's own order, so
+        grading and the teacher's views never change; only what the student sees is shuffled."""
+        seed, _, choices_on = self.shuffling(assignment, attempt)
+        if not choices_on:
+            return {}
+        return {question["id"]: shuffle.choice_order(len(question["choices"]), seed, question["id"])
+                for question in questions if question["type"] == "multiple_choice"}
+
     def detail(self, assignment_id):
         """The sheet to answer (no answer keys), the saved answers, and the score that counts."""
         assignment = self.require(assignment_id)
         submission = self.submissions.latest(assignment_id, self.user["id"])
         last_submitted = self.submissions.latest(assignment_id, self.user["id"], submitted_only=True)
         sections = self.activities.sections(assignment["activity_id"])
+        attempt = submission["attempt"] if submission else 1
+        seed, questions_on, _ = self.shuffling(assignment, attempt)
+        orders = self.choice_orders(assignment, attempt,
+                                    [question for section in sections for question in section["questions"]])
         for section in sections:
             section["questions"] = [question_for_student(question) for question in section["questions"]]
+            for question in section["questions"]:
+                if question["id"] in orders:
+                    question["choices"] = [question["choices"][place] for place in orders[question["id"]]]
+            if questions_on and section["kind"] == "activity":
+                section["questions"] = shuffle.shuffled_questions(section["questions"], seed, section["id"])
         feedback = self.submissions.feedback(last_submitted["id"]) \
             if last_submitted and assignment["scores_released"] and submission["submitted_at"] else {}
         return {
@@ -98,7 +126,8 @@ class StudentWorkService(Service):
             # A submitted attempt shows the blank sheet until the teacher releases the scores, so
             # answers can't be passed around; after that the student sees their own answers.
             "answers": {} if submission and submission["submitted_at"] and not assignment["scores_released"]
-            else self.submissions.answers(submission["id"] if submission else None),
+            else {question_id: shuffle.to_shown(orders[question_id], answer) if question_id in orders else answer
+                  for question_id, answer in self.submissions.answers(submission["id"] if submission else None).items()},
             "submitted_at": submission["submitted_at"] if submission else None,
             "attempt": submission["attempt"] if submission else 1,
             "max_attempts": assignment["max_attempts"],
@@ -129,10 +158,15 @@ class StudentWorkService(Service):
             submission = self.submissions.latest(assignment_id, self.user["id"])
         return submission
 
-    def save_answers(self, submission, questions, posted):
-        """Save the posted {question id: answer} (only questions of this sheet)."""
+    def save_answers(self, submission, questions, posted, orders=None):
+        """Save the posted {question id: answer} (only questions of this sheet). orders = the shuffled choice
+        orders of this student (see choice_orders): a posted choice is the place on their screen, and is saved as
+        the place in the teacher's list."""
         if not isinstance(posted, dict):
             raise ValidationError("Answers are not valid.")
+        orders = orders or {}
+        posted = {key: shuffle.to_stored(orders[int(key)], value) if str(key).isdigit() and int(key) in orders else value
+                  for key, value in posted.items()}
         by_id = {str(question["id"]): question for question in questions}
         for key, value in posted.items():
             question = by_id.get(str(key))
@@ -145,7 +179,8 @@ class StudentWorkService(Service):
         """Save answers while working (called automatically as the student types)."""
         assignment = self.require_answerable(assignment_id)
         submission = self.current_attempt(assignment_id)
-        self.save_answers(submission, self.activities.questions(assignment["activity_id"]), posted)
+        questions = self.activities.questions(assignment["activity_id"])
+        self.save_answers(submission, questions, posted, self.choice_orders(assignment, submission["attempt"], questions))
         self.commit()
 
     def submit(self, assignment_id, posted):
@@ -153,7 +188,7 @@ class StudentWorkService(Service):
         assignment = self.require_answerable(assignment_id)
         submission = self.current_attempt(assignment_id)
         questions = self.activities.questions(assignment["activity_id"])
-        self.save_answers(submission, questions, posted)
+        self.save_answers(submission, questions, posted, self.choice_orders(assignment, submission["attempt"], questions))
 
         grade_attempt(self, assignment_id, submission, questions, self.user["id"])
         self.submissions.mark_submitted(submission["id"], is_late(assignment["due_date"], school_today()))
