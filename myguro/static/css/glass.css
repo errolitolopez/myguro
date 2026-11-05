@@ -1358,3 +1358,36 @@ html[data-style="neu"] {
 /* The moving colour blobs and the faint logo would show through as stains on a flat surface. */
 html[data-style="neu"] body::after,
 html[data-style="neu"] body::before { display: none; }
+
+/* Neumorphic buttons: raised at rest, pressed in while held. A smaller shadow than a panel, so a button
+   reads as sitting on the card. The border goes (the shadow is the edge) and the hover accent border with it;
+   hover only lifts the text colour. */
+html[data-style="neu"] {
+  --neu-raised-sm: 3px 3px 6px var(--neu-dark), -3px -3px 6px var(--neu-light);
+  --neu-inset-sm: inset 2px 2px 4px var(--neu-dark), inset -2px -2px 4px var(--neu-light);
+}
+html[data-style="neu"] :is(.btn-success, .btn-outline-success, .btn-primary, .btn-outline-primary,
+  .btn-danger, .btn-outline-danger, .btn-secondary, .btn-outline-secondary, .btn-warning, .btn-outline-warning, .btn-toggle) {
+  --bs-btn-bg: var(--neu-bg);
+  --bs-btn-border-color: transparent;
+  --bs-btn-hover-bg: var(--neu-bg);
+  --bs-btn-hover-border-color: transparent;
+  --bs-btn-active-bg: var(--neu-bg);
+  --bs-btn-active-border-color: transparent;
+  --bs-btn-disabled-bg: var(--neu-bg);
+  --bs-btn-disabled-border-color: transparent;
+  box-shadow: var(--neu-raised-sm);
+}
+html[data-style="neu"] .btn:not(:disabled):active,
+html[data-style="neu"] .btn.show,
+html[data-style="neu"] .btn-check:checked + .btn {
+  box-shadow: var(--neu-inset-sm);
+  transform: none; /* the inset shadow already says "pressed"; the shrink from the glass look would double it */
+}
+/* The chosen button of a segmented control keeps its blue (so it is clear which is on) and is pressed in. */
+html[data-style="neu"] .btn-check:checked + .btn-toggle,
+html[data-style="neu"] .btn-toggle.active {
+  --bs-btn-bg: var(--confirm-bg);
+  box-shadow: var(--neu-inset-sm);
+}
+html[data-style="neu"] .btn:disabled { box-shadow: none; opacity: 0.55; }
