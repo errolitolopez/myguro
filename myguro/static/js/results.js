@@ -12,6 +12,49 @@ const STATUS = {
   excluded: [t("Excluded"), "text-bg-secondary"],
 };
 
+// Sorting by a column header (Status or Score). Tap again to flip the direction, a third time to go back to
+// the order the server sends (by name). A student without a score always goes last.
+const STATUS_ORDER = { not_started: 0, in_progress: 1, submitted: 2, excluded: 3 };
+let sortKey = null; // "status", "score" or null
+let sortDirection = 1; // 1 = ascending, -1 = descending
+
+// sortValue(student, "score") -> 7 (points earned), or null when there is no score
+function sortValue(student, key) {
+  if (key === "status") return STATUS_ORDER[student.status];
+  return student.score ? student.score.earned : null;
+}
+
+// sortedStudents(list) -> a copy in the chosen order; Array.sort is stable, so ties keep the name order
+function sortedStudents(list) {
+  if (!sortKey) return list;
+  return [...list].sort((a, b) => {
+    const first = sortValue(a, sortKey);
+    const second = sortValue(b, sortKey);
+    if (first === null || second === null) return (first === null) - (second === null);
+    return (first - second) * sortDirection;
+  });
+}
+
+// sortHeader("Score", "score") -> a header cell with a button that sorts by that column
+function sortHeader(label, key) {
+  const active = sortKey === key;
+  const cell = el("th");
+  cell.setAttribute("aria-sort", active ? (sortDirection === 1 ? "ascending" : "descending") : "none");
+  const button = el("button",
+    `btn btn-link p-0 border-0 fw-bold text-reset text-decoration-none text-nowrap bi ${
+      active ? (sortDirection === 1 ? "bi-arrow-up" : "bi-arrow-down") : "bi-arrow-down-up text-body-secondary"}`,
+    ` ${label}`);
+  button.type = "button";
+  button.addEventListener("click", () => {
+    if (sortKey !== key) { sortKey = key; sortDirection = 1; }
+    else if (sortDirection === 1) sortDirection = -1;
+    else sortKey = null;
+    render();
+  });
+  cell.append(button);
+  return cell;
+}
+
 // The search and filter come back from the checking page's "Back to results" link.
 const startParams = new URLSearchParams(window.location.search);
 document.getElementById("search").value = startParams.get("q") || "";
@@ -135,13 +178,13 @@ function render() {
   document.getElementById("stat-to-check").textContent = summary.to_check;
 
   const head = document.getElementById("results-head");
-  head.replaceChildren(el("th", "", t("Student")), el("th", "", t("Status")), el("th", "", t("Score")),
+  head.replaceChildren(el("th", "", t("Student")), sortHeader(t("Status"), "status"), sortHeader(t("Score"), "score"),
     ...sections.map((section) => el("th", "small fw-normal", section.title)), el("th", "", t("Tries")),
     el("th", "visually-hidden", t("Actions")));
 
   const query = document.getElementById("search").value.trim().toLowerCase();
   const filter = document.getElementById("filter").value;
-  const shown = students.filter((student) => {
+  const shown = sortedStudents(students).filter((student) => {
     if (query && !student.name.toLowerCase().includes(query) && !student.username.includes(query)) return false;
     if (filter === "submitted") return student.score !== null;
     if (filter === "not_submitted") return student.score === null && !student.excluded;
