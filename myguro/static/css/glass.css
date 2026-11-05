@@ -1402,3 +1402,11 @@ html[data-style="neu"] .list-group-item-action:focus {
   background-color: var(--neu-bg);
   box-shadow: var(--neu-inset-sm);
 }
+
+/* Focus ring for the neu style. Bootstrap draws a button's ring with box-shadow, but the raised look above sets
+   box-shadow too and is more specific, so a tabbed-to button showed no ring. An outline is a separate property,
+   so it shows on top of either shadow. (Inputs keep Bootstrap's ring: their focus rule comes later and wins.) */
+html[data-style="neu"] :is(.btn, .list-group-item-action):focus-visible {
+  outline: 2px solid var(--accent-to);
+  outline-offset: 2px;
+}
