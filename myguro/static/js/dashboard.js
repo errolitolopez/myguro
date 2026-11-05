@@ -120,7 +120,6 @@ async function loadDashboard() {
       setText("stat-not-started", data.not_started);
       setText("stat-open", data.open);
       setText("stat-closed", data.closed);
-      setText("stat-submissions", data.submissions);
       showClasses(data.classes, "teacher");
     }
   } catch {

@@ -366,7 +366,6 @@ TEACHER = {
     "Some marks could not be saved. Change the day anyway?": "May mga mark na hindi na-save. Palitan pa rin ang araw?",
     "{marked} of {count} marked · {present} present · {late} late · {absent} absent · {excused} excused": "{marked} sa {count} ang may mark · {present} present · {late} late · {absent} absent · {excused} excused",
     # --- Dashboard (teacher and admin tiles), schedule view, GuroBot, navbar extras ---
-    "Answers submitted": "Mga sagot na na-submit",
     "Backup": "Backup",
     "Create your first class": "Gumawa ng unang class mo",
     "Download backup": "I-download ang backup",

@@ -87,11 +87,11 @@
 
   {% include "_holidays_widget.html" %}
   {% else %}
-  <!-- Everything about activities in one card: assignments by status and the answers students submitted. -->
+  <!-- Everything about activities in one card: assignments by status. -->
   <a class="card text-decoration-none mb-3" href="{{ url_for('activities.list_page') }}">
     <div class="card-body">
       <div class="fw-semibold bi bi-journal-text mb-2"> {{ _("Activities") }}</div>
-      <div class="row row-cols-2 row-cols-md-4 g-3">
+      <div class="row row-cols-3 g-3">
         <div class="col">
           <div class="text-body-secondary small">{{ _("Not started") }}</div>
           <div class="fs-3 fw-bold stat-number" id="stat-not-started">–</div>
@@ -103,10 +103,6 @@
         <div class="col">
           <div class="text-body-secondary small">{{ _("Closed") }}</div>
           <div class="fs-3 fw-bold stat-number" id="stat-closed">–</div>
-        </div>
-        <div class="col">
-          <div class="text-body-secondary small">{{ _("Answers submitted") }}</div>
-          <div class="fs-3 fw-bold stat-number" id="stat-submissions">–</div>
         </div>
       </div>
     </div>
