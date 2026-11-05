@@ -49,7 +49,7 @@ def supervisors_page():
 @bp.get("/api/users")
 @role_required_api("admin")
 def api_list():
-    """?role=teacher (default) or student, ?q= search, ?grade= (empty = no grade) and ?section= and ?status= (active, pending, deactivated) and ?recovery= (yes, no) (advanced filters), ?sort= (name, login_new, login_old), ?page= and ?per_page= (20 by default)."""
+    """?role=teacher (default) or student, ?q= search, ?grade= (empty = no grade) and ?section= and ?status= (active, pending, deactivated) and ?recovery= (yes, no) (advanced filters), ?sort= (name, name_desc, login_new, login_old), ?page= and ?per_page= (20 by default)."""
     args = request.args
     return jsonify(service().list(
         args.get("role", "teacher"),

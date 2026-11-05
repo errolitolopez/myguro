@@ -14,8 +14,9 @@ const list = document.getElementById("user-list");
 const searchInput = document.getElementById("search");
 // Advanced filter (students page only): full name, grade, section
 const sortNameButton = document.getElementById("sort-name");
-const sortLoginButton = document.getElementById("sort-login");
-let sort = "name"; // "name", "login_new" or "login_old" (the server accepts only these)
+// The Last login header is there twice (one for phones, one for the wide table): both sort the same way.
+const sortLoginButtons = [document.getElementById("sort-login"), document.getElementById("sort-login-wide")];
+let sort = "name"; // "name", "name_desc", "login_new" or "login_old" (the server accepts only these)
 const gradeFilter = document.getElementById("grade-filter");
 const sectionFilter = document.getElementById("section-filter");
 const statusFilter = document.getElementById("status-filter");
@@ -72,8 +73,7 @@ function userItem(user) {
   phoneLogin.textContent = `${t("Last login")}: ${lastLogin}`;
   left.append(phoneLogin);
   const loginColumn = document.createElement("div");
-  loginColumn.className = "small text-body-secondary d-none d-md-block text-nowrap";
-  loginColumn.style.width = "9rem";
+  loginColumn.className = "small text-body-secondary d-none d-md-block text-nowrap users-col-login";
   loginColumn.textContent = lastLogin;
 
   const badge = document.createElement("span");
@@ -94,7 +94,7 @@ function userItem(user) {
   recovery.className = user.has_recovery_code ? "badge text-bg-info" : "badge text-bg-light border";
   recovery.textContent = user.has_recovery_code ? t("Has recovery code") : t("No recovery code");
   const badges = document.createElement("div");
-  badges.className = "d-flex flex-column align-items-end gap-1";
+  badges.className = "d-flex flex-column align-items-end gap-1 users-col-status";
   badges.append(badge, recovery);
 
   if (typeof selectionBox === "function") row.append(selectionBox(user)); // students page
@@ -194,18 +194,25 @@ function searchSoon() {
   searchTimer = setTimeout(() => goToPage(1), 250);
 }
 searchInput.addEventListener("input", searchSoon);
-// Name sorts by name; Last login sorts newest first, and a second tap flips to oldest first.
+// Header sorting: tap Name for A to Z (the default, active accounts first), again for Z to A. Tap Last login for
+// newest first, again for oldest first. The arrow shows the column and direction in use.
 function setSort(newSort) {
   sort = newSort;
-  sortNameButton.classList.toggle("active", sort === "name");
-  sortLoginButton.classList.toggle("active", sort !== "name");
-  sortLoginButton.classList.toggle("bi-arrow-down-up", sort === "name");
-  sortLoginButton.classList.toggle("bi-arrow-down", sort === "login_new");
-  sortLoginButton.classList.toggle("bi-arrow-up", sort === "login_old");
+  const byName = sort === "name" || sort === "name_desc";
+  sortNameButton.classList.remove("bi-arrow-up", "bi-arrow-down");
+  sortNameButton.classList.add(sort === "name_desc" ? "bi-arrow-down" : "bi-arrow-up");
+  sortNameButton.classList.toggle("text-body-secondary", !byName);
+  for (const button of sortLoginButtons) {
+    button.classList.remove("bi-arrow-down-up", "bi-arrow-down", "bi-arrow-up");
+    button.classList.add(byName ? "bi-arrow-down-up" : sort === "login_new" ? "bi-arrow-down" : "bi-arrow-up");
+    button.classList.toggle("text-body-secondary", byName);
+  }
   goToPage(1);
 }
-sortNameButton.addEventListener("click", () => setSort("name"));
-sortLoginButton.addEventListener("click", () => setSort(sort === "login_new" ? "login_old" : "login_new"));
+sortNameButton.addEventListener("click", () => setSort(sort === "name" ? "name_desc" : "name"));
+for (const button of sortLoginButtons) {
+  button.addEventListener("click", () => setSort(sort === "login_new" ? "login_old" : "login_new"));
+}
 if (gradeFilter) {
   sectionFilter.addEventListener("input", searchSoon);
   gradeFilter.addEventListener("change", () => goToPage(1));

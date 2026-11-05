@@ -202,3 +202,9 @@ def test_last_login_is_recorded_and_sortable(admin, teacher):
     times = [user["last_login_at"] for user in old if user["last_login_at"]]
     assert times == sorted(times)
     assert admin.get("/api/users?role=teacher&sort=bad").status_code == 400
+
+
+def test_users_can_be_sorted_by_name_from_z_to_a(admin, teacher):
+    names = [user["name"].lower() for user in admin.get("/api/users?role=student&per_page=100&sort=name_desc")
+             .get_json()["users"]]
+    assert names == sorted(names, reverse=True)

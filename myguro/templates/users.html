@@ -107,12 +107,22 @@
       <input id="select-page" type="checkbox" class="form-check-input mt-0" aria-label="{{ _("Select all on this page") }}">
       {% endif %}
       <span class="fw-semibold me-auto">{{ nouns }}</span>
-      <!-- Sort by name (default) or by last login; tap Last login again to flip newest / oldest -->
-      <div class="btn-group btn-group-sm" role="group" aria-label="{{ _("Sort by") }}">
-        <button id="sort-name" type="button" class="btn btn-outline-secondary active">{{ _("Name") }}</button>
-        <button id="sort-login" type="button" class="btn btn-outline-secondary bi bi-arrow-down-up">{{ _("Last login") }}</button>
-      </div>
       <span id="user-summary" class="text-body-secondary small"></span>
+    </div>
+    <!-- Column headers: tap Name or Last login to sort by it, tap again to flip the direction. The widths match
+         the columns of a row (users.js, glass.css .users-col-*). -->
+    <div class="list-group list-group-flush">
+      <div class="list-group-item d-flex align-items-center gap-2 small bg-body-tertiary" id="user-head">
+        {% if role == "student" %}<span class="flex-shrink-0" style="width: 1em;" aria-hidden="true"></span>{% endif %}
+        <span class="me-auto">
+          <button id="sort-name" type="button" class="btn btn-link p-0 border-0 fw-semibold text-reset text-decoration-none text-nowrap bi bi-arrow-up"> {{ _("Name") }}</button>
+          <button id="sort-login" type="button" class="btn btn-link p-0 border-0 fw-semibold text-reset text-decoration-none text-nowrap bi bi-arrow-down-up text-body-secondary d-md-none ms-3"> {{ _("Last login") }}</button>
+        </span>
+        <span class="users-col-login d-none d-md-block">
+          <button id="sort-login-wide" type="button" class="btn btn-link p-0 border-0 fw-semibold text-reset text-decoration-none text-nowrap bi bi-arrow-down-up text-body-secondary"> {{ _("Last login") }}</button>
+        </span>
+        <span class="users-col-status d-none d-md-block text-end fw-semibold">{{ _("Status") }}</span>
+      </div>
     </div>
     <div id="user-list" class="list-group list-group-flush">
       <div class="list-group-item text-body-secondary">{{ _("Loading...") }}</div>

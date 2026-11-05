@@ -604,6 +604,13 @@ html[data-tab-bar="top"] .web-tabs { display: block !important; }
 }
 @media (prefers-reduced-motion: reduce) { .feedback-toast { transition: none; transform: none; } }
 
+/* The Users list columns: the header row and every row use the same widths, so the columns line up. Only on wide
+   screens; on a phone the last login is a line under the name and the status badges take what they need. */
+@media (min-width: 768px) {
+  .users-col-login { width: 9rem; flex: none; }
+  .users-col-status { width: 9.5rem; flex: none; }
+}
+
 /* Slim scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb { background-color: var(--scroll-thumb); border-radius: 8px; }

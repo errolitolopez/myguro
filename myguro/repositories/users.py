@@ -45,6 +45,7 @@ class UserRepository(Repository):
     # A login not recorded yet (NULL) always goes last.
     SORT_ORDER = {
         "name": "active DESC, name COLLATE NOCASE, id",
+        "name_desc": "name COLLATE NOCASE DESC, id DESC",
         "login_new": "last_login_at IS NULL, last_login_at DESC, name COLLATE NOCASE, id",
         "login_old": "last_login_at IS NULL, last_login_at ASC, name COLLATE NOCASE, id",
     }
@@ -77,7 +78,7 @@ class UserRepository(Repository):
     def search(self, role, pattern, grade=None, section_pattern=None, status=None, recovery=None,
                limit=20, offset=0, sort="name"):
         """One page of the matching accounts. sort "name" (default): active ones first, then by name
-        (Last, First = by last name); "login_new" / "login_old": by last login."""
+        (Last, First = by last name); "name_desc": by name from Z to A; "login_new" / "login_old": by last login."""
         where, params = self._matching(role, pattern, grade, section_pattern, status, recovery)
         return self.all(f"SELECT * FROM users WHERE {where} ORDER BY {self.SORT_ORDER[sort]} "
                         "LIMIT ? OFFSET ?", [*params, limit, offset])
