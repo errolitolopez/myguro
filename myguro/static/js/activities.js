@@ -32,12 +32,18 @@ function statusBadge(text, status) {
 // One class or group the sheet is given to: its name and status, and the button that opens, closes or re-opens it
 // (the same buttons as in Check results on the activity's page, so a teacher can do it from the list).
 function givenRow(given) {
+  // Like a table row: the class name takes the space, then the status and the button in columns of the same width
+  // on every line (see .given-status and .given-action in glass.css), so they line up down the list.
   const row = document.createElement("div");
-  row.className = "d-flex align-items-center gap-2 mt-1";
+  row.className = "d-flex align-items-center gap-2 py-1 border-top";
+  const name = document.createElement("div");
+  name.className = "flex-grow-1 small text-truncate";
+  name.textContent = given.name;
+  name.title = given.name;
   const action = STATUS_ACTIONS[given.status];
   const button = document.createElement("button");
   button.type = "button";
-  button.className = `btn btn-sm text-nowrap bi ${action.icon} ${action.className}`;
+  button.className = `btn btn-sm text-nowrap given-action bi ${action.icon} ${action.className}`;
   button.textContent = ` ${action.label}`;
   button.setAttribute("aria-label", `${action.label}: ${given.name}`);
   button.addEventListener("click", async () => {
@@ -59,7 +65,9 @@ function givenRow(given) {
       stopLoading();
     }
   });
-  row.append(statusBadge(`${given.name} · ${STATUS_LABELS[given.status]}`, given.status), button);
+  const status = statusBadge(STATUS_LABELS[given.status], given.status);
+  status.classList.add("given-status");
+  row.append(name, status, button);
   return row;
 }
 
@@ -88,14 +96,14 @@ function activityItem(activity) {
 
   // Under the details: where the sheet is given, a status and an Open / Close button per class or group, or
   // "Not given yet". Only the school year being viewed is listed.
+  const given = document.createElement("div");
+  given.className = "mt-2";
   if (activity.given_to.length === 0) {
-    const none = document.createElement("div");
-    none.className = "mt-1";
-    none.append(statusBadge(t("Not given yet"), "not_started"));
-    row.append(none);
+    given.append(statusBadge(t("Not given yet"), "not_started"));
   } else {
-    row.append(...activity.given_to.map(givenRow));
+    given.append(...activity.given_to.map(givenRow));
   }
+  row.append(given);
   return row;
 }
 

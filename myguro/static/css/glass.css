@@ -651,6 +651,11 @@ html[data-tab-bar="top"] .web-tabs { display: block !important; }
   color: var(--confirm-text);
 }
 
+/* The Open / Close line of each class under an activity in the Activities list: the status and the button have a
+   fixed width, so they line up in two columns at the right edge on every line. */
+.given-status { width: 6.5rem; flex: none; text-align: center; }
+.given-action { width: 6.5rem; flex: none; }
+
 /* Slim scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb { background-color: var(--scroll-thumb); border-radius: 6px; }
