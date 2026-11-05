@@ -210,6 +210,7 @@ TEACHER = {
     "Select all": "Piliin lahat",
     "Selected students": "Mga napiling estudyante",
     "You have no classes yet. ": "Wala ka pang class. ",
+    "{submitted} of {students} submitted": "{submitted} sa {students} ang naka-submit",
     "average {average}%": "average na {average}%",
     "{points} to check": "{points} na susuriin",
     # --- Checking one student's answers ---

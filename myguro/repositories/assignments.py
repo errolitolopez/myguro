@@ -189,6 +189,16 @@ class AssignmentRepository(Repository):
             {"student": student_id, "year": year_id},
         )
 
+    def progress(self, assignment):
+        """(submitted, total) students of the assignment, as in the results summary: the excluded ones are left
+        out, and a student counts as submitted once any attempt is submitted."""
+        excluded = set(self.excluded_ids(assignment["id"]))
+        submitted = {row["student_id"] for row in self.all(
+            "SELECT DISTINCT student_id FROM submissions WHERE assignment_id = ? AND submitted_at IS NOT NULL",
+            (assignment["id"],))}
+        students = [student["id"] for student in self.students(assignment) if student["id"] not in excluded]
+        return sum(student_id in submitted for student_id in students), len(students)
+
     def students(self, assignment):
         """The students who got this assignment, plus anyone who already worked on it
         (e.g. removed from the class later), in name order."""

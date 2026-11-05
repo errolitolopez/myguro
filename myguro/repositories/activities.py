@@ -182,7 +182,7 @@ class ActivityRepository(Repository):
         assignment (class_name NULL), with the assignment's status, oldest first."""
         return self.all(
             """
-            SELECT asg.id, asg.status, c.name AS class_name
+            SELECT asg.id, asg.status, asg.class_id, asg.everyone, c.name AS class_name
             FROM assignments asg LEFT JOIN classes c ON c.id = asg.class_id
             WHERE asg.activity_id = ? AND asg.school_year_id = ?
             ORDER BY asg.assigned_at, asg.id

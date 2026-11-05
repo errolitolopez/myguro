@@ -37,9 +37,16 @@ function givenRow(given) {
   const row = document.createElement("div");
   row.className = "d-flex align-items-center gap-2 py-1 border-top";
   const name = document.createElement("div");
-  name.className = "flex-grow-1 small text-truncate";
+  name.className = "small text-truncate";
   name.textContent = given.name;
   name.title = given.name;
+  // "30 of 30 submitted" under the name, like the cards on the activity's page
+  const counts = document.createElement("div");
+  counts.className = "small text-body-secondary";
+  counts.textContent = t("{submitted} of {students} submitted", { submitted: given.submitted, students: given.students });
+  const label = document.createElement("div");
+  label.className = "flex-grow-1 text-truncate";
+  label.append(name, counts);
   const action = STATUS_ACTIONS[given.status];
   const button = document.createElement("button");
   button.type = "button";
@@ -67,7 +74,7 @@ function givenRow(given) {
   });
   const status = statusBadge(STATUS_LABELS[given.status], given.status);
   status.classList.add("given-status");
-  row.append(name, status, button);
+  row.append(label, status, button);
   return row;
 }
 

@@ -250,3 +250,13 @@ def test_migration_from_the_open_flag(app, teacher):
         db.commit()
         init_db()
         assert db.execute("SELECT status FROM assignments WHERE id = ?", (assignment_id,)).fetchone()[0] == "open"
+
+
+def test_the_activity_list_counts_who_submitted_in_each_place_it_is_given(teacher):
+    activity_id, assignment_id, students, questions = assigned_sheet(teacher)
+    open_assignment(teacher, assignment_id)
+    given = teacher.get("/api/activities").get_json()["activities"][0]["given_to"][0]
+    assert (given["submitted"], given["students"]) == (0, len(students))
+    login(students[0]["username"]).post(f"/api/my-activities/{assignment_id}/submit", json={"answers": {}})
+    given = teacher.get("/api/activities").get_json()["activities"][0]["given_to"][0]
+    assert given["submitted"] == 1
