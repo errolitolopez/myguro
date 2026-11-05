@@ -1391,3 +1391,14 @@ html[data-style="neu"] .btn-toggle.active {
   box-shadow: var(--neu-inset-sm);
 }
 html[data-style="neu"] .btn:disabled { box-shadow: none; opacity: 0.55; }
+
+/* Neumorphic list rows: they share the panel's colour, so they are flat. A faint line between rows takes the
+   place of the border the style removed; rows you can tap sink in a little on hover. */
+html[data-style="neu"] .list-group {
+  --bs-list-group-border-color: color-mix(in srgb, var(--neu-dark) 45%, transparent);
+}
+html[data-style="neu"] .list-group-item-action:hover,
+html[data-style="neu"] .list-group-item-action:focus {
+  background-color: var(--neu-bg);
+  box-shadow: var(--neu-inset-sm);
+}
