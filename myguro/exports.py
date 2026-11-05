@@ -518,10 +518,11 @@ LETTERS = "ABCDEFGHIJKL"
 WRITE_LINES = 3  # ruled lines under a short answer
 # The sheet is made compact on purpose, to save paper: Times-style text (Liberation Serif has the same letter
 # widths as Times New Roman and is free to bundle), tight lines and small margins.
-SHEET_LINE_HEIGHT = 0.42  # mm per point of text size, about 1.2 times the text size
-SHEET_MARGIN = 12  # mm
-WRITE_LINE_GAP = 6  # mm between the ruled lines of a short answer
-INLINE_CHOICES_MAX = 95  # characters: choices that fit on one line are printed side by side
+SHEET_TEXT_SIZE = 9.5  # pt, the body text (questions, choices, directions)
+SHEET_LINE_HEIGHT = 0.4  # mm per point of text size, about 1.15 times the text size
+SHEET_MARGIN = 10  # mm
+WRITE_LINE_GAP = 5.5  # mm between the ruled lines of a short answer
+INLINE_CHOICES_MAX = 110  # characters: choices that fit on one line are printed side by side
 
 
 class SheetPDF(FPDF):
@@ -532,11 +533,11 @@ class SheetPDF(FPDF):
         self.add_font("Serif", "", os.path.join(FONTS_DIR, "LiberationSerif-Regular.ttf"))
         self.add_font("Serif", "B", os.path.join(FONTS_DIR, "LiberationSerif-Bold.ttf"))
 
-    def text_style(self, size=11, bold=False, grey=False):
+    def text_style(self, size=SHEET_TEXT_SIZE, bold=False, grey=False):
         self.set_font("Serif", "B" if bold else "", size)
         self.set_text_color(*(GREY if grey else BLACK))
 
-    def paragraph(self, text, size=11, bold=False, grey=False, indent=0):
+    def paragraph(self, text, size=SHEET_TEXT_SIZE, bold=False, grey=False, indent=0):
         """A wrapped paragraph; indent moves it right (mm) from the left margin."""
         self.text_style(size, bold, grey)
         self.set_x(self.l_margin + indent)
@@ -544,7 +545,7 @@ class SheetPDF(FPDF):
 
     def footer(self):
         self.set_y(-9)
-        self.text_style(8, grey=True)
+        self.text_style(7, grey=True)
         self.cell(0, 4, GENERATED_BY, align="C")
         self.set_x(self.l_margin)  # the same line again, for the page number on the right
         self.cell(0, 4, f"Page {self.page_no()}", align="R")
@@ -601,7 +602,7 @@ def print_question(pdf, number, question, with_key):
     if with_key:
         answer = question_key_text(question)
         if answer:
-            pdf.paragraph(f"Answer: {answer}", size=10, bold=True, indent=6)
+            pdf.paragraph(f"Answer: {answer}", size=8.5, bold=True, indent=6)
     pdf.ln(1)
 
 
@@ -617,19 +618,19 @@ def sheet_pdf_bytes(activity, teacher, with_key, password=None):
                            permissions=AccessPermission.PRINT_LOW_RES | AccessPermission.PRINT_HIGH_RES)
     pdf.add_page()
 
-    pdf.text_style(14, bold=True)
-    pdf.multi_cell(0, 6.5, activity["title"], new_x="LMARGIN", new_y="NEXT")
+    pdf.text_style(12.5, bold=True)
+    pdf.multi_cell(0, 5.5, activity["title"], new_x="LMARGIN", new_y="NEXT")
     total = sum(question["points"] for section in activity["sections"] for question in section["questions"])
-    pdf.paragraph("  ·  ".join(filter(None, [activity["subject"], teacher, f"{total} points"])), size=10, grey=True)
+    pdf.paragraph("  ·  ".join(filter(None, [activity["subject"], teacher, f"{total} points"])), size=8.5, grey=True)
     if with_key:
-        pdf.paragraph("ANSWER KEY (teacher's copy)", size=11, bold=True)
+        pdf.paragraph("ANSWER KEY (teacher's copy)", size=9.5, bold=True)
     else:
         pdf.paragraph(f"Name: {'_' * 36}   Date: {'_' * 16}   Score: ______ / {total}")
     pdf.ln(2)
 
     for section in activity["sections"]:
         if section["title"]:
-            pdf.paragraph(section["title"], size=12, bold=True)
+            pdf.paragraph(section["title"], size=10.5, bold=True)
         if section["description"]:
             text = rich_to_text(section["description"]) if section["description_format"] == "rich" \
                 else section["description"]
