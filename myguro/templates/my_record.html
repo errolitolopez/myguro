@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _("My record") }} · MyGuro{% endblock %}
+
+{% block content %}
+{% include "_navbar.html" %}
+
+<main class="container py-3">
+  <div id="record-error" class="alert alert-danger d-none" role="alert"></div>
+
+  <h1 class="h4 mb-3">{{ _("My record") }}</h1>
+
+  <section class="card mb-3" aria-labelledby="overview-title">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      <span class="fw-semibold bi bi-bar-chart" id="overview-title"> {{ _("Overview") }}</span>
+    </div>
+    <div class="card-body">
+      <div id="overview" class="d-flex align-items-center gap-3 flex-wrap">
+        <div class="placeholder-glow"><span class="placeholder col-12" style="width: 12rem;"></span></div>
+      </div>
+      <p class="small text-body-secondary mb-0 mt-2">{{ _("Only scores your teacher has released are counted.") }}</p>
+    </div>
+  </section>
+
+  <div id="subjects">
+    <div class="list-group">
+      {% include "_skeleton.html" %}
+    </div>
+  </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/my-record.js') }}"></script>
+{% endblock %}

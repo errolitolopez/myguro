@@ -1,4 +1,4 @@
-"""Students: My activities and answering."""
+"""Students: My activities, My record and answering."""
 
 from flask import Blueprint, jsonify, redirect, render_template, url_for
 
@@ -20,6 +20,12 @@ def activities_page():
     return render_template("my_activities.html", user=current_user())
 
 
+@bp.get("/my-record")
+@role_required_page("student")
+def record_page():
+    return render_template("my_record.html", user=current_user())
+
+
 @bp.get("/my-activities/<int:assignment_id>")
 @role_required_page("student")
 def answer_page(assignment_id):
@@ -32,6 +38,12 @@ def answer_page(assignment_id):
 @role_required_api("student")
 def api_list():
     return jsonify(activities=service().list(), today=school_today().isoformat())
+
+
+@bp.get("/api/my-record")
+@role_required_api("student")
+def api_record():
+    return jsonify(record=service().record())
 
 
 @bp.get("/api/my-activities/<int:assignment_id>")

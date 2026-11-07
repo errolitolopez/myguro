@@ -20,6 +20,7 @@ TRANSLATED_FILES = [
     "myguro/static/js/student-widgets.js", "myguro/static/js/notifications.js", "myguro/templates/time_clock.html", "myguro/static/js/time-clock.js", "myguro/templates/time_records.html", "myguro/static/js/time-records.js", "myguro/static/js/dashboard-chart.js", "myguro/static/js/tips.js",
     # My activities
     "myguro/templates/my_activities.html", "myguro/static/js/my-activities.js",
+    "myguro/templates/my_record.html", "myguro/static/js/my-record.js",
     # The answer page
     "myguro/templates/answer.html", "myguro/static/js/answer.js",
     # Feedback and Display

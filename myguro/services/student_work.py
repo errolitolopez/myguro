@@ -1,6 +1,7 @@
 from myguro.config import school_today
 from myguro.domain import shuffle
 from myguro.domain.grading import clean_student_answer, question_for_student
+from myguro.domain.record import build_record
 from myguro.domain.work import can_try_again, is_late
 from myguro.errors import NotFoundError, ValidationError
 from myguro.services.attempts import grade_attempt
@@ -78,6 +79,11 @@ class StudentWorkService(Service):
                 if row["last_id"] and row["scores_released"] else None,
             })
         return result
+
+    def record(self):
+        """The student's own record: scores by teacher and subject, with averages, for the school year
+        being looked at. Only released scores are in it (list() leaves the others out)."""
+        return build_record(self.list())
 
     def shuffling(self, assignment, attempt):
         """(seed, shuffle questions, shuffle choices) for this student's attempt: the choices of the teacher who
