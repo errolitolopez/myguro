@@ -66,6 +66,11 @@ def test_close_submits_everyone_and_students_can_only_read(teacher):
     assert not any(row["late"] for row in rows.values())  # a close is never late
     assert rows[students[1]["id"]]["score"]["earned"] == 1  # what was saved is scored
     assert rows[students[2]["id"]]["score"]["earned"] == 0  # never started: nothing answered
+    # The close's submissions are counted apart, so "all submitted" is not read as everyone handed it in
+    assert [rows[student["id"]]["by_close"] for student in students[:3]] == [False, True, True]
+    assert results["summary"]["submitted"] == total and results["summary"]["by_close"] == total - 1
+    given = teacher.get("/api/activities").get_json()["activities"][0]["given_to"][0]
+    assert (given["submitted"], given["by_close"], given["students"]) == (total, total - 1, total)
 
     # Students still see it, marked closed, but cannot answer, submit or try again
     seen = unfinished.get("/api/my-activities").get_json()["activities"]

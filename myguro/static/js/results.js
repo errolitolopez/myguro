@@ -11,6 +11,7 @@ const STATUS = {
   submitted: [t("Submitted"), "text-bg-success"],
   excluded: [t("Excluded"), "text-bg-secondary"],
 };
+const BY_CLOSE = [t("By close"), "text-bg-light border"];
 
 // Sorting by a column header (Status or Score). Tap again to flip the direction, a third time to go back to
 // the order the server sends (by name). A student without a score always goes last.
@@ -171,7 +172,11 @@ function render() {
   document.getElementById("release-note").textContent = released
     ? t("Students can see their scores.")
     : t("Students can't see their scores yet. Release them when everyone is done.");
-  document.getElementById("stat-submitted").textContent = `${summary.submitted} / ${summary.students}`;
+  // Only the ones who handed it in; the ones a close submitted are counted under it
+  document.getElementById("stat-submitted").textContent = `${summary.submitted - summary.by_close} / ${summary.students}`;
+  const byClose = document.getElementById("stat-by-close");
+  byClose.textContent = t("{count} by close", { count: summary.by_close });
+  byClose.classList.toggle("d-none", !summary.by_close);
   document.getElementById("stat-not-started").textContent = summary.not_started;
   document.getElementById("stat-late").textContent = summary.late;
   document.getElementById("stat-average").textContent = summary.average === null ? "–" : `${summary.average}%`;
@@ -188,7 +193,8 @@ function render() {
   const filter = document.getElementById("filter").value;
   const shown = sortedStudents(students).filter((student) => {
     if (query && !student.name.toLowerCase().includes(query) && !student.username.includes(query)) return false;
-    if (filter === "submitted") return student.score !== null;
+    if (filter === "submitted") return student.score !== null && !student.by_close;
+    if (filter === "by_close") return student.by_close;
     if (filter === "not_submitted") return student.score === null && !student.excluded;
     if (filter === "to_check") return student.score !== null && student.score.pending > 0;
     if (filter === "late") return student.late;
@@ -217,7 +223,8 @@ function render() {
     name.append(el("div", "fw-semibold", student.name),
       el("div", "small text-body-secondary", gradeSection(student) || student.username));
     const status = el("td");
-    const [label, style] = STATUS[student.status];
+    // A close submitted it for them: not the green Submitted, so it is not read as handed in
+    const [label, style] = student.status === "submitted" && student.by_close ? BY_CLOSE : STATUS[student.status];
     status.append(el("span", `badge ${style}`, label));
     if (student.paper) status.append(" ", el("span", "badge text-bg-secondary", t("Paper")));
     if (student.late) status.append(" ", el("span", "badge text-bg-warning", t("Late")));

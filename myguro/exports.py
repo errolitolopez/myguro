@@ -41,7 +41,8 @@ def percent(score, total_points):
 
 def status_text(student):
     """"Submitted", "Submitted (paper, late)", "Not started", ..."""
-    extras = [word for word, flag in (("paper", student["paper"]), ("late", student["late"])) if flag]
+    extras = [word for word, flag in (("by close", student["by_close"]), ("paper", student["paper"]),
+                                      ("late", student["late"])) if flag]
     return STATUS[student["status"]] + (f" ({', '.join(extras)})" if extras else "")
 
 

@@ -20,7 +20,8 @@ function checkItem(item) {
   const row = el("div", "list-group-item d-flex justify-content-between align-items-center gap-2");
   const link = el("a", "flex-grow-1 text-decoration-none text-reset");
   link.href = `/results/${item.id}`;
-  const details = [`${item.submitted} of ${item.students} submitted`];
+  const details = [t("{submitted} of {students} submitted", { submitted: item.submitted - item.by_close, students: item.students })];
+  if (item.by_close) details.push(t("{count} by close", { count: item.by_close }));
   if (item.average !== null) details.push(t("average {average}%", { average: item.average }));
   if (item.due_date) details.push(`due ${formatDay(item.due_date)}`);
   link.append(el("div", "fw-semibold", item.class_name), el("div", "small text-body-secondary", details.join(" · ")));

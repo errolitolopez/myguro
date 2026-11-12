@@ -100,6 +100,8 @@ class ResultsService(Service):
         summary = {
             "students": len(counted_students),
             "submitted": len(scored),
+            # Of the submitted, the ones a close submitted: they never handed it in themselves
+            "by_close": sum(student["by_close"] for student in counted_students),
             "not_started": sum(student["status"] == "not_started" for student in counted_students),
             "late": sum(student["late"] for student in counted_students),
             "to_check": sum(score["pending"] for score in scored),
@@ -153,6 +155,9 @@ class ResultsService(Service):
             # a paper score has no real start
             "started_at": (counted or latest)["started_at"] if latest and not (counted or latest)["paper"] else None,
             "auto_submitted": bool(counted and counted["auto_submitted"]),
+            # Every submitted attempt came from a close: the student never handed it in (a later try that the
+            # close submitted does not count, because they handed in an earlier one)
+            "by_close": bool(submitted) and all(attempt["auto_submitted"] for attempt in submitted),
             "late": bool(counted and counted["late"]),
             "paper": bool(counted and counted["paper"]),
             "score": score["total"] if score else None,
@@ -175,6 +180,7 @@ class ResultsService(Service):
                 "class_name": data["assignment"]["class_name"],
                 "students": summary["students"],
                 "submitted": summary["submitted"],
+                "by_close": summary["by_close"],
                 "to_check": summary["to_check"],
                 "average": summary["average"],  # None until something is checked
                 "due_date": data["assignment"]["due_date"],

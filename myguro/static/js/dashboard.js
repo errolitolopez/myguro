@@ -49,7 +49,8 @@ function toCheckRow(item) {
   title.textContent = item.title;
   const details = document.createElement("div");
   details.className = "small text-body-secondary";
-  details.textContent = t("{class_name} · {submitted} of {students} submitted", { class_name: item.class_name, submitted: item.submitted, students: plural(item.students, "student") });
+  details.textContent = t("{class_name} · {submitted} of {students} submitted", { class_name: item.class_name, submitted: item.submitted - item.by_close, students: plural(item.students, "student") })
+    + byCloseText(item.by_close);
   left.append(title, details);
 
   const badge = document.createElement("span");

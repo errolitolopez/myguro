@@ -43,7 +43,8 @@ function givenRow(given) {
   // "30 of 30 submitted" under the name, like the cards on the activity's page
   const counts = document.createElement("div");
   counts.className = "small text-body-secondary";
-  counts.textContent = t("{submitted} of {students} submitted", { submitted: given.submitted, students: given.students });
+  counts.textContent = t("{submitted} of {students} submitted", { submitted: given.submitted - given.by_close, students: given.students })
+    + byCloseText(given.by_close);
   const label = document.createElement("div");
   label.className = "flex-grow-1 text-truncate";
   label.append(name, counts);

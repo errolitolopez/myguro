@@ -197,14 +197,17 @@ class AssignmentRepository(Repository):
         )
 
     def progress(self, assignment):
-        """(submitted, total) students of the assignment, as in the results summary: the excluded ones are left
-        out, and a student counts as submitted once any attempt is submitted."""
+        """(submitted, by_close, total) students of the assignment, as in the results summary: the excluded ones
+        are left out, a student counts as submitted once any attempt is submitted, and by_close counts the
+        submitted ones whose every submitted attempt was submitted by a close (they never handed it in)."""
         excluded = set(self.excluded_ids(assignment["id"]))
-        submitted = {row["student_id"] for row in self.all(
-            "SELECT DISTINCT student_id FROM submissions WHERE assignment_id = ? AND submitted_at IS NOT NULL",
-            (assignment["id"],))}
+        rows = self.all(
+            "SELECT student_id, MIN(auto_submitted) AS only_close FROM submissions "
+            "WHERE assignment_id = ? AND submitted_at IS NOT NULL GROUP BY student_id", (assignment["id"],))
+        only_close = {row["student_id"]: bool(row["only_close"]) for row in rows}
         students = [student["id"] for student in self.students(assignment) if student["id"] not in excluded]
-        return sum(student_id in submitted for student_id in students), len(students)
+        return (sum(student_id in only_close for student_id in students),
+                sum(only_close.get(student_id, False) for student_id in students), len(students))
 
     def students(self, assignment):
         """The students who got this assignment, plus anyone who already worked on it

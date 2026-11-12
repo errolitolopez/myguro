@@ -119,6 +119,12 @@ function plural(count, one, many = `${one}s`) {
   return `${count} ${count === 1 ? one : many}`;
 }
 
+// The students a close submitted are not counted as handed in, so a teacher does not read 37 of 37 as everyone:
+// byCloseText(7) -> " · 7 by close" (added after "23 of 37 submitted"), "" when the close submitted nobody
+function byCloseText(byClose) {
+  return byClose ? ` · ${t("{count} by close", { count: byClose })}` : "";
+}
+
 // fetch() that sends the user to the login page when the session has ended,
 // or to the change password page while they still have a temporary password.
 // Returns null in those cases, so callers can simply stop: if (!response) return;
