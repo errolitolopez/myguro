@@ -91,37 +91,8 @@ class ResultsService(Service):
                     if section["kind"] == "activity"]
 
         excluded_ids = set(self.assignments.excluded_ids(assignment_id))
-        students = []
-        for student in self.assignments.students(assignment):
-            attempts = self.submissions.attempts(assignment_id, student["id"])
-            submitted = [attempt for attempt in attempts if attempt["submitted_at"]]
-            latest = attempts[-1] if attempts else None
-            counted = submitted[-1] if submitted else None
-            excluded = student["id"] in excluded_ids
-            if excluded:
-                status = "excluded"  # the teacher took this student off the activity (absent)
-            elif latest is None:
-                status = "not_started"
-            elif latest["submitted_at"]:
-                status = "submitted"
-            else:
-                status = "in_progress"  # first time, or trying again
-            score = self.score(counted["id"], activity_id) if counted else None
-            students.append({
-                **user_json(student),
-                "status": status,
-                "excluded": excluded,
-                "attempts": len(submitted),
-                "submitted_at": counted["submitted_at"] if counted else None,
-                # When that attempt (the one that counts, else the one being answered) was started;
-                # a paper score has no real start
-                "started_at": (counted or latest)["started_at"] if latest and not (counted or latest)["paper"] else None,
-                "auto_submitted": bool(counted and counted["auto_submitted"]),
-                "late": bool(counted and counted["late"]),
-                "paper": bool(counted and counted["paper"]),
-                "score": score["total"] if score else None,
-                "section_scores": {str(key): value for key, value in score["sections"].items()} if score else {},
-            })
+        students = [self.student_row(assignment, student, student["id"] in excluded_ids)
+                    for student in self.assignments.students(assignment)]
 
         # Excluded students stay in the list but do not count in the totals or the average.
         counted_students = [student for student in students if not student["excluded"]]
@@ -153,6 +124,38 @@ class ResultsService(Service):
             "sections": sections,
             "students": students,
             "summary": summary,
+        }
+
+    def student_row(self, assignment, student, excluded):
+        """One student's row of an assignment: status, tries and the score that counts (latest
+        submitted attempt). Shared by the results page, the gradebook and the student record."""
+        attempts = self.submissions.attempts(assignment["id"], student["id"])
+        submitted = [attempt for attempt in attempts if attempt["submitted_at"]]
+        latest = attempts[-1] if attempts else None
+        counted = submitted[-1] if submitted else None
+        if excluded:
+            status = "excluded"  # the teacher took this student off the activity (absent)
+        elif latest is None:
+            status = "not_started"
+        elif latest["submitted_at"]:
+            status = "submitted"
+        else:
+            status = "in_progress"  # first time, or trying again
+        score = self.score(counted["id"], assignment["activity_id"]) if counted else None
+        return {
+            **user_json(student),
+            "status": status,
+            "excluded": excluded,
+            "attempts": len(submitted),
+            "submitted_at": counted["submitted_at"] if counted else None,
+            # When that attempt (the one that counts, else the one being answered) was started;
+            # a paper score has no real start
+            "started_at": (counted or latest)["started_at"] if latest and not (counted or latest)["paper"] else None,
+            "auto_submitted": bool(counted and counted["auto_submitted"]),
+            "late": bool(counted and counted["late"]),
+            "paper": bool(counted and counted["paper"]),
+            "score": score["total"] if score else None,
+            "section_scores": {str(key): value for key, value in score["sections"].items()} if score else {},
         }
 
     def to_check(self, activity_id=None):
