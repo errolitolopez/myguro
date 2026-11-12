@@ -520,11 +520,14 @@ const STATUS_BADGES = {
   closed: ["text-bg-dark", t("Closed")],
 };
 
-// Open, close or re-open an assignment. A close asks first: it submits everyone's unfinished work.
-// putStatus(12, "closed", "Grade 9 - Rizal") -> the response, or null when cancelled or signed out
-async function putStatus(assignmentId, next, name) {
+// Open, close or re-open an assignment. A close asks first: it submits everyone's unfinished work. A re-open
+// asks too: everything submitted after it is marked late.
+// putStatus(12, "closed", "Grade 9 - Rizal", "open") -> the response, or null when cancelled or signed out
+async function putStatus(assignmentId, next, name, current) {
   if (next === "closed" && !window.confirm(
     t("Close this activity for {name}? Work not submitted yet is submitted as it is, and students can only read the questions. You can re-open it later.", { name }))) return null;
+  if (next === "open" && current === "closed" && !window.confirm(
+    t("Re-open this activity for {name}? Students can answer again, but everything submitted from now on is marked Late.", { name }))) return null;
   return apiFetch(`/api/assignments/${assignmentId}/status`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },

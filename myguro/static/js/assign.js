@@ -46,7 +46,7 @@ async function changeStatus(item, next, button) {
   const stopLoading = startLoading(button);
   if (!stopLoading) return;
   try {
-    const response = await putStatus(item.id, next, item.class_name);
+    const response = await putStatus(item.id, next, item.class_name, item.status);
     if (!response) return;
     if (!response.ok) {
       showEditorError((await response.json()).error || t("Could not save."));

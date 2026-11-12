@@ -18,8 +18,10 @@ def clean_due_date(value, class_label):
         raise ValidationError(f"{class_label}: the due date is not valid.") from None
 
 
-def is_late(due_date, today):
-    return bool(due_date and today.isoformat() > due_date)
+def is_late(due_date, today, reopened=False):
+    """A submission is late after the due date, or at any time once the teacher re-opened the activity
+    after closing it (the students already had their chance before the close)."""
+    return reopened or bool(due_date and today.isoformat() > due_date)
 
 
 def can_try_again(submission, max_attempts):

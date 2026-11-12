@@ -28,6 +28,11 @@
     {{ _("This activity is closed. You can read the questions again to review, but you can't change your answers.") }}
   </div>
 
+  <!-- Shown while the teacher has re-opened it after a close: what is submitted now is late -->
+  <div id="reopened-banner" class="alert alert-warning small mb-4 d-none">
+    {{ _("Your teacher re-opened this activity. You can still answer, but it will be marked late when you submit.") }}
+  </div>
+
   <!-- Shown after submitting -->
   <div id="result-card" class="card border-success mb-4 d-none">
     <div class="card-body">

@@ -285,6 +285,8 @@ TAGLISH = {
     "Try again": "Ulitin",
     "This activity is closed. You can read the questions again to review, but you can't change your answers.":
         "Sarado na ang activity na ito. Puwede mong basahin ulit ang mga tanong para mag-review, pero hindi mo na mababago ang mga sagot mo.",
+    "Your teacher re-opened this activity. You can still answer, but it will be marked late when you submit.":
+        "Na-re-open ng teacher mo ang activity na ito. Puwede ka pang sumagot, pero mamarkahan itong late kapag nag-submit ka.",
     "Your answers are hidden after you submit. You can still read the questions below.":
         "Nakatago ang mga sagot mo pagkatapos mong mag-submit. Mababasa mo pa rin ang mga tanong sa ibaba.",
     "Save progress": "I-save ang progress",

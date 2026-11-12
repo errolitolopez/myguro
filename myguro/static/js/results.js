@@ -157,7 +157,9 @@ function render() {
   document.getElementById("open-button").className = `btn btn-sm text-nowrap bi ${action.icon} ${action.className}`;
   document.getElementById("open-note").textContent = {
     not_started: t("Not started: students can't see this activity yet. Open it when they may answer."),
-    open: t("Open: students can see and answer this activity."),
+    open: assignment.reopened
+      ? t("Re-opened: students can answer again. Everything submitted now is marked Late.")
+      : t("Open: students can see and answer this activity."),
     closed: t("Closed: all work was submitted as it was. Students can only read the questions. ") +
       t("Re-open it to let unfinished students continue."),
   }[assignment.status];
@@ -262,7 +264,7 @@ document.getElementById("open-button").addEventListener("click", async (event) =
   hideError("results-error");
   try {
     const response = await putStatus(assignmentId, STATUS_ACTIONS[results.assignment.status].next,
-      results.assignment.class_name);
+      results.assignment.class_name, results.assignment.status);
     if (!response) return;
     if (!response.ok) {
       showError("results-error", (await response.json()).error || t("Could not save."));

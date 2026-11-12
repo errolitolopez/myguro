@@ -178,6 +178,9 @@ def add_missing_columns(db):
                        "WHERE activity_id IN (SELECT id FROM activities WHERE published = 1)")
         else:
             db.execute("UPDATE assignments SET status = 'open'")
+    if "reopened_at" not in assignment_columns:
+        # Re-opens from before this column are unknown, so their work is not made late afterwards.
+        db.execute("ALTER TABLE assignments ADD COLUMN reopened_at TEXT")
 
     submission_columns = [row["name"] for row in db.execute("PRAGMA table_info(submissions)")]
     if "auto_submitted" not in submission_columns:

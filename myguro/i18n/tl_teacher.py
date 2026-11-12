@@ -442,6 +442,10 @@ TEACHER = {
     "Other...": "Iba pa...",
     "Close this activity for {name}? Work not submitted yet is submitted as it is, and students can only read the questions. You can re-open it later.":
         "Isara ang activity na ito para sa {name}? Ang gawang hindi pa na-submit ay isusumite kung ano ito ngayon, at mababasa na lang ng mga estudyante ang mga tanong. Puwede mo itong buksan ulit mamaya.",
+    "Re-open this activity for {name}? Students can answer again, but everything submitted from now on is marked Late.":
+        "I-re-open ang activity na ito para sa {name}? Makakasagot ulit ang mga estudyante, pero mamarkahang Late ang lahat ng isa-submit mula ngayon.",
+    "Re-opened: students can answer again. Everything submitted now is marked Late.":
+        "Na-re-open: makakasagot ulit ang mga estudyante. Mamarkahang Late ang lahat ng isa-submit ngayon.",
     "Could not make the file.": "Hindi nagawa ang file.",
     "First name is required.": "Kailangan ang pangalan.",
     "Re-open": "Buksan ulit",

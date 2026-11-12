@@ -58,7 +58,7 @@ function givenRow(given) {
     if (!stopLoading) return;
     hideError("activities-error");
     try {
-      const response = await putStatus(given.assignment_id, action.next, given.name);
+      const response = await putStatus(given.assignment_id, action.next, given.name, given.status);
       if (!response) return; // cancelled, or signed out
       if (!response.ok) {
         showError("activities-error", (await response.json()).error || t("Could not save."));

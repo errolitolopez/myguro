@@ -260,3 +260,30 @@ def test_the_activity_list_counts_who_submitted_in_each_place_it_is_given(teache
     login(students[0]["username"]).post(f"/api/my-activities/{assignment_id}/submit", json={"answers": {}})
     given = teacher.get("/api/activities").get_json()["activities"][0]["given_to"][0]
     assert given["submitted"] == 1
+
+
+def test_work_submitted_after_a_re_open_is_late(teacher):
+    _, assignment_id, students, questions = assigned_sheet(teacher)  # no due date
+    open_assignment(teacher, assignment_id)
+    on_time, after = login(students[0]["username"]), login(students[1]["username"])
+    on_time.post(f"/api/my-activities/{assignment_id}/submit", json={"answers": {str(questions[0]): 1}})
+    assert not student_detail(after, assignment_id)["reopened"]
+
+    set_status(teacher, assignment_id, "closed")
+    open_assignment(teacher, assignment_id)
+    assert student_detail(after, assignment_id)["reopened"]
+    assert teacher.get(f"/api/assignments/{assignment_id}/results").get_json()["assignment"]["reopened"]
+    after.post(f"/api/my-activities/{assignment_id}/submit", json={"answers": {str(questions[0]): 1}})
+
+    rows = {row["id"]: row for row in teacher.get(f"/api/assignments/{assignment_id}/results").get_json()["students"]}
+    assert not rows[students[0]["id"]]["late"]  # submitted before the close: stays on time
+    assert rows[students[1]["id"]]["late"]
+
+
+def test_opening_from_not_started_is_not_a_re_open(teacher):
+    _, assignment_id, students, questions = assigned_sheet(teacher)
+    open_assignment(teacher, assignment_id)
+    student = login(students[0]["username"])
+    assert not student_detail(student, assignment_id)["reopened"]
+    student.post(f"/api/my-activities/{assignment_id}/submit", json={"answers": {str(questions[0]): 1}})
+    assert not student_detail(student, assignment_id)["late"]

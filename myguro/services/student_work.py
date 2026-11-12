@@ -139,6 +139,8 @@ class StudentWorkService(Service):
             "max_attempts": assignment["max_attempts"],
             # A closed activity is final: it can be read again, not answered or tried again.
             "closed": assignment["status"] == "closed",
+            # Re-opened after a close: whatever is submitted now is marked late.
+            "reopened": assignment["status"] == "open" and bool(assignment["reopened_at"]),
             "can_retry": bool(submission and submission["submitted_at"] and assignment["status"] == "open"
                               and can_try_again(submission, assignment["max_attempts"])),
             # The latest submitted attempt counts. While working on a new attempt, this is the
@@ -190,14 +192,16 @@ class StudentWorkService(Service):
         self.commit()
 
     def submit(self, assignment_id, posted):
-        """Save the last answers, check them, and submit. Late when after the due date."""
+        """Save the last answers, check them, and submit. Late when after the due date, or after the teacher
+        re-opened the activity."""
         assignment = self.require_answerable(assignment_id)
         submission = self.current_attempt(assignment_id)
         questions = self.activities.questions(assignment["activity_id"])
         self.save_answers(submission, questions, posted, self.choice_orders(assignment, submission["attempt"], questions))
 
         grade_attempt(self, assignment_id, submission, questions, self.user["id"])
-        self.submissions.mark_submitted(submission["id"], is_late(assignment["due_date"], school_today()))
+        self.submissions.mark_submitted(submission["id"], is_late(assignment["due_date"], school_today(),
+                                                                  reopened=bool(assignment["reopened_at"])))
         self.log("student.submitted", "students", f"Submitted {assignment['title']} ({assignment['class_name']}), "
                  f"attempt {submission['attempt']}.", ("assignment", assignment_id, assignment["title"]))
         self.commit()

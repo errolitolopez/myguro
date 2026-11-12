@@ -456,6 +456,7 @@ function render() {
     ? t("Due {day}", { day: formatDay(activity.due_date) }) : "";
 
   document.getElementById("closed-banner").classList.toggle("d-none", !activity.closed);
+  document.getElementById("reopened-banner").classList.toggle("d-none", locked || !activity.reopened);
   showResult();
   // A paper score has no answers here: show the sheet only for reference, collapsed.
   const sectionsArea = document.getElementById("sections");

@@ -110,6 +110,9 @@ CREATE TABLE IF NOT EXISTS assignments (
     -- unfinished attempt was submitted; students can only read it. The teacher can re-open it. Each class or
     -- group has its own status, so one sheet can be open for one class and closed for another
     status TEXT NOT NULL DEFAULT 'not_started' CHECK (status IN ('not_started', 'open', 'closed')),
+    -- When the teacher last re-opened it after a close (UTC); NULL = never. Every submission after a
+    -- re-open is late, because the students had their chance before the close
+    reopened_at TEXT,
     assigned_at TEXT NOT NULL DEFAULT (datetime('now')),
     UNIQUE (activity_id, class_id)
 );

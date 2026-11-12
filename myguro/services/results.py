@@ -117,6 +117,7 @@ class ResultsService(Service):
                 "due_date": assignment["due_date"],
                 "scores_released": bool(assignment["scores_released"]),
                 "status": assignment["status"],
+                "reopened": assignment["status"] == "open" and bool(assignment["reopened_at"]),
                 "everyone": bool(assignment["everyone"]),
                 "max_attempts": assignment["max_attempts"],
                 "total_points": self.activities.total_points(activity_id),
@@ -313,7 +314,7 @@ class ResultsService(Service):
         never started, is submitted as it stands (answers saved so far, unanswered = 0 points, never
         late). Students can still read the activity but not answer it. Re-opening puts those
         attempts back to in progress with the answers the student really wrote, so they can continue;
-        students who submitted on their own stay submitted.
+        students who submitted on their own stay submitted. Every submission after a re-open is late.
         Returns {status, changed: how many attempts the close submitted or the re-open put back}."""
         assignment = self.require_open(assignment_id)
         before = assignment["status"]
@@ -328,7 +329,7 @@ class ResultsService(Service):
             changed = self.submit_unfinished(assignment)
         elif before == "closed":
             changed = self.put_back_in_progress(assignment)
-        self.assignments.set_status(assignment_id, status)
+        self.assignments.set_status(assignment_id, status, reopened=before == "closed")
         where = f"{assignment['title']} ({assignment['class_name']})"
         if status == "closed":
             self.log_giving("assignment.closed", f"Closed {where}; {plural(changed, 'unfinished attempt')} "

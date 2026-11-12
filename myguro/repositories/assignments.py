@@ -56,12 +56,19 @@ class AssignmentRepository(Repository):
         self.execute("UPDATE assignments SET everyone = ?, due_date = ? WHERE id = ?",
                      (int(everyone), due_date, assignment_id))
 
-    def set_status(self, assignment_id, status):
-        self.execute("UPDATE assignments SET status = ? WHERE id = ?", (status, assignment_id))
+    def set_status(self, assignment_id, status, reopened=False):
+        """Change the status; reopened=True (open again after a close) also notes when, so later work is late."""
+        if reopened:
+            self.execute("UPDATE assignments SET status = ?, reopened_at = datetime('now') WHERE id = ?",
+                         (status, assignment_id))
+        else:
+            self.execute("UPDATE assignments SET status = ? WHERE id = ?", (status, assignment_id))
 
     def reset_all(self, activity_id):
-        """Put every assignment of a sheet back to not started (when the sheet is deleted and archived)."""
-        self.execute("UPDATE assignments SET status = 'not_started' WHERE activity_id = ?", (activity_id,))
+        """Put every assignment of a sheet back to not started (when the sheet is deleted and archived). Opening
+        it again after a restore is a fresh start, not a re-open, so the re-open mark goes too."""
+        self.execute("UPDATE assignments SET status = 'not_started', reopened_at = NULL WHERE activity_id = ?",
+                     (activity_id,))
 
     def count_for_teacher(self, teacher_id, year_id, status):
         """How many of the teacher's assignments in one school year have this status."""
