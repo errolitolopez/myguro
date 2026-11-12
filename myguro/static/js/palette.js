@@ -1,5 +1,5 @@
 // Quick jump (Ctrl+K, or / when no box is focused): a search box over the pages of the role and, for
-// teachers and students, their classes and activities. Pick with the arrow keys and Enter, or tap.
+// teachers and students, their classes and activities (and a teacher's students). Pick with the arrow keys and Enter, or tap.
 // The lists come from the same APIs the pages use and are fetched once, the first time it opens.
 
 (function () {
@@ -21,7 +21,8 @@
     loaded = true;
     try {
       if (role === "teacher") {
-        const [classes, activities] = await Promise.all([fetch("/api/classes"), fetch("/api/activities")]);
+        const [classes, activities, students] = await Promise.all([
+          fetch("/api/classes"), fetch("/api/activities"), fetch("/api/my-students")]);
         if (classes.ok) {
           (await classes.json()).classes.forEach((item) =>
             items.push({ label: typeof classTitle === "function" ? classTitle(item) : item.name, icon: "bi-mortarboard", kind: t("Class"), href: `/classes/${item.id}` }));
@@ -29,6 +30,10 @@
         if (activities.ok) {
           (await activities.json()).activities.forEach((item) =>
             items.push({ label: item.title, icon: "bi-journal-text", kind: t("Activity"), href: `/activities/${item.id}` }));
+        }
+        if (students.ok) {
+          (await students.json()).students.forEach((item) =>
+            items.push({ label: item.name, icon: "bi-person", kind: t("Student"), href: `/my-students/${item.id}` }));
         }
       } else if (role === "student") {
         const response = await fetch("/api/my-activities");

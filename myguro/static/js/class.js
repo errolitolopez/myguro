@@ -443,6 +443,7 @@ function openStudent(student) {
   selected = student;
   document.getElementById("student-modal-title").textContent = student.name;
   document.getElementById("student-username").textContent = student.username;
+  document.getElementById("student-record-link").href = `/my-students/${student.id}`;
   document.getElementById("student-grade-section").textContent =
     gradeSection(student) || t("No grade or section (irregular)");
   removeButtons.classList.remove("d-none");

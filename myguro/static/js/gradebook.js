@@ -86,7 +86,9 @@ function render() {
   body.replaceChildren(...students.map((student) => {
     const row = el("tr");
     const name = el("td", "text-nowrap");
-    const nameText = el("div", "fw-semibold text-truncate gb-name", student.name);
+    // The name opens the student's record: everything this teacher gave them, across classes.
+    const nameText = el("a", "d-block fw-semibold text-truncate gb-name text-reset", student.name);
+    nameText.href = `/my-students/${student.id}`;
     nameText.title = student.name;
     name.append(nameText);
     const place = [student.grade, student.section].filter(Boolean).join(" - ");

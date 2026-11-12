@@ -39,6 +39,8 @@ TEACHER_PAGES = {
     "classes": ("Classes", "/classes",
                 "The teacher's classes: add students, take attendance, open a class gradebook.",
                 "Open a class there to find its gradebook and attendance."),
+    "students": ("Students", "/my-students",
+                 "The teacher's students: search them and open one student's record, every activity the teacher gave them with the scores.", ""),
     "schedule": ("My schedule", "/my-schedule",
                  "The teacher's weekly timetable, once the admin published it.", ""),
     "feedback": ("Feedback", "/feedback", "Rate MyGuro and send feedback.", ""),
