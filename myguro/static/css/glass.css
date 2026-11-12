@@ -709,6 +709,11 @@ html[data-tab-bar="top"] .web-tabs { display: block !important; }
 
 /* Pages with a fixed bottom bar (editor, answering): leave room so the footer isn't covered */
 body:has(.position-fixed.bottom-0) > footer { padding-bottom: 5rem !important; }
+/* The bar has no z-index of its own, so buttons that Bootstrap lifts (a button group on hover or focus,
+   an input group, a card with an open menu) and the frosted cards, each its own layer, were drawn over it
+   while scrolling. 950: above the page and the phone's tab bar (900), below dropdown menus (1000), the chat
+   bubble (1030) and modals (1055). */
+.position-fixed.bottom-0 { z-index: 950; }
 
 /* No blur support, or the person asked for less transparency: plain opaque panels */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
