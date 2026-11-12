@@ -27,7 +27,7 @@ TAGLISH = {
     "{count} h ago": "{count} oras ang nakalipas",
     "{title} is now open. You can answer it.": "Bukas na ang {title}. Puwede mo na itong sagutan.",
     "{title} is closed. You can still read it, but not answer it.": "Sarado na ang {title}. Mababasa mo pa ito, pero hindi mo na ito masasagutan.",
-    "{title} is open again. You can continue answering it.": "Bukas ulit ang {title}. Puwede mong ituloy ang pagsagot.",
+    "{title} is open again, but what you submit now is marked late.": "Bukas ulit ang {title}, pero mamarkahang late ang isa-submit mo ngayon.",
     "Your score for {title} is ready.": "Handa na ang score mo sa {title}.",
     "School year": "School year",
     "(current)": "(ngayon)",
@@ -285,8 +285,12 @@ TAGLISH = {
     "Try again": "Ulitin",
     "This activity is closed. You can read the questions again to review, but you can't change your answers.":
         "Sarado na ang activity na ito. Puwede mong basahin ulit ang mga tanong para mag-review, pero hindi mo na mababago ang mga sagot mo.",
-    "Your teacher re-opened this activity. You can still answer, but it will be marked late when you submit.":
-        "Na-re-open ng teacher mo ang activity na ito. Puwede ka pang sumagot, pero mamarkahan itong late kapag nag-submit ka.",
+    "Re-opened activity: late submission": "Na-re-open na activity: late submission",
+    "Your teacher re-opened this activity after it was closed. You can still answer it, but it will be marked late when you submit.":
+        "Na-re-open ng teacher mo ang activity na ito matapos itong isara. Puwede mo pa itong sagutan, pero mamarkahan itong late kapag nag-submit ka.",
+    "Next time, submit before the activity is closed.": "Sa susunod, mag-submit bago isara ang activity.",
+    "This activity was re-opened, so it will be submitted as late.": "Na-re-open ang activity na ito, kaya isa-submit ito bilang late.",
+    "Re-opened · will be late": "Na-re-open · magiging late",
     "Your answers are hidden after you submit. You can still read the questions below.":
         "Nakatago ang mga sagot mo pagkatapos mong mag-submit. Mababasa mo pa rin ang mga tanong sa ibaba.",
     "Save progress": "I-save ang progress",

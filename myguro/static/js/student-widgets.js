@@ -54,7 +54,14 @@
       go.textContent = activity.status === "in_progress" ? t("Continue") : t("Start");
       const right = document.createElement("div");
       right.className = "d-flex flex-column align-items-end gap-1";
-      right.append(badge, go);
+      right.append(badge);
+      if (activity.reopened) {
+        const late = document.createElement("span");
+        late.className = "badge text-nowrap text-bg-warning";
+        late.textContent = t("Re-opened · will be late");
+        right.append(late);
+      }
+      right.append(go);
       row.append(text, right);
       return row;
     });

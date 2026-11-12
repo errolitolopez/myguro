@@ -35,10 +35,12 @@ function statusBadges(activity) {
     }
     if (activity.paper) add("text-bg-secondary", t("Paper"));
     if (activity.late) add("text-bg-warning", t("Late"));
+    if (activity.reopened && activity.status === "in_progress") add("text-bg-warning", t("Re-opened · will be late"));
     if (activity.status === "in_progress") add("text-bg-info", t("Trying again · attempt {attempt} · {progress}", { attempt: activity.attempt, progress: progressText(activity) }));
     else if (activity.can_retry) add("text-bg-light border", t("Can try again"));
     return badges;
   }
+  if (activity.reopened) add("text-bg-warning", t("Re-opened · will be late"));
   if (activity.overdue) add("text-bg-danger", t("Overdue · was due {day}", { day: formatDay(activity.due_date) }));
   else if (activity.due_date === today) add("text-bg-warning", t("Due today"));
   else if (activity.due_date) add("text-bg-light border", t("Due {day}", { day: formatDay(activity.due_date) }));

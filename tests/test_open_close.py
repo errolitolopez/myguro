@@ -277,6 +277,8 @@ def test_work_submitted_after_a_re_open_is_late(teacher):
     set_status(teacher, assignment_id, "closed")
     open_assignment(teacher, assignment_id)
     assert student_detail(after, assignment_id)["reopened"]
+    listed = after.get("/api/my-activities").get_json()["activities"]
+    assert [item["reopened"] for item in listed if item["id"] == assignment_id] == [True]
     assert teacher.get(f"/api/assignments/{assignment_id}/results").get_json()["assignment"]["reopened"]
     after.post(f"/api/my-activities/{assignment_id}/submit", json={"answers": {str(questions[0]): 1}})
 

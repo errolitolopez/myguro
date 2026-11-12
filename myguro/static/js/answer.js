@@ -504,6 +504,7 @@ async function loadActivity() {
 document.getElementById("submit-button").addEventListener("click", () => {
   const unanswered = allQuestions().filter((question) => !isAnswered(answers[question.id])).length;
   const warning = document.getElementById("submit-warning");
+  document.getElementById("submit-late").classList.toggle("d-none", !activity.reopened);
   const triesAfter = activity.max_attempts === null ? null : activity.max_attempts - activity.attempt;
   document.getElementById("submit-note").textContent = triesAfter === 0
     ? t("This is your last try: you can't change your answers after submitting.")

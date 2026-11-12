@@ -64,6 +64,8 @@ class StudentWorkService(Service):
                 "attempt": row["attempt"] or 0,
                 "max_attempts": row["max_attempts"],
                 "closed": row["assignment_status"] == "closed",
+                # Re-opened after a close: whatever is submitted now is marked late.
+                "reopened": row["assignment_status"] == "open" and bool(row["reopened_at"]),
                 "can_retry": status == "submitted" and row["assignment_status"] == "open"
                 and can_try_again(row, row["max_attempts"]),
                 "late": bool(row["last_late"]),

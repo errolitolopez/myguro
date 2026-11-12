@@ -7,7 +7,7 @@ LIST_LIMIT = 20  # how many the bell shows
 MESSAGES = {
     "opened": "{title} is now open. You can answer it.",
     "closed": "{title} is closed. You can still read it, but not answer it.",
-    "reopened": "{title} is open again. You can continue answering it.",
+    "reopened": "{title} is open again, but what you submit now is marked late.",
     "released": "Your score for {title} is ready.",
 }
 
