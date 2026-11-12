@@ -460,6 +460,10 @@ TEACHER = {
     "Scores stay hidden from students until you tap Release scores on the results page.": "Nakatago sa mga estudyante ang mga score hanggang i-tap mo ang Release scores sa results page.",
     "Tap Save in the activity editor often. It warns you if you leave with unsaved changes.": "Madalas na i-tap ang Save sa activity editor. Binabalaan ka nito kung aalis ka na may hindi pa na-save na pagbabago.",
     "You can import a whole activity from Word on the Activities page.": "Puwede kang mag-import ng buong activity mula sa Word sa Activities page.",
+    # --- Activity editor: Save & next ---
+    "Save & next": "I-save at susunod",
+    "Save & next: {title}": "I-save at susunod: {title}",
+    "Next": "Susunod",
     # --- Students tab and a student's record ---
     "My students": "Mga estudyante ko",
     "Search name": "Hanapin ang pangalan",

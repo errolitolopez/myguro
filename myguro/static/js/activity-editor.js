@@ -805,7 +805,10 @@ async function loadActivity() {
       return;
     }
     markSaved();
-    showActivity((await response.json()).activity); // after markSaved, so t("Locked") stays shown
+    const activity = (await response.json()).activity;
+    showActivity(activity); // after markSaved, so t("Locked") stays shown
+    showNextLabel();
+    findNextActivity(activity.subject);
   } catch {
     showEditorError(t("Cannot reach the server. Check your connection."));
   }
@@ -848,10 +851,53 @@ async function save() {
   } catch {
     showEditorError(t("Cannot reach the server. Check your connection."));
     markUnsaved();
+    return false;
   }
+  return !unsaved; // true when it saved (markSaved ran)
 }
 
 saveButton.addEventListener("click", save);
+
+// --- Save & next --------------------------------------------------------------------
+
+const nextButton = document.getElementById("next-button");
+let nextActivity = null; // {id, title} of the activity after this one, or null on the last one
+
+// Find the activity after this one: the same subject, in the order of the Activities list. The list is
+// read once when the page opens, so saving this one (which moves it to the top) does not change "next".
+async function findNextActivity(subject) {
+  try {
+    const response = await apiFetch("/api/activities");
+    if (!response || !response.ok) return;
+    const inSubject = (await response.json()).activities
+      .filter((item) => subjectKey(item.subject) === subjectKey(subject));
+    const index = inSubject.findIndex((item) => item.id === Number(activityId));
+    nextActivity = index >= 0 ? inSubject[index + 1] || null : null;
+  } catch {
+    nextActivity = null; // offline: no button, Save still works
+  }
+  if (!nextActivity) return;
+  const label = t("Save & next: {title}", { title: nextActivity.title });
+  nextButton.title = label;
+  nextButton.setAttribute("aria-label", label);
+  nextButton.classList.remove("d-none");
+}
+
+// A locked sheet has nothing to save, so the button only moves on.
+function showNextLabel() {
+  document.getElementById("next-label").textContent = `${sheetLocked ? t("Next") : t("Save & next")} `;
+}
+
+nextButton.addEventListener("click", async () => {
+  if (!nextActivity) return;
+  const stopLoading = startLoading(nextButton);
+  if (!stopLoading) return;
+  if (unsaved && !sheetLocked && !(await save())) {
+    stopLoading(); // the error box says why; stay on this sheet
+    return;
+  }
+  window.location.href = `/activities/${nextActivity.id}`;
+});
 
 // Ctrl+S / Cmd+S saves instead of saving the web page.
 document.addEventListener("keydown", (event) => {

@@ -121,6 +121,11 @@
     <div class="d-flex gap-2">
       <button id="preview-button" type="button" class="btn btn-outline-secondary bi bi-eye">{{ _("Preview") }}</button>
       <button id="save-button" type="button" class="btn btn-success bi bi-check-lg" disabled>{{ _("Save") }}</button>
+      <!-- Saves (when there are changes) and opens the next activity of the same subject, in the Activities
+           list order. Hidden on the last one. On a phone only the arrow shows. -->
+      <button id="next-button" type="button" class="btn btn-outline-success text-nowrap d-none">
+        <span id="next-label" class="d-none d-sm-inline">{{ _("Save & next") }} </span><i class="bi bi-arrow-right" aria-hidden="true"></i>
+      </button>
     </div>
   </div>
 </div>
