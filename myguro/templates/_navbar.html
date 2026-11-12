@@ -1,4 +1,5 @@
 {# One list of pages, used by the desktop tabs and by the phone tab bar. #}
+{% set menu_pages = [] %}
 {% if user.role == "admin" %}
   {% set tabs = [("dashboard.page", ("dashboard.page",), _("Dashboard"), "bi-house"),
                  ("accounts.users_page", ("accounts.users_page", "accounts.teachers_page", "accounts.students_page",
@@ -11,9 +12,10 @@
 {% elif user.role == "teacher" %}
   {% set tabs = [("dashboard.page", ("dashboard.page",), _("Dashboard"), "bi-house"),
                  ("activities.list_page", ("activities.list_page", "activities.editor_page"), _("Activities"), "bi-journal-text"),
-                 ("classes.list_page", ("classes.list_page", "classes.detail_page"), _("Classes"), "bi-mortarboard"),
-                 ("schedule.my_page", ("schedule.my_page",), _("Schedule"), "bi-calendar-week"),
-                 ("calendar.page", ("calendar.page",), _("Calendar"), "bi-calendar3")] %}
+                 ("classes.list_page", ("classes.list_page", "classes.detail_page"), _("Classes"), "bi-mortarboard")] %}
+  {# Pages used less often sit in the account menu, so the phone bar keeps room for the daily ones. #}
+  {% set menu_pages = [("schedule.my_page", _("Schedule"), "bi-calendar-week"),
+                       ("calendar.page", _("Calendar"), "bi-calendar3")] %}
 {% else %}
   {% set tabs = [("dashboard.page", ("dashboard.page",), _("Dashboard"), "bi-house"),
                  ("student.activities_page", ("student.activities_page", "student.answer_page"), _("Activities"), "bi-journal-text"),
@@ -67,6 +69,10 @@
       </button>
       <ul class="dropdown-menu dropdown-menu-end">
         <li><h6 class="dropdown-header">{{ user.name }} ({{ user.role }})</h6></li>
+        {% for endpoint, label, icon in menu_pages %}
+        <li><a class="dropdown-item bi {{ icon }} {{ 'active' if request.endpoint == endpoint }}" href="{{ url_for(endpoint) }}"> {{ label }}</a></li>
+        {% endfor %}
+        {% if menu_pages %}<li><hr class="dropdown-divider"></li>{% endif %}
         <!-- School year, display, password, recovery code and feedback are grouped on the Settings page. -->
         <li><a class="dropdown-item bi bi-gear {{ 'active' if request.endpoint in ('settings.page', 'display.page') }}" href="{{ url_for('settings.page') }}"> {{ _("Settings") }}</a></li>
         {% if TIME_CLOCK and user.role == "teacher" %}
@@ -136,6 +142,9 @@
 {# Quick jump: filled in by palette.js. The pages of the role are handed over as JSON. #}
 {% set palette_pages = [] %}
 {% for endpoint, actives, label, icon in tabs %}
+  {% set added = palette_pages.append({"label": label, "icon": icon, "href": url_for(endpoint)}) %}
+{% endfor %}
+{% for endpoint, label, icon in menu_pages %}
   {% set added = palette_pages.append({"label": label, "icon": icon, "href": url_for(endpoint)}) %}
 {% endfor %}
 <dialog id="palette" class="palette" aria-label="{{ _("Quick jump") }}" data-role="{{ user.role }}"
