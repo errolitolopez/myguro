@@ -12,6 +12,13 @@ const filters = [classFilter, gradeFilter, sectionFilter, statusFilter];
 // The value of each filter that means "no filter" (grade and section use "*", because "" means none set).
 const NO_FILTER = new Map([[classFilter, ""], [gradeFilter, "*"], [sectionFilter, "*"], [statusFilter, ""]]);
 let students = [];
+// One page at a time, all in the browser: search and filters still look at every student.
+const PAGE_SIZE = 20;
+let page = 1; // the page shown
+const pager = document.getElementById("pager");
+const pageInfo = document.getElementById("page-info");
+const prevPage = document.getElementById("prev-page");
+const nextPage = document.getElementById("next-page");
 
 // messageRow("No students yet.") -> a grey row in the list
 function messageRow(text) {
@@ -101,13 +108,33 @@ function render() {
   showFilterCount();
   count.textContent = String(shown.length);
   count.classList.remove("d-none");
+  // ‹ Prev · Page 2 of 3 · Next ›; a shorter list after a search can have fewer pages than the page shown
+  const pages = Math.max(1, Math.ceil(shown.length / PAGE_SIZE));
+  page = Math.min(page, pages);
+  pager.classList.toggle("d-none", pages <= 1);
+  pageInfo.textContent = t("Page {page} of {pages}", { page, pages });
+  prevPage.disabled = page <= 1;
+  nextPage.disabled = page >= pages;
   if (shown.length === 0) {
     list.replaceChildren(messageRow(students.length
       ? t("No student matches your search or filters.")
       : t("No students yet. Add students to a class first.")));
     return;
   }
-  list.replaceChildren(...shown.map(studentRow));
+  list.replaceChildren(...shown.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map(studentRow));
+}
+
+// goToPage(2) -> shows students 21 to 40, from the top of the page
+function goToPage(newPage) {
+  page = newPage;
+  render();
+  window.scrollTo({ top: 0 });
+}
+
+// A new search or filter starts again from page 1.
+function renderFromStart() {
+  page = 1;
+  render();
 }
 
 async function loadStudents() {
@@ -129,10 +156,12 @@ async function loadStudents() {
   }
 }
 
-search.addEventListener("input", render);
-filters.forEach((select) => select.addEventListener("change", render));
+search.addEventListener("input", renderFromStart);
+filters.forEach((select) => select.addEventListener("change", renderFromStart));
+prevPage.addEventListener("click", () => goToPage(page - 1));
+nextPage.addEventListener("click", () => goToPage(page + 1));
 document.getElementById("filter-clear").addEventListener("click", () => {
   filters.forEach((select) => { select.value = NO_FILTER.get(select); });
-  render();
+  renderFromStart();
 });
 loadStudents();
