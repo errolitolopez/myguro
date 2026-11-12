@@ -456,6 +456,21 @@ TEACHER = {
     "Scores stay hidden from students until you tap Release scores on the results page.": "Nakatago sa mga estudyante ang mga score hanggang i-tap mo ang Release scores sa results page.",
     "Tap Save in the activity editor often. It warns you if you leave with unsaved changes.": "Madalas na i-tap ang Save sa activity editor. Binabalaan ka nito kung aalis ka na may hindi pa na-save na pagbabago.",
     "You can import a whole activity from Word on the Activities page.": "Puwede kang mag-import ng buong activity mula sa Word sa Activities page.",
+    # --- Students tab and a student's record ---
+    "My students": "Mga estudyante ko",
+    "Search name, username, section or class": "Hanapin ang pangalan, username, section o class",
+    "Tap a student to see their record: every activity you gave them.": "I-tap ang estudyante para makita ang record niya: bawat activity na ibinigay mo sa kanya.",
+    "No students yet. Add students to a class first.": "Wala pang estudyante. Magdagdag muna ng mga estudyante sa isang class.",
+    "Could not load your students.": "Hindi ma-load ang mga estudyante mo.",
+    "Student record": "Record ng estudyante",
+    "‹ Students": "‹ Mga estudyante",
+    "Only the activities you gave this student. You see every score, released or not; the average is of the points checked so far.":
+        "Ang mga activity lang na ibinigay mo sa estudyanteng ito. Nakikita mo ang bawat score, na-release man o hindi; ang average ay mula sa mga puntos na na-check na.",
+    "points to check": "puntos na iche-check",
+    "Not released": "Hindi pa na-release",
+    "You have not given this student an activity yet.": "Wala ka pang naibibigay na activity sa estudyanteng ito.",
+    "Could not load the record.": "Hindi ma-load ang record.",
+    "Open record": "Buksan ang record",
     # --- Page titles ---
     "Check answers": "Tingnan ang mga sagot",
     "Edit activity": "I-edit ang activity",

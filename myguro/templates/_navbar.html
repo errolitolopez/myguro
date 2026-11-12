@@ -12,7 +12,8 @@
 {% elif user.role == "teacher" %}
   {% set tabs = [("dashboard.page", ("dashboard.page",), _("Dashboard"), "bi-house"),
                  ("activities.list_page", ("activities.list_page", "activities.editor_page"), _("Activities"), "bi-journal-text"),
-                 ("classes.list_page", ("classes.list_page", "classes.detail_page"), _("Classes"), "bi-mortarboard")] %}
+                 ("classes.list_page", ("classes.list_page", "classes.detail_page"), _("Classes"), "bi-mortarboard"),
+                 ("students.list_page", ("students.list_page", "students.record_page"), _("Students"), "bi-people")] %}
   {# Pages used less often sit in the account menu, so the phone bar keeps room for the daily ones. #}
   {% set menu_pages = [("schedule.my_page", _("Schedule"), "bi-calendar-week"),
                        ("calendar.page", _("Calendar"), "bi-calendar3")] %}

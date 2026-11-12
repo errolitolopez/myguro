@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _("Student record") }} · MyGuro{% endblock %}
+
+{% block content %}
+{% include "_navbar.html" %}
+
+<main class="container py-3" data-student-id="{{ student_id }}">
+  <a href="{{ url_for('students.list_page') }}" class="small">{{ _("‹ Students") }}</a>
+  <div id="record-error" class="alert alert-danger mt-2 d-none" role="alert"></div>
+
+  <header class="mt-2 mb-3">
+    <h1 class="h4 mb-1" id="student-name">{{ _("Student record") }}</h1>
+    <div class="small text-body-secondary" id="student-details">{{ _("Loading...") }}</div>
+  </header>
+
+  <section class="card mb-3" aria-labelledby="overview-title">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      <span class="fw-semibold bi bi-bar-chart" id="overview-title"> {{ _("Overview") }}</span>
+    </div>
+    <div class="card-body">
+      <div id="overview" class="d-flex align-items-center gap-3 flex-wrap">
+        <div class="placeholder-glow"><span class="placeholder col-12" style="width: 12rem;"></span></div>
+      </div>
+      <p class="small text-body-secondary mb-0 mt-2">{{ _("Only the activities you gave this student. You see every score, released or not; the average is of the points checked so far.") }}</p>
+    </div>
+  </section>
+
+  <div id="classes">
+    <div class="list-group">
+      {% include "_skeleton.html" %}
+    </div>
+  </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/student-record.js') }}"></script>
+{% endblock %}

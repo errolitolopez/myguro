@@ -48,3 +48,35 @@ def build_record(activities):
         "late": sum(1 for item in activities if item["late"]),
         "subjects": result,
     }
+
+
+def build_teacher_record(rows):
+    """A teacher's view of one student: the rows (one per assignment of the teacher's that the student has,
+    each with class_id, class_name, excluded, late and score) grouped by class, in the order given.
+
+    The teacher sees every score, released or not. Like the gradebook, an excluded activity is left out
+    of "given" and of every average, and an average is of the points checked so far."""
+    classes = {}
+    for row in rows:
+        group = classes.setdefault(row["class_id"], {"class_id": row["class_id"], "class_name": row["class_name"],
+                                                     "activities": []})
+        score = row["score"]
+        group["activities"].append({**row, "percent": percent_of(score) if score else None})
+
+    result = []
+    for group in classes.values():
+        scores = [item["score"] for item in group["activities"] if item["score"] and not item["excluded"]]
+        result.append({**group, "average": scoring.average_percent(scores)})
+    # The individual students group (no class) goes last.
+    result.sort(key=lambda group: (group["class_id"] is None, group["class_name"].lower()))
+
+    counted = [row for row in rows if not row["excluded"]]
+    scores = [row["score"] for row in counted if row["score"]]
+    return {
+        "average": scoring.average_percent(scores),
+        "given": len(counted),
+        "done": len(scores),
+        "late": sum(1 for row in counted if row["late"]),
+        "to_check": sum(score["pending"] for score in scores),
+        "classes": result,
+    }

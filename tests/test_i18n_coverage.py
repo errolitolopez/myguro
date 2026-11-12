@@ -39,6 +39,8 @@ TRANSLATED_FILES = [
     "myguro/templates/classes.html", "myguro/templates/_class_modal.html", "myguro/static/js/classes.js",
     "myguro/templates/class.html", "myguro/static/js/class.js", "myguro/templates/results.html",
     "myguro/static/js/results.js", "myguro/templates/gradebook.html", "myguro/static/js/gradebook.js",
+    "myguro/templates/students.html", "myguro/static/js/students.js",
+    "myguro/templates/student_record.html", "myguro/static/js/student-record.js",
     "myguro/templates/attendance.html", "myguro/static/js/attendance.js",
     # Teacher dashboard, schedule view, GuroBot, shared bits
     "myguro/templates/my_schedule.html", "myguro/static/js/dashboard.js", "myguro/static/js/dashboard-chart.js",

@@ -1,3 +1,4 @@
+from myguro.repositories.assignments import DIRECT_CLASS_NAME
 from myguro.repositories.base import Repository
 
 
@@ -51,6 +52,27 @@ class ClassRepository(Repository):
             "SELECT u.* FROM class_students cs JOIN users u ON u.id = cs.student_id "
             "WHERE cs.class_id = ? ORDER BY u.name COLLATE NOCASE",
             (class_id,),
+        )
+
+    def students_of_teacher(self, teacher_id, year_id):
+        """Every student of the teacher in one school year, one row per class they are in: the students of
+        the teacher's classes, plus the students given one of the teacher's sheets directly (class_id NULL,
+        class_name "Individual students"). Deleted sheets are left out."""
+        return self.all(
+            f"""
+            SELECT u.*, c.id AS class_id, c.name AS class_name, c.subject AS class_subject
+            FROM class_students cs JOIN classes c ON c.id = cs.class_id JOIN users u ON u.id = cs.student_id
+            WHERE c.teacher_id = :teacher AND c.school_year_id = :year
+            UNION
+            SELECT u.*, NULL, '{DIRECT_CLASS_NAME}', ''
+            FROM assignment_students s
+            JOIN assignments asg ON asg.id = s.assignment_id
+            JOIN activities a ON a.id = asg.activity_id
+            JOIN users u ON u.id = s.student_id
+            WHERE asg.class_id IS NULL AND a.teacher_id = :teacher AND asg.school_year_id = :year
+                  AND a.deleted_at IS NULL
+            """,
+            {"teacher": teacher_id, "year": year_id},
         )
 
     def has_student(self, class_id, student_id):
