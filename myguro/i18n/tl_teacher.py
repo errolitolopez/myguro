@@ -462,7 +462,9 @@ TEACHER = {
     "You can import a whole activity from Word on the Activities page.": "Puwede kang mag-import ng buong activity mula sa Word sa Activities page.",
     # --- Students tab and a student's record ---
     "My students": "Mga estudyante ko",
-    "Search name, username, section or class": "Hanapin ang pangalan, username, section o class",
+    "Search name": "Hanapin ang pangalan",
+    "All classes": "Lahat ng class",
+    "No student matches your search or filters.": "Walang estudyanteng tugma sa hinanap mo o sa mga filter.",
     "Tap a student to see their record: every activity you gave them.": "I-tap ang estudyante para makita ang record niya: bawat activity na ibinigay mo sa kanya.",
     "No students yet. Add students to a class first.": "Wala pang estudyante. Magdagdag muna ng mga estudyante sa isang class.",
     "Could not load your students.": "Hindi ma-load ang mga estudyante mo.",

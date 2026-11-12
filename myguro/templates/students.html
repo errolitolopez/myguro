@@ -14,8 +14,49 @@
       <span id="students-count" class="badge text-bg-secondary d-none"></span>
     </div>
     <div class="card-body pb-2">
-      <input id="search" type="search" class="form-control" placeholder="{{ _("Search name, username, section or class") }}"
-             aria-label="{{ _("Search students") }}" autocomplete="off">
+      <div class="d-flex gap-2">
+        <input id="search" type="search" class="form-control" placeholder="{{ _("Search name") }}"
+               aria-label="{{ _("Search students") }}" autocomplete="off">
+        <!-- Filters: all of them together narrow the list, with the name search. Class and section options come
+             from the teacher's own students (students.js fills them). -->
+        <div class="dropdown">
+          <button id="filter-toggle" type="button" class="btn btn-outline-secondary btn-input-height text-nowrap bi bi-funnel dropdown-toggle"
+                  data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+            {{ _("Filters") }}<span id="filter-count" class="badge text-bg-success ms-1 d-none"></span>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end p-3" style="width: 18rem; max-width: 92vw;">
+            <div class="mb-2">
+              <label for="class-filter" class="form-label small mb-1">{{ _("Class") }}</label>
+              <select id="class-filter" class="form-select">
+                <option value="">{{ _("All classes") }}</option>
+              </select>
+            </div>
+            <div class="mb-2">
+              <label for="grade-filter" class="form-label small mb-1">{{ _("Grade") }}</label>
+              <select id="grade-filter" class="form-select">
+                <option value="*">{{ _("All grades") }}</option>
+                {% for grade in FILTER_GRADES %}<option>{{ grade }}</option>{% endfor %}
+                <option value="">{{ _("No grade") }}</option>
+              </select>
+            </div>
+            <div class="mb-2">
+              <label for="section-filter" class="form-label small mb-1">{{ _("Section") }}</label>
+              <select id="section-filter" class="form-select">
+                <option value="*">{{ _("All sections") }}</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="status-filter" class="form-label small mb-1">{{ _("Status") }}</label>
+              <select id="status-filter" class="form-select">
+                <option value="">{{ _("All statuses") }}</option>
+                <option value="active">{{ _("Active") }}</option>
+                <option value="deactivated">{{ _("Deactivated") }}</option>
+              </select>
+            </div>
+            <button id="filter-clear" type="button" class="btn btn-outline-secondary w-100 bi bi-x-circle">{{ _("Clear filters") }}</button>
+          </div>
+        </div>
+      </div>
       <p class="small text-body-secondary mt-2 mb-0">{{ _("Tap a student to see their record: every activity you gave them.") }}</p>
       <div id="students-error" class="alert alert-danger mt-2 mb-0 d-none" role="alert"></div>
     </div>
